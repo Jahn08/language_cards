@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../data/word_dictionary.dart';
 import '../router.dart';
+import '../widgets/styled_text_field.dart';
+import '../widgets/keyboarded_field.dart';
+import '../widgets/english_phonetic_keyboard.dart';
 
 class NewCardScreenState extends State<NewCardScreen> {
     final _key = new GlobalKey<FormState>();
@@ -31,8 +34,11 @@ class NewCardScreenState extends State<NewCardScreen> {
     Widget _buildFormLayout() {
         return new Column(
             children: <Widget>[
-                _buildTextField('Enter the first word', isRequired: true, 
+                new StyledTextField('Enter the first word', isRequired: true, 
                     onChanged: (value) async {
+                        if (value == null || value.isEmpty)
+                            return;
+
                         final articles = await _dictionary.lookUp(value);
 
                         if (articles.words.length == 0)
@@ -49,12 +55,15 @@ class NewCardScreenState extends State<NewCardScreen> {
                                 _translation = firstWord.translations[0];
                         });
                     }, initialValue: _word),
-                _buildTextField('Tap to alter its phonetic notation',
-                    initialValue: this._transcription),
-                _buildTextField('Tap to set up its part of speech',
+                new KeyboardedField(new EnglishPhoneticKeyboard(), 
+                    'Tap to alter its phonetic notation', 
+                    initialValue: this._transcription,
+                    onChanged: (value) => setState(() => this._transcription = value)),
+                new StyledTextField('Tap to set up its part of speech', 
                     initialValue: this._partOfSpeech),
-                _buildTextField('Enter its translation', isRequired: true,
-                    initialValue: this._translation),
+                new StyledTextField('Enter its translation', isRequired: true, 
+                    initialValue: this._translation, 
+                    onChanged: (value) => setState(() => this._translation = value)),
                 new RaisedButton(
                     child: new Text('Save'),
                     onPressed: () {
@@ -69,31 +78,6 @@ class NewCardScreenState extends State<NewCardScreen> {
                     }
                 )
             ]
-        );
-    }
-
-    Widget _buildTextField(String hintText, 
-        { bool isRequired, Function(String) onChanged, String initialValue }) {
-        String value;
-        
-        isRequired = isRequired ?? false;
-
-        return new TextFormField(
-            keyboardType: TextInputType.text,
-            decoration: new InputDecoration(
-                hintText: hintText,
-                contentPadding: EdgeInsets.only(left: 10, right: 10)
-            ),
-            autocorrect: true,
-            onChanged: (val) => value = val,
-            onEditingComplete: () => onChanged(value),
-            validator: (String text) {
-                if (isRequired && (text == null || text.isEmpty))
-                    return 'The field is required';
-
-                return null;
-            },
-            controller: new TextEditingController(text: initialValue)
         );
     }
 }
