@@ -10,11 +10,7 @@ void main() {
     testWidgets('Shows a keyboard with English phonetic symbols', (tester) async {
         final foundResult = await _createKeyboard(tester);
         
-        expect(find.byType(EnglishPhoneticKeyboard), findsNothing);
-        EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) { 
-            expect(find.text(symbol), findsNothing);
-        });
-
+        _assertKeyboardIsHidden();
         await _showKeyboard(tester, foundResult);
 
         EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) { 
@@ -41,7 +37,7 @@ void main() {
         await _tapIconKey(tester, Icons.backspace);
     });
 
-    testWidgets('Accepts entered text by clicking on the done key', (tester) async {
+    testWidgets('Hides a keyboard by clicking on the done key', (tester) async {
         await _createKeyboard(tester, show: true);
 
         final expectedSymbols = await _enterRandomSymbols(tester);
@@ -53,6 +49,7 @@ void main() {
         final foundResult = _findEditableText(input);
         expect(foundResult, findsOneWidget);
 
+        _assertKeyboardIsHidden();
         expect((tester.widget(foundResult) as EditableText).focusNode.hasFocus, false);
     });
 }
@@ -78,6 +75,12 @@ Future<void> _showKeyboard(WidgetTester tester, Finder foundKeyboard) async {
     await tester.showKeyboard(foundKeyboard);
     await tester.pump();
 }
+
+void _assertKeyboardIsHidden() {
+    expect(find.byType(EnglishPhoneticKeyboard), findsNothing);
+    EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) => 
+        expect(find.text(symbol), findsNothing));
+} 
 
 Future<List<String>> _enterRandomSymbols(WidgetTester tester) async {
     const symbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
