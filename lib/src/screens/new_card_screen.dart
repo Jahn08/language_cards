@@ -3,8 +3,10 @@ import 'package:flutter/widgets.dart';
 import '../data/word_dictionary.dart';
 import '../router.dart';
 import '../widgets/styled_text_field.dart';
+import '../widgets/styled_dropdown.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/english_phonetic_keyboard.dart';
+import '../models/word.dart';
 
 class NewCardScreenState extends State<NewCardScreen> {
     final _key = new GlobalKey<FormState>();
@@ -59,8 +61,9 @@ class NewCardScreenState extends State<NewCardScreen> {
                     'Tap to alter its phonetic notation', 
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledTextField('Tap to set up its part of speech', 
-                    initialValue: this._partOfSpeech),
+                new StyledDropdown(Word.PARTS_OF_SPEECH, 'Tap to set up its part of speech',
+                    initialValue: this._partOfSpeech,
+                    onChanged: (value) => setState(() => this._partOfSpeech = value)),
                 new StyledTextField('Enter its translation', isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value) => setState(() => this._translation = value)),

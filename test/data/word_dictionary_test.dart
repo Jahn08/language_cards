@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'dart:convert';
 import 'package:language_cards/src/data/word_dictionary.dart';
+import 'package:language_cards/src/models/word.dart';
 import '../utilities/randomiser.dart';
 
 void main() {
@@ -79,6 +80,30 @@ void main() {
 
             expect(url.queryParameters['key'], expectedApiKey);
             expect(url.queryParameters['text'], expectedWord);
+        });
+
+        test('Gets a word article with a default part of speech when it is not recognisable', 
+            () async {
+            final wordToLookUp = Randomiser.buildRandomString();
+            final client = new MockClient((request) async =>_buildJsonResponse({
+                "head": {},
+                "def": List<dynamic>.generate(3, (index) => {
+                    "text": wordToLookUp,
+                    "pos": Randomiser.buildRandomString(), 
+                    "ts": Randomiser.buildRandomString(), 
+                    "tr": [{ "text": Randomiser.buildRandomString() }]
+                })
+            }));
+
+            final article = await new WordDictionary(Randomiser.buildRandomString(), 
+                client: client).lookUp(wordToLookUp);
+            final words = article?.words;
+
+            final defaultPartOfSpeech = words?.first?.partOfSpeech;
+            expect(defaultPartOfSpeech == null, false);
+            expect(Word.PARTS_OF_SPEECH.contains(defaultPartOfSpeech), true);
+
+            expect(words?.every((w) => w.partOfSpeech == defaultPartOfSpeech), true);
         });
 }
 
