@@ -51,12 +51,15 @@ void main() {
 
         _assertKeyboardIsHidden();
         expect((tester.widget(foundResult) as EditableText).focusNode.hasFocus, false);
+
+        await tester.pumpAndSettle(const Duration(milliseconds: 100));
     });
 }
 
 Future<Finder> _createKeyboard(WidgetTester tester, { bool show }) async {
     final fieldKey = new Key(Randomiser.buildRandomString());
-    final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(), '', 
+    final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(''), '', 
+        new FocusNode(),
         key: fieldKey);
 
     await tester.pumpWidget(new MaterialApp(

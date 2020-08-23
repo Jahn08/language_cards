@@ -9,5 +9,6 @@ class EnglishPhoneticKeyboard extends InputKeyboard {
         'tʃ', 'θ', 'ð', 'v', 'w', 'z', 'ʒ', 'dʒ'
     ];
 
-    EnglishPhoneticKeyboard({ Key key }): super(PHONETIC_SYMBOLS, 15, key: key);
+    EnglishPhoneticKeyboard(String initialValue, { Key key }): 
+        super(PHONETIC_SYMBOLS, 15, key: key, initialValue: initialValue);
 }

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import './styled_form_field.dart';
+import './styled_input_decoration.dart';
 
-class StyledDropdown extends StyledFormField {
+class StyledDropdown extends StatelessWidget {
+    final String _hintText;
     final String _initialValue;
     final Function(String) _onChanged;
     final List<String> _options;
@@ -9,9 +10,10 @@ class StyledDropdown extends StyledFormField {
     StyledDropdown(List<String> options, String hintText, 
         { Key key, Function(String) onChanged, String initialValue }):
         _initialValue = initialValue, 
+        _hintText = hintText, 
         _onChanged = onChanged, 
-        _options = options, 
-        super(hintText, key: key);
+        _options = options,
+        super(key: key);
 
     @override
     Widget build(BuildContext context) {
@@ -19,7 +21,7 @@ class StyledDropdown extends StyledFormField {
             items: _options.map((pos) => 
                 new DropdownMenuItem(child: new Text(pos), value: pos)).toList(), 
             onChanged: _onChanged,
-            decoration: super.decoration,
+            decoration: new StyledInputDecoration(_hintText),
             value: _initialValue,
         );
     }

@@ -7,14 +7,15 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 
     final List<String> _symbols;
     final double _symbolSize;
-    final ValueNotifier<String> _notifier = new ValueNotifier('');
+    final ValueNotifier<String> _notifier;
 
     final RegExp _lastSymbolRegExp;
 
-    InputKeyboard(List<String> symbols, double symbolSize, { Key key }): 
+    InputKeyboard(List<String> symbols, double symbolSize, { Key key, String initialValue }): 
         _symbols = symbols,
         _symbolSize = symbolSize,
         _lastSymbolRegExp = new RegExp('(${symbols.join('|')})\$'),
+        _notifier = new ValueNotifier(initialValue ?? ''),
         super(key: key);
 
     @override

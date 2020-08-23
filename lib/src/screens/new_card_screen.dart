@@ -14,6 +14,8 @@ class NewCardScreenState extends State<NewCardScreen> {
 
     final WordDictionary _dictionary;
 
+    final FocusNode _transcriptionFocusNode = new FocusNode();
+
     String _word;
     String _translation;
     String _transcription;
@@ -60,8 +62,9 @@ class NewCardScreenState extends State<NewCardScreen> {
                                 _translation = chosenWord.translations[0];
                         });
                     }, initialValue: this._word),
-                new KeyboardedField(new EnglishPhoneticKeyboard(), 
-                    'Tap to alter its phonetic notation',
+                new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 
+                    'Tap to alter its phonetic notation', 
+                    _transcriptionFocusNode,
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
                 new StyledDropdown(Word.PARTS_OF_SPEECH, 'Tap to set up its part of speech',
