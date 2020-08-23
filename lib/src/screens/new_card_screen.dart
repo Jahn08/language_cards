@@ -6,6 +6,7 @@ import '../widgets/styled_text_field.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/english_phonetic_keyboard.dart';
+import '../widgets/word_selector_dialog.dart';
 import '../models/word.dart';
 
 class NewCardScreenState extends State<NewCardScreen> {
@@ -41,24 +42,26 @@ class NewCardScreenState extends State<NewCardScreen> {
                         if (value == null || value.isEmpty)
                             return;
 
-                        final articles = await _dictionary.lookUp(value);
+                        final article = await _dictionary.lookUp(value);
+                        final words = article.words.length == 0 ? [new Word(value)]: article.words;
+                        final chosenWord = await WordSelectorDialog.show(words, context);
 
-                        if (articles.words.length == 0)
-                            return;
-
-                        // TODO: Additional logic to render a list of possible alternatives
-                        final firstWord = articles.words[0];
                         setState(() {
-                            _word = firstWord.text;
-                            _partOfSpeech = firstWord.partOfSpeech;
-                            _transcription = firstWord.transcription;
+                            if (chosenWord == null) {
+                                _word = value;
+                                return;
+                            }
 
-                            if (firstWord.translations.length > 0)
-                                _translation = firstWord.translations[0];
+                            _word = chosenWord.text;
+                            _partOfSpeech = chosenWord.partOfSpeech;
+                            _transcription = chosenWord.transcription;
+
+                            if (chosenWord.translations.length > 0)
+                                _translation = chosenWord.translations[0];
                         });
-                    }, initialValue: _word),
+                    }, initialValue: this._word),
                 new KeyboardedField(new EnglishPhoneticKeyboard(), 
-                    'Tap to alter its phonetic notation', 
+                    'Tap to alter its phonetic notation',
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
                 new StyledDropdown(Word.PARTS_OF_SPEECH, 'Tap to set up its part of speech',
