@@ -22,6 +22,12 @@ class Word {
 
     final List<String> translations;
 
+    Word(String text):
+        text = text,
+        transcription = '',
+        partOfSpeech = _DEFAULT_PART_OF_SPEECH,
+        translations = [];
+
     Word.fromJson(Map<String, dynamic> json):
         text = json['text'],
         transcription = json['ts'],
