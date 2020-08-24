@@ -22,11 +22,11 @@ class Word {
 
     final List<String> translations;
 
-    Word(String text):
+    Word(String text, { String transcription, String partOfSpeech, List<String> translations }):
         text = text,
-        transcription = '',
-        partOfSpeech = _DEFAULT_PART_OF_SPEECH,
-        translations = [];
+        transcription = transcription ?? '',
+        partOfSpeech = _lookUpPartOfSpeech(partOfSpeech),
+        translations = translations ?? [];
 
     Word.fromJson(Map<String, dynamic> json):
         text = json['text'],

@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import '../models/word.dart';
 
 class WordSelectorDialog {
+    
+    WordSelectorDialog._();
 
     static Future<Word> show(List<Word> words, BuildContext context) {
+        words = words ?? <Word>[];
         return words.length > 1 ? showDialog(
             context: context,
             builder: (dialogContext) {
@@ -12,7 +15,7 @@ class WordSelectorDialog {
                     children: words.map((w) => _buildDialogOption(w, dialogContext)).toList()
                 );
             }
-        ) : Future.value(words.first);
+        ) : Future.value(words.firstWhere((_) => true, orElse: () => new Word('')));
     }
 
     static Widget _buildDialogOption(Word word, BuildContext context) {
