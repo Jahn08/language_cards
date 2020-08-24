@@ -22,4 +22,7 @@ class TestRootWidget extends StatelessWidget {
             )
         );
     }
+
+    static Widget buildAsAppHome({ Function(BuildContext) onBuilding, Widget child }) =>
+        new MaterialApp(home: new TestRootWidget(onBuilding: onBuilding, child: child)); 
 }

@@ -62,8 +62,7 @@ Future<Finder> _createKeyboard(WidgetTester tester, { bool show }) async {
         new FocusNode(),
         key: fieldKey);
 
-    await tester.pumpWidget(new MaterialApp(
-        home: new TestRootWidget(child: fieldWithKeyboard)));
+    await tester.pumpWidget(TestRootWidget.buildAsAppHome(child: fieldWithKeyboard));
 
     final foundResult = find.byKey(fieldKey);
     expect(foundResult, findsWidgets);
