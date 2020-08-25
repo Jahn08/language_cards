@@ -30,7 +30,7 @@ void main() {
     });
 
     testWidgets('Shows a dialog according to items passed as an argument', (tester) async {
-        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(), 
+        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 2, 
             (_) => _buildRandomWord());
 
         Word dialogResult;
@@ -49,14 +49,14 @@ void main() {
                 matching: find.text(word.translations.join('; '))), findsOneWidget);
         }
 
-        final cosenOptionIndex = Randomiser.buildRandomInt(foundOptions.length);
-        final chosenOptionFinder = optionFinders.at(cosenOptionIndex);
+        final chosenOptionIndex = Randomiser.buildRandomInt(foundOptions.length);
+        final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
         expect(chosenOptionFinder, findsOneWidget);
 
         await tester.tap(chosenOptionFinder);
         await tester.pump();
 
-        expect(dialogResult, availableWords[cosenOptionIndex]);
+        expect(dialogResult, availableWords[chosenOptionIndex]);
         expect(find.byType(SimpleDialog), findsNothing);
     });
 }
@@ -84,5 +84,5 @@ Future<void> _showDialog(WidgetTester tester, List<Word> availableWords,
     expect(foundDialogBtn, findsOneWidget);
         
     await tester.tap(foundDialogBtn);
-    await tester.pump();
+    await tester.pump(new Duration(milliseconds: 200));
 }
