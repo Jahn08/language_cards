@@ -7,7 +7,7 @@ class WordSelectorDialog {
 
     static Future<Word> show(List<Word> words, BuildContext context) {
         words = words ?? <Word>[];
-        return words.length > 1 ? showDialog(
+        return words.length > 0 ? showDialog(
             context: context,
             builder: (dialogContext) {
                 return new SimpleDialog(

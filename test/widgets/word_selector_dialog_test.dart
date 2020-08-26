@@ -15,17 +15,8 @@ void main() {
         expect(find.byType(SimpleDialog), findsNothing);
     });
 
-    testWidgets('Returns a result immediately for one word without showing a dialog', (tester) async {
-        final availableWords = <Word>[_buildRandomWord()];
-        Word dialogResult;
-        await _showDialog(tester, availableWords, (word) => dialogResult = word);
-        
-        expect(dialogResult, availableWords.first);
-        expect(find.byType(SimpleDialog), findsNothing);
-    });
-
     testWidgets('Shows a dialog according to items passed as an argument', (tester) async {
-        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 2, 
+        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
             (_) => _buildRandomWord());
 
         Word dialogResult;
