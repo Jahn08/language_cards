@@ -9,6 +9,7 @@ class Word {
         'idiom',
         'interjection',
         'noun',
+        'participle',
         'preposition',
         'pronoun',
         'verb'
