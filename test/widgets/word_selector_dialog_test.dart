@@ -7,15 +7,10 @@ import '../utilities/randomiser.dart';
 
 void main() {
 
-    testWidgets('Returns a default word immediately for for an empty list of words', (tester) async {
+    testWidgets('Returns null for for an empty list of words', (tester) async {
         Word dialogResult;
         await _showDialog(tester, [], (word) => dialogResult = word);
-        
-        final defaultWord = new Word('');
-        expect(dialogResult.text, defaultWord.text);
-        expect(dialogResult.partOfSpeech, defaultWord.partOfSpeech);
-        expect(dialogResult.transcription, defaultWord.transcription);
-        expect(dialogResult.translations.length, 0);
+        expect(dialogResult, null);
 
         expect(find.byType(SimpleDialog), findsNothing);
     });

@@ -45,8 +45,7 @@ class NewCardScreenState extends State<NewCardScreen> {
                             return;
 
                         final article = await _dictionary.lookUp(value);
-                        final words = article.words.length == 0 ? [new Word(value)]: article.words;
-                        final chosenWord = await WordSelectorDialog.show(words, context);
+                        final chosenWord = await WordSelectorDialog.show(article.words, context);
 
                         setState(() {
                             if (chosenWord == null) {

@@ -15,7 +15,7 @@ class WordSelectorDialog {
                     children: words.map((w) => _buildDialogOption(w, dialogContext)).toList()
                 );
             }
-        ) : Future.value(words.firstWhere((_) => true, orElse: () => new Word('')));
+        ) : Future.value(words.firstWhere((_) => true, orElse: () => null));
     }
 
     static Widget _buildDialogOption(Word word, BuildContext context) {
