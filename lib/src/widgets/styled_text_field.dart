@@ -7,7 +7,8 @@ class _StyledTextFieldState extends State<StyledTextField> {
     final String _hintText; 
     final Function(String) _onChanged;
 
-    String _tempValue;
+    FocusNode _focusNode;
+    TextEditingController _controller;
     bool _isChanged = false;
     
     _StyledTextFieldState(String hintText, { bool isRequired, 
@@ -22,35 +23,33 @@ class _StyledTextFieldState extends State<StyledTextField> {
     void initState() {
         super.initState();
 
-        _addFocusListener();
+        _controller = new TextEditingController(text: widget.initialValue);
+
+        _focusNode = new FocusNode();
+        _focusNode.addListener(_emitOnChangedEvent);
     }
-
-    void _addFocusListener() => _focusNode.addListener(_emitOnChangedEvent);
-
-    FocusNode get _focusNode => this.widget.focusNode;
 
     _emitOnChangedEvent() {
         if (!_focusNode.hasFocus && _isChanged) {
             _isChanged = false;
 
-            _onChanged?.call(_tempValue);
+            _onChanged?.call(_controller.text);
         }
     }
 
     @override
     void didUpdateWidget(Widget oldWidget) {
-        _removeFocusListener(focusNode: (oldWidget as StyledTextField).focusNode);
-        _addFocusListener();
-    
         super.didUpdateWidget(oldWidget);
+
+        if (_controller.text != widget.initialValue) {
+            _controller.text = widget.initialValue;
+            _controller.clearComposing();
+        }
     }
-
-    void _removeFocusListener({ FocusNode focusNode }) => 
-        (focusNode ?? _focusNode).removeListener(_emitOnChangedEvent);
-
+    
     @override
     Widget build(BuildContext context) {
-        _tempValue = widget.initialValue;
+        String tempValue = widget.initialValue;
         return new TextFormField(
             focusNode: _focusNode,
             readOnly: _readonly,
@@ -59,12 +58,12 @@ class _StyledTextFieldState extends State<StyledTextField> {
             autocorrect: true,
             onChanged: (val) {
                 _isChanged = true;
-                _tempValue = val;
+                tempValue = val;
             },
             onEditingComplete: () {
                 _isChanged = false;
 
-                _onChanged?.call(_tempValue);
+                _onChanged?.call(tempValue);
                 FocusScope.of(context).unfocus();
             },
             validator: (String text) {
@@ -73,14 +72,16 @@ class _StyledTextFieldState extends State<StyledTextField> {
 
                 return null;
             },
-            controller: new TextEditingController(text: _tempValue)
+            controller: _controller
         );
     }
 
     @override
     void dispose() {
-        _removeFocusListener();
+        _focusNode.removeListener(_emitOnChangedEvent);
         
+        _controller.dispose();
+
         super.dispose();
     }
 }
@@ -92,12 +93,10 @@ class StyledTextField extends StatefulWidget {
 
     final Function(String) _onChanged;
 
-    final String initialValue; 
-    final FocusNode focusNode; 
+    final String initialValue;
 
     StyledTextField(String hintText, { Key key, bool isRequired, Function(String) onChanged,
-        bool readonly, FocusNode focusNode, this.initialValue }): 
-        focusNode = focusNode ?? new FocusNode(),
+        bool readonly, this.initialValue }): 
         _isRequired = isRequired ?? false,
         _readonly = readonly ?? false,
         _onChanged = onChanged,
