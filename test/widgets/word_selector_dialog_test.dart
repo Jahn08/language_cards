@@ -15,12 +15,11 @@ void main() {
         expect(find.byType(SimpleDialog), findsNothing);
     });
 
-    testWidgets('Shows a dialog according to items passed as an argument', (tester) async {
+    testWidgets('Shows the dialog according to items passed as an argument', (tester) async {
         final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
             (_) => _buildRandomWord());
 
-        Word dialogResult;
-        await _showDialog(tester, availableWords, (word) => dialogResult = word);
+        await _showDialog(tester, availableWords);
 
         final optionFinders = find.byType(SimpleDialogOption);
         final foundOptions = tester.widgetList(optionFinders);
@@ -34,8 +33,20 @@ void main() {
             expect(find.descendant(of: optionFinders.at(i), 
                 matching: find.text(word.translations.join('; '))), findsOneWidget);
         }
+    });
 
-        final chosenOptionIndex = Randomiser.buildRandomInt(foundOptions.length);
+    testWidgets('Returns a chosen word and hides the dialog', (tester) async {
+        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
+            (_) => _buildRandomWord());
+
+        Word dialogResult;
+        await _showDialog(tester, availableWords, (word) => dialogResult = word);
+
+        final optionFinders = find.byType(SimpleDialogOption);
+        optionFinders.precache();
+
+        final chosenOptionIndex = Randomiser.buildRandomInt(
+            tester.widgetList(optionFinders).length);
         final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
         expect(chosenOptionFinder, findsOneWidget);
 
@@ -43,6 +54,24 @@ void main() {
         await tester.pump();
 
         expect(dialogResult, availableWords[chosenOptionIndex]);
+        expect(find.byType(SimpleDialog), findsNothing);
+    });
+
+    testWidgets('Returns null after tapping on the cancel button', (tester) async {
+        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
+            (_) => _buildRandomWord());
+
+        Word dialogResult;
+        await _showDialog(tester, availableWords, (word) => dialogResult = word);
+
+        final cancelBtnFinder = find.descendant(of: find.byType(SimpleDialog), 
+            matching: find.byType(RaisedButton));
+        expect(cancelBtnFinder, findsOneWidget);
+
+        await tester.tap(cancelBtnFinder);
+        await tester.pump();
+
+        expect(dialogResult, null);
         expect(find.byType(SimpleDialog), findsNothing);
     });
 }
@@ -53,7 +82,7 @@ Word _buildRandomWord() => new Word(Randomiser.buildRandomString(),
     translations: Randomiser.buildRandomStringList(3));
 
 Future<void> _showDialog(WidgetTester tester, List<Word> availableWords, 
-    Function(Word) onDialogClose) async {
+    [Function(Word) onDialogClose]) async {
     BuildContext context;
     final dialogBtnKey = new Key(Randomiser.buildRandomString());
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
@@ -61,7 +90,8 @@ Future<void> _showDialog(WidgetTester tester, List<Word> availableWords,
         child: new RaisedButton(
             key: dialogBtnKey,
             onPressed: () async {
-                onDialogClose(await WordSelectorDialog.show(availableWords, context));
+                final outcome = await WordSelectorDialog.show(availableWords, context);
+                onDialogClose?.call(outcome);
             })
         )
     );
