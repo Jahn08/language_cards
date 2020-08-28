@@ -6,7 +6,8 @@ import '../widgets/styled_text_field.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/english_phonetic_keyboard.dart';
-import '../widgets/word_selector_dialog.dart';
+import '../dialogs/word_selector_dialog.dart';
+import '../dialogs/translation_selector_dialog.dart';
 import '../models/word.dart';
 
 class NewCardScreenState extends State<NewCardScreen> {
@@ -45,7 +46,13 @@ class NewCardScreenState extends State<NewCardScreen> {
                             return;
 
                         final article = await _dictionary.lookUp(value);
-                        final chosenWord = await WordSelectorDialog.show(article.words, context);
+                        final chosenWord = await new WordSelectorDialog(context)
+                            .show(article.words);
+
+                        String translation;
+                        if (chosenWord != null)
+                            translation = await new TranslationSelectorDialog(context)
+                                .show(chosenWord.translations);
 
                         setState(() {
                             if (chosenWord == null) {
@@ -56,9 +63,9 @@ class NewCardScreenState extends State<NewCardScreen> {
                             _word = chosenWord.text;
                             _partOfSpeech = chosenWord.partOfSpeech;
                             _transcription = chosenWord.transcription;
-
-                            if (chosenWord.translations.length > 0)
-                                _translation = chosenWord.translations[0];
+                            
+                            if (translation != null)
+                                _translation = translation;
                         });
                     }, initialValue: this._word),
                 new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 

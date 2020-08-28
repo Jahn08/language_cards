@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/word.dart';
-import 'package:language_cards/src/widgets/word_selector_dialog.dart';
-import '../utilities/test_root_widget.dart';
+import 'package:language_cards/src/dialogs/word_selector_dialog.dart';
+import '../utilities/selector_dialog_revealer.dart';
 import '../utilities/randomiser.dart';
 
 void main() {
@@ -15,7 +15,7 @@ void main() {
         expect(find.byType(SimpleDialog), findsNothing);
     });
 
-    testWidgets('Shows the dialog according to items passed as an argument', (tester) async {
+    testWidgets('Shows the dialog according to words passed as an argument', (tester) async {
         final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
             (_) => _buildRandomWord());
 
@@ -43,8 +43,6 @@ void main() {
         await _showDialog(tester, availableWords, (word) => dialogResult = word);
 
         final optionFinders = find.byType(SimpleDialogOption);
-        optionFinders.precache();
-
         final chosenOptionIndex = Randomiser.buildRandomInt(
             tester.widgetList(optionFinders).length);
         final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
@@ -79,26 +77,8 @@ void main() {
 Word _buildRandomWord() => new Word(Randomiser.buildRandomString(), 
     partOfSpeech: Randomiser.getRandomElement(Word.PARTS_OF_SPEECH), 
     transcription: Randomiser.buildRandomString(), 
-    translations: Randomiser.buildRandomStringList(3));
+    translations: Randomiser.buildRandomStringList(maxLength: 3));
 
-Future<void> _showDialog(WidgetTester tester, List<Word> availableWords, 
-    [Function(Word) onDialogClose]) async {
-    BuildContext context;
-    final dialogBtnKey = new Key(Randomiser.buildRandomString());
-    await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-        onBuilding: (inContext) => context = inContext,
-        child: new RaisedButton(
-            key: dialogBtnKey,
-            onPressed: () async {
-                final outcome = await WordSelectorDialog.show(availableWords, context);
-                onDialogClose?.call(outcome);
-            })
-        )
-    );
-
-    final foundDialogBtn = find.byKey(dialogBtnKey);
-    expect(foundDialogBtn, findsOneWidget);
-        
-    await tester.tap(foundDialogBtn);
-    await tester.pump(new Duration(milliseconds: 200));
-}
+_showDialog(WidgetTester tester, List<Word> items, [Function(Word) onDialogClose]) async =>
+    SelectorDialogRevealer.showDialog(tester, items, onDialogClose: onDialogClose,
+        builder: (context) => new WordSelectorDialog(context));
