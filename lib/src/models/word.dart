@@ -15,6 +15,8 @@ class Word {
         'verb'
     ];
 
+    final int id;
+
     final String text;
 
     final String transcription;
@@ -23,17 +25,20 @@ class Word {
 
     final List<String> translations;
 
-    Word(String text, { String transcription, String partOfSpeech, List<String> translations }):
-        text = text,
+    Word(this.text, { int id, String transcription, String partOfSpeech, List<String> translations }):
+        id = id ?? 0,
         transcription = transcription ?? '',
         partOfSpeech = _lookUpPartOfSpeech(partOfSpeech),
         translations = translations ?? [];
 
     Word.fromJson(Map<String, dynamic> json):
+        id = 0,
         text = json['text'],
         transcription = json['ts'],
         partOfSpeech = _lookUpPartOfSpeech(json['pos']),
         translations = _decodeTranslations(json['tr']);
+
+    String get translationString => translations.join('; ');
 
     static List<String> _decodeTranslations(List<dynamic> translationJson) =>
         translationJson.map((value) => value['text'] as String).toList();
