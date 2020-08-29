@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import './asset_icon.dart';
 import './icon_option.dart';
-import '../blocs/settings_bloc_provider.dart';
+import '../blocs/settings_bloc.dart';
 
 class SettingsPanelState extends State<SettingsPanel> {
     @override

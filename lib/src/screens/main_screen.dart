@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../widgets/settings_panel.dart';
 import '../widgets/settings_opener_button.dart';
-import '../blocs/settings_bloc_provider.dart';
+import '../blocs/settings_bloc.dart';
 import '../router.dart';
 
 class MainScreen extends StatelessWidget {
