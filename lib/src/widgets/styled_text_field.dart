@@ -42,8 +42,10 @@ class _StyledTextFieldState extends State<StyledTextField> {
         super.didUpdateWidget(oldWidget);
 
         if (_controller.text != widget.initialValue) {
-            _controller.text = widget.initialValue;
-            _controller.clearComposing();
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+                _controller.text = widget.initialValue;
+                _controller.clearComposing();
+            });
         }
     }
     

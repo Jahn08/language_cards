@@ -1,5 +1,5 @@
 class StoredWord {
-    final int id;
+    int _id;
 
     final String text;
 
@@ -10,6 +10,13 @@ class StoredWord {
     final String translation;
 
     StoredWord(this.text, { int id, String transcription, this.partOfSpeech, this.translation }):
-        id = id ?? 0,
+        _id = id ?? 0,
         transcription = transcription ?? '';
+
+    get id => _id;
+
+    set id(int value) {
+        if (_id == 0 && value > 0)
+            _id = value;
+    }
 }

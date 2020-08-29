@@ -45,7 +45,7 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     Future<List<StoredWord>> _fetchNextWords() => 
-        _storage.getWords(skipCount: _pageIndex++ * _wordsPerPage, takeCount: _wordsPerPage);
+        _storage.fetch(skipCount: _pageIndex++ * _wordsPerPage, takeCount: _wordsPerPage);
 
     @override
     dispose() {
@@ -75,7 +75,8 @@ class _MainScreenState extends State<MainScreen> {
                 return new ListTile(
                     title: _buildOneLineText(word.text),
                     trailing: _buildOneLineText(word.partOfSpeech),
-                    subtitle: _buildOneLineText(word.translation)
+                    subtitle: _buildOneLineText(word.translation),
+                    onTap: () => Router.goToNewCard(listContext, wordId: word.id)
                 );
             },
             controller: _scrollController

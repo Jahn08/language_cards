@@ -17,21 +17,26 @@ class WordStorage {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    Future<List<StoredWord>> getWords({ int skipCount, int takeCount }) {
+    Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: new Random().nextInt(1000)),
                 () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
-    Future<bool> saveWord(StoredWord word) async {
+    Future<bool> save(StoredWord word) async {
         if (word.id > 0)
             _words.removeWhere((w) => w.id == word.id);
+        else
+            word.id = _words.length;
 
         _words.add(word);
         _sortWords();
         
         return Future.value(true);
     }
+
+    Future<StoredWord> find(int id) =>
+        Future.value(id > 0 ? _words.firstWhere((w) => w.id == id, orElse: () => null) : null);
 
     // TODO: A temporary method to debug rendering a list of words
     static List<StoredWord> _generateWords(int length) {

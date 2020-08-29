@@ -11,8 +11,9 @@ class App extends StatelessWidget {
         return new MaterialApp(
             theme: new ThemeData.dark(),
             onGenerateRoute: (settings) {
-                if (Router.isNewCardRoute(settings))
-                    return _buildNewCardRoute();
+                final route = Router.getRoute(settings);
+                if (route is WordCardRoute)
+                    return _buildNewCardRoute(route.wordId);
 
                 return new MaterialPageRoute(
                     builder: (context) => new MainScreen()
@@ -21,12 +22,12 @@ class App extends StatelessWidget {
         );
     }
 
-    MaterialPageRoute _buildNewCardRoute() {
+    MaterialPageRoute _buildNewCardRoute(int wordId) {
         return new MaterialPageRoute(
             builder: (context) => new FutureBuilder(
                 future: Configuration.getParams(context),
                 builder: (_, AsyncSnapshot<AppParams> snapshot) => snapshot.hasData ? 
-                    new NewCardScreen(snapshot.data.dictionary.apiKey) : new Loader()
+                    new NewCardScreen(snapshot.data.dictionary.apiKey, wordId: wordId) : new Loader()
             )
         );
     }
