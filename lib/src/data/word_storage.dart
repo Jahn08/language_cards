@@ -1,39 +1,48 @@
 import 'dart:math';
 import '../models/word.dart';
+import '../models/stored_word.dart';
+
+export '../models/stored_word.dart';
 
 class WordStorage {
-    final List<Word> _words = _generateWords(50);
+    final List<StoredWord> _words = _generateWords(15);
 
-    Future<List<Word>> getWords({ int skipCount, int takeCount }) {
+    static WordStorage _storage;
+
+    WordStorage._() {
+        _sortWords();
+    }
+
+    static WordStorage get instance => _storage == null ? (_storage = new WordStorage._()) : _storage;
+
+    _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
+
+    Future<List<StoredWord>> getWords({ int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: new Random().nextInt(1000)),
                 () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
-    Future<bool> saveWord(Word word) async {
+    Future<bool> saveWord(StoredWord word) async {
         if (word.id > 0)
             _words.removeWhere((w) => w.id == word.id);
 
         _words.add(word);
-
+        _sortWords();
+        
         return Future.value(true);
     }
 
-    dispose() { }
-
     // TODO: A temporary method to debug rendering a list of words
-    static List<Word> _generateWords(int length) {
-        final list = new List<Word>.generate(length, (index) {
+    static List<StoredWord> _generateWords(int length) {
+        return new List<StoredWord>.generate(length, (index) {
             final random = new Random();
-            return new Word(random.nextDouble().toString(), 
+            return new StoredWord(random.nextDouble().toString(), 
                 id: index, 
                 partOfSpeech: Word.PARTS_OF_SPEECH[random.nextInt(Word.PARTS_OF_SPEECH.length)],
-                translations: new List<String>.generate(random.nextInt(7), 
-                    (index) => random.nextDouble().toString())
+                translation: new List<String>.generate(random.nextInt(7), 
+                    (index) => random.nextDouble().toString()).join('; ')
             );
         });
-
-        list.sort((a, b) => a.text.compareTo(b.text));
-        return list;
     }
 }

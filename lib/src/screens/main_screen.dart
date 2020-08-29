@@ -3,7 +3,6 @@ import '../widgets/settings_panel.dart';
 import '../widgets/settings_opener_button.dart';
 import '../blocs/settings_bloc.dart';
 import '../router.dart';
-import '../models/word.dart';
 import '../data/word_storage.dart';
 
 class _MainScreenState extends State<MainScreen> {
@@ -14,15 +13,15 @@ class _MainScreenState extends State<MainScreen> {
 
     int _pageIndex = 0;
 
-    final List<Word> _words = [];
+    final List<StoredWord> _words = [];
     final ScrollController _scrollController = new ScrollController();
 
-    final _storage = new WordStorage();
-
+    final _storage = WordStorage.instance;
+    
     @override
     initState() {
         super.initState();
-
+        
         _scrollController.addListener(_expandWordListOnScroll);
 
         _fetchWords();
@@ -45,15 +44,12 @@ class _MainScreenState extends State<MainScreen> {
             _fetchWords();
     }
 
-    Future<List<Word>> _fetchNextWords() => 
+    Future<List<StoredWord>> _fetchNextWords() => 
         _storage.getWords(skipCount: _pageIndex++ * _wordsPerPage, takeCount: _wordsPerPage);
-        
 
     @override
     dispose() {
         _scrollController.removeListener(_expandWordListOnScroll);
-
-        _storage.dispose();
 
         super.dispose();
     }
@@ -79,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
                 return new ListTile(
                     title: _buildOneLineText(word.text),
                     trailing: _buildOneLineText(word.partOfSpeech),
-                    subtitle: _buildOneLineText(word.translationString)
+                    subtitle: _buildOneLineText(word.translation)
                 );
             },
             controller: _scrollController

@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import '../data/word_dictionary.dart';
+import '../data/word_storage.dart';
+import '../dialogs/word_selector_dialog.dart';
+import '../dialogs/translation_selector_dialog.dart';
+import '../models/word.dart';
 import '../router.dart';
 import '../widgets/styled_text_field.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/english_phonetic_keyboard.dart';
-import '../dialogs/word_selector_dialog.dart';
-import '../dialogs/translation_selector_dialog.dart';
-import '../models/word.dart';
 
 class NewCardScreenState extends State<NewCardScreen> {
     final _key = new GlobalKey<FormState>();
@@ -86,8 +87,11 @@ class NewCardScreenState extends State<NewCardScreen> {
                         if (state.validate()) {
                             state.save();
 
-                            // TODO: Perform some actons here through a bloc
-
+                            WordStorage.instance.saveWord(new StoredWord(this._word, 
+                                partOfSpeech: this._partOfSpeech, 
+                                transcription: this._transcription,
+                                translation: this._translation
+                            ));
                             Router.goHome(context);
                         }
                     }
