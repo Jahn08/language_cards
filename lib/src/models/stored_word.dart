@@ -13,7 +13,7 @@ class StoredWord {
         _id = id ?? 0,
         transcription = transcription ?? '';
 
-    get id => _id;
+    int get id => _id;
 
     set id(int value) {
         if (_id == 0 && value > 0)

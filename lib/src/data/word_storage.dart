@@ -50,4 +50,9 @@ class WordStorage {
             );
         });
     }
+
+    Future<void> remove(Iterable<int> ids) {
+        _words.removeWhere((w) => ids.contains(w.id));
+        return Future.value();
+    }
 }
