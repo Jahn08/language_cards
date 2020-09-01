@@ -73,7 +73,7 @@ class _MainScreenState extends State<MainScreen> {
             ),
             endDrawer: new SettingsBlocProvider(child: new SettingsPanel()),
             body: _buildWordList(),
-            floatingActionButton: _buildNewCardButton(context),
+            floatingActionButton: _buildNewCardButton(context)
         );
     }
 
@@ -125,7 +125,7 @@ class _MainScreenState extends State<MainScreen> {
                 title: _buildOneLineText(word.text),
                 trailing: _buildOneLineText(word.partOfSpeech),
                 subtitle: _buildOneLineText(word.translation),
-                onTap: () => _goToNewCard(context, word.id)
+                onTap: () => _goToCard(context, word.id)
             )
         );
     }
@@ -161,7 +161,7 @@ class _MainScreenState extends State<MainScreen> {
     Widget _buildNewCardButton(BuildContext context) {
         final theme = Theme.of(context);
         return new FloatingActionButton(
-            onPressed: () => _goToNewCard(context),
+            onPressed: () => _goToCard(context),
             child: new Icon(Icons.add_circle), 
             mini: true,
             tooltip: 'New Card',
@@ -170,9 +170,9 @@ class _MainScreenState extends State<MainScreen> {
         );
     }
 
-    _goToNewCard(BuildContext context, [int wordId]) {
+    _goToCard(BuildContext context, [int wordId]) {
         _deleteAllMarkedForRemoval();
-        Router.goToNewCard(context, wordId: wordId);
+        Router.goToCard(context, wordId: wordId);
     }
     
     _deleteAllMarkedForRemoval() {

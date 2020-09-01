@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
-import 'package:language_cards/src/screens/new_card_screen.dart';
+import 'package:language_cards/src/screens/card_screen.dart';
 import '../utilities/test_root_widget.dart';
 import '../utilities/mock_word_storage.dart';
 import '../utilities/widget_assistant.dart';
@@ -91,7 +91,7 @@ Future<StoredWord> _displayWord(WidgetTester tester, [MockWordStorage storage]) 
     final wordToShow = storage.getRandomWord();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-        child: new NewCardScreen('', storage, wordId: wordToShow.id)));
+        child: new CardScreen('', storage, wordId: wordToShow.id)));
     await tester.pumpAndSettle();
 
     return wordToShow;

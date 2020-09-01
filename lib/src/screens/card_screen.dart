@@ -12,7 +12,7 @@ import '../widgets/loader.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 
-class NewCardScreenState extends State<NewCardScreen> {
+class CardScreenState extends State<CardScreen> {
     final _key = new GlobalKey<FormState>();
 
     final WordDictionary _dictionary;
@@ -26,7 +26,7 @@ class NewCardScreenState extends State<NewCardScreen> {
 
     bool _initialised = false;
 
-    NewCardScreenState(String apiKey): _dictionary = new WordDictionary(apiKey);
+    CardScreenState(String apiKey): _dictionary = new WordDictionary(apiKey);
 
     IWordStorage get _storage => widget._storage;
 
@@ -144,19 +144,19 @@ class NewCardScreenState extends State<NewCardScreen> {
     }
 }
 
-class NewCardScreen extends StatefulWidget {
+class CardScreen extends StatefulWidget {
     final String _apiKey;
 
     final int wordId;
 
     final IWordStorage _storage;
     
-    NewCardScreen(String apiKey, IWordStorage storage, { this.wordId }): 
+    CardScreen(String apiKey, IWordStorage storage, { this.wordId }): 
         _apiKey = apiKey,
         _storage = storage;
 
     @override
-    NewCardScreenState createState() {
-        return new NewCardScreenState(_apiKey);
+    CardScreenState createState() {
+        return new CardScreenState(_apiKey);
     }
 }

@@ -23,15 +23,15 @@ class WordCardRoute {
 }
 
 class Router {
-    static const String _NEW_CARD_ROUTE_NAME = 'newcard';
+    static const String _cardRouteName = 'card';
 
-    static goToNewCard(BuildContext context, { IWordStorage storage, int wordId }) {
-        Navigator.pushNamed(context, _NEW_CARD_ROUTE_NAME, 
+    static goToCard(BuildContext context, { IWordStorage storage, int wordId }) {
+        Navigator.pushNamed(context, _cardRouteName, 
             arguments: new _WordCardRouteArgs(storage: storage, wordId: wordId));
     }
 
     static dynamic getRoute(RouteSettings settings) {
-        if (settings.name == _NEW_CARD_ROUTE_NAME)
+        if (settings.name == _cardRouteName)
             return new WordCardRoute.fromArguments(settings.arguments);
         
         return new HomeRoute();
