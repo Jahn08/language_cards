@@ -17,11 +17,8 @@ class _StyledTextFieldState extends State<StyledTextField> {
     }
 
     _emitOnChangedEvent() {
-        if (!_focusNode.hasFocus && _isChanged) {
-            _isChanged = false;
-
-            widget._onChanged?.call(_controller.text, false);
-        }
+        if (!_focusNode.hasFocus && _isChanged)
+            _emitOnChanged(_controller.text);
     }
 
     @override
@@ -50,11 +47,11 @@ class _StyledTextFieldState extends State<StyledTextField> {
                 tempValue = val;
             },
             onEditingComplete: () {
-                _isChanged = false;
+                _emitOnChanged(tempValue, true);
 
-                widget._onChanged?.call(tempValue, true);
                 FocusScope.of(context).unfocus();
             },
+            onSaved: _emitOnChanged,
             validator: (String text) {
                 if (widget._isRequired && (text == null || text.isEmpty))
                     return 'The field cannot be empty';
@@ -63,6 +60,12 @@ class _StyledTextFieldState extends State<StyledTextField> {
             },
             controller: _controller
         );
+    }
+
+    void _emitOnChanged(String value, [bool isSubmitted]) {
+        _isChanged = false;
+
+        widget._onChanged?.call(value, isSubmitted ?? false);
     }
 
     @override

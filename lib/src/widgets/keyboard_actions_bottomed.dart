@@ -5,8 +5,8 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 class _KeyboardActionsStateBottomed extends KeyboardActionstate {
     FocusNode _focusNode;
 
-    _KeyboardActionsStateBottomed(FocusNode fieldFocusNode): 
-        _focusNode = fieldFocusNode, super() {
+    _KeyboardActionsStateBottomed(FocusNode focusNode): 
+        _focusNode = focusNode, super() {
             assert(_focusNode != null);
         }
 
@@ -37,7 +37,7 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
 
         _removeFocusListener();
 
-        this._focusNode = (this.widget as KeyboardActionsBottomed).fieldFocusNode;
+        this._focusNode = (this.widget as KeyboardActionsBottomed).focusNode;
         _addFocusListener();
     }
 
@@ -52,16 +52,16 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
 }
 
 class KeyboardActionsBottomed extends KeyboardActions {
-    final FocusNode fieldFocusNode;
+    final FocusNode focusNode;
 
     KeyboardActionsBottomed({ 
-        @required this.fieldFocusNode,
+        @required this.focusNode,
         @required KeyboardActionsConfig config,
         Widget child
     }): super(child: child, config: config, disableScroll: true);
 
     @override
     KeyboardActionstate createState() {
-        return new _KeyboardActionsStateBottomed(fieldFocusNode);
+        return new _KeyboardActionsStateBottomed(focusNode);
     }
 }

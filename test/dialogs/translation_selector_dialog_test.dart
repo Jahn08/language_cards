@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/translation_selector_dialog.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/selector_dialog_revealer.dart';
+import '../utilities/widget_assistant.dart';
 
 void main() {
 
@@ -40,7 +41,7 @@ void main() {
         await _tapOption(tester, optionFinders.at(anotherChosenOptionIndex));
         await tester.pumpAndSettle();
 
-        await _tapButtonByLabel(tester, 'Done');
+        await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');
 
         expect(dialogResult.contains(availableItems[chosenOptionIndex]), true);
         expect(dialogResult.contains(availableItems[anotherChosenOptionIndex]), true);
@@ -54,7 +55,7 @@ void main() {
         String dialogResult;
         await _showDialog(tester, availableItems, (word) => dialogResult = word);
 
-        await _tapButtonByLabel(tester, 'Cancel');
+        await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Cancel');
 
         expect(dialogResult, null);
         
@@ -70,12 +71,4 @@ _showDialog(WidgetTester tester, List<String> items, [Function(String) onDialogC
 Future<void> _tapOption(WidgetTester tester, Finder optionFinder) async {
     expect(optionFinder, findsOneWidget);
     await tester.tap(optionFinder);
-}
-
-Future<void> _tapButtonByLabel(WidgetTester tester, String label) async {
-    final btnFinder = find.widgetWithText(RaisedButton, label);
-    expect(btnFinder, findsOneWidget);
-    tester.widget<RaisedButton>(btnFinder).onPressed();
-
-    await tester.pumpAndSettle(Duration(milliseconds: 200));
 }

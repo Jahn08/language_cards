@@ -5,8 +5,10 @@ import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/test_root_widget.dart';
+import '../utilities/widget_assistant.dart';
 
 void main() {
+    
     testWidgets('Shows a keyboard with English phonetic symbols', (tester) async {
         final foundResult = await _createKeyboard(tester);
         
@@ -21,7 +23,7 @@ void main() {
     testWidgets('Removes a phonetic symbol by clicking on the backspace key', (tester) async {
         await _createKeyboard(tester, show: true);
         
-        final expectedSymbols = await _enterRandomSymbols(tester);
+        final expectedSymbols = await new WidgetAssistant(tester).enterRandomTranscription();
         var input = expectedSymbols.join('');
 
         do {
@@ -40,7 +42,7 @@ void main() {
     testWidgets('Hides a keyboard by clicking on the done key', (tester) async {
         await _createKeyboard(tester, show: true);
 
-        final expectedSymbols = await _enterRandomSymbols(tester);
+        final expectedSymbols = await new WidgetAssistant(tester).enterRandomTranscription();
 
         await _tapIconKey(tester, Icons.done);
 
@@ -83,25 +85,6 @@ void _assertKeyboardIsHidden() {
     EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) => 
         expect(find.text(symbol), findsNothing));
 } 
-
-Future<List<String>> _enterRandomSymbols(WidgetTester tester) async {
-    const symbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
-    final expectedSymbols = [Randomiser.getRandomElement(symbols),
-        Randomiser.getRandomElement(symbols), Randomiser.getRandomElement(symbols)];
-
-    for (final symbol in expectedSymbols)
-        await _tapSymbolKey(tester, symbol);
-
-    return expectedSymbols;
-}
-
-Future<void> _tapSymbolKey(WidgetTester tester, String symbol) async {
-    final foundKey = find.widgetWithText(InkWell, symbol);
-    expect(foundKey, findsOneWidget);
-
-    await tester.tap(foundKey);
-    await tester.pump(new Duration(milliseconds: 200));
-}
 
 Future<void> _tapIconKey(WidgetTester tester, IconData icon) async {
     final foundKey = find.widgetWithIcon(InkWell, icon);

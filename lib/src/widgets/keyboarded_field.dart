@@ -28,7 +28,7 @@ class KeyboardedField extends StatelessWidget {
         final textFieldFocusNode = new FocusNode();
         
         return new KeyboardActionsBottomed(
-            fieldFocusNode: textFieldFocusNode,
+            focusNode: _focusNode,
             config: _buildKeyboardConfig(),
             child: new Column(
                 children: <Widget>[
@@ -37,17 +37,21 @@ class KeyboardedField extends StatelessWidget {
                         builder: (BuildContext _context, String value, bool hasFocus) {
                             final curValue = isInitialBuilding ? _initialValue : (value ?? '');
                             if (!hasFocus && _initialValue != curValue)
-                                new Timer(new Duration(), () => _onChanged?.call(curValue));
+                                new Timer(new Duration(), () => _emitOnChangedEvent(curValue));
 
                             if (isInitialBuilding)
                                 isInitialBuilding = false;
+
+                            if (hasFocus)
+                                textFieldFocusNode.requestFocus();
 
                             return new TextFormField(
                                 decoration: new StyledInputDecoration(_hintText),
                                 focusNode: textFieldFocusNode,
                                 controller: new TextEditingController(text: curValue),
                                 readOnly: true,
-                                onEditingComplete: () => _onChanged(curValue),
+                                onSaved: (newValue) => _emitOnChangedEvent(newValue),
+                                onEditingComplete: () => _emitOnChangedEvent(curValue)
                             );
                         }, 
                         notifier: _keyboard.notifier
@@ -70,4 +74,6 @@ class KeyboardedField extends StatelessWidget {
             ]
         );
     }
+
+    void _emitOnChangedEvent(String value) => _onChanged?.call(value);
 }

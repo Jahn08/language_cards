@@ -1,6 +1,7 @@
 import 'dart:math';
 import '../models/word.dart';
 import '../models/stored_word.dart';
+import '../widgets/english_phonetic_keyboard.dart';
 
 export '../models/stored_word.dart';
 
@@ -50,16 +51,22 @@ class WordStorage implements IWordStorage {
 
     // TODO: A temporary method to debug rendering a list of words
     static List<StoredWord> _generateWords(int length) {
+        const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
         return new List<StoredWord>.generate(length, (index) {
             final random = new Random();
             return new StoredWord(random.nextDouble().toString(), 
                 id: index + 1, 
-                partOfSpeech: Word.PARTS_OF_SPEECH[random.nextInt(Word.PARTS_OF_SPEECH.length)],
-                translation: new List<String>.generate(random.nextInt(7), 
-                    (index) => random.nextDouble().toString()).join('; ')
+                partOfSpeech: _getRandomListElement(Word.PARTS_OF_SPEECH, random),
+                translation: new List<String>.generate(random.nextInt(5) + 1, 
+                    (index) => random.nextDouble().toString()).join('; '),
+                transcription: new List<String>.generate(random.nextInt(7) + 1, 
+                    (_) => _getRandomListElement(phoneticSymbols, random)).join()
             );
         });
     }
+
+    static T _getRandomListElement<T>(List<T> list, Random random) => 
+        list[random.nextInt(list.length)];
 
     Future<void> remove(Iterable<int> ids) {
         _words.removeWhere((w) => ids.contains(w.id));
