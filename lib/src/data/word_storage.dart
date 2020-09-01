@@ -4,7 +4,17 @@ import '../models/stored_word.dart';
 
 export '../models/stored_word.dart';
 
-class WordStorage {
+abstract class IWordStorage {
+    Future<List<StoredWord>> fetch({ int skipCount, int takeCount });
+
+    Future<StoredWord> find(int id);
+
+    Future<bool> save(StoredWord word);
+
+    Future<void> remove(Iterable<int> ids);
+}
+
+class WordStorage implements IWordStorage {
     final List<StoredWord> _words = _generateWords(15);
 
     static WordStorage _storage;
@@ -27,7 +37,7 @@ class WordStorage {
         if (word.id > 0)
             _words.removeWhere((w) => w.id == word.id);
         else
-            word.id = _words.length;
+            word.id = _words.length + 1;
 
         _words.add(word);
         _sortWords();
@@ -43,7 +53,7 @@ class WordStorage {
         return new List<StoredWord>.generate(length, (index) {
             final random = new Random();
             return new StoredWord(random.nextDouble().toString(), 
-                id: index, 
+                id: index + 1, 
                 partOfSpeech: Word.PARTS_OF_SPEECH[random.nextInt(Word.PARTS_OF_SPEECH.length)],
                 translation: new List<String>.generate(random.nextInt(7), 
                     (index) => random.nextDouble().toString()).join('; ')

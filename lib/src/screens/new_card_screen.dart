@@ -28,6 +28,8 @@ class NewCardScreenState extends State<NewCardScreen> {
 
     NewCardScreenState(String apiKey): _dictionary = new WordDictionary(apiKey);
 
+    IWordStorage get _storage => widget._storage;
+
     @override
     Widget build(BuildContext context) {
         return new Scaffold(
@@ -36,21 +38,24 @@ class NewCardScreenState extends State<NewCardScreen> {
             ),
             body: new Form(
                 key: _key,
-                child: widget.wordId > 0 && !_initialised ? _buildFutureFormLayout(widget.wordId) : 
-                    _buildFormLayout()
+                child: _buildFutureFormLayout(widget.wordId)
             )
         );
     }
 
     Widget _buildFutureFormLayout(int wordId) {
+        final futureWord = widget.wordId > 0 && !_initialised ? 
+            _storage.find(widget.wordId): Future.value(new StoredWord(''));
         return new FutureBuilder(
-            future: WordStorage.instance.find(wordId),
+            future: futureWord,
             builder: (context, AsyncSnapshot<StoredWord> snapshot) {
                 if (!snapshot.hasData)
                     return new Loader();
 
                 final foundWord = snapshot.data;
-                if (foundWord != null) {
+                if (foundWord != null && foundWord.id > 0 && !_initialised) {
+                    _initialised = true;
+
                     _text = foundWord.text;
                     _transcription = foundWord.transcription;
                     _partOfSpeech = foundWord.partOfSpeech;
@@ -63,11 +68,15 @@ class NewCardScreenState extends State<NewCardScreen> {
     }
 
     Widget _buildFormLayout() {
-        _initialised = true;
         return new Column(
             children: <Widget>[
                 new StyledTextField('Enter the first word', isRequired: true, 
-                    onChanged: (value) async {
+                    onChanged: (value, submitted) async {
+                        if (!submitted) {
+                            setState(() => _text = value);
+                            return;
+                        }
+                        
                         if (value == null || value.isEmpty)
                             return;
 
@@ -104,26 +113,34 @@ class NewCardScreenState extends State<NewCardScreen> {
                     onChanged: (value) => setState(() => this._partOfSpeech = value)),
                 new StyledTextField('Enter its translation', isRequired: true, 
                     initialValue: this._translation, 
-                    onChanged: (value) => setState(() => this._translation = value)),
+                    onChanged: (value, _) => setState(() => this._translation = value)),
                 new RaisedButton(
                     child: new Text('Save'),
                     onPressed: () {
                         final state = _key.currentState;
-                        if (state.validate()) {
-                            state.save();
+                        if (!state.validate())
+                            return;
 
-                            WordStorage.instance.save(new StoredWord(this._text, 
-                                id: widget.wordId,
-                                partOfSpeech: this._partOfSpeech, 
-                                transcription: this._transcription,
-                                translation: this._translation
-                            ));
-                            Router.goHome(context);
-                        }
+                        state.save();
+
+                        _storage.save(new StoredWord(this._text, 
+                            id: widget.wordId,
+                            partOfSpeech: this._partOfSpeech, 
+                            transcription: this._transcription,
+                            translation: this._translation
+                        ));
+                        Router.goHome(context);
                     }
                 )
             ]
         );
+    }
+
+    @override
+    dispose() {
+        _dictionary.dispose();
+
+        super.dispose();
     }
 }
 
@@ -131,9 +148,12 @@ class NewCardScreen extends StatefulWidget {
     final String _apiKey;
 
     final int wordId;
+
+    final IWordStorage _storage;
     
-    NewCardScreen(String apiKey, { this.wordId }): 
-        _apiKey = apiKey;
+    NewCardScreen(String apiKey, IWordStorage storage, { this.wordId }): 
+        _apiKey = apiKey,
+        _storage = storage;
 
     @override
     NewCardScreenState createState() {

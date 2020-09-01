@@ -2,23 +2,10 @@ import 'package:flutter/material.dart';
 import './styled_input_decoration.dart';
 
 class _StyledTextFieldState extends State<StyledTextField> {
-    final bool _isRequired; 
-    final bool _readonly; 
-    final String _hintText; 
-    final Function(String) _onChanged;
-
     FocusNode _focusNode;
     TextEditingController _controller;
     bool _isChanged = false;
     
-    _StyledTextFieldState(String hintText, { bool isRequired, 
-        Function(String) onChanged, bool readonly }): 
-        _isRequired = isRequired ?? false,
-        _readonly = readonly ?? false,
-        _onChanged = onChanged,
-        _hintText = hintText,
-        super();
-
     @override
     void initState() {
         super.initState();
@@ -33,7 +20,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
         if (!_focusNode.hasFocus && _isChanged) {
             _isChanged = false;
 
-            _onChanged?.call(_controller.text);
+            widget._onChanged?.call(_controller.text, false);
         }
     }
 
@@ -54,9 +41,9 @@ class _StyledTextFieldState extends State<StyledTextField> {
         String tempValue = widget.initialValue;
         return new TextFormField(
             focusNode: _focusNode,
-            readOnly: _readonly,
+            readOnly: widget._readonly,
             keyboardType: TextInputType.text,
-            decoration: new StyledInputDecoration(_hintText),
+            decoration: new StyledInputDecoration(widget._hintText),
             autocorrect: true,
             onChanged: (val) {
                 _isChanged = true;
@@ -65,12 +52,12 @@ class _StyledTextFieldState extends State<StyledTextField> {
             onEditingComplete: () {
                 _isChanged = false;
 
-                _onChanged?.call(tempValue);
+                widget._onChanged?.call(tempValue, true);
                 FocusScope.of(context).unfocus();
             },
             validator: (String text) {
-                if (_isRequired && (text == null || text.isEmpty))
-                    return 'The field is required';
+                if (widget._isRequired && (text == null || text.isEmpty))
+                    return 'The field cannot be empty';
 
                 return null;
             },
@@ -93,12 +80,12 @@ class StyledTextField extends StatefulWidget {
     final bool _readonly; 
     final String _hintText; 
 
-    final Function(String) _onChanged;
+    final Function(String, bool) _onChanged;
 
     final String initialValue;
 
-    StyledTextField(String hintText, { Key key, bool isRequired, Function(String) onChanged,
-        bool readonly, this.initialValue }): 
+    StyledTextField(String hintText, { Key key, bool isRequired, 
+        Function(String value, bool submitted) onChanged, bool readonly, this.initialValue }): 
         _isRequired = isRequired ?? false,
         _readonly = readonly ?? false,
         _onChanged = onChanged,
@@ -107,7 +94,6 @@ class StyledTextField extends StatefulWidget {
 
     @override
     State<StatefulWidget> createState() {
-        return new _StyledTextFieldState(_hintText, isRequired: _isRequired,
-            onChanged: _onChanged, readonly: _readonly);
+        return new _StyledTextFieldState();
     }
 }
