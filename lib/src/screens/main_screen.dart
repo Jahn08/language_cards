@@ -18,10 +18,15 @@ class _MainScreenState extends State<MainScreen> {
 
     bool _endOfData = false;
     bool _canFetch = false;
+    
+    bool _editorMode;
 
     int _pageIndex = 0;
 
+    BuildContext _scaffoldContext;
+
     final Map<int, _CachedWord> _wordsMarkedForRemoval = {};
+    final Map<int, _CachedWord> _wordsMarkedForRemovalInEditor = {};
 
     final List<StoredWord> _words = [];
     final ScrollController _scrollController = new ScrollController();
@@ -32,6 +37,8 @@ class _MainScreenState extends State<MainScreen> {
     initState() {
         super.initState();
         
+        _editorMode = false;
+
         _scrollController.addListener(_expandWordListOnScroll);
 
         _fetchWords();
@@ -65,31 +72,144 @@ class _MainScreenState extends State<MainScreen> {
     }
 
     @override
-    Widget build(BuildContext context) {
+    Widget build(BuildContext buildContext) {
         return new Scaffold(
             appBar: new AppBar(
+                leading: new SettingsOpenerButton(),
                 title: new Text('Language Cards'),
-                actions: <Widget>[new SettingsOpenerButton()]
+                actions: <Widget>[_editorMode ? _buildEditorDoneButton(): 
+                    _buildEditorButton()]
             ),
-            endDrawer: new SettingsBlocProvider(child: new SettingsPanel()),
+            bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
+            drawer: new SettingsBlocProvider(child: new SettingsPanel()),
             body: _buildWordList(),
-            floatingActionButton: _buildNewCardButton(context)
+            floatingActionButton: _buildNewCardButton(buildContext)
         );
+    }
+
+    Widget _buildEditorButton() => new FlatButton(
+        onPressed: () {
+            setState(() => _editorMode = true);
+        }, 
+        child: new Text('Edit')
+    );
+
+    Widget _buildEditorDoneButton() => new FlatButton(
+        onPressed: () {
+            setState(() { 
+                _wordsMarkedForRemovalInEditor.clear();
+                _editorMode = false;
+            });
+        },
+        child: new Text('Done')
+    );
+
+    Widget _buildBottomBar() {
+        bool allSelected = _wordsMarkedForRemovalInEditor.length == _words.length;
+
+        const int removalItemIndex = 0;
+        final options = new List<BottomNavigationBarItem>.generate(2, (index) {
+            if (index == removalItemIndex)
+                return new BottomNavigationBarItem(
+                    icon: new Icon(Icons.delete),
+                    title: new Text('Remove')
+                );
+            else
+                return new BottomNavigationBarItem(
+                    icon: new Icon(Icons.select_all),
+                    title: new Text('${allSelected ? 'Unselect': 'Select'} All')
+                );
+        });
+        
+        return new BottomNavigationBar(
+            items: options,
+            onTap: (tappedIndex) {
+                if (tappedIndex == removalItemIndex) {
+                    if (_wordsMarkedForRemovalInEditor.length == 0)
+                        return;
+
+                    _wordsMarkedForRemoval.addAll(_wordsMarkedForRemovalInEditor);
+
+                    setState(() {
+                        final idsMarkedForRemoval = _wordsMarkedForRemovalInEditor.keys;
+                        _words.removeWhere((w) => idsMarkedForRemoval.contains(w.id));
+
+                        _showWordRemovalInfoSnackBar(_scaffoldContext,
+                            '${_wordsMarkedForRemovalInEditor.length} words have been removed',
+                            _wordsMarkedForRemovalInEditor.keys.toList());
+
+                        _wordsMarkedForRemovalInEditor.clear();
+                    });
+                }
+                else {
+                    if (allSelected)
+                        setState(() => _wordsMarkedForRemovalInEditor.clear());
+                    else {
+                        setState(() {
+                            int index = 0;
+                            _words.forEach((w) =>
+                                _wordsMarkedForRemovalInEditor[w.id] = new _CachedWord(w, index++));
+                        });
+                    }
+                }
+            }
+        );
+    }
+
+    void _showWordRemovalInfoSnackBar(BuildContext scaffoldContext, String message, 
+        List<int> wordIdsToRemove) {
+        final snackBar = Scaffold.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
+            content: new Text(message),
+            action: SnackBarAction(
+                label: 'Undo',
+                onPressed: () => _recoverMarkedForRemoval(wordIdsToRemove)
+            )
+        ));
+
+        snackBar.closed.then((value) {
+            if (value == SnackBarClosedReason.timeout)
+                _deleteMarkedForRemoval(wordIdsToRemove);
+        });
     }
 
     Widget _buildWordList() => new Scrollbar(
         child: new ListView.builder(
             itemCount: _words.length,
-            itemBuilder: (listContext, index) => _buildListItem(listContext, index),
+            itemBuilder: (listContext, index) => _editorMode ?
+                _buildCheckListItem(listContext, index):
+                _buildDismissibleListItem(listContext, index),
             controller: _scrollController
         )
     );
 
-    Widget _buildListItem(BuildContext context, int wordIndex) {
+    Widget _buildCheckListItem(BuildContext buildContext, int wordIndex) {
+        _scaffoldContext = buildContext;
+        final word = _words[wordIndex];
+        
+        return new CheckboxListTile(
+            value: _wordsMarkedForRemovalInEditor.containsKey(word.id),
+            onChanged: (isChecked) {
+                setState(() {
+                    if (isChecked)
+                        _wordsMarkedForRemovalInEditor[word.id] = new _CachedWord(word, wordIndex);
+                    else
+                        _wordsMarkedForRemovalInEditor.remove(word.id);
+                });
+            },
+            title: _buildOneLineText(word.text),
+            subtitle: _buildOneLineText(word.translation),
+        );
+    }
+
+    Widget _buildOneLineText(String data) => 
+        new Text(data, maxLines: 1, overflow: TextOverflow.ellipsis);
+
+    Widget _buildDismissibleListItem(BuildContext buildContext, int wordIndex) {
         final word = _words[wordIndex];
 
         bool shouldRemove = false;
         return new Dismissible(
+            direction: DismissDirection.endToStart,
             confirmDismiss: (direction) => Future.delayed(new Duration(milliseconds: 2000), 
                 () => shouldRemove),
             background: new Container(
@@ -106,18 +226,9 @@ class _MainScreenState extends State<MainScreen> {
                 _wordsMarkedForRemoval[wordToRemove.id] = 
                     new _CachedWord(wordToRemove, wordIndex);
 
-                final snackBar = Scaffold.of(context).showSnackBar(new SnackBar(
-                    content: new Text('The word ${wordToRemove.text} has been removed'),
-                    action: SnackBarAction(
-                        label: 'Undo',
-                        onPressed: () => _recoverMarkedForRemoval([wordToRemove.id])
-                    )
-                ));
-
-                snackBar.closed.then((value) {
-                    if (value == SnackBarClosedReason.timeout)
-                        _deleteMarkedForRemoval([wordToRemove.id]);
-                });
+                _showWordRemovalInfoSnackBar(buildContext, 
+                    'The word ${wordToRemove.text} has been removed',
+                    [wordToRemove.id]);
 
                 setState(() => _words.remove(wordToRemove));
             },
@@ -125,7 +236,7 @@ class _MainScreenState extends State<MainScreen> {
                 title: _buildOneLineText(word.text),
                 trailing: _buildOneLineText(word.partOfSpeech),
                 subtitle: _buildOneLineText(word.translation),
-                onTap: () => _goToCard(context, word.id)
+                onTap: () => _goToCard(buildContext, word.id)
             )
         );
     }
@@ -136,13 +247,14 @@ class _MainScreenState extends State<MainScreen> {
             return;
 
         setState(() {
+            entries.sort((a, b) => a.value.index.compareTo(b.value.index));
             entries.forEach((entry) => _words.insert(entry.value.index, entry.value.word));
             _deleteFromMarkedForRemoval(ids);
         });
     }
 
-    Iterable<MapEntry<int, _CachedWord>> _getEntriesMarkedForRemoval(List<int> ids) =>
-        _wordsMarkedForRemoval.entries.where((entry) => ids.contains(entry.key));
+    List<MapEntry<int, _CachedWord>> _getEntriesMarkedForRemoval(List<int> ids) =>
+        _wordsMarkedForRemoval.entries.where((entry) => ids.contains(entry.key)).toList();
 
     _deleteFromMarkedForRemoval(List<int> ids) => 
         _wordsMarkedForRemoval.removeWhere((id, _) => ids.contains(id));
@@ -155,13 +267,10 @@ class _MainScreenState extends State<MainScreen> {
         _deleteFromMarkedForRemoval(ids);
     }
 
-    Widget _buildOneLineText(String data) => 
-        new Text(data, maxLines: 1, overflow: TextOverflow.ellipsis);
-
-    Widget _buildNewCardButton(BuildContext context) {
-        final theme = Theme.of(context);
+    Widget _buildNewCardButton(BuildContext buildContext) {
+        final theme = Theme.of(buildContext);
         return new FloatingActionButton(
-            onPressed: () => _goToCard(context),
+            onPressed: () => _goToCard(buildContext),
             child: new Icon(Icons.add_circle), 
             mini: true,
             tooltip: 'New Card',
@@ -170,9 +279,9 @@ class _MainScreenState extends State<MainScreen> {
         );
     }
 
-    _goToCard(BuildContext context, [int wordId]) {
+    _goToCard(BuildContext buildContext, [int wordId]) {
         _deleteAllMarkedForRemoval();
-        Router.goToCard(context, wordId: wordId);
+        Router.goToCard(buildContext, wordId: wordId);
     }
     
     _deleteAllMarkedForRemoval() {

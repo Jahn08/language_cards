@@ -5,7 +5,7 @@ class SettingsOpenerButton extends StatelessWidget {
     Widget build(BuildContext context) {
         return new IconButton(
             icon: new Icon(Icons.settings),
-            onPressed: () => Scaffold.of(context).openEndDrawer()
+            onPressed: () => Scaffold.of(context).openDrawer()
         );
     }
 }
