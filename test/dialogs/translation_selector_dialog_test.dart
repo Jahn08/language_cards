@@ -16,7 +16,7 @@ void main() {
     });
 
     testWidgets('Shows the dialog according to translations passed as an argument', (tester) async {
-        final availableItems = Randomiser.buildRandomStringList();
+        final availableItems = Randomiser.nextStringList();
         
         await _showDialog(tester, availableItems);
 
@@ -28,7 +28,7 @@ void main() {
     });
 
     testWidgets('Returns chosen translations and hides the dialog', (tester) async {
-        final availableItems = Randomiser.buildRandomStringList(minLength: 5, maxLength: 15);
+        final availableItems = Randomiser.nextStringList(minLength: 5, maxLength: 15);
         
         String dialogResult;
         await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
@@ -50,7 +50,7 @@ void main() {
     });
 
     testWidgets('Returns null after tapping on the cancel button', (tester) async {
-        final availableItems = Randomiser.buildRandomStringList();
+        final availableItems = Randomiser.nextStringList();
 
         String dialogResult;
         await _showDialog(tester, availableItems, (word) => dialogResult = word);

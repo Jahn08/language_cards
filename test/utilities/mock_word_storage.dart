@@ -14,7 +14,7 @@ class MockWordStorage implements IWordStorage {
 
     Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
         return Future.delayed(
-            new Duration(milliseconds: Randomiser.buildRandomInt(1000)),
+            new Duration(milliseconds: Randomiser.nextInt(1000)),
                 () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
@@ -36,13 +36,13 @@ class MockWordStorage implements IWordStorage {
     static List<StoredWord> _generateWords(int length) {
         const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
         return new List<StoredWord>.generate(length, (index) {
-            return new StoredWord(Randomiser.buildRandomString(), 
+            return new StoredWord(Randomiser.nextString(), 
                 id: index + 1, 
-                partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.buildRandomInt(Word.PARTS_OF_SPEECH.length)],
-                translation: new List<String>.generate(Randomiser.buildRandomInt(5) + 1, 
-                    (index) => Randomiser.buildRandomString()).join('; '),
-                transcription: new List<String>.generate(Randomiser.buildRandomInt(7) + 1, 
-                    (_) => Randomiser.getRandomElement(phoneticSymbols)).join()
+                partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.nextInt(Word.PARTS_OF_SPEECH.length)],
+                translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
+                    (index) => Randomiser.nextString()).join('; '),
+                transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
+                    (_) => Randomiser.nextElement(phoneticSymbols)).join()
             );
         });
     }
@@ -52,5 +52,5 @@ class MockWordStorage implements IWordStorage {
         return Future.value();
     }
 
-    StoredWord getRandomWord() => Randomiser.getRandomElement(_words);
+    StoredWord getRandomWord() => Randomiser.nextElement(_words);
 }

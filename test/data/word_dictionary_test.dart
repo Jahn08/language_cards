@@ -39,7 +39,7 @@ void main() {
             ]
         }));
 
-        final article = await new WordDictionary(Randomiser.buildRandomString(), client: client)
+        final article = await new WordDictionary(Randomiser.nextString(), client: client)
             .lookUp(wordToLookUp);
         final words = article?.words;
 
@@ -57,8 +57,8 @@ void main() {
     test('Returns an empty word article for an unknown word', () async {
         final client = new MockClient((request) async => _buildJsonResponse(_emptyArticle));
 
-        final unknownWord = Randomiser.buildRandomString();
-        final article = await new WordDictionary(Randomiser.buildRandomString(), client: client)
+        final unknownWord = Randomiser.nextString();
+        final article = await new WordDictionary(Randomiser.nextString(), client: client)
             .lookUp(unknownWord);
         expect(article?.words?.length, 0);
     });
@@ -71,8 +71,8 @@ void main() {
                 return _buildJsonResponse(_emptyArticle);
             });
 
-            final expectedWord = Randomiser.buildRandomString();
-            final expectedApiKey = Randomiser.buildRandomString();
+            final expectedWord = Randomiser.nextString();
+            final expectedApiKey = Randomiser.nextString();
             await new WordDictionary(expectedApiKey, client: client).lookUp(expectedWord);
             
             expect(url == null, false);
@@ -84,18 +84,18 @@ void main() {
 
         test('Gets a word article with a default part of speech when it is not recognisable', 
             () async {
-            final wordToLookUp = Randomiser.buildRandomString();
+            final wordToLookUp = Randomiser.nextString();
             final client = new MockClient((request) async =>_buildJsonResponse({
                 "head": {},
                 "def": List<dynamic>.generate(3, (index) => {
                     "text": wordToLookUp,
-                    "pos": Randomiser.buildRandomString(), 
-                    "ts": Randomiser.buildRandomString(), 
-                    "tr": [{ "text": Randomiser.buildRandomString() }]
+                    "pos": Randomiser.nextString(), 
+                    "ts": Randomiser.nextString(), 
+                    "tr": [{ "text": Randomiser.nextString() }]
                 })
             }));
 
-            final article = await new WordDictionary(Randomiser.buildRandomString(), 
+            final article = await new WordDictionary(Randomiser.nextString(), 
                 client: client).lookUp(wordToLookUp);
             final words = article?.words;
 

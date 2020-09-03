@@ -10,8 +10,8 @@ class WidgetAssistant {
 
     Future<List<String>> enterRandomTranscription() async {
         const symbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
-        final expectedSymbols = [Randomiser.getRandomElement(symbols),
-            Randomiser.getRandomElement(symbols), Randomiser.getRandomElement(symbols)];
+        final expectedSymbols = [Randomiser.nextElement(symbols),
+            Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
 
         for (final symbol in expectedSymbols)
             await _tapSymbolKey(symbol);

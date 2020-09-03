@@ -16,7 +16,7 @@ void main() {
     });
 
     testWidgets('Shows the dialog according to words passed as an argument', (tester) async {
-        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
+        final availableWords = new List<Word>.generate(Randomiser.nextInt(5) + 1, 
             (_) => _buildRandomWord());
 
         await _showDialog(tester, availableWords);
@@ -36,14 +36,14 @@ void main() {
     });
 
     testWidgets('Returns a chosen word and hides the dialog', (tester) async {
-        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
+        final availableWords = new List<Word>.generate(Randomiser.nextInt(5) + 1, 
             (_) => _buildRandomWord());
 
         Word dialogResult;
         await _showDialog(tester, availableWords, (word) => dialogResult = word);
 
         final optionFinders = find.byType(SimpleDialogOption);
-        final chosenOptionIndex = Randomiser.buildRandomInt(
+        final chosenOptionIndex = Randomiser.nextInt(
             tester.widgetList(optionFinders).length);
         final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
         expect(chosenOptionFinder, findsOneWidget);
@@ -56,7 +56,7 @@ void main() {
     });
 
     testWidgets('Returns null after tapping on the cancel button', (tester) async {
-        final availableWords = new List<Word>.generate(Randomiser.buildRandomInt(5) + 1, 
+        final availableWords = new List<Word>.generate(Randomiser.nextInt(5) + 1, 
             (_) => _buildRandomWord());
 
         Word dialogResult;
@@ -74,10 +74,10 @@ void main() {
     });
 }
 
-Word _buildRandomWord() => new Word(Randomiser.buildRandomString(), 
-    partOfSpeech: Randomiser.getRandomElement(Word.PARTS_OF_SPEECH), 
-    transcription: Randomiser.buildRandomString(), 
-    translations: Randomiser.buildRandomStringList(maxLength: 3));
+Word _buildRandomWord() => new Word(Randomiser.nextString(), 
+    partOfSpeech: Randomiser.nextElement(Word.PARTS_OF_SPEECH), 
+    transcription: Randomiser.nextString(), 
+    translations: Randomiser.nextStringList(maxLength: 3));
 
 _showDialog(WidgetTester tester, List<Word> items, [Function(Word) onDialogClose]) async =>
     SelectorDialogRevealer.showDialog(tester, items, onDialogClose: onDialogClose,

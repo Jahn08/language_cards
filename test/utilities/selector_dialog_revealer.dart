@@ -12,7 +12,7 @@ class SelectorDialogRevealer {
         Function(T) onDialogClose 
     }) async {
         BuildContext context;
-        final dialogBtnKey = new Key(Randomiser.buildRandomString());
+        final dialogBtnKey = new Key(Randomiser.nextString());
         await tester.pumpWidget(TestRootWidget.buildAsAppHome(
             onBuilding: (inContext) => context = inContext,
             child: new RaisedButton(

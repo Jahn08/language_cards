@@ -8,14 +8,14 @@ import '../utilities/randomiser.dart';
 
 void main() {
     testWidgets('Loads configuration preferring secret parameteres', (tester) async {
-        final expectedSecretApiKey = Randomiser.buildRandomString();
+        final expectedSecretApiKey = Randomiser.nextString();
         
         AppParams params;
         await tester.pumpWidget(
             new MaterialApp(
                 home: new DefaultAssetBundle(
                     bundle: new TestAssetBundle.params(
-                        _buildAppParams(Randomiser.buildRandomString()), 
+                        _buildAppParams(Randomiser.nextString()), 
                         secretParams: _buildAppParams(expectedSecretApiKey)),
                     child: new TestRootWidget(onBuilding: (context) async =>
                         params = await Configuration.getParams(context)),
@@ -27,7 +27,7 @@ void main() {
     });
 
      testWidgets('Loads configuration without secret parameteres', (tester) async {
-        final expectedApiKey = Randomiser.buildRandomString();
+        final expectedApiKey = Randomiser.nextString();
         
         AppParams params;
         await tester.pumpWidget(
