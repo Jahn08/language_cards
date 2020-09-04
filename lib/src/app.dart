@@ -16,7 +16,7 @@ class App extends StatelessWidget {
                     return _buildCardRoute(route);
 
                 return new MaterialPageRoute(
-                    builder: (context) => new MainScreen()
+                    builder: (context) => new MainScreen((route as HomeRoute).params.storage)
                 );
             }
         );

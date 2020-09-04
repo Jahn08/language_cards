@@ -31,7 +31,7 @@ class _MainScreenState extends State<MainScreen> {
     final List<StoredWord> _words = [];
     final ScrollController _scrollController = new ScrollController();
 
-    final _storage = WordStorage.instance;
+    IWordStorage get _storage => widget._storage;
     
     @override
     initState() {
@@ -294,6 +294,10 @@ class _MainScreenState extends State<MainScreen> {
 }
 
 class MainScreen extends StatefulWidget {
+    final IWordStorage _storage;
+
+    MainScreen(IWordStorage storage): _storage = storage;
+
     @override
     State<StatefulWidget> createState() => new _MainScreenState();
 }

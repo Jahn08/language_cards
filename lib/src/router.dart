@@ -3,16 +3,26 @@ import './data/word_storage.dart';
 
 export './data/word_storage.dart' show IWordStorage;
 
-class HomeRoute { }
-
-class _WordCardRouteArgs {
-    final int wordId;
-
+class _StorageRouteArgs {
     final IWordStorage storage;
+
+    _StorageRouteArgs([IWordStorage storage]): 
+        storage = storage ?? WordStorage.instance;
+}
+
+class HomeRoute { 
+    final _StorageRouteArgs params;
+
+    HomeRoute.fromArguments(Object arguments): 
+        params = arguments is _StorageRouteArgs ? arguments : new _StorageRouteArgs();
+}
+
+class _WordCardRouteArgs extends _StorageRouteArgs {
+    final int wordId;
 
     _WordCardRouteArgs({ IWordStorage storage, int wordId }): 
         wordId = wordId ?? 0,
-        storage = storage ?? WordStorage.instance;
+        super(storage);
 }
 
 class WordCardRoute { 
@@ -34,7 +44,7 @@ class Router {
         if (settings.name == _cardRouteName)
             return new WordCardRoute.fromArguments(settings.arguments);
         
-        return new HomeRoute();
+        return new HomeRoute.fromArguments(settings.arguments);
     }
 
     static goHome(BuildContext context) {
