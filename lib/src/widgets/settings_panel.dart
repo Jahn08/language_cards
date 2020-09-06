@@ -36,8 +36,8 @@ class SettingsPanelState extends State<SettingsPanel> {
         return <Widget>[
             _buildSubsectionHeader('Language'),
             new Row(children: <Widget>[
-                _buildLanguageOption(AppLanguage.english, bloc),
-                _buildLanguageOption(AppLanguage.russian, bloc)
+                _buildLanguageOption(Language.english, bloc),
+                _buildLanguageOption(Language.russian, bloc)
             ])
         ];
     }
@@ -53,12 +53,12 @@ class SettingsPanelState extends State<SettingsPanel> {
             ));
     }
 
-    Widget _buildLanguageOption(AppLanguage lang, SettingsBloc bloc) {
+    Widget _buildLanguageOption(Language lang, SettingsBloc bloc) {
         final isSelected = lang == bloc.language;
         
         return new GestureDetector(
             child: new IconOption(
-                icon: lang == AppLanguage.english ? AssetIcon.britishFlag : AssetIcon.russianFlag, 
+                icon: lang == Language.english ? AssetIcon.britishFlag : AssetIcon.russianFlag, 
                 isSelected: isSelected
             ),
             onTap: () {
