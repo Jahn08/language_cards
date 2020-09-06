@@ -1,9 +1,10 @@
-import 'package:language_cards/src/data/word_storage.dart';
+import 'package:language_cards/src/data/base_storage.dart';
+import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import './randomiser.dart';
 
-class MockWordStorage implements IWordStorage {
+class MockWordStorage implements BaseStorage<StoredWord> {
     final List<StoredWord> _words = _generateWords(15);
 
     MockWordStorage() {
@@ -12,7 +13,7 @@ class MockWordStorage implements IWordStorage {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
+    Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: Randomiser.nextInt(1000)),
                 () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());

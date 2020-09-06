@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
+import '../models/language.dart';
 
-enum AppLanguage {
-    english,
-
-    russian
-}
+export '../models/language.dart';
 
 enum AppTheme {
     light,
@@ -14,7 +11,7 @@ enum AppTheme {
 
 class SettingsBloc {
     AppTheme theme;
-    AppLanguage language;
+    Language language;
 
     SettingsBloc({this.theme, this.language});
 }
@@ -23,7 +20,7 @@ class SettingsBlocProvider extends InheritedWidget {
     final SettingsBloc _bloc;
 
     SettingsBlocProvider({ Key key, @required Widget child }):
-        _bloc = new SettingsBloc(language: AppLanguage.english, theme: AppTheme.dark),
+        _bloc = new SettingsBloc(language: Language.english, theme: AppTheme.dark),
         super(key: key, child: child);
 
     @override

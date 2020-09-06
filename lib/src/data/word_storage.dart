@@ -1,21 +1,13 @@
 import 'dart:math';
-import '../models/word.dart';
+import '../data/base_storage.dart';
 import '../models/stored_word.dart';
+import '../models/word.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 
 export '../models/stored_word.dart';
+export '../data/base_storage.dart';
 
-abstract class IWordStorage {
-    Future<List<StoredWord>> fetch({ int skipCount, int takeCount });
-
-    Future<StoredWord> find(int id);
-
-    Future<bool> save(StoredWord word);
-
-    Future<void> remove(Iterable<int> ids);
-}
-
-class WordStorage implements IWordStorage {
+class WordStorage implements BaseStorage<StoredWord> {
     final List<StoredWord> _words = _generateWords(15);
 
     static WordStorage _storage;
@@ -28,7 +20,7 @@ class WordStorage implements IWordStorage {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
+    Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: new Random().nextInt(1000)),
                 () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());

@@ -28,7 +28,7 @@ class CardScreenState extends State<CardScreen> {
 
     CardScreenState(String apiKey): _dictionary = new WordDictionary(apiKey);
 
-    IWordStorage get _storage => widget._storage;
+    BaseStorage<StoredWord> get _storage => widget._storage;
 
     @override
     Widget build(BuildContext context) {
@@ -149,9 +149,9 @@ class CardScreen extends StatefulWidget {
 
     final int wordId;
 
-    final IWordStorage _storage;
+    final BaseStorage<StoredWord> _storage;
     
-    CardScreen(String apiKey, IWordStorage storage, { this.wordId }): 
+    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.wordId }): 
         _apiKey = apiKey,
         _storage = storage;
 
