@@ -13,4 +13,6 @@ abstract class StoredEntity {
 
     @protected
     int getIdFromValue(int value, int curId) => curId == 0 && value > 0 ? value: curId;
+
+    bool get isNew => _id == 0;
 }

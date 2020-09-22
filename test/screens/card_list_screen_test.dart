@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/screens/main_screen.dart';
+import 'package:language_cards/src/screens/card_list_screen.dart';
 import '../utilities/mock_word_storage.dart';
 import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
@@ -117,7 +117,7 @@ void main() {
 Future<void> _pumpScreen(WidgetTester tester, [MockWordStorage storage]) async {
     storage = storage ?? new MockWordStorage();
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-        child: new MainScreen(storage)));
+        child: new CardListScreen(storage)));
     await tester.pumpAndSettle(new Duration(milliseconds: 900));
 }
 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/word_selector_dialog.dart';
@@ -123,13 +124,18 @@ class CardScreenState extends State<CardScreen> {
 
                         state.save();
 
-                        _storage.save(new StoredWord(this._text, 
+                        final wordToSave = new StoredWord(this._text, 
                             id: widget.wordId,
+                            packId: widget.pack?.id,
                             partOfSpeech: this._partOfSpeech, 
                             transcription: this._transcription,
                             translation: this._translation
-                        ));
-                        Router.goHome(context);
+                        );
+                        final cardWasAdded = wordToSave.isNew;
+                        _storage.save(wordToSave);
+
+                        Router.goToCardList(context, pack: widget.pack, 
+                            cardWasAdded: cardWasAdded);
                     }
                 )
             ]
@@ -148,10 +154,12 @@ class CardScreen extends StatefulWidget {
     final String _apiKey;
 
     final int wordId;
+    
+    final StoredPack pack;
 
     final BaseStorage<StoredWord> _storage;
     
-    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.wordId }): 
+    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.wordId, this.pack }): 
         _apiKey = apiKey,
         _storage = storage;
 

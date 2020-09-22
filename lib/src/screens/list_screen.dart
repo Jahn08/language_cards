@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../blocs/settings_bloc.dart';
-import '../data/base_storage.dart';
 import '../models/stored_entity.dart';
 import '../widgets/settings_opener_button.dart';
 import '../widgets/settings_panel.dart';
@@ -13,7 +12,8 @@ class _CachedItem<TItem> {
     _CachedItem(this.item, this.index);
 }
 
-abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScreen> {
+abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
+    extends State<TWidget> {
     static const int _itemsPerPage = 30;
 
     bool _endOfData = false;
@@ -30,8 +30,6 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
 
     final List<TItem> _items = [];
     final ScrollController _scrollController = new ScrollController();
-
-    BaseStorage get _storage => widget.storage;
     
     @override
     initState() {
@@ -62,7 +60,10 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
     }
 
     Future<List<TItem>> _fetchNextItems() => 
-        _storage.fetch(skipCount: _pageIndex++ * _itemsPerPage, takeCount: _itemsPerPage);
+        fetchNextItems(_pageIndex++ * _itemsPerPage, _itemsPerPage);
+
+    @protected
+    Future<List<TItem>> fetchNextItems(int skipCount, int takeCount);
 
     @override
     dispose() {
@@ -74,18 +75,44 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
     @override
     Widget build(BuildContext buildContext) {
         return new Scaffold(
-            appBar: new AppBar(
-                leading: new SettingsOpenerButton(),
-                title: new Text('Language Cards'),
-                actions: <Widget>[_editorMode ? _buildEditorDoneButton(): 
-                    _buildEditorButton()]
-            ),
+            appBar: _buildAppBar(buildContext),
             bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
             drawer: new SettingsBlocProvider(child: new SettingsPanel()),
             body: _buildList(),
             floatingActionButton: _buildNewCardButton(buildContext)
         );
     }
+
+    Widget _buildAppBar(BuildContext buildContext) {
+        final barTitle = new Text(title);
+        final settingsOpenerBtn = new SettingsOpenerButton();
+        final editorActions = <Widget>[_editorMode ? _buildEditorDoneButton(): 
+            _buildEditorButton()];
+
+        return canGoBack ? new AppBar(
+            automaticallyImplyLeading: false,
+            title: new Row(
+                children: <Widget>[
+                    new IconButton(
+                        icon: new Icon(Icons.arrow_back), 
+                        onPressed: () {
+                            _deleteAllMarkedForRemoval();
+                            onGoingBack(buildContext);
+                        }
+                    ),
+                    settingsOpenerBtn,
+                    new Expanded(child: barTitle)
+                ]
+            ),
+            actions: editorActions) : new AppBar(
+                leading: settingsOpenerBtn,
+                title: barTitle,
+                actions: editorActions
+            );
+    }
+
+    @protected
+    String get title;
 
     Widget _buildEditorButton() => new FlatButton(
         onPressed: () {
@@ -103,6 +130,12 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
         },
         child: new Text('Done')
     );
+
+    @protected
+    bool get canGoBack;
+
+    @protected
+    void onGoingBack(BuildContext context);
 
     Widget _buildBottomBar() {
         bool allSelected = _itemsMarkedForRemovalInEditor.length == _items.length;
@@ -196,18 +229,19 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
                         _itemsMarkedForRemovalInEditor.remove(item.id);
                 });
             },
-            title: _buildOneLineText(getItemTitle(item)),
-            subtitle: _buildOneLineText(getItemSubtitle(item))
+            title: getItemTitle(item),
+            subtitle: getItemSubtitle(item)
         );
     }
 
     @protected
-    String getItemTitle(TItem item);
+    Widget getItemTitle(TItem item);
 
     @protected
-    String getItemSubtitle(TItem item);
+    Widget getItemSubtitle(TItem item);
 
-    Widget _buildOneLineText(String data) => 
+    @protected
+    Widget buildOneLineText(String data) => 
         new Text(data, maxLines: 1, overflow: TextOverflow.ellipsis);
 
     Widget _buildDismissibleListItem(BuildContext buildContext, int itemIndex) {
@@ -239,16 +273,16 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
                 setState(() => _items.remove(itemToRemove));
             },
             child: new ListTile(
-                title: _buildOneLineText(getItemTitle(item)),
-                trailing: _buildOneLineText(getItemTrailing(item)),
-                subtitle: _buildOneLineText(getItemSubtitle(item)),
+                title: getItemTitle(item),
+                trailing: getItemTrailing(item),
+                subtitle: getItemSubtitle(item),
                 onTap: () => onLeaving(buildContext, item)
             )
         );
     }
 
     @protected
-    String getItemTrailing(TItem item);
+    Widget getItemTrailing(TItem item);
 
     _recoverMarkedForRemoval(List<int> ids) {
         final entries = _getEntriesMarkedForRemoval(ids).toList();
@@ -272,9 +306,12 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-        _storage.remove(_getEntriesMarkedForRemoval(ids).map((entry) => entry.key).toList());
+        removeItems(_getEntriesMarkedForRemoval(ids).map((entry) => entry.key).toList());
         _deleteFromMarkedForRemoval(ids);
     }
+
+    @protected
+    void removeItems(List<int> ids);
 
     Widget _buildNewCardButton(BuildContext buildContext) {
         final theme = Theme.of(buildContext);
@@ -289,7 +326,7 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
     }
 
     @mustCallSuper
-    onLeaving(BuildContext buildContext, [TItem id]) {
+    onLeaving(BuildContext buildContext, [TItem item]) {
         _deleteAllMarkedForRemoval();
     }
     
@@ -297,16 +334,7 @@ abstract class ListScreenState<TItem extends StoredEntity> extends State<ListScr
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-        _storage.remove(_itemsMarkedForRemoval.keys);
+        removeItems(_itemsMarkedForRemoval.keys.toList());
         _itemsMarkedForRemoval.clear();
     }
-}
-
-abstract class ListScreen<TItem extends StoredEntity> extends StatefulWidget {
-    final BaseStorage<TItem> storage;
-
-    ListScreen({ this.storage });
-
-    @override
-    ListScreenState<TItem> createState();
 }

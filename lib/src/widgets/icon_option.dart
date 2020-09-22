@@ -5,9 +5,9 @@ class IconOption extends StatelessWidget {
     final Widget _iconWidget;
     final bool _isSelected;
     
-    IconOption({Widget icon, bool isSelected}): 
+    IconOption({ @required Widget icon, bool isSelected }): 
         _iconWidget = icon,
-        _isSelected = isSelected;
+        _isSelected = isSelected ?? false;
 
     @override
     Widget build(BuildContext context) {

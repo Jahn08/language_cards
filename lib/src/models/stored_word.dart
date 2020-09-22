@@ -1,7 +1,7 @@
 import './stored_entity.dart';
 
 class StoredWord extends StoredEntity {
-    int _deckId;
+    int _packId;
     
     final String text;
 
@@ -11,15 +11,15 @@ class StoredWord extends StoredEntity {
 
     final String translation;
 
-    StoredWord(this.text, { int id, int deckId, String transcription, 
+    StoredWord(this.text, { int id, int packId, String transcription, 
         this.partOfSpeech, this.translation }):
-        _deckId = deckId ?? 0,
+        _packId = packId ?? 0,
         transcription = transcription ?? '',
         super(id: id);
 
-    int get deckId => _deckId;
+    int get packId => _packId;
 
-    set deckId(int value) {
-        _deckId = getIdFromValue(value, _deckId);
+    set packId(int value) {
+        _packId = getIdFromValue(value, _packId);
     }
 }

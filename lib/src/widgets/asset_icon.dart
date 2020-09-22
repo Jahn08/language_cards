@@ -1,5 +1,6 @@
 import 'package:path/path.dart';
 import 'package:flutter/material.dart';
+import '../models/language.dart';
 
 class AssetIcon extends Image {
     static const double WIDTH = 40;
@@ -15,4 +16,15 @@ class AssetIcon extends Image {
         width: WIDTH,
         height: HEIGHT
     );
+
+    static AssetIcon buildByLanguage(Language lang) {
+        switch (lang) {
+            case Language.english:
+                return britishFlag;
+            case Language.russian:
+                return russianFlag;
+            default:
+                return null;
+        }
+    }
 }

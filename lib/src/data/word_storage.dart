@@ -23,14 +23,23 @@ class WordStorage implements BaseStorage<StoredWord> {
     Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: new Random().nextInt(1000)),
-                () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+                () => _fetch(parentId).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+    }
+
+    Iterable<StoredWord> _fetch([int parentId]) => parentId == null ? _words : 
+        _words.where((w) => w.packId == parentId);
+
+    Future<int> getLength({ int parentId }) {
+        return Future.delayed(
+            new Duration(milliseconds: new Random().nextInt(1000)),
+                () => _fetch(parentId).length);
     }
 
     Future<bool> save(StoredWord word) async {
-        if (word.id > 0)
-            _words.removeWhere((w) => w.id == word.id);
-        else
+        if (word.isNew)
             word.id = _words.length + 1;
+        else
+            _words.removeWhere((w) => w.id == word.id);
 
         _words.add(word);
         _sortWords();
@@ -52,7 +61,8 @@ class WordStorage implements BaseStorage<StoredWord> {
                 translation: new List<String>.generate(random.nextInt(5) + 1, 
                     (index) => random.nextDouble().toString()).join('; '),
                 transcription: new List<String>.generate(random.nextInt(7) + 1, 
-                    (_) => _getRandomListElement(phoneticSymbols, random)).join()
+                    (_) => _getRandomListElement(phoneticSymbols, random)).join(),
+                packId: random.nextInt(5) + 1
             );
         });
     }
