@@ -14,8 +14,20 @@ class _CheckboxListState extends State<_CheckboxList> {
             )
         ));
 
+        final theme = Theme.of(context);
         return new SimpleDialog(
-            title: new Text(this.widget.title),
+            title: new CheckboxListTile(
+                title: new Text(this.widget.title, style: theme.textTheme.headline6),
+                value: widget.items.length == _chosenItems.length,
+                onChanged: (value) => setState(() {
+                    _chosenItems.clear();
+
+                    if (value)
+                        _chosenItems.addAll(this.widget.items);
+
+                    widget.onChange?.call(_chosenItems);
+                })
+            ),
             children: children
         );
     }
@@ -62,7 +74,7 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
         return items.length > 0 ? showDialog(
             context: _context,
             builder: (dialogContext) {
-                return new _CheckboxList('Select word translations', items, 
+                return new _CheckboxList('Select translations', items, 
                     onChange: (chosenItems) => _chosenTranslations = chosenItems,
                     buttons: <Widget>[
                         buildCancelBtn(_context), 

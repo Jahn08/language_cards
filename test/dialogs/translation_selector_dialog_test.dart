@@ -41,13 +41,52 @@ void main() {
         await _tapOption(tester, optionFinders.at(anotherChosenOptionIndex));
         await tester.pumpAndSettle();
 
-        await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');
+        await _pressDoneButton(tester);
 
         expect(dialogResult.contains(availableItems[chosenOptionIndex]), true);
         expect(dialogResult.contains(availableItems[anotherChosenOptionIndex]), true);
         
         expect(find.byType(SimpleDialog), findsNothing);
     });
+
+    testWidgets('Returns all translations chosen by ticking the title checkbox', (tester) async {
+        final availableItems = Randomiser.nextStringList(minLength: 3, maxLength: 7);
+        
+        String dialogResult;
+        await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
+
+        final titleOptionFinder = find.byType(CheckboxListTile);
+        await _tapOption(tester, titleOptionFinder.first);
+        await tester.pumpAndSettle();
+
+        expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+            .every((checkbox) => checkbox.value), true);
+
+        await _pressDoneButton(tester);
+
+        expect(availableItems.every((op) => dialogResult.contains(op)), true);
+    });
+
+    testWidgets('Returns emptiness after choosing nothing by clicking the title checkbox twice',
+        (tester) async {
+            final availableItems = Randomiser.nextStringList(minLength: 3, maxLength: 7);
+            
+            String dialogResult;
+            await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
+
+            final titleOptionFinder = find.byType(CheckboxListTile);
+            await _tapOption(tester, titleOptionFinder.first);
+            await tester.pumpAndSettle();
+
+            await _tapOption(tester, titleOptionFinder.first);
+            await tester.pumpAndSettle();
+
+            expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+                .every((checkbox) => !checkbox.value), true);
+
+            await _pressDoneButton(tester);
+            expect(dialogResult.isEmpty, true);
+        });
 
     testWidgets('Returns null after tapping on the cancel button', (tester) async {
         final availableItems = Randomiser.nextStringList();
@@ -72,3 +111,6 @@ Future<void> _tapOption(WidgetTester tester, Finder optionFinder) async {
     expect(optionFinder, findsOneWidget);
     await tester.tap(optionFinder);
 }
+
+Future<void> _pressDoneButton(WidgetTester tester) async => 
+    await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');
