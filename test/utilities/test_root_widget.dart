@@ -24,5 +24,7 @@ class TestRootWidget extends StatelessWidget {
     }
 
     static Widget buildAsAppHome({ Function(BuildContext) onBuilding, Widget child }) =>
-        new MaterialApp(home: new TestRootWidget(onBuilding: onBuilding, child: child)); 
+        new MaterialApp(onGenerateRoute: (settings) => new MaterialPageRoute(
+            builder: (context) => new TestRootWidget(onBuilding: onBuilding, child: child)
+        ));
 }
