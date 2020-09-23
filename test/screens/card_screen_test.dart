@@ -88,7 +88,7 @@ void main() {
 
 Future<StoredWord> _displayWord(WidgetTester tester, [MockWordStorage storage]) async {
     storage = storage ?? new MockWordStorage();
-    final wordToShow = storage.getRandomWord();
+    final wordToShow = storage.getRandom();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
         child: new CardScreen('', storage, wordId: wordToShow.id)));

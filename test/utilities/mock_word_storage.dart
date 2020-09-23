@@ -2,6 +2,7 @@ import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
+import './mock_pack_storage.dart';
 import './randomiser.dart';
 
 class MockWordStorage implements BaseStorage<StoredWord> {
@@ -14,9 +15,15 @@ class MockWordStorage implements BaseStorage<StoredWord> {
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
     Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
-        return Future.delayed(
-            new Duration(milliseconds: Randomiser.nextInt(1000)),
-                () => _words.skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+        return Future.delayed(new Duration(milliseconds: 100),
+            () => _fetch(parentId).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+    }
+
+    Iterable<StoredWord> _fetch([int parentId]) => parentId == null ? _words : 
+        _words.where((w) => w.packId == parentId);
+
+    Future<int> getLength({ int parentId }) {
+        return Future.delayed(new Duration(milliseconds: 100), () => _fetch(parentId).length);
     }
 
     Future<bool> save(StoredWord word) async {
@@ -43,7 +50,8 @@ class MockWordStorage implements BaseStorage<StoredWord> {
                 translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
                     (index) => Randomiser.nextString()).join('; '),
                 transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
-                    (_) => Randomiser.nextElement(phoneticSymbols)).join()
+                    (_) => Randomiser.nextElement(phoneticSymbols)).join(),
+                packId: Randomiser.nextInt(MockPackStorage.packNumber) + 1
             );
         });
     }
@@ -53,5 +61,5 @@ class MockWordStorage implements BaseStorage<StoredWord> {
         return Future.value();
     }
 
-    StoredWord getRandomWord() => Randomiser.nextElement(_words);
+    StoredWord getRandom() => Randomiser.nextElement(_words);
 }

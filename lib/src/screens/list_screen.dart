@@ -44,14 +44,14 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     _fetchItems() async {
         _canFetch = false;
-        final nextIems = await _fetchNextItems();
+        final nextItems = await _fetchNextItems();
 
         _canFetch = true;
 
-        if (nextIems.length == 0)
+        if (nextItems.length == 0)
             _endOfData = true;
         else
-            setState(() { _items.addAll(nextIems); });
+            setState(() { _items.addAll(nextItems); });
     }
 
     _expandListOnScroll() {
