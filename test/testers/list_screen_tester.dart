@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import './test_root_widget.dart';
-import './widget_assistant.dart';
+import '../utilities/test_root_widget.dart';
+import '../utilities/widget_assistant.dart';
 
-class ListScreenTester{
+class ListScreenTester {
     final StatefulWidget Function() _screenBuilder;
     
     final String screenName;

@@ -41,19 +41,20 @@ class MockWordStorage implements BaseStorage<StoredWord> {
     Future<StoredWord> find(int id) =>
         Future.value(id > 0 ? _words.firstWhere((w) => w.id == id, orElse: () => null) : null);
 
-    static List<StoredWord> _generateWords(int length) {
+    static List<StoredWord> _generateWords(int length) => 
+        new List<StoredWord>.generate(length, (index) => generateWord(id: index + 1));
+
+    static StoredWord generateWord({ int id, int packId }) {
         const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
-        return new List<StoredWord>.generate(length, (index) {
-            return new StoredWord(Randomiser.nextString(), 
-                id: index + 1, 
-                partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.nextInt(Word.PARTS_OF_SPEECH.length)],
-                translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
-                    (index) => Randomiser.nextString()).join('; '),
-                transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
-                    (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-                packId: Randomiser.nextInt(MockPackStorage.packNumber) + 1
-            );
-        });
+        return new StoredWord(Randomiser.nextString(), 
+            id: id, 
+            partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.nextInt(Word.PARTS_OF_SPEECH.length)],
+            translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
+                (index) => Randomiser.nextString()).join('; '),
+            transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
+                (_) => Randomiser.nextElement(phoneticSymbols)).join(),
+            packId: packId ?? Randomiser.nextInt(MockPackStorage.packNumber) + 1
+        );
     }
 
     Future<void> remove(Iterable<int> ids) {

@@ -18,8 +18,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     Widget getItemTrailing(StoredWord item) => super.buildOneLineText(item.partOfSpeech);
 
     @override
-    void onLeaving(BuildContext buildContext, [StoredWord item]) {
-        super.onLeaving(buildContext, item);
+    void onGoingToCard(BuildContext buildContext, [StoredWord item]) {
+        super.onGoingToCard(buildContext, item);
         
         Router.goToCard(buildContext, wordId: item?.id, pack: widget.pack);
     }

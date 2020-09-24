@@ -93,8 +93,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             automaticallyImplyLeading: false,
             title: new Row(
                 children: <Widget>[
-                    new IconButton(
-                        icon: new Icon(Icons.arrow_back), 
+                    new BackButton(
                         onPressed: () {
                             _deleteAllMarkedForRemoval();
                             onGoingBack(buildContext);
@@ -276,7 +275,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                 title: getItemTitle(item),
                 trailing: getItemTrailing(item),
                 subtitle: getItemSubtitle(item),
-                onTap: () => onLeaving(buildContext, item)
+                onTap: () => onGoingToCard(buildContext, item)
             )
         );
     }
@@ -316,7 +315,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildNewCardButton(BuildContext buildContext) {
         final theme = Theme.of(buildContext);
         return new FloatingActionButton(
-            onPressed: () => onLeaving(buildContext),
+            onPressed: () => onGoingToCard(buildContext),
             child: new Icon(Icons.add_circle), 
             mini: true,
             tooltip: 'New Card',
@@ -326,7 +325,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
     @mustCallSuper
-    onLeaving(BuildContext buildContext, [TItem item]) {
+    onGoingToCard(BuildContext buildContext, [TItem item]) {
         _deleteAllMarkedForRemoval();
     }
     
