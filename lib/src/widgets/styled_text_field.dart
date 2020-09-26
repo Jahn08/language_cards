@@ -38,7 +38,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
         String tempValue = widget.initialValue;
         return new TextFormField(
             focusNode: _focusNode,
-            readOnly: widget._readonly,
+            readOnly: widget.readonly,
             keyboardType: TextInputType.text,
             decoration: new StyledInputDecoration(widget.label),
             autocorrect: true,
@@ -53,7 +53,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
             },
             onSaved: _emitOnChanged,
             validator: (String text) {
-                if (widget._isRequired && (text == null || text.isEmpty))
+                if (widget.isRequired && (text == null || text.isEmpty))
                     return 'The field cannot be empty';
 
                 return null;

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import '../testers/list_screen_tester.dart';
 import '../utilities/mock_pack_storage.dart';
@@ -84,6 +85,13 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
                         child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
                             cardWasAdded: cardWasAdded))
                 );
+            else if (route is PackRoute)
+                return new MaterialPageRoute(
+                    settings: settings,
+                    builder: (context) => new TestRootWidget(
+                        child: new PackScreen(storage, packId: route.params.packId, 
+                            refreshed: route.params.refreshed))
+                );
 
             return new MaterialPageRoute(
                 settings: settings,
@@ -105,14 +113,22 @@ Future<void> _goToCardList(WidgetAssistant assistant, String cardName) async {
         matching: find.byType(ListTile));
     expect(tileWithCardsFinder, findsOneWidget);
     await assistant.tapWidget(tileWithCardsFinder);
+
+    final cardListBtnFinder = find.byIcon(Icons.filter_1);
+    expect(cardListBtnFinder, findsOneWidget);
+    await assistant.tapWidget(cardListBtnFinder);
 }
 
-Future<void> _goBackToPackList(WidgetAssistant assistant, [Duration duration]) async {
+Future<void> _goBackToPackList(WidgetAssistant assistant) async {
+    await _goBack(assistant);
+    await _goBack(assistant);
+}
+
+Future<void> _goBack(WidgetAssistant assistant) async {
     final backBtnFinders = find.byType(BackButton);
     assistant.tester.widget<BackButton>(backBtnFinders.first).onPressed.call();
 
-    await (duration == null ? assistant.tester.pumpAndSettle() : 
-        assistant.tester.pumpAndSettle(duration));
+    await assistant.tester.pumpAndSettle();
 }
 
 Future<void> _assertPackCardNumber(WidgetTester tester, MockPackStorage storage, 

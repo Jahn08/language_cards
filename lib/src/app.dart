@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import './screens/pack_screen.dart';
 import './screens/card_list_screen.dart';
 import './screens/card_screen.dart';
 import './screens/pack_list_screen.dart';
@@ -22,6 +23,13 @@ class App extends StatelessWidget {
                         settings: settings,
                         builder: (context) => new CardListScreen(params.storage, 
                             pack: params.pack, cardWasAdded: params.cardWasAdded));
+                }
+                else if (route is PackRoute) {
+                    final params = route.params;
+                    return new MaterialPageRoute(
+                        settings: settings,
+                        builder: (context) => new PackScreen(params.storage, 
+                            packId: params.packId, refreshed: params.refreshed));
                 }
                     
                 return new MaterialPageRoute(

@@ -44,7 +44,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     void onGoingBack(BuildContext context) => _cardsWereRemoved || widget.cardWasAdded ? 
-        Router.goToPackList(context): Router.goBackToPackList(context);
+        Router.goToPack(context, packId: widget.pack?.id, refreshed: true): 
+        Router.goBackToPack(context);
 }
 
 class CardListScreen extends StatefulWidget {

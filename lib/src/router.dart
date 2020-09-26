@@ -32,7 +32,9 @@ class CardListRoute {
 }
 
 class _PackStorageRouteArgs extends _StorageRouteArgs<StoredPack> {
-    _PackStorageRouteArgs([WordStorage storage]): super(storage ?? PackStorage.instance);
+
+    _PackStorageRouteArgs([PackStorage storage]): 
+        super(storage ?? PackStorage.instance);
 }
 
 class PackListRoute { 
@@ -59,10 +61,30 @@ class WordCardRoute {
         params = arguments is _WordCardRouteArgs ? arguments : new _WordCardRouteArgs();
 }
 
+class _PackRouteArgs extends _PackStorageRouteArgs {
+    final int packId;
+
+    final bool refreshed;
+
+    _PackRouteArgs({ BaseStorage<StoredPack> storage, int packId, bool refreshed }): 
+        packId = packId ?? 0,
+        refreshed = refreshed ?? false,
+        super(storage);
+}
+
+class PackRoute { 
+    final _PackRouteArgs params;
+
+    PackRoute.fromArguments(Object arguments): 
+        params = arguments is _PackStorageRouteArgs ? arguments : new _PackStorageRouteArgs();
+}
+
 class Router {
     static const String _cardRouteName = 'card';
 
     static const String _cardListRouteName = 'cardList';
+
+    static const String _packRouteName = 'pack';
 
     static const String _packListRouteName = 'packList';
 
@@ -87,6 +109,8 @@ class Router {
                 return new WordCardRoute.fromArguments(settings.arguments);
             case _cardListRouteName:
                 return new CardListRoute.fromArguments(settings.arguments);
+            case _packRouteName:
+                return new PackRoute.fromArguments(settings.arguments);
             default:        
                 return new PackListRoute.fromArguments(settings.arguments);
         }
@@ -94,8 +118,18 @@ class Router {
 
     static goHome(BuildContext context) => Navigator.pushNamed(context, initialRouteName);
 
+    static goToPack(BuildContext context, 
+        { BaseStorage<StoredPack> storage, int packId, bool refreshed }) {
+        Navigator.pushNamed(context, _packRouteName, 
+            arguments: new _PackRouteArgs(storage: storage, packId: packId, refreshed: refreshed));
+    }
+
+    static goBackToPack(BuildContext context) => _goBackUntil(context, _packRouteName);
+
+    static _goBackUntil(BuildContext context, String routeName) => 
+        Navigator.popUntil(context, ModalRoute.withName(routeName));
+
     static goToPackList(BuildContext context) => Navigator.pushNamed(context, _packListRouteName);
 
-    static goBackToPackList(BuildContext context) => 
-        Navigator.popUntil(context, ModalRoute.withName(_packListRouteName));
+    static goBackToPackList(BuildContext context) => _goBackUntil(context, _packListRouteName);
 }
