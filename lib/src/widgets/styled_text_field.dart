@@ -40,7 +40,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
             focusNode: _focusNode,
             readOnly: widget._readonly,
             keyboardType: TextInputType.text,
-            decoration: new StyledInputDecoration(widget._hintText),
+            decoration: new StyledInputDecoration(widget.label),
             autocorrect: true,
             onChanged: (val) {
                 _isChanged = true;
@@ -79,20 +79,20 @@ class _StyledTextFieldState extends State<StyledTextField> {
 }
 
 class StyledTextField extends StatefulWidget {
-    final bool _isRequired; 
-    final bool _readonly; 
-    final String _hintText; 
+    final bool isRequired; 
+    final bool readonly; 
+    
+    final String label; 
 
     final Function(String, bool) _onChanged;
 
     final String initialValue;
 
-    StyledTextField(String hintText, { Key key, bool isRequired, 
+    StyledTextField(this.label, { Key key, bool isRequired, 
         Function(String value, bool submitted) onChanged, bool readonly, this.initialValue }): 
-        _isRequired = isRequired ?? false,
-        _readonly = readonly ?? false,
+        isRequired = isRequired ?? false,
+        readonly = readonly ?? false,
         _onChanged = onChanged,
-        _hintText = hintText,
         super(key: key);
 
     @override

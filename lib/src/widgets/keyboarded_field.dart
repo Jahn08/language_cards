@@ -6,17 +6,17 @@ import './styled_input_decoration.dart';
 import './input_keyboard.dart';
 
 class KeyboardedField extends StatelessWidget {
-    final String _hintText;
+    final String label;
+
     final FocusNode _focusNode;
     final InputKeyboard _keyboard;
 
     final String _initialValue;
     final Function(String) _onChanged;
 
-    KeyboardedField(InputKeyboard keyboard, String hintText, FocusNode focusNode,
+    KeyboardedField(InputKeyboard keyboard, FocusNode focusNode, this.label,
         { Key key, Function(String) onChanged, String initialValue }): 
         _keyboard = keyboard,
-        _hintText = hintText,
         _initialValue = initialValue ?? '',
         _onChanged = onChanged,
         _focusNode = focusNode,
@@ -46,7 +46,7 @@ class KeyboardedField extends StatelessWidget {
                                 textFieldFocusNode.requestFocus();
 
                             return new TextFormField(
-                                decoration: new StyledInputDecoration(_hintText),
+                                decoration: new StyledInputDecoration(label),
                                 focusNode: textFieldFocusNode,
                                 controller: new TextEditingController(text: curValue),
                                 readOnly: true,

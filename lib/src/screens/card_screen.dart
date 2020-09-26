@@ -35,7 +35,7 @@ class CardScreenState extends State<CardScreen> {
     Widget build(BuildContext context) {
         return new Scaffold(
             appBar: new AppBar(
-                title: new Text('New Card')
+                title: new Text(_isNew ? 'Add Card' : "Change Card")
             ),
             body: new Form(
                 key: _key,
@@ -44,9 +44,11 @@ class CardScreenState extends State<CardScreen> {
         );
     }
 
+    bool get _isNew => widget.wordId == 0;
+
     Widget _buildFutureFormLayout(int wordId) {
-        final futureWord = widget.wordId > 0 && !_initialised ? 
-            _storage.find(widget.wordId): Future.value(new StoredWord(''));
+        final futureWord = _isNew || _initialised ? 
+            Future.value(new StoredWord('')): _storage.find(widget.wordId);
         return new FutureBuilder(
             future: futureWord,
             builder: (context, AsyncSnapshot<StoredWord> snapshot) {
@@ -54,7 +56,7 @@ class CardScreenState extends State<CardScreen> {
                     return new Loader();
 
                 final foundWord = snapshot.data;
-                if (foundWord != null && foundWord.id > 0 && !_initialised) {
+                if (foundWord != null && !foundWord.isNew && !_initialised) {
                     _initialised = true;
 
                     _text = foundWord.text;
@@ -71,7 +73,7 @@ class CardScreenState extends State<CardScreen> {
     Widget _buildFormLayout() {
         return new Column(
             children: <Widget>[
-                new StyledTextField('Enter the first word', isRequired: true, 
+                new StyledTextField('Word Text', isRequired: true, 
                     onChanged: (value, submitted) async {
                         if (!submitted) {
                             setState(() => _text = value);
@@ -105,14 +107,14 @@ class CardScreenState extends State<CardScreen> {
                         });
                     }, initialValue: this._text),
                 new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 
-                    'Tap to alter its phonetic notation', 
                     _transcriptionFocusNode,
+                    'Phonetic Notation', 
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledDropdown(Word.PARTS_OF_SPEECH, 'Tap to set up its part of speech',
+                new StyledDropdown(Word.PARTS_OF_SPEECH, label: 'Part of Speech',
                     initialValue: this._partOfSpeech,
                     onChanged: (value) => setState(() => this._partOfSpeech = value)),
-                new StyledTextField('Enter its translation', isRequired: true, 
+                new StyledTextField('Translation', isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
                 new RaisedButton(
@@ -159,7 +161,7 @@ class CardScreen extends StatefulWidget {
 
     final BaseStorage<StoredWord> _storage;
     
-    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.wordId, this.pack }): 
+    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.pack, this.wordId = 0 }): 
         _apiKey = apiKey,
         _storage = storage;
 

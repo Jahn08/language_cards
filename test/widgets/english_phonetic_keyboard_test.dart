@@ -60,9 +60,8 @@ void main() {
 
 Future<Finder> _createKeyboard(WidgetTester tester, { bool show }) async {
     final fieldKey = new Key(Randomiser.nextString());
-    final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(''), '', 
-        new FocusNode(),
-        key: fieldKey);
+    final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(''), 
+        new FocusNode(), '', key: fieldKey);
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(child: fieldWithKeyboard));
 
