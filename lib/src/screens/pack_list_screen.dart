@@ -29,8 +29,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     );
 
     @override
-    void onGoingToCard(BuildContext buildContext, [StoredPack item]) {
-        super.onGoingToCard(buildContext, item);
+    void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
+        super.onGoingToItem(buildContext, item);
         
         Router.goToCardList(buildContext, pack: item);
     }

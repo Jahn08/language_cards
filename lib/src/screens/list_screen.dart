@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../blocs/settings_bloc.dart';
 import '../models/stored_entity.dart';
+import '../widgets/navigation_bar.dart';
 import '../widgets/settings_opener_button.dart';
 import '../widgets/settings_panel.dart';
 
@@ -89,25 +90,20 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         final editorActions = <Widget>[_editorMode ? _buildEditorDoneButton(): 
             _buildEditorButton()];
 
-        return canGoBack ? new AppBar(
-            automaticallyImplyLeading: false,
-            title: new Row(
-                children: <Widget>[
-                    new BackButton(
-                        onPressed: () {
-                            _deleteAllMarkedForRemoval();
-                            onGoingBack(buildContext);
-                        }
-                    ),
-                    settingsOpenerBtn,
-                    new Expanded(child: barTitle)
-                ]
-            ),
-            actions: editorActions) : new AppBar(
+        if (canGoBack)
+            return new NavigationBar(barTitle, 
                 leading: settingsOpenerBtn,
-                title: barTitle,
-                actions: editorActions
-            );
+                actions: editorActions,
+                onGoingBack: () {
+                    _deleteAllMarkedForRemoval();
+                    onGoingBack(buildContext);
+                });
+            
+        return new AppBar(
+            leading: settingsOpenerBtn,
+            title: barTitle,
+            actions: editorActions
+        );
     }
 
     @protected
@@ -275,7 +271,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                 title: getItemTitle(item),
                 trailing: getItemTrailing(item),
                 subtitle: getItemSubtitle(item),
-                onTap: () => onGoingToCard(buildContext, item)
+                onTap: () => onGoingToItem(buildContext, item)
             )
         );
     }
@@ -315,7 +311,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildNewCardButton(BuildContext buildContext) {
         final theme = Theme.of(buildContext);
         return new FloatingActionButton(
-            onPressed: () => onGoingToCard(buildContext),
+            onPressed: () => onGoingToItem(buildContext),
             child: new Icon(Icons.add_circle), 
             mini: true,
             tooltip: 'New Card',
@@ -325,7 +321,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
     @mustCallSuper
-    onGoingToCard(BuildContext buildContext, [TItem item]) {
+    onGoingToItem(BuildContext buildContext, [TItem item]) {
         _deleteAllMarkedForRemoval();
     }
     
