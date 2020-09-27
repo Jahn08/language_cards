@@ -117,6 +117,11 @@ class CardScreenState extends State<CardScreen> {
                 new StyledTextField('Translation', isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
+                new FlatButton.icon(
+                    icon: new Icon(Icons.folder_open),
+                    label: new Text('Card Pack: ${widget.pack?.name ?? 'None'}'),
+                    onPressed: () => print('a dialog to choose a pack')
+                ),
                 new RaisedButton(
                     child: new Text('Save'),
                     onPressed: () {

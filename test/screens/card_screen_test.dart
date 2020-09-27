@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
+import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/mock_word_storage.dart';
+import '../utilities/mock_pack_storage.dart';
+import '../utilities/randomiser.dart';
+import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -21,6 +24,22 @@ void main() {
             final posField = tester.widget<DropdownButton<String>>(
                 find.byType(_typify<DropdownButton<String>>()));
             expect(posField.value, wordToShow.partOfSpeech);
+        });
+
+    testWidgets('Displays a card pack for a word from a storage', 
+        (tester) async {
+            final expectedPack = MockPackStorage.generatePack(
+                Randomiser.nextInt(MockPackStorage.packNumber));
+            await _displayWord(tester, pack: expectedPack);
+
+            await _testDisplayingPackName(tester, expectedPack);
+        });
+
+    testWidgets('Displays no card pack name for a word from a storage without a pack', 
+        (tester) async {
+            await _displayWord(tester);
+            
+            await _testDisplayingPackName(tester);
         });
 
     testWidgets('Switches focus to the translation field after changes in the word text field', 
@@ -72,7 +91,7 @@ void main() {
     testWidgets('Saves all changes to a word whereas the word transcription field is still focused', 
         (tester) async {
             final storage = new MockWordStorage();
-            final wordToShow = await _displayWord(tester, storage);
+            final wordToShow = await _displayWord(tester, storage: storage);
 
             final assistant = new WidgetAssistant(tester);
             await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
@@ -86,12 +105,13 @@ void main() {
         });
 }
 
-Future<StoredWord> _displayWord(WidgetTester tester, [MockWordStorage storage]) async {
+Future<StoredWord> _displayWord(WidgetTester tester, 
+    { MockWordStorage storage, StoredPack pack }) async {
     storage = storage ?? new MockWordStorage();
     final wordToShow = storage.getRandom();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-        child: new CardScreen('', storage, wordId: wordToShow.id)));
+        child: new CardScreen('', storage, wordId: wordToShow.id, pack: pack)));
     await tester.pumpAndSettle();
 
     return wordToShow;
@@ -124,7 +144,7 @@ Type _typify<T>() => T;
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
     final storage = new MockWordStorage();
-    final wordToShow = await _displayWord(tester, storage);
+    final wordToShow = await _displayWord(tester, storage: storage);
 
     final expectedChangedText = await _enterChangedText(tester, valueToChangeGetter(wordToShow));
 
@@ -148,4 +168,18 @@ Future<void> _showTranscriptionKeyboard(WidgetAssistant assistant, String transc
 Future<String> _changeTranscription(WidgetAssistant assistant, String curTranscription) async {
     final expectedSymbols = await assistant.enterRandomTranscription();
     return curTranscription + expectedSymbols.join();
+}
+
+Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPack]) async {
+    await _displayWord(tester, pack: expectedPack);
+    
+    final packBtnFinder = find.ancestor(of: find.byIcon(Icons.folder_open), 
+        matching: find.byWidgetPredicate((widget) => widget is MaterialButton));
+    expect(packBtnFinder, findsOneWidget);
+    
+    final packLabelFinder = find.descendant(of: packBtnFinder, matching: find.byType(Text));
+    expect(packLabelFinder, findsOneWidget);
+    
+    final packLabel = tester.widget<Text>(packLabelFinder);
+    expect(packLabel.data.toUpperCase().endsWith(expectedPack?.name ?? 'NONE'), true);
 }

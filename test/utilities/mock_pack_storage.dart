@@ -51,16 +51,17 @@ class MockPackStorage implements BaseStorage<StoredPack> {
         return new StoredPack.copy(pack, cardsNumber: wordsNumber);
     }
 
-    // TODO: A temporary method to debug rendering a list of word decks
+    // TODO: A temporary method to debug rendering a list of word packs
     static List<StoredPack> _generatePacks(int length) {
-        return new List<StoredPack>.generate(length, (index) {
-            return new StoredPack(Randomiser.nextString(), 
-                id: index + 1, 
-                from: Language.english,
-                to: Language.russian
-            );
-        });
+        return new List<StoredPack>.generate(length, (index) => generatePack(index + 1));
     }
+
+    static StoredPack generatePack([int id]) => 
+        new StoredPack(Randomiser.nextString(), 
+            id: id ?? 0, 
+            from: Language.english,
+            to: Language.russian
+        );
 
     Future<void> remove(Iterable<int> ids) {
         _packs.removeWhere((w) => ids.contains(w.id));
