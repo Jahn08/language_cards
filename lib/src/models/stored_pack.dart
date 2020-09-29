@@ -2,6 +2,10 @@ import './language.dart';
 import './stored_entity.dart';
 
 class StoredPack extends StoredEntity {
+    static const String noneName = 'None'; 
+
+    static final StoredPack none = new StoredPack(noneName);
+
     final String name;
 
     final Language from;
@@ -19,4 +23,6 @@ class StoredPack extends StoredEntity {
 
     StoredPack.copy(StoredPack pack, { int cardsNumber }): 
         this(pack.name, id: pack.id, from: pack.from, to: pack.to, cardsNumber: cardsNumber);
+
+    bool get isEmpty => name == noneName && id == 0;
 }

@@ -3,7 +3,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
-import '../utilities/mock_word_storage.dart';
 import '../utilities/mock_pack_storage.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/test_root_widget.dart';
@@ -90,7 +89,7 @@ void main() {
     
     testWidgets('Saves all changes to a word whereas the word transcription field is still focused', 
         (tester) async {
-            final storage = new MockWordStorage();
+            final storage = new MockPackStorage();
             final wordToShow = await _displayWord(tester, storage: storage);
 
             final assistant = new WidgetAssistant(tester);
@@ -100,18 +99,20 @@ void main() {
 
             await assistant.pressButtonDirectly(_findSaveButton());
 
-            final changedWord = await storage.find(wordToShow.id);
+            final changedWord = await storage.wordStorage.find(wordToShow.id);
             expect(changedWord?.transcription, expectedChangedTr);
         });
 }
 
 Future<StoredWord> _displayWord(WidgetTester tester, 
-    { MockWordStorage storage, StoredPack pack }) async {
-    storage = storage ?? new MockWordStorage();
-    final wordToShow = storage.getRandom();
+    { MockPackStorage storage, StoredPack pack }) async {
+    storage = storage ?? new MockPackStorage();
+    final wordStorage = storage.wordStorage;
+    final wordToShow = wordStorage.getRandom();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-        child: new CardScreen('', storage, wordId: wordToShow.id, pack: pack)));
+        child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
+        wordId: wordToShow.id, pack: pack)));
     await tester.pumpAndSettle();
 
     return wordToShow;
@@ -143,7 +144,7 @@ Type _typify<T>() => T;
 
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
-    final storage = new MockWordStorage();
+    final storage = new MockPackStorage();
     final wordToShow = await _displayWord(tester, storage: storage);
 
     final expectedChangedText = await _enterChangedText(tester, valueToChangeGetter(wordToShow));
@@ -151,7 +152,7 @@ Future<void> _testSavingChangedValue(WidgetTester tester,
     await new WidgetAssistant(tester).tapWidget(_findSaveButton());
     await tester.pumpAndSettle();
 
-    final changedWord = await storage.find(wordToShow.id);
+    final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
     expect(valueToChangeGetter(changedWord), expectedChangedText);
 }

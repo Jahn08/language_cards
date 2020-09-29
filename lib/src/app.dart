@@ -46,7 +46,8 @@ class App extends StatelessWidget {
             builder: (context) => new FutureBuilder(
                 future: Configuration.getParams(context),
                 builder: (_, AsyncSnapshot<AppParams> snapshot) => snapshot.hasData ? 
-                    new CardScreen(snapshot.data.dictionary.apiKey, params.storage, 
+                    new CardScreen(snapshot.data.dictionary.apiKey, 
+                        wordStorage: params.storage, packStorage: params.packStorage,
                         wordId: params.wordId, pack: params.pack) : 
                     new Loader()
             )

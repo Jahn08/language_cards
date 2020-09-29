@@ -49,8 +49,12 @@ class _WordCardRouteArgs extends _CardStorageRouteArgs {
 
     final StoredPack pack;
 
-    _WordCardRouteArgs({ BaseStorage<StoredWord> storage, int wordId, this.pack }): 
+    final BaseStorage<StoredPack> packStorage;
+
+    _WordCardRouteArgs({ BaseStorage<StoredWord> storage, 
+        BaseStorage<StoredPack> packStorage, int wordId, this.pack }): 
         wordId = wordId ?? 0,
+        packStorage = packStorage ?? PackStorage.instance,
         super(storage);
 }
 

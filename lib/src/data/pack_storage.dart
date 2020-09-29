@@ -11,14 +11,13 @@ class PackStorage implements BaseStorage<StoredPack> {
 
     static PackStorage _storage;
 
-    PackStorage._() {
-        _sort();
-    }
+    PackStorage._();
 
     static PackStorage get instance => _storage == null ? 
         (_storage = new PackStorage._()) : _storage;
 
-    _sort() => _packs.sort((a, b) => a.name.compareTo(b.name));
+    static void _sort(List<StoredPack> packs) => 
+        packs.sort((a, b) => a.name.compareTo(b.name));
 
     Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
@@ -41,7 +40,7 @@ class PackStorage implements BaseStorage<StoredPack> {
             word.id = _packs.length + 1;
 
         _packs.add(word);
-        _sort();
+        _sort(_packs);
         
         return Future.value(true);
     }
@@ -57,7 +56,7 @@ class PackStorage implements BaseStorage<StoredPack> {
 
     // TODO: A temporary method to debug rendering a list of word decks
     static List<StoredPack> _generatePacks(int length) {
-        return new List<StoredPack>.generate(length, (index) {
+        final generatedPacks = List<StoredPack>.generate(length, (index) {
             final random = new Random();
             return new StoredPack(random.nextDouble().toString(), 
                 id: index + 1, 
@@ -65,6 +64,12 @@ class PackStorage implements BaseStorage<StoredPack> {
                 to: Language.russian
             );
         });
+        _sort(generatedPacks);
+
+        final packs = <StoredPack>[StoredPack.none];
+        packs.addAll(generatedPacks);
+
+        return packs;
     }
 
     Future<void> remove(Iterable<int> ids) {

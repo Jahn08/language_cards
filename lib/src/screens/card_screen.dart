@@ -3,8 +3,9 @@ import 'package:flutter/widgets.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
-import '../dialogs/word_selector_dialog.dart';
+import '../dialogs/pack_selector_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
+import '../dialogs/word_selector_dialog.dart';
 import '../models/word.dart';
 import '../router.dart';
 import '../widgets/english_phonetic_keyboard.dart';
@@ -20,6 +21,9 @@ class CardScreenState extends State<CardScreen> {
 
     final FocusNode _transcriptionFocusNode = new FocusNode();
 
+    Future<List<StoredPack>> _futurePacks;
+    StoredPack _pack;
+
     String _text;
     String _translation;
     String _transcription;
@@ -27,9 +31,15 @@ class CardScreenState extends State<CardScreen> {
 
     bool _initialised = false;
 
-    CardScreenState(String apiKey): _dictionary = new WordDictionary(apiKey);
+    CardScreenState(String apiKey):
+        _dictionary = new WordDictionary(apiKey);
 
-    BaseStorage<StoredWord> get _storage => widget._storage;
+    @override
+    void initState() {
+        super.initState();
+
+        _pack = widget.pack ?? StoredPack.none;
+    }
 
     @override
     Widget build(BuildContext context) {
@@ -48,7 +58,7 @@ class CardScreenState extends State<CardScreen> {
 
     Widget _buildFutureFormLayout(int wordId) {
         final futureWord = _isNew || _initialised ? 
-            Future.value(new StoredWord('')): _storage.find(widget.wordId);
+            Future.value(new StoredWord('')): widget._wordStorage.find(widget.wordId);
         return new FutureBuilder(
             future: futureWord,
             builder: (context, AsyncSnapshot<StoredWord> snapshot) {
@@ -119,8 +129,17 @@ class CardScreenState extends State<CardScreen> {
                     onChanged: (value, _) => setState(() => this._translation = value)),
                 new FlatButton.icon(
                     icon: new Icon(Icons.folder_open),
-                    label: new Text('Card Pack: ${widget.pack?.name ?? 'None'}'),
-                    onPressed: () => print('a dialog to choose a pack')
+                    label: new Text('Card Pack: ${_pack.name}'),
+                    onPressed: () async {
+                        if (_futurePacks == null)
+                            _futurePacks = widget._packStorage.fetch();
+                        
+                        final chosenPack = await new PackSelectorDialog(context)
+                            .showAsync(_futurePacks);
+
+                        if (chosenPack != null && chosenPack.name != _pack.name)
+                            setState(() => _pack = chosenPack);
+                    }
                 ),
                 new RaisedButton(
                     child: new Text('Save'),
@@ -133,15 +152,16 @@ class CardScreenState extends State<CardScreen> {
 
                         final wordToSave = new StoredWord(this._text, 
                             id: widget.wordId,
-                            packId: widget.pack?.id,
+                            packId: _pack.id,
                             partOfSpeech: this._partOfSpeech, 
                             transcription: this._transcription,
                             translation: this._translation
                         );
-                        final cardWasAdded = wordToSave.isNew;
-                        _storage.save(wordToSave);
+                        final cardWasAdded = wordToSave.isNew || 
+                            widget.pack?.id != _pack.id;
+                        widget._wordStorage.save(wordToSave);
 
-                        Router.goToCardList(context, pack: widget.pack, 
+                        Router.goToCardList(context, pack: _pack, 
                             cardWasAdded: cardWasAdded);
                     }
                 )
@@ -164,11 +184,15 @@ class CardScreen extends StatefulWidget {
     
     final StoredPack pack;
 
-    final BaseStorage<StoredWord> _storage;
+    final BaseStorage<StoredWord> _wordStorage;
+
+    final BaseStorage<StoredPack> _packStorage;
     
-    CardScreen(String apiKey, BaseStorage<StoredWord> storage, { this.pack, this.wordId = 0 }): 
+    CardScreen(String apiKey, { @required BaseStorage<StoredWord> wordStorage, 
+        @required BaseStorage<StoredPack> packStorage, this.pack, this.wordId = 0 }): 
         _apiKey = apiKey,
-        _storage = storage;
+        _packStorage = packStorage,
+        _wordStorage = wordStorage;
 
     @override
     CardScreenState createState() {
