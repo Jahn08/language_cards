@@ -102,6 +102,20 @@ void main() {
             final changedWord = await storage.wordStorage.find(wordToShow.id);
             expect(changedWord?.transcription, expectedChangedTr);
         });
+    
+    testWidgets('Saves a new pack for a card', 
+        (tester) async {
+            final storage = new MockPackStorage();
+            await _testChangingPack(storage, tester, 
+                (word) async => (await storage.fetch())
+                    .firstWhere((p) => p.cardsNumber > 0 && p.id != word.id));
+        });
+    
+    testWidgets('Saves the none pack for a card', 
+        (tester) async {
+            await _testChangingPack(new MockPackStorage(), tester, 
+                (word) => Future.value(StoredPack.none));
+        });
 }
 
 Future<StoredWord> _displayWord(WidgetTester tester, 
@@ -174,13 +188,41 @@ Future<String> _changeTranscription(WidgetAssistant assistant, String curTranscr
 Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPack]) async {
     await _displayWord(tester, pack: expectedPack);
     
-    final packBtnFinder = find.ancestor(of: find.byIcon(Icons.folder_open), 
-        matching: find.byWidgetPredicate((widget) => widget is MaterialButton));
-    expect(packBtnFinder, findsOneWidget);
-    
+    final packBtnFinder = _findPackButton();
     final packLabelFinder = find.descendant(of: packBtnFinder, matching: find.byType(Text));
     expect(packLabelFinder, findsOneWidget);
     
     final packLabel = tester.widget<Text>(packLabelFinder);
-    expect(packLabel.data.toUpperCase().endsWith(expectedPack?.name ?? 'NONE'), true);
+    expect(packLabel.data.endsWith(expectedPack?.name ?? StoredPack.noneName), true);
+}
+
+Finder _findPackButton() {
+    final packBtnFinder = find.ancestor(of: find.byIcon(Icons.folder_open), 
+        matching: find.byWidgetPredicate((widget) => widget is MaterialButton));
+    expect(packBtnFinder, findsOneWidget);
+
+    return packBtnFinder;
+}
+
+Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester, 
+    Future<StoredPack> Function(StoredWord) newPackGetter) async {
+    final wordToShow = await _displayWord(tester, storage: storage);
+
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(_findPackButton());
+
+    StoredPack expectedPack;
+    await tester.runAsync(() async => expectedPack = await newPackGetter(wordToShow));
+
+    final packTileFinder = find.ancestor(of: find.text(expectedPack.name), 
+        matching: find.byType(ListTile));
+    expect(packTileFinder, findsOneWidget);
+
+    await assistant.tapWidget(packTileFinder);
+
+    await assistant.tapWidget(_findSaveButton());
+
+    final changedWord = await storage.wordStorage.find(wordToShow.id);
+    expect(changedWord == null, false);
+    expect(changedWord.packId, expectedPack.id);
 }

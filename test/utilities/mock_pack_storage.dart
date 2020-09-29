@@ -11,11 +11,10 @@ class MockPackStorage implements BaseStorage<StoredPack> {
 
     final MockWordStorage wordStorage = new MockWordStorage();
 
-    MockPackStorage() {
-        _sort();
-    }
+    MockPackStorage();
 
-    _sort() => _packs.sort((a, b) => a.name.compareTo(b.name));
+    static void _sort(List<StoredPack> packs) => 
+        packs.sort((a, b) => a.name.compareTo(b.name));
 
     Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
@@ -37,7 +36,7 @@ class MockPackStorage implements BaseStorage<StoredPack> {
             word.id = _packs.length + 1;
 
         _packs.add(word);
-        _sort();
+        _sort(_packs);
         
         return Future.value(true);
     }
@@ -53,7 +52,14 @@ class MockPackStorage implements BaseStorage<StoredPack> {
 
     // TODO: A temporary method to debug rendering a list of word packs
     static List<StoredPack> _generatePacks(int length) {
-        return new List<StoredPack>.generate(length, (index) => generatePack(index + 1));
+        final generatedPacks = new List<StoredPack>.generate(length, 
+            (index) => generatePack(index + 1));
+        _sort(generatedPacks);
+
+        final packs = <StoredPack>[StoredPack.none];
+        packs.addAll(generatedPacks);
+
+        return packs;
     }
 
     static StoredPack generatePack([int id]) => 
