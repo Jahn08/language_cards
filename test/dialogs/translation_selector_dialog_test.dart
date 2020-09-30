@@ -2,44 +2,47 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/translation_selector_dialog.dart';
 import '../utilities/randomiser.dart';
-import '../utilities/selector_dialog_revealer.dart';
 import '../utilities/widget_assistant.dart';
+import '../testers/selector_dialog_tester.dart';
 
 void main() {
 
-    testWidgets('Returns null for for an empty list of translations', (tester) async {
-        String dialogResult;
-        await _showDialog(tester, [], (word) => dialogResult = word);
-        expect(dialogResult, null);
+    testWidgets('Returns null for an empty list of translations', (tester) async {
+        final dialogTester = new SelectorDialogTester(tester, _buildDialog);
 
+        String dialogResult;
+        await dialogTester.showDialog([], (tr) => dialogResult = tr);
+
+        expect(dialogResult, null);
         expect(find.byType(SimpleDialog), findsNothing);
     });
 
-    testWidgets('Shows the dialog according to translations passed as an argument', (tester) async {
-        final availableItems = Randomiser.nextStringList();
-        
-        await _showDialog(tester, availableItems);
-
-        final optionFinders = find.byType(SimpleDialogOption);
-        final optionsNumber = availableItems.length;
-        for (int i = 0; i < optionsNumber; ++i)
-            expect(find.descendant(of: optionFinders.at(i), matching: find.text(availableItems[i])), 
-                findsOneWidget);
-    });
+    testWidgets('Shows the translation dialog according to items passed as an argument', 
+        (tester) async {
+            final availableItems = Randomiser.nextStringList();
+            final dialogTester = new SelectorDialogTester(tester, _buildDialog);
+            await dialogTester.testRenderingOptions(availableItems, (finder, option) {
+                expect(find.descendant(of: finder, matching: find.text(option)), 
+                    findsOneWidget);
+            }, CheckboxListTile); 
+        });
 
     testWidgets('Returns chosen translations and hides the dialog', (tester) async {
         final availableItems = Randomiser.nextStringList(minLength: 5, maxLength: 15);
         
+        final dialogTester = new SelectorDialogTester(tester, _buildDialog);
+        
         String dialogResult;
-        await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
+        await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
         const int chosenOptionIndex = 1;
         final optionFinders = find.byType(SimpleDialogOption);
-        await _tapOption(tester, optionFinders.at(chosenOptionIndex));
+
+        final assistant = new WidgetAssistant(tester);
+        await assistant.tapWidget(optionFinders.at(chosenOptionIndex));
 
         const int anotherChosenOptionIndex = 3;
-        await _tapOption(tester, optionFinders.at(anotherChosenOptionIndex));
-        await tester.pumpAndSettle();
+        await assistant.tapWidget(optionFinders.at(anotherChosenOptionIndex));
 
         await _pressDoneButton(tester);
 
@@ -52,12 +55,13 @@ void main() {
     testWidgets('Returns all translations chosen by ticking the title checkbox', (tester) async {
         final availableItems = Randomiser.nextStringList(minLength: 3, maxLength: 7);
         
+        final dialogTester = new SelectorDialogTester(tester, _buildDialog);
+        
         String dialogResult;
-        await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
+        await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
-        final titleOptionFinder = find.byType(CheckboxListTile);
-        await _tapOption(tester, titleOptionFinder.first);
-        await tester.pumpAndSettle();
+        final assistant = new WidgetAssistant(tester);
+        await assistant.tapWidget(find.byType(CheckboxListTile).first);
 
         expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
             .every((checkbox) => checkbox.value), true);
@@ -67,19 +71,19 @@ void main() {
         expect(availableItems.every((op) => dialogResult.contains(op)), true);
     });
 
-    testWidgets('Returns emptiness after choosing nothing by clicking the title checkbox twice',
+    testWidgets('Returns no translation after choosing nothing by clicking the title checkbox twice',
         (tester) async {
-            final availableItems = Randomiser.nextStringList(minLength: 3, maxLength: 7);
+            final dialogTester = new SelectorDialogTester(tester, _buildDialog);
             
             String dialogResult;
-            await _showDialog(tester, availableItems, (tr) => dialogResult = tr);
+            await dialogTester.showDialog(Randomiser.nextStringList(minLength: 3, maxLength: 7), 
+                (tr) => dialogResult = tr);
 
             final titleOptionFinder = find.byType(CheckboxListTile);
-            await _tapOption(tester, titleOptionFinder.first);
-            await tester.pumpAndSettle();
+            final assistant = new WidgetAssistant(tester);
+            await assistant.tapWidget(titleOptionFinder.first);
 
-            await _tapOption(tester, titleOptionFinder.first);
-            await tester.pumpAndSettle();
+            await assistant.tapWidget(titleOptionFinder.first);
 
             expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
                 .every((checkbox) => !checkbox.value), true);
@@ -88,29 +92,15 @@ void main() {
             expect(dialogResult.isEmpty, true);
         });
 
-    testWidgets('Returns null after tapping on the cancel button', (tester) async {
-        final availableItems = Randomiser.nextStringList();
-
-        String dialogResult;
-        await _showDialog(tester, availableItems, (word) => dialogResult = word);
-
-        await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Cancel');
-
-        expect(dialogResult, null);
-        
-        expect(find.byType(SimpleDialog), findsNothing);
-    });
+    testWidgets('Returns null after tapping the cancel button of the translation dialog', 
+        (tester) async {
+            final dialogTester = new SelectorDialogTester(tester, _buildDialog);
+            await dialogTester.testCancelling(Randomiser.nextStringList());
+        });
 }
 
-_showDialog(WidgetTester tester, List<String> items, [Function(String) onDialogClose]) async =>
-    SelectorDialogRevealer.showDialog(tester, items, onDialogClose: onDialogClose,
-        builder: (context) => new TranslationSelectorDialog(context));
-        
-
-Future<void> _tapOption(WidgetTester tester, Finder optionFinder) async {
-    expect(optionFinder, findsOneWidget);
-    await tester.tap(optionFinder);
-}
+TranslationSelectorDialog _buildDialog(BuildContext context) => 
+    new TranslationSelectorDialog(context);
 
 Future<void> _pressDoneButton(WidgetTester tester) async => 
     await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');
