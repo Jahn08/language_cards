@@ -134,7 +134,7 @@ class CardScreenState extends State<CardScreen> {
                         if (_futurePacks == null)
                             _futurePacks = widget._packStorage.fetch();
                         
-                        final chosenPack = await new PackSelectorDialog(context)
+                        final chosenPack = await new PackSelectorDialog(context, _pack.id)
                             .showAsync(_futurePacks);
 
                         if (chosenPack != null && chosenPack.name != _pack.name)

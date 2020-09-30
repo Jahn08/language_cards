@@ -11,4 +11,7 @@ class WordSelectorDialog extends SingleSelectorDialog<Word> {
   
     @override
     String getItemTitle(Word item) => item.translations.join('; ');
+
+    @override
+    Widget getItemTrailing(Word item) => null;
 }

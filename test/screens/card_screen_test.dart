@@ -41,6 +41,30 @@ void main() {
             await _testDisplayingPackName(tester);
         });
 
+    testWidgets('Displays a currently chosen pack as highlighted in the dialog and changes it', 
+        (tester) async {
+            final storage = new MockPackStorage();
+            final expectedPack = storage.getRandom();
+            await _displayWord(tester, storage: storage, pack: expectedPack);
+            
+            final assistant = new WidgetAssistant(tester);
+            final packBtnFinder = _findPackButton();
+            await assistant.tapWidget(packBtnFinder);
+
+            final packTileFinder = _findListTileByTitle(expectedPack.name);
+            _assureTileIsTicked(packTileFinder);
+
+            StoredPack anotherExpectedPack;
+            await tester.runAsync(() async => 
+                anotherExpectedPack = await _fetchAnotherPack(storage, expectedPack.id));
+            final anotherPackTileFinder = _findListTileByTitle(anotherExpectedPack.name);
+            await assistant.tapWidget(anotherPackTileFinder);
+
+            await assistant.tapWidget(packBtnFinder);
+
+            _assureTileIsTicked(anotherPackTileFinder);
+        });
+
     testWidgets('Switches focus to the translation field after changes in the word text field', 
         (tester) async {
             final wordToShow = await _displayWord(tester);
@@ -107,8 +131,7 @@ void main() {
         (tester) async {
             final storage = new MockPackStorage();
             await _testChangingPack(storage, tester, 
-                (word) async => (await storage.fetch())
-                    .firstWhere((p) => p.cardsNumber > 0 && p.id != word.id));
+                (word) async => await _fetchAnotherPack(storage, word.packId));
         });
     
     testWidgets('Saves the none pack for a card', 
@@ -204,6 +227,9 @@ Finder _findPackButton() {
     return packBtnFinder;
 }
 
+Future<StoredPack> _fetchAnotherPack(MockPackStorage storage, int curPackId) async => 
+    (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId);
+
 Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester, 
     Future<StoredPack> Function(StoredWord) newPackGetter) async {
     final wordToShow = await _displayWord(tester, storage: storage);
@@ -214,10 +240,7 @@ Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester,
     StoredPack expectedPack;
     await tester.runAsync(() async => expectedPack = await newPackGetter(wordToShow));
 
-    final packTileFinder = find.ancestor(of: find.text(expectedPack.name), 
-        matching: find.byType(ListTile));
-    expect(packTileFinder, findsOneWidget);
-
+    final packTileFinder = _findListTileByTitle(expectedPack.name);
     await assistant.tapWidget(packTileFinder);
 
     await assistant.tapWidget(_findSaveButton());
@@ -226,3 +249,15 @@ Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester,
     expect(changedWord == null, false);
     expect(changedWord.packId, expectedPack.id);
 }
+
+Finder _findListTileByTitle(String title) {
+    final tileFinder = find.ancestor(of: find.text(title), 
+        matching: find.byType(ListTile));
+    expect(tileFinder, findsOneWidget); 
+
+    return tileFinder;
+}
+
+void _assureTileIsTicked(Finder tileFinder) => 
+    expect(find.descendant(of: tileFinder, matching: find.byIcon(Icons.check)), 
+        findsOneWidget);

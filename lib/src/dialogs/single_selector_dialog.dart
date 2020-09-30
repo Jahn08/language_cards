@@ -29,9 +29,11 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
         );
     }
 
-    Widget _createSimpleDialog(List<Widget> children) => new SimpleDialog(
-        title: new Text(_title),
-        children: children
+    Widget _createSimpleDialog(List<Widget> children) => new Scrollbar(
+        child: new SimpleDialog(
+            title: new Text(_title),
+            children: children
+        )
     );
 
     Widget _buildDialog(List<T> items) {
@@ -40,6 +42,15 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 
         return _createSimpleDialog(children);
     }
+
+    Widget _buildDialogOption(T item) => new SimpleDialogOption(
+        onPressed: () => returnResult(_context, item),
+        child: new ListTile(
+            title: new Text(getItemTitle(item)),
+            subtitle: new Text(getItemSubtitle(item)),
+            trailing: getItemTrailing(item)
+        )
+    );
 
     @override
     Future<T> show(List<T> items) {
@@ -50,17 +61,12 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
         ) : Future.value(null);
     } 
 
-    Widget _buildDialogOption(T item) => new SimpleDialogOption(
-        onPressed: () => returnResult(_context, item),
-        child: new ListTile(
-            title: new Text(getItemTitle(item)),
-            subtitle: new Text(getItemSubtitle(item))
-        )
-    );
-
     @protected
     String getItemTitle(T item);
 
     @protected
     String getItemSubtitle(T item);
+
+    @protected
+    Widget getItemTrailing(T item);
 }
