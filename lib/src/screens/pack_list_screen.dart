@@ -9,7 +9,7 @@ import '../router.dart';
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
-    Widget getItemSubtitle(StoredPack item) => new Row(
+    Widget getItemSubtitle(StoredPack item) => item.isEmpty ? null: new Row(
         children: <Widget>[
             new IconOption(icon: AssetIcon.buildByLanguage(item.from)),
             new Icon(Icons.arrow_right),
@@ -32,7 +32,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
         super.onGoingToItem(buildContext, item);
         
-        Router.goToPack(buildContext, packId: item?.id);
+        item.isEmpty ? Router.goToCardList(context, pack: item): 
+            Router.goToPack(buildContext, packId: item?.id);
     }
 
     @override
@@ -50,6 +51,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
     void onGoingBack(BuildContext context) {}
+
+    @override
+    bool isRemovableItem(StoredPack item) => !item.isEmpty;
 }
 
 class PackListScreen extends StatefulWidget {

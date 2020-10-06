@@ -214,7 +214,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         _scaffoldContext = buildContext;
         final item = _items[itemIndex];
         
-        return new CheckboxListTile(
+        return isRemovableItem(item) ? new CheckboxListTile(
             value: _itemsMarkedForRemovalInEditor.containsKey(item.id),
             onChanged: (isChecked) {
                 setState(() {
@@ -226,14 +226,25 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             },
             title: getItemTitle(item),
             subtitle: getItemSubtitle(item)
-        );
+        ) : _buildListTile(buildContext, item, isReadonly: true);
     }
+
+    @protected
+    bool isRemovableItem(TItem item) => true;
 
     @protected
     Widget getItemTitle(TItem item);
 
     @protected
     Widget getItemSubtitle(TItem item);
+
+    Widget _buildListTile(BuildContext buildContext, TItem item, 
+        { bool isReadonly = false }) => new ListTile(
+            title: getItemTitle(item),
+            trailing: getItemTrailing(item),
+            subtitle: getItemSubtitle(item),
+            onTap: () => isReadonly ? null: onGoingToItem(buildContext, item)
+        );
 
     @protected
     Widget buildOneLineText(String data) => 
@@ -243,7 +254,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         final item = _items[itemIndex];
 
         bool shouldRemove = false;
-        return new Dismissible(
+        return isRemovableItem(item) ? new Dismissible(
             direction: DismissDirection.endToStart,
             confirmDismiss: (direction) => Future.delayed(new Duration(milliseconds: 2000), 
                 () => shouldRemove),
@@ -267,13 +278,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
                 setState(() => _items.remove(itemToRemove));
             },
-            child: new ListTile(
-                title: getItemTitle(item),
-                trailing: getItemTrailing(item),
-                subtitle: getItemSubtitle(item),
-                onTap: () => onGoingToItem(buildContext, item)
-            )
-        );
+            child: _buildListTile(buildContext, item)
+        ): _buildListTile(buildContext, item);
     }
 
     @protected
