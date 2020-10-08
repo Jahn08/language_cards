@@ -42,7 +42,7 @@ class MockPackStorage implements BaseStorage<StoredPack> {
     }
 
     Future<StoredPack> find(int id) async {
-        if (id <= 0)
+        if (id < 0)
             return null;
 
         final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);

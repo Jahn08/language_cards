@@ -15,7 +15,7 @@ class ListScreenTester {
     testEditorMode() {
 
         testWidgets(_buildDescription('switches to the editor mode and back'), (tester) async {
-            await _pumpScreen(tester);
+            await pumpScreen(tester);
 
             _tryFindingEditorDoneButton();
             _tryFindingEditorRemoveButton();
@@ -25,7 +25,7 @@ class ListScreenTester {
             _tryFindingSeveral(type: Dismissible, shouldFind: true);
             
             final assistant = new WidgetAssistant(tester);
-            await _activateEditorMode(assistant);
+            await activateEditorMode(assistant);
             
             _tryFindingEditorButton();
             _tryFindingSeveral(type: Dismissible);
@@ -48,10 +48,10 @@ class ListScreenTester {
 
         testWidgets(_buildDescription('selects and unselects all items in the editor mode'), 
             (tester) async {
-                await _pumpScreen(tester);
+                await pumpScreen(tester);
                 
                 final assistant = new WidgetAssistant(tester);
-                await _activateEditorMode(assistant);
+                await activateEditorMode(assistant);
 
                 final selectorFinder = _tryFindingEditorSelectButton(shouldFind: true);
                 await assistant.tapWidget(selectorFinder);
@@ -65,10 +65,10 @@ class ListScreenTester {
 
         testWidgets(_buildDescription('removes nothing when no items have been selected in the editor mode'), 
             (tester) async {
-                await _pumpScreen(tester);
+                await pumpScreen(tester);
                 
                 final assistant = new WidgetAssistant(tester);
-                await _activateEditorMode(assistant);
+                await activateEditorMode(assistant);
 
                 final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
 
@@ -118,7 +118,7 @@ class ListScreenTester {
                 final assistant = new WidgetAssistant(tester);
                 await _deactivateEditorMode(assistant);
 
-                await _activateEditorMode(assistant);
+                await activateEditorMode(assistant);
 
                 _assureSelectionForAllTilesInEditor(tester);
             });
@@ -126,13 +126,13 @@ class ListScreenTester {
 
     String _buildDescription(String outline) => '$screenName: $outline';
 
-    Future<void> _pumpScreen(WidgetTester tester) async {
+    Future<void> pumpScreen(WidgetTester tester) async {
         await tester.pumpWidget(TestRootWidget.buildAsAppHome(
             child: _screenBuilder()));
         await tester.pumpAndSettle(new Duration(milliseconds: 900));
     }
 
-    Future<void> _activateEditorMode(WidgetAssistant assistant) async {
+    Future<void> activateEditorMode(WidgetAssistant assistant) async {
         final editorBtnFinder = _tryFindingEditorButton(shouldFind: true);
         await assistant.tapWidget(editorBtnFinder);
     }
@@ -180,7 +180,8 @@ class ListScreenTester {
 
     Finder _assureSelectionForAllTilesInEditor(WidgetTester tester, [bool selected = false]) {
         final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
-        expect(tester.widgetList<CheckboxListTile>(tilesFinder).every((w) => w.value), selected);
+        final tiles = tester.widgetList<CheckboxListTile>(tilesFinder);
+        expect(tiles.every((w) => w.value), selected);
 
         return tilesFinder;
     }
@@ -195,10 +196,10 @@ class ListScreenTester {
     }
 
     Future<Map<int, String>> _selectSomeItemsInEditor(WidgetTester tester) async {
-        await _pumpScreen(tester);
+        await pumpScreen(tester);
 
         final assistant = new WidgetAssistant(tester);
-        await _activateEditorMode(assistant);
+        await activateEditorMode(assistant);
 
         final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
         final tilesFinderLength = tester.widgetList(tilesFinder).length - 1;

@@ -12,59 +12,57 @@ import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
-    new ListScreenTester('Pack', _buildPackListScreen).testEditorMode();
+    final screenTester = new ListScreenTester('Pack', _buildPackListScreen);
+    screenTester.testEditorMode();
 
     testWidgets("Doesn't update a number of cards for a pack without changes in it", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
         final packWithCards = await _getFirstPackWithCards(storage, tester);
-        final expectedNumberOfCards = packWithCards.cardsNumber;
-        
-        final assistant = new WidgetAssistant(tester);
-        await _goToCardList(assistant, packWithCards.name);
-
-        expect(find.byType(Dismissible), findsNWidgets(expectedNumberOfCards));
-
-        await _goBackToPackList(assistant);
-
-        await _assertPackCardNumber(tester, storage, packWithCards, expectedNumberOfCards);
+        await _testShowingCardsWithoutChanging(tester, storage, packWithCards);
     });
 
     testWidgets("Decreases a number of cards for a pack after deleting one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
         final packWithCards = await _getFirstPackWithCards(storage, tester);
-        final expectedNumberOfCards = packWithCards.cardsNumber - 1;
-        
-        final assistant = new WidgetAssistant(tester);
-        await _goToCardList(assistant, packWithCards.name);
-
-        tester.widget<Dismissible>(find.byType(Dismissible).first)
-            .onDismissed.call(DismissDirection.endToStart);
-        
-        await _goBackToPackList(assistant);
-
-        await _assertPackCardNumber(tester, storage, packWithCards, expectedNumberOfCards);
+        await _testDecreasingNumberOfCards(tester, storage, packWithCards);
     });
 
     testWidgets("Increases a number of cards for a pack after adding one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
 
         final packWithCards = await _getFirstPackWithCards(storage, tester);
-        final expectedNumberOfCards = packWithCards.cardsNumber + 1;
+        await _testIncreasingNumberOfCards(tester, storage, packWithCards);
+    });
 
-        final assistant = new WidgetAssistant(tester);
-        await _goToCardList(assistant, packWithCards.name);
+    testWidgets("Renders an unremovable link for a list of cards without a pack", (tester) async {
+        await screenTester.pumpScreen(tester);
+        _findPackTileByName(StoredPack.noneName);
 
-        await tester.runAsync(() async {
-            final randomWord = MockWordStorage.generateWord(packId: packWithCards.id);
-            final saveOutcome = await storage.wordStorage.save(randomWord);
-            expect(saveOutcome, true);
-        });
+        await screenTester.activateEditorMode(new WidgetAssistant(tester));
+        _findPackTileByName(StoredPack.noneName);
+    });
 
-        await _goBackToPackList(assistant);
+    testWidgets("Doesn't update a number of cards for the none pack without changes in it", (tester) async {
+        final storage = await _pumpScreenWithRouting(tester);
 
-        await _assertPackCardNumber(tester, storage, packWithCards, expectedNumberOfCards);
+        final nonePack = await _getNonePack(storage, tester);
+        await _testShowingCardsWithoutChanging(tester, storage, nonePack);
+    });
+
+    testWidgets("Decreases a number of cards for the none pack after deleting one", (tester) async {
+        final storage = await _pumpScreenWithRouting(tester);
+
+        final nonePack = await _getNonePack(storage, tester);
+        await _testDecreasingNumberOfCards(tester, storage, nonePack);
+    });
+
+    testWidgets("Increases a number of cards for the none pack after adding one", (tester) async {
+        final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
+
+        final nonePack = await _getNonePack(storage, tester);
+        await _testIncreasingNumberOfCards(tester, storage, nonePack);
     });
 }
 
@@ -108,19 +106,82 @@ Future<StoredPack> _getFirstPackWithCards(MockPackStorage storage, WidgetTester 
     await tester.runAsync<StoredPack>(
         () async => (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0));
 
-Future<void> _goToCardList(WidgetAssistant assistant, String cardName) async {
-    final tileWithCardsFinder = find.ancestor(of: find.text(cardName), 
-        matching: find.byType(ListTile));
+Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
+    MockPackStorage storage, StoredPack pack) async {
+    final expectedNumberOfCards = pack.cardsNumber;
+        
+    final assistant = new WidgetAssistant(tester);
+
+    final packName = pack.name;
+    await _goToCardList(assistant, packName);
+
+    expect(find.byType(Dismissible), findsNWidgets(expectedNumberOfCards));
+
+    await _goBackToPackList(assistant, packName);
+
+    await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
+}
+
+Future<void> _testDecreasingNumberOfCards(WidgetTester tester, 
+    MockPackStorage storage, StoredPack pack) async {
+    final expectedNumberOfCards = pack.cardsNumber - 1;
+    
+    final assistant = new WidgetAssistant(tester);
+    await _goToCardList(assistant, pack.name);
+
+    tester.widget<Dismissible>(find.byType(Dismissible).first)
+        .onDismissed.call(DismissDirection.endToStart);
+    
+    await _goBackToPackList(assistant, pack.name);
+
+    await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
+}
+
+Future<void> _testIncreasingNumberOfCards(WidgetTester tester, 
+    MockPackStorage storage, StoredPack pack) async {
+    final expectedNumberOfCards = pack.cardsNumber + 1;
+
+    final assistant = new WidgetAssistant(tester);
+    await _goToCardList(assistant, pack.name);
+
+    await tester.runAsync(() async {
+        final randomWord = MockWordStorage.generateWord(packId: pack.id);
+        final saveOutcome = await storage.wordStorage.save(randomWord);
+        expect(saveOutcome, true);
+    });
+
+    await _goBackToPackList(assistant, pack.name);
+
+    await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
+}
+
+Future<void> _goToCardList(WidgetAssistant assistant, String packName) async {
+    final tileWithCardsFinder = _findPackTileByName(packName);
     expect(tileWithCardsFinder, findsOneWidget);
     await assistant.tapWidget(tileWithCardsFinder);
+
+    if (packName == StoredPack.noneName) 
+        return;
 
     final cardListBtnFinder = find.byIcon(Icons.filter_1);
     expect(cardListBtnFinder, findsOneWidget);
     await assistant.tapWidget(cardListBtnFinder);
 }
 
-Future<void> _goBackToPackList(WidgetAssistant assistant) async {
+Finder _findPackTileByName(String name) {
+    final nonePackTileFinder = find.ancestor(of: find.text(StoredPack.noneName), 
+        matching: find.byType(ListTile), matchRoot: true);
+    expect(nonePackTileFinder, findsOneWidget);
+
+    return nonePackTileFinder;
+}
+
+Future<void> _goBackToPackList(WidgetAssistant assistant, String packName) async {
     await _goBack(assistant);
+
+    if (packName == StoredPack.noneName) 
+        return;
+
     await _goBack(assistant);
 }
 
@@ -145,3 +206,7 @@ Future<void> _assertPackCardNumber(WidgetTester tester, MockPackStorage storage,
         expect(actualPackWithCards?.cardsNumber, expectedNumber);
     });
 }
+
+Future<StoredPack> _getNonePack(MockPackStorage storage, WidgetTester tester) async => 
+    await tester.runAsync<StoredPack>(
+        () async => (await storage.fetch()).firstWhere((p) => p.name == StoredPack.noneName));

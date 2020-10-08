@@ -6,7 +6,7 @@ import './mock_pack_storage.dart';
 import './randomiser.dart';
 
 class MockWordStorage implements BaseStorage<StoredWord> {
-    final List<StoredWord> _words = _generateWords(15);
+    final List<StoredWord> _words = _generateWords(18);
 
     MockWordStorage() {
         _sortWords();
@@ -15,7 +15,7 @@ class MockWordStorage implements BaseStorage<StoredWord> {
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
     Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
-        return Future.delayed(new Duration(milliseconds: 100),
+        return Future.delayed(new Duration(milliseconds: 50),
             () => _fetch(parentId).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
@@ -41,8 +41,17 @@ class MockWordStorage implements BaseStorage<StoredWord> {
     Future<StoredWord> find(int id) =>
         Future.value(id > 0 ? _words.firstWhere((w) => w.id == id, orElse: () => null) : null);
 
-    static List<StoredWord> _generateWords(int length) => 
-        new List<StoredWord>.generate(length, (index) => generateWord(id: index + 1));
+    static List<StoredWord> _generateWords(int length) {
+        final cardsWithoutPackNumber = Randomiser.nextInt(3) + 1;
+        final cardsWithPackNumber = length - cardsWithoutPackNumber;
+        final words = new List<StoredWord>.generate(cardsWithPackNumber, 
+            (index) => generateWord(id: index + 1));
+        words.addAll(new List<StoredWord>.generate(cardsWithoutPackNumber,
+            (index) => generateWord(id: cardsWithPackNumber + index + 1, packId: 0)));
+
+        return words;
+    }
+        
 
     static StoredWord generateWord({ int id, int packId }) {
         const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
