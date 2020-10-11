@@ -3,7 +3,7 @@ abstract class BaseStorage<T> {
 
     Future<T> find(int id);
 
-    Future<bool> save(T word);
+    Future<bool> save(List<T> word);
 
     Future<void> remove(Iterable<int> ids);
 }

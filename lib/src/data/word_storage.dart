@@ -36,13 +36,15 @@ class WordStorage implements BaseStorage<StoredWord> {
                 () => _fetch(parentId).length);
     }
 
-    Future<bool> save(StoredWord word) async {
-        if (word.isNew)
-            word.id = _words.length + 1;
-        else
-            _words.removeWhere((w) => w.id == word.id);
+    Future<bool> save(List<StoredWord> words) async {
+        words.forEach((word) {
+            if (word.isNew)
+                word.id = _words.length + 1;
+            else
+                _words.removeWhere((w) => w.id == word.id);
 
-        _words.add(word);
+            _words.add(word);
+        });
         _sortWords();
         
         return Future.value(true);

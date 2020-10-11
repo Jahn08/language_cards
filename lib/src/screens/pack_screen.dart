@@ -103,7 +103,7 @@ class PackScreenState extends State<PackScreen> {
 
                 state.save();
 
-                _storage.save(_buildPack());
+                _storage.save([_buildPack()]);
 
                 Router.goToPackList(context);
             }

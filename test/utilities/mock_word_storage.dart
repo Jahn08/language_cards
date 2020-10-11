@@ -26,13 +26,15 @@ class MockWordStorage implements BaseStorage<StoredWord> {
         return Future.delayed(new Duration(milliseconds: 100), () => _fetch(parentId).length);
     }
 
-    Future<bool> save(StoredWord word) async {
-        if (word.id > 0)
-            _words.removeWhere((w) => w.id == word.id);
-        else
-            word.id = _words.length;
+    Future<bool> save(List<StoredWord> words) async {
+        words.forEach((word) { 
+            if (word.id > 0)
+                _words.removeWhere((w) => w.id == word.id);
+            else
+                word.id = _words.length;
 
-        _words.add(word);
+            _words.add(word);
+        });
         _sortWords();
         
         return Future.value(true);

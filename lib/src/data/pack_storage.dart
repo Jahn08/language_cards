@@ -33,13 +33,15 @@ class PackStorage implements BaseStorage<StoredPack> {
                 });
     }
 
-    Future<bool> save(StoredPack word) async {
-        if (word.id > 0)
-            _packs.removeWhere((w) => w.id == word.id);
-        else
-            word.id = _packs.length + 1;
+    Future<bool> save(List<StoredPack> words) async {
+        words.forEach((word) { 
+            if (word.id > 0)
+                _packs.removeWhere((w) => w.id == word.id);
+            else
+                word.id = _packs.length + 1;
 
-        _packs.add(word);
+            _packs.add(word);
+        });
         _sort(_packs);
         
         return Future.value(true);
