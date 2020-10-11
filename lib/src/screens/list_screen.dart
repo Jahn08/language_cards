@@ -17,6 +17,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     extends State<TWidget> {
     static const int _itemsPerPage = 30;
 
+    static const int _navBarRemovalOptionIndex = 0;
+    static const int _navBarSelectAllOptionIndex = 1;
+
     bool _endOfData = false;
     bool _canFetch = false;
     
@@ -27,7 +30,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     BuildContext _scaffoldContext;
 
     final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
-    final Map<int, _CachedItem<TItem>> _itemsMarkedForRemovalInEditor = {};
+    final Map<int, _CachedItem<TItem>> _itemsMarkedInEditor = {};
 
     final List<TItem> _items = [];
     final ScrollController _scrollController = new ScrollController();
@@ -119,7 +122,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildEditorDoneButton() => new FlatButton(
         onPressed: () {
             setState(() { 
-                _itemsMarkedForRemovalInEditor.clear();
+                _itemsMarkedInEditor.clear();
                 _editorMode = false;
             });
         },
@@ -133,56 +136,66 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void onGoingBack(BuildContext context);
 
     Widget _buildBottomBar() {
-        bool allSelected = _itemsMarkedForRemovalInEditor.length == _items.length;
-
-        const int removalItemIndex = 0;
-        final options = new List<BottomNavigationBarItem>.generate(2, (index) {
-            if (index == removalItemIndex)
-                return new BottomNavigationBarItem(
-                    icon: new Icon(Icons.delete),
-                    title: new Text('Remove')
-                );
-            else
-                return new BottomNavigationBarItem(
-                    icon: new Icon(Icons.select_all),
-                    title: new Text('${allSelected ? 'Unselect': 'Select'} All')
-                );
-        });
+        bool allSelected = _itemsMarkedInEditor.length == _items.length;
+        final options = getNavBarOptions(allSelected);
         
         return new BottomNavigationBar(
             items: options,
-            onTap: (tappedIndex) {
-                if (tappedIndex == removalItemIndex) {
-                    if (_itemsMarkedForRemovalInEditor.length == 0)
+            onTap: (tappedIndex) async {
+                if (tappedIndex == _navBarRemovalOptionIndex) {
+                    if (_itemsMarkedInEditor.length == 0)
                         return;
 
-                    _itemsMarkedForRemoval.addAll(_itemsMarkedForRemovalInEditor);
+                    _itemsMarkedForRemoval.addAll(_itemsMarkedInEditor);
 
                     setState(() {
-                        final idsMarkedForRemoval = _itemsMarkedForRemovalInEditor.keys;
+                        final idsMarkedForRemoval = _itemsMarkedInEditor.keys;
                         _items.removeWhere((w) => idsMarkedForRemoval.contains(w.id));
 
                         _showItemRemovalInfoSnackBar(_scaffoldContext,
-                            '${_itemsMarkedForRemovalInEditor.length} items have been removed',
-                            _itemsMarkedForRemovalInEditor.keys.toList());
+                            '${_itemsMarkedInEditor.length} items have been removed',
+                            _itemsMarkedInEditor.keys.toList());
 
-                        _itemsMarkedForRemovalInEditor.clear();
+                        _itemsMarkedInEditor.clear();
                     });
                 }
-                else {
+                else if (tappedIndex == _navBarSelectAllOptionIndex) {
                     if (allSelected)
-                        setState(() => _itemsMarkedForRemovalInEditor.clear());
+                        setState(() => _itemsMarkedInEditor.clear());
                     else {
                         setState(() {
                             int index = 0;
                             _items.forEach((w) =>
-                                _itemsMarkedForRemovalInEditor[w.id] = new _CachedItem(w, index++));
+                                _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
                         });
                     }
+                }
+                else if (await handleNavBarOption(tappedIndex, 
+                    _itemsMarkedInEditor.values.map((e) => e.item), _scaffoldContext)) {
+                    _itemsMarkedInEditor.clear();
                 }
             }
         );
     }
+
+    @protected
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected) {
+        final options = new List<BottomNavigationBarItem>();
+        options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
+            icon: new Icon(Icons.delete),
+            title: new Text('Remove')
+        ));
+        options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
+            icon: new Icon(Icons.select_all),
+            title: new Text('${allSelected ? 'Unselect': 'Select'} All')
+        ));
+
+        return options;
+    } 
+        
+    @protected
+    Future<bool> handleNavBarOption(int tappedIndex, Iterable<TItem> markedItems,
+        BuildContext scaffoldContext) async => Future.value(true);
 
     void _showItemRemovalInfoSnackBar(BuildContext scaffoldContext, String message, 
         List<int> itemIdsToRemove) {
@@ -215,13 +228,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         final item = _items[itemIndex];
         
         return isRemovableItem(item) ? new CheckboxListTile(
-            value: _itemsMarkedForRemovalInEditor.containsKey(item.id),
+            value: _itemsMarkedInEditor.containsKey(item.id),
             onChanged: (isChecked) {
                 setState(() {
                     if (isChecked)
-                        _itemsMarkedForRemovalInEditor[item.id] = new _CachedItem(item, itemIndex);
+                        _itemsMarkedInEditor[item.id] = new _CachedItem(item, itemIndex);
                     else
-                        _itemsMarkedForRemovalInEditor.remove(item.id);
+                        _itemsMarkedInEditor.remove(item.id);
                 });
             },
             title: getItemTitle(item),
