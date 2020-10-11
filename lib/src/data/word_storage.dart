@@ -2,6 +2,7 @@ import 'dart:math';
 import '../data/base_storage.dart';
 import '../models/stored_word.dart';
 import '../models/word.dart';
+import '../models/word_study_stage.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 
 export '../models/stored_word.dart';
@@ -53,6 +54,10 @@ class WordStorage implements BaseStorage<StoredWord> {
     // TODO: A temporary method to debug rendering a list of words
     static List<StoredWord> _generateWords(int length) {
         const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
+        
+        const studyStages = WordStudyStage.values;
+        final studyStagesLength = studyStages.length;
+
         return new List<StoredWord>.generate(length, (index) {
             final random = new Random();
             return new StoredWord(random.nextDouble().toString(), 
@@ -62,7 +67,8 @@ class WordStorage implements BaseStorage<StoredWord> {
                     (index) => random.nextDouble().toString()).join('; '),
                 transcription: new List<String>.generate(random.nextInt(7) + 1, 
                     (_) => _getRandomListElement(phoneticSymbols, random)).join(),
-                packId: random.nextInt(5) + 1
+                packId: random.nextInt(5) + 1,
+                studyProgress: studyStages[random.nextInt(studyStagesLength)]
             );
         });
     }

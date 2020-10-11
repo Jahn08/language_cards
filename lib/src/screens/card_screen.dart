@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:language_cards/src/models/word_study_stage.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
@@ -28,6 +29,8 @@ class CardScreenState extends State<CardScreen> {
     String _translation;
     String _transcription;
     String _partOfSpeech;
+    
+    int _studyProgress;
 
     bool _initialised = false;
 
@@ -39,6 +42,7 @@ class CardScreenState extends State<CardScreen> {
         super.initState();
 
         _pack = widget.pack ?? StoredPack.none;
+        _studyProgress = WordStudyStage.unknown;
     }
 
     @override
@@ -73,6 +77,7 @@ class CardScreenState extends State<CardScreen> {
                     _transcription = foundWord.transcription;
                     _partOfSpeech = foundWord.partOfSpeech;
                     _translation = foundWord.translation;
+                    _studyProgress = foundWord.studyProgress;
                 }
 
                 return _buildFormLayout();
@@ -111,7 +116,8 @@ class CardScreenState extends State<CardScreen> {
                             _text = chosenWord.text;
                             _partOfSpeech = chosenWord.partOfSpeech;
                             _transcription = chosenWord.transcription;
-                            
+                            _studyProgress = WordStudyStage.unknown;
+
                             if (translation != null)
                                 _translation = translation;
                         });
@@ -141,6 +147,13 @@ class CardScreenState extends State<CardScreen> {
                             setState(() => _pack = chosenPack);
                     }
                 ),
+                if (this._studyProgress != WordStudyStage.unknown)
+                    new FlatButton.icon(
+                        icon: new Icon(Icons.restore),
+                        label: new Text('Reset ${this._studyProgress}% Progress'),
+                        onPressed: () =>  setState(
+                            () => this._studyProgress = WordStudyStage.unknown)
+                    ),
                 new RaisedButton(
                     child: new Text('Save'),
                     onPressed: () {
@@ -155,7 +168,8 @@ class CardScreenState extends State<CardScreen> {
                             packId: _pack.id,
                             partOfSpeech: this._partOfSpeech, 
                             transcription: this._transcription,
-                            translation: this._translation
+                            translation: this._translation,
+                            studyProgress: this._studyProgress
                         );
                         final cardWasAdded = wordToSave.isNew || 
                             widget.pack?.id != _pack.id;
