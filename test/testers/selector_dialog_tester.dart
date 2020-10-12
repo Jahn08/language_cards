@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:language_cards/src/dialogs/selector_dialog.dart';
+import '../utilities/dialog_opener.dart';
 import '../utilities/randomiser.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 class SelectorDialogTester<T> {
@@ -25,33 +25,10 @@ class SelectorDialogTester<T> {
         expect(find.byType(SimpleDialog), findsNothing);
     }
 
-    Future<void> showDialog(List<T> items, [Function(T) onDialogClose]) async =>
-        await _showDialog(items, onDialogClose: onDialogClose,
-            builder: _dialogBuilder);
-
-    Future<void> _showDialog(List<T> items, { 
-        @required SelectorDialog Function(BuildContext) builder, 
-        Function(T) onDialogClose 
-    }) async {
-        BuildContext context;
-        final dialogBtnKey = new Key(Randomiser.nextString());
-        await tester.pumpWidget(TestRootWidget.buildAsAppHome(
-            onBuilding: (inContext) => context = inContext,
-            child: new RaisedButton(
-                key: dialogBtnKey,
-                onPressed: () async {
-                    final outcome = await builder(context).show(items);
-                    onDialogClose?.call(outcome);
-                })
-            )
-        );
-
-        final foundDialogBtn = find.byKey(dialogBtnKey);
-        expect(foundDialogBtn, findsOneWidget);
-            
-        await tester.tap(foundDialogBtn);
-        await tester.pump(new Duration(milliseconds: 200));
-    }
+    Future<void> showDialog(List<T> items, [Function(T) onDialogClose]) =>
+        DialogOpener.showDialog<T>(tester, 
+            dialogExposer: (context) => _dialogBuilder(context).show(items),
+            onDialogClose: onDialogClose);
 
     Future<void> testTappingItem(List<T> items) async {
         T dialogResult;
