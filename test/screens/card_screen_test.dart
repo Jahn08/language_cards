@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
 import '../utilities/mock_pack_storage.dart';
 import '../utilities/randomiser.dart';
@@ -32,6 +33,43 @@ void main() {
             await _displayWord(tester, pack: expectedPack);
 
             await _testDisplayingPackName(tester, expectedPack);
+        });
+
+    testWidgets('Displays no button showing study progress for a card with the zero progress', 
+        (tester) async {
+            final storage = new MockPackStorage();
+            final wordWithoutProgress = storage.wordStorage.getRandom();
+            if (wordWithoutProgress.studyProgress != WordStudyStage.unknown)
+                wordWithoutProgress.resetStudyProgress();
+
+            await _displayWord(tester, storage: storage, wordToShow: wordWithoutProgress);
+
+            _findStudyProgressButton(shouldFind: false);
+        });
+
+    testWidgets('Displays a button showing study progress for a card and resetting it', 
+        (tester) async {
+            final storage = new MockPackStorage();
+            StoredWord wordWithProgress;
+            await tester.runAsync(() async => wordWithProgress = (await storage.wordStorage.fetch())
+                .firstWhere((w) => w.studyProgress != WordStudyStage.unknown));
+            await _displayWord(tester, storage: storage, wordToShow: wordWithProgress);
+
+            final progressBtnFinder = _findStudyProgressButton();
+            final progressLabelFinder = find.descendant(of: progressBtnFinder, 
+                matching: find.byType(Text));
+            expect(progressLabelFinder, findsOneWidget);
+            expect(tester.widget<Text>(progressLabelFinder)
+                .data.contains('${wordWithProgress.studyProgress}%'), true);
+
+            final assistant = new WidgetAssistant(tester);
+            await assistant.tapWidget(progressBtnFinder);
+            _findStudyProgressButton(shouldFind: false);
+
+            await assistant.pressButtonDirectly(_findSaveButton());
+
+            final changedWord = await storage.wordStorage.find(wordWithProgress.id);
+            expect(changedWord.studyProgress, WordStudyStage.unknown);
         });
 
     testWidgets('Displays no card pack name for a word from a storage without a pack', 
@@ -142,10 +180,10 @@ void main() {
 }
 
 Future<StoredWord> _displayWord(WidgetTester tester, 
-    { MockPackStorage storage, StoredPack pack }) async {
+    { MockPackStorage storage, StoredPack pack, StoredWord wordToShow }) async {
     storage = storage ?? new MockPackStorage();
     final wordStorage = storage.wordStorage;
-    final wordToShow = wordStorage.getRandom();
+    wordToShow = wordToShow ?? wordStorage.getRandom();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
         child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
@@ -208,6 +246,17 @@ Future<String> _changeTranscription(WidgetAssistant assistant, String curTranscr
     return curTranscription + expectedSymbols.join();
 }
 
+Finder _findStudyProgressButton({ bool shouldFind = true }) => 
+    _findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
+
+Finder _findFlatButtonByIcon(IconData icon, { bool shouldFind = true }) {
+    final flatBtnFinder = find.ancestor(of: find.byIcon(icon), 
+        matching: find.byWidgetPredicate((widget) => widget is FlatButton));
+    expect(flatBtnFinder, shouldFind ? findsOneWidget: findsNothing);
+
+    return flatBtnFinder;
+}
+
 Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPack]) async {
     await _displayWord(tester, pack: expectedPack);
     
@@ -219,13 +268,7 @@ Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPa
     expect(packLabel.data.endsWith(expectedPack?.name ?? StoredPack.noneName), true);
 }
 
-Finder _findPackButton() {
-    final packBtnFinder = find.ancestor(of: find.byIcon(Icons.folder_open), 
-        matching: find.byWidgetPredicate((widget) => widget is MaterialButton));
-    expect(packBtnFinder, findsOneWidget);
-
-    return packBtnFinder;
-}
+Finder _findPackButton() => _findFlatButtonByIcon(Icons.folder_open);
 
 Future<StoredPack> _fetchAnotherPack(MockPackStorage storage, int curPackId) async => 
     (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId);

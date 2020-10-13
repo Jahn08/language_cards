@@ -1,6 +1,7 @@
 import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word.dart';
+import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import './mock_pack_storage.dart';
 import './randomiser.dart';
@@ -53,10 +54,11 @@ class MockWordStorage implements BaseStorage<StoredWord> {
 
         return words;
     }
-        
 
     static StoredWord generateWord({ int id, int packId }) {
         const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
+
+        const studyStages = WordStudyStage.values;
         return new StoredWord(Randomiser.nextString(), 
             id: id, 
             partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.nextInt(Word.PARTS_OF_SPEECH.length)],
@@ -64,7 +66,8 @@ class MockWordStorage implements BaseStorage<StoredWord> {
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-            packId: packId ?? Randomiser.nextInt(MockPackStorage.packNumber) + 1
+            packId: packId ?? Randomiser.nextInt(MockPackStorage.packNumber) + 1,
+            studyProgress: Randomiser.nextElement(studyStages)
         );
     }
 
