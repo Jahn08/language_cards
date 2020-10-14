@@ -5,6 +5,7 @@ import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/pack_selector_dialog.dart';
+import '../dialogs/confirm_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
 import '../models/word.dart';
@@ -18,12 +19,12 @@ import '../widgets/styled_text_field.dart';
 class CardScreenState extends State<CardScreen> {
     final _key = new GlobalKey<FormState>();
 
-    final WordDictionary _dictionary;
-
     final FocusNode _transcriptionFocusNode = new FocusNode();
 
     Future<List<StoredPack>> _futurePacks;
     StoredPack _pack;
+
+    WordDictionary _dictionary;
 
     String _text;
     String _translation;
@@ -34,15 +35,37 @@ class CardScreenState extends State<CardScreen> {
 
     bool _initialised = false;
 
-    CardScreenState(String apiKey):
-        _dictionary = new WordDictionary(apiKey);
-
     @override
     void initState() {
         super.initState();
 
-        _pack = widget.pack ?? StoredPack.none;
+        _setPack(widget.pack ?? StoredPack.none);
         _studyProgress = WordStudyStage.unknown;
+    }
+
+    _setPack(StoredPack newPack) {
+        _pack = newPack;
+
+        _disposeDictionary();
+        _dictionary = _pack == null || _pack.isNone ? null: 
+            new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to);
+
+        WidgetsBinding.instance.addPostFrameCallback(
+            (_) => _warnWhenEmptyDictionary(context));
+    }
+
+    _disposeDictionary() => _dictionary?.dispose();
+
+    Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
+        if (_dictionary != null)
+            return;
+
+        await new ConfirmDialog<bool>(
+            title: 'Choose Pack', 
+            content: 'You should choose a pack to make automatic translation' + 
+                ' available for the word',
+            actions: { true: 'OK' }
+        ).show(buildContext);
     }
 
     @override
@@ -53,14 +76,14 @@ class CardScreenState extends State<CardScreen> {
             ),
             body: new Form(
                 key: _key,
-                child: _buildFutureFormLayout(widget.wordId)
+                child: _buildFutureFormLayout()
             )
         );
     }
 
     bool get _isNew => widget.wordId == 0;
 
-    Widget _buildFutureFormLayout(int wordId) {
+    Widget _buildFutureFormLayout() {
         final futureWord = _isNew || _initialised ? 
             Future.value(new StoredWord('')): widget._wordStorage.find(widget.wordId);
         return new FutureBuilder(
@@ -90,7 +113,7 @@ class CardScreenState extends State<CardScreen> {
             children: <Widget>[
                 new StyledTextField('Word Text', isRequired: true, 
                     onChanged: (value, submitted) async {
-                        if (!submitted) {
+                        if (!submitted || _dictionary == null) {
                             setState(() => _text = value);
                             return;
                         }
@@ -144,7 +167,7 @@ class CardScreenState extends State<CardScreen> {
                             .showAsync(_futurePacks);
 
                         if (chosenPack != null && chosenPack.name != _pack.name)
-                            setState(() => _pack = chosenPack);
+                            setState(() => _setPack(chosenPack));
                     }
                 ),
                 if (this._studyProgress != WordStudyStage.unknown)
@@ -185,7 +208,7 @@ class CardScreenState extends State<CardScreen> {
 
     @override
     dispose() {
-        _dictionary.dispose();
+        _disposeDictionary();
 
         super.dispose();
     }
@@ -209,7 +232,5 @@ class CardScreen extends StatefulWidget {
         _wordStorage = wordStorage;
 
     @override
-    CardScreenState createState() {
-        return new CardScreenState(_apiKey);
-    }
+    CardScreenState createState() => new CardScreenState();
 }

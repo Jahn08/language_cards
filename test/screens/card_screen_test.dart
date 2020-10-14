@@ -190,6 +190,10 @@ Future<StoredWord> _displayWord(WidgetTester tester,
         wordId: wordToShow.id, pack: pack)));
     await tester.pumpAndSettle();
 
+    final emptyPackWarnDialogBtnFinder = find.widgetWithText(FlatButton, 'OK');
+    if (findsOneWidget.matches(emptyPackWarnDialogBtnFinder, {}))
+        await new WidgetAssistant(tester).tapWidget(emptyPackWarnDialogBtnFinder);
+
     return wordToShow;
 }
 
@@ -270,8 +274,10 @@ Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPa
 
 Finder _findPackButton() => _findFlatButtonByIcon(Icons.folder_open);
 
-Future<StoredPack> _fetchAnotherPack(MockPackStorage storage, int curPackId) async => 
-    (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId);
+Future<StoredPack> _fetchAnotherPack(MockPackStorage storage, int curPackId, 
+    { canBeNonePack = false }) async => 
+        (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId && 
+            (canBeNonePack || !p.isNone));
 
 Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester, 
     Future<StoredPack> Function(StoredWord) newPackGetter) async {

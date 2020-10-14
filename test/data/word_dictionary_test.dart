@@ -3,6 +3,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'dart:convert';
 import 'package:language_cards/src/data/word_dictionary.dart';
+import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/word.dart';
 import '../utilities/randomiser.dart';
 
@@ -39,8 +40,8 @@ void main() {
             ]
         }));
 
-        final article = await new WordDictionary(Randomiser.nextString(), client: client)
-            .lookUp(wordToLookUp);
+        final article = await new WordDictionary(Randomiser.nextString(), 
+            from: Language.english, client: client).lookUp(wordToLookUp);
         final words = article?.words;
 
         const int expectedWordNumber = 3;
@@ -58,8 +59,8 @@ void main() {
         final client = new MockClient((request) async => _buildJsonResponse(_emptyArticle));
 
         final unknownWord = Randomiser.nextString();
-        final article = await new WordDictionary(Randomiser.nextString(), client: client)
-            .lookUp(unknownWord);
+        final article = await new WordDictionary(Randomiser.nextString(), 
+            from: Language.english, client: client).lookUp(unknownWord);
         expect(article?.words?.length, 0);
     });
 
@@ -73,7 +74,8 @@ void main() {
 
             final expectedWord = Randomiser.nextString();
             final expectedApiKey = Randomiser.nextString();
-            await new WordDictionary(expectedApiKey, client: client).lookUp(expectedWord);
+            await new WordDictionary(expectedApiKey, 
+                client: client, from: Language.english).lookUp(expectedWord);
             
             expect(url == null, false);
             expect(url.query?.isEmpty, false);
@@ -96,7 +98,7 @@ void main() {
             }));
 
             final article = await new WordDictionary(Randomiser.nextString(), 
-                client: client).lookUp(wordToLookUp);
+                from: Language.english, client: client).lookUp(wordToLookUp);
             final words = article?.words;
 
             final defaultPartOfSpeech = words?.first?.partOfSpeech;

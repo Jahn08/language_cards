@@ -24,5 +24,5 @@ class StoredPack extends StoredEntity {
     StoredPack.copy(StoredPack pack, { int cardsNumber }): 
         this(pack.name, id: pack.id, from: pack.from, to: pack.to, cardsNumber: cardsNumber);
 
-    bool get isEmpty => name == noneName && id == 0;
+    bool get isNone => name == noneName && id == 0;
 }

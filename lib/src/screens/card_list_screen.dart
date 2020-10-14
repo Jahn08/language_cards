@@ -50,7 +50,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     void onGoingBack(BuildContext context) {
         final shouldRefreshPack = _cardsWereRemoved || widget.cardWasAdded;
 
-        if (widget.pack != null && widget.pack.isEmpty)
+        if (widget.pack != null && widget.pack.isNone)
             shouldRefreshPack ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context);
         else
@@ -75,7 +75,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
         BuildContext scaffoldContext) async { 
         final listOfMarkedItems = markedItems.toList();
         if (listOfMarkedItems.length == 0 || !(await new ConfirmDialog(
-            title: 'Reset study progress', 
+            title: 'Confirm Resetting Study Progress', 
             content: 'The study progress of the ${listOfMarkedItems.length}' +
                 ' marked cards will be reset. Continue?',
             actions: {
