@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../utilities/assured_finder.dart';
 import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -20,30 +21,30 @@ class ListScreenTester {
             _tryFindingEditorDoneButton();
             _tryFindingEditorRemoveButton();
             _tryFindingEditorSelectButton();
-            _tryFindingSeveral(type: CheckboxListTile);
+            AssuredFinder.findSeveral(type: CheckboxListTile);
         
-            _tryFindingSeveral(type: Dismissible, shouldFind: true);
+            tryFindingListItems(shouldFind: true);
             
             final assistant = new WidgetAssistant(tester);
             await activateEditorMode(assistant);
             
             _tryFindingEditorButton();
-            _tryFindingSeveral(type: Dismissible);
-
+            tryFindingListItems();
+            
             _tryFindingEditorRemoveButton(shouldFind: true);
             _tryFindingEditorSelectButton(shouldFind: true);
 
             _assureSelectionForAllTilesInEditor(tester);
 
-            await _deactivateEditorMode(assistant);
+            await deactivateEditorMode(assistant);
 
             _tryFindingEditorButton(shouldFind: true);
-            _tryFindingSeveral(type: Dismissible, shouldFind: true);
-
+            tryFindingListItems(shouldFind: true);
+            
             _tryFindingEditorDoneButton();
             _tryFindingEditorRemoveButton();
             _tryFindingEditorSelectButton();
-            _tryFindingSeveral(type: CheckboxListTile);
+            AssuredFinder.findSeveral(type: CheckboxListTile);
         });
 
         testWidgets(_buildDescription('selects and unselects all items in the editor mode'), 
@@ -70,7 +71,7 @@ class ListScreenTester {
                 final assistant = new WidgetAssistant(tester);
                 await activateEditorMode(assistant);
 
-                final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
+                final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
 
                 int index = 0;
                 final items = new Map.fromEntries(tester.widgetList<CheckboxListTile>(tilesFinder)
@@ -92,17 +93,17 @@ class ListScreenTester {
             _assureSelectionForAllTilesInEditor(tester);
 
             for (final item in itemsToRemove.entries)
-                _tryFindingOne(type: Text, label: item.value);
+                AssuredFinder.findOne(type: Text, label: item.value);
         });
 
         testWidgets(_buildDescription('recovers removed items in their previous order'), (tester) async {
             final itemsToRemove = await _removeItemsInEditor(tester);
 
-            final undoBtnFinder = _tryFindingOne(label: 'Undo', shouldFind: true);
+            final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
             await new WidgetAssistant(tester).tapWidget(undoBtnFinder);
 
             final listTiles = tester.widgetList<CheckboxListTile>(
-                _tryFindingSeveral(type: CheckboxListTile, shouldFind: true));
+                AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true));
             for (final item in itemsToRemove.entries) {
                 final listTile = listTiles.elementAt(item.key);
                 
@@ -113,10 +114,14 @@ class ListScreenTester {
 
         testWidgets(_buildDescription('resets selected items after quitting the editor mode'), 
             (tester) async {
-                await _selectSomeItemsInEditor(tester);
+                await pumpScreen(tester);
 
                 final assistant = new WidgetAssistant(tester);
-                await _deactivateEditorMode(assistant);
+                await activateEditorMode(assistant);
+
+                await selectSomeItemsInEditor(assistant);
+
+                await deactivateEditorMode(assistant);
 
                 await activateEditorMode(assistant);
 
@@ -138,48 +143,27 @@ class ListScreenTester {
     }
 
     Finder _tryFindingEditorButton({ bool shouldFind }) => 
-        _tryFindingOne(label: 'Edit', shouldFind: shouldFind);
+        AssuredFinder.findOne(label: 'Edit', shouldFind: shouldFind);
 
-    Finder _tryFindingOne({ String label, IconData icon, Type type, bool shouldFind }) => 
-        _tryFinding(expectSeveral: false, icon: icon, label: label, type: type, shouldFind: shouldFind);
-
-    Finder _tryFinding({ String label, IconData icon, Type type,
-        bool shouldFind, bool expectSeveral }) {
-        
-        Finder finder;
-        if (label != null && type != null)
-            finder = find.widgetWithText(type, label);
-        if (label != null)
-            finder = find.text(label);
-        else if(icon != null)
-            finder = find.byIcon(icon);
-        else
-            finder = find.byType(type);
-
-        expect(finder, (shouldFind ?? false) ? 
-            ((expectSeveral ?? false) ? findsWidgets : findsOneWidget): findsNothing);
-        return finder;
-    }
-
-    Finder _tryFindingSeveral({ String label, Type type, bool shouldFind }) =>
-        _tryFinding(expectSeveral: true, label: label, type: type, shouldFind: shouldFind);
-
+    Finder tryFindingListItems({ bool shouldFind }) => 
+        AssuredFinder.findSeveral(type: Dismissible, shouldFind: shouldFind);
+    
     Finder _tryFindingEditorDoneButton({ bool shouldFind }) => 
-        _tryFindingOne(label: 'Done', shouldFind: shouldFind);
+        AssuredFinder.findOne(label: 'Done', shouldFind: shouldFind);
 
     Finder _tryFindingEditorRemoveButton({ bool shouldFind }) => 
-        _tryFindingOne(label: 'Remove', shouldFind: shouldFind);
+        AssuredFinder.findOne(label: 'Remove', shouldFind: shouldFind);
 
     Finder _tryFindingEditorSelectButton({ bool shouldFind }) => 
-        _tryFindingOne(icon: Icons.select_all, shouldFind: shouldFind);
+        AssuredFinder.findOne(icon: Icons.select_all, shouldFind: shouldFind);
 
-    Future<void> _deactivateEditorMode(WidgetAssistant assistant) async {
-        final editorDoneBtnFinder =_tryFindingEditorDoneButton(shouldFind: true);
+    Future<void> deactivateEditorMode(WidgetAssistant assistant) async {
+        final editorDoneBtnFinder = _tryFindingEditorDoneButton(shouldFind: true);
         await assistant.tapWidget(editorDoneBtnFinder);
     }
 
     Finder _assureSelectionForAllTilesInEditor(WidgetTester tester, [bool selected = false]) {
-        final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
+        final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
         final tiles = tester.widgetList<CheckboxListTile>(tilesFinder);
         expect(tiles.every((w) => w.value), selected);
 
@@ -187,22 +171,22 @@ class ListScreenTester {
     }
 
     Future<Map<int, String>> _removeItemsInEditor(WidgetTester tester) async {
-        final itemsToRemove = await _selectSomeItemsInEditor(tester);
-        
-        final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
-        await new WidgetAssistant(tester).tapWidget(removeBtnFinder);
-
-        return itemsToRemove;
-    }
-
-    Future<Map<int, String>> _selectSomeItemsInEditor(WidgetTester tester) async {
         await pumpScreen(tester);
 
         final assistant = new WidgetAssistant(tester);
         await activateEditorMode(assistant);
+        
+        final itemsToRemove = await selectSomeItemsInEditor(assistant);
+        
+        final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
+        await assistant.tapWidget(removeBtnFinder);
 
-        final tilesFinder = _tryFindingSeveral(type: CheckboxListTile, shouldFind: true);
-        final tilesFinderLength = tester.widgetList(tilesFinder).length - 1;
+        return itemsToRemove;
+    }
+
+    Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant) async {
+        final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
+        final tilesFinderLength = assistant.tester.widgetList(tilesFinder).length - 1;
         final middleTileIndex = (tilesFinderLength / 2).round();
         
         final tilesToSelect = {
@@ -213,7 +197,7 @@ class ListScreenTester {
         final itemsToRemove = new Map<int, String>();
         for (final tileFinder in tilesToSelect.entries) {
             itemsToRemove[tileFinder.key] =
-                (tester.widget<CheckboxListTile>(tileFinder.value).title as Text).data;
+                (assistant.tester.widget<CheckboxListTile>(tileFinder.value).title as Text).data;
             await assistant.tapWidget(tileFinder.value);
         }
 
