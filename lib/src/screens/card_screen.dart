@@ -1,3 +1,4 @@
+import 'package:http/http.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -21,6 +22,8 @@ class CardScreenState extends State<CardScreen> {
 
     final FocusNode _transcriptionFocusNode = new FocusNode();
 
+    final Client _client;
+
     Future<List<StoredPack>> _futurePacks;
     StoredPack _pack;
 
@@ -35,6 +38,10 @@ class CardScreenState extends State<CardScreen> {
 
     bool _initialised = false;
 
+    CardScreenState([Client client]): 
+        this._client = client,
+        super();
+
     @override
     void initState() {
         super.initState();
@@ -48,7 +55,8 @@ class CardScreenState extends State<CardScreen> {
 
         _disposeDictionary();
         _dictionary = _pack == null || _pack.isNone ? null: 
-            new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to);
+            new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to, 
+                client: _client);
 
         WidgetsBinding.instance.addPostFrameCallback(
             (_) => _warnWhenEmptyDictionary(context));
@@ -210,6 +218,8 @@ class CardScreenState extends State<CardScreen> {
     dispose() {
         _disposeDictionary();
 
+        _client?.close();
+
         super.dispose();
     }
 }
@@ -221,16 +231,20 @@ class CardScreen extends StatefulWidget {
     
     final StoredPack pack;
 
+    final Client _client;
+
     final BaseStorage<StoredWord> _wordStorage;
 
     final BaseStorage<StoredPack> _packStorage;
     
     CardScreen(String apiKey, { @required BaseStorage<StoredWord> wordStorage, 
-        @required BaseStorage<StoredPack> packStorage, this.pack, this.wordId = 0 }): 
+        @required BaseStorage<StoredPack> packStorage, Client client,
+        this.pack, this.wordId = 0 }): 
         _apiKey = apiKey,
+        _client = client,
         _packStorage = packStorage,
         _wordStorage = wordStorage;
 
     @override
-    CardScreenState createState() => new CardScreenState();
+    CardScreenState createState() => new CardScreenState(_client);
 }

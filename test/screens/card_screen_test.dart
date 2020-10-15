@@ -1,9 +1,12 @@
+import 'package:http/http.dart';
+import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
+import '../utilities/http_responder.dart';
 import '../utilities/mock_pack_storage.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/test_root_widget.dart';
@@ -177,25 +180,42 @@ void main() {
             await _testChangingPack(new MockPackStorage(), tester, 
                 (word) => Future.value(StoredPack.none));
         });
+
+    testWidgets('Shows a warning for a card without a pack and turns off dictionaries', 
+        (tester) => _testInitialDictionaryState(tester, hasPack: false));
+
+    testWidgets('Shows a warning after nullifying a pack and turns off dictionaries', 
+        (tester) => _testChangingDictionaryState(tester, nullifyPack: true));
+    
+    testWidgets('Turns on dictionaries and shows no warnings when a card has a pack', 
+        (tester) => _testInitialDictionaryState(tester, hasPack: true));
+    
+    testWidgets('Turns on dictionaries and shows no warnings after choosing a pack',
+        (tester) => _testChangingDictionaryState(tester, nullifyPack: false));
 }
 
-Future<StoredWord> _displayWord(WidgetTester tester, 
-    { MockPackStorage storage, StoredPack pack, StoredWord wordToShow }) async {
+Future<StoredWord> _displayWord(WidgetTester tester, { Client client, 
+        MockPackStorage storage, StoredPack pack, 
+        StoredWord wordToShow, bool shouldHideWarningDialog = true }) async {
     storage = storage ?? new MockPackStorage();
     final wordStorage = storage.wordStorage;
     wordToShow = wordToShow ?? wordStorage.getRandom();
 
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
         child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
-        wordId: wordToShow.id, pack: pack)));
+        wordId: wordToShow.id, pack: pack, client: client)));
     await tester.pumpAndSettle();
 
-    final emptyPackWarnDialogBtnFinder = find.widgetWithText(FlatButton, 'OK');
-    if (findsOneWidget.matches(emptyPackWarnDialogBtnFinder, {}))
-        await new WidgetAssistant(tester).tapWidget(emptyPackWarnDialogBtnFinder);
-
+    if (shouldHideWarningDialog) {
+        final emptyPackWarnDialogBtnFinder = _findWarningDialogButton();
+        if (findsOneWidget.matches(emptyPackWarnDialogBtnFinder, {}))
+            await new WidgetAssistant(tester).tapWidget(emptyPackWarnDialogBtnFinder);
+    }
+    
     return wordToShow;
 }
+
+Finder _findWarningDialogButton() => find.widgetWithText(FlatButton, 'OK');
 
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {
@@ -283,20 +303,27 @@ Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester,
     Future<StoredPack> Function(StoredWord) newPackGetter) async {
     final wordToShow = await _displayWord(tester, storage: storage);
 
-    final assistant = new WidgetAssistant(tester);
-    await assistant.tapWidget(_findPackButton());
+    final expectedPack = await _changePack(tester, () => newPackGetter(wordToShow));
 
-    StoredPack expectedPack;
-    await tester.runAsync(() async => expectedPack = await newPackGetter(wordToShow));
-
-    final packTileFinder = _findListTileByTitle(expectedPack.name);
-    await assistant.tapWidget(packTileFinder);
-
-    await assistant.tapWidget(_findSaveButton());
+    await new WidgetAssistant(tester).tapWidget(_findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
     expect(changedWord.packId, expectedPack.id);
+}
+
+Future<StoredPack> _changePack(WidgetTester tester,
+    Future<StoredPack> Function() newPackGetter) async {
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(_findPackButton());
+
+    StoredPack expectedPack;
+    await tester.runAsync(() async => expectedPack = await newPackGetter());
+
+    final packTileFinder = _findListTileByTitle(expectedPack.name);
+    await assistant.tapWidget(packTileFinder);
+
+    return expectedPack;
 }
 
 Finder _findListTileByTitle(String title) {
@@ -310,3 +337,62 @@ Finder _findListTileByTitle(String title) {
 void _assureTileIsTicked(Finder tileFinder) => 
     expect(find.descendant(of: tileFinder, matching: find.byIcon(Icons.check)), 
         findsOneWidget);
+
+Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool hasPack }) 
+    async {
+        bool dictionaryIsActive = false;
+        final client = new MockClient((request) async {
+            dictionaryIsActive = true;
+            return HttpResponder.respondWithJson({});
+        });
+        
+        final wordToShow = await _displayWord(tester, client: client,
+            shouldHideWarningDialog: false, 
+            pack: hasPack ? MockPackStorage.generatePack(
+                Randomiser.nextInt(MockPackStorage.packNumber)): null);
+        
+        await _assureWarningDialog(tester, !hasPack);
+
+        await _inputTextAndAccept(tester, wordToShow.text);
+
+        expect(dictionaryIsActive, hasPack);
+    }
+
+Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
+    final warningBtnFinder = _findWarningDialogButton();
+    expect(warningBtnFinder, shouldFind ? findsOneWidget: findsNothing);
+
+    if (shouldFind)
+        await new WidgetAssistant(tester).tapWidget(warningBtnFinder);
+}
+
+Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
+    final newText = await _enterChangedText(tester, wordText);
+    final textFinder = find.widgetWithText(TextField, newText);
+    tester.widget<TextField>(textFinder).onEditingComplete();
+
+    await tester.pumpAndSettle();
+}
+
+Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool nullifyPack }) 
+    async {
+        bool dictionaryIsActive = false;
+        final client = new MockClient((request) async {
+            dictionaryIsActive = true;
+            return HttpResponder.respondWithJson({});
+        });
+        
+        final storage = new MockPackStorage();
+        final wordToShow = await _displayWord(tester, storage: storage, 
+            client: client, pack: nullifyPack ? MockPackStorage.generatePack(
+                Randomiser.nextInt(MockPackStorage.packNumber)): null);
+        
+        await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
+                _fetchAnotherPack(storage, wordToShow.packId));
+
+        await _assureWarningDialog(tester, nullifyPack);
+
+        await _inputTextAndAccept(tester, wordToShow.text);
+
+        expect(dictionaryIsActive, !nullifyPack);
+    }

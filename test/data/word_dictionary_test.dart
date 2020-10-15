@@ -1,18 +1,16 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart';
 import 'package:http/testing.dart';
-import 'dart:convert';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/word.dart';
+import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
 
 void main() {
     test('Returns a word article describing word translations and properties', () async {
         const String wordToLookUp = 'flatter';
 
-        final client = new MockClient((request) async =>_buildJsonResponse({
-            "head": {},
+        final client = new MockClient((request) async => HttpResponder.respondWithJson({
             "def": [
                 {"text": wordToLookUp, "pos": "verb", "ts": "ˈflætə", "tr": [
                     {"text": "льстить", "pos": "verb", "asp":" несов", "syn": [
@@ -56,7 +54,7 @@ void main() {
     });
 
     test('Returns an empty word article for an unknown word', () async {
-        final client = new MockClient((request) async => _buildJsonResponse(_emptyArticle));
+        final client = new MockClient((request) async => HttpResponder.respondWithJson(_emptyArticle));
 
         final unknownWord = Randomiser.nextString();
         final article = await new WordDictionary(Randomiser.nextString(), 
@@ -69,7 +67,7 @@ void main() {
             Uri url;
             final client = new MockClient((request) async {
                 url = request.url;
-                return _buildJsonResponse(_emptyArticle);
+                return HttpResponder.respondWithJson(_emptyArticle);
             });
 
             final expectedWord = Randomiser.nextString();
@@ -87,8 +85,7 @@ void main() {
         test('Gets a word article with a default part of speech when it is not recognisable', 
             () async {
             final wordToLookUp = Randomiser.nextString();
-            final client = new MockClient((request) async =>_buildJsonResponse({
-                "head": {},
+            final client = new MockClient((request) async => HttpResponder.respondWithJson({
                 "def": List<dynamic>.generate(3, (index) => {
                     "text": wordToLookUp,
                     "pos": Randomiser.nextString(), 
@@ -109,15 +106,6 @@ void main() {
         });
 }
 
-Response _buildJsonResponse(Object body) {
-    return new Response(
-        json.encode(body),
-        200,
-        headers: {'content-type': 'application/json; charset=utf-8'}
-    );
-}
-
 Object get _emptyArticle => ({
-    "head": {},
     "def": []
 });
