@@ -54,8 +54,16 @@ void main() {
         (tester) async {
             final storage = new MockPackStorage();
             StoredWord wordWithProgress;
-            await tester.runAsync(() async => wordWithProgress = (await storage.wordStorage.fetch())
-                .firstWhere((w) => w.studyProgress != WordStudyStage.unknown));
+            await tester.runAsync(() async {
+                final words = (await storage.wordStorage.fetch());
+                wordWithProgress = words.firstWhere((w) => w.studyProgress != WordStudyStage.unknown, 
+                    orElse: () => words.first);
+
+                if (wordWithProgress.studyProgress == WordStudyStage.unknown)
+                    await storage.wordStorage.updateWordProgress(wordWithProgress.id, 
+                        WordStudyStage.learned);
+            });
+
             await _displayWord(tester, storage: storage, wordToShow: wordWithProgress);
 
             final progressBtnFinder = _findStudyProgressButton();

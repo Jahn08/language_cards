@@ -10,8 +10,7 @@ import '../utilities/widget_assistant.dart';
 
 void main() {
     final wordStorage = new MockWordStorage();
-    final screenTester = new ListScreenTester('Card', 
-        () => new CardListScreen(wordStorage));
+    final screenTester = _buildScreenTester(wordStorage);
     screenTester.testEditorMode();
 
     testWidgets('Renders study progress for each card', (tester) async {
@@ -32,15 +31,18 @@ void main() {
 
     testWidgets("Cancels resetting study progress for selected cards when it wasn't confirmed", 
         (tester) async {
+            final wordWithProgressIndex = 
+                await _getIndexOfFirstWordWithProgress(tester, wordStorage);
+            
             await screenTester.pumpScreen(tester);
 
             final assistant = new WidgetAssistant(tester);
             await screenTester.activateEditorMode(assistant);
             
-            final selectedItems = (await screenTester.selectSomeItemsInEditor(assistant))
-                .values;
+            final selectedItems = (await screenTester.selectSomeItemsInEditor(assistant, 
+                wordWithProgressIndex)).values;
             final selectedWords = (await _fetchWords(tester, wordStorage))
-                    .where((w) => selectedItems.contains(w.text)).toList();
+                .where((w) => selectedItems.contains(w.text));
             final selectedWordsWithProgress = new Map<String, int>.fromIterable(
                 selectedWords, 
                 value: (w) => w.studyProgress,
@@ -57,11 +59,16 @@ void main() {
         });
 
     testWidgets('Resets study progress for selected cards', (tester) async {
+        final wordWithProgressIndex = 
+            await _getIndexOfFirstWordWithProgress(tester, wordStorage);
+
         await screenTester.pumpScreen(tester);
 
         final assistant = new WidgetAssistant(tester);
         await screenTester.activateEditorMode(assistant);
-        final selectedItems = await screenTester.selectSomeItemsInEditor(assistant);
+
+        final selectedItems = await screenTester.selectSomeItemsInEditor(assistant, 
+            wordWithProgressIndex);
         
         await _operateResettingProgressDialog(assistant, shouldConfirm: true);
 
@@ -72,7 +79,30 @@ void main() {
             assuredWords.any((word) => word.text == text && 
                 word.studyProgress == WordStudyStage.unknown)), true);
     });
+
+    testWidgets('Shows no dialog to reset study progress for cards without progress', 
+        (tester) async {
+            final storage = new MockWordStorage();
+            final inScreenTester = _buildScreenTester(storage);
+
+            final words = await _fetchWords(tester, storage);
+            words.forEach((w) => w.resetStudyProgress());
+            await storage.update(words);
+
+            await inScreenTester.pumpScreen(tester);
+
+            final assistant = new WidgetAssistant(tester);
+            await inScreenTester.activateEditorMode(assistant);
+
+            await inScreenTester.selectSomeItemsInEditor(assistant);
+            
+            await _operateResettingProgressDialog(assistant, shouldConfirm: true, 
+                assureNoDialog: true);
+        });
 }
+
+ListScreenTester _buildScreenTester(MockWordStorage storage) => 
+    new ListScreenTester('Card', () => new CardListScreen(storage));
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
     ListScreenTester screenTester, MockWordStorage storage) async {
@@ -105,12 +135,31 @@ Future<List<StoredWord>> _fetchWords(WidgetTester tester, MockWordStorage storag
 Finder _findRestoreBtn({ bool shouldFind }) => 
     AssuredFinder.findOne(icon: Icons.restore, shouldFind: shouldFind);
 
-Finder _findBtnByLabel(String label) => 
-    AssuredFinder.findOne(type: FlatButton, label: label, shouldFind: true);
+Finder _findBtnByLabel(String label, { bool shouldFind = true }) => 
+    AssuredFinder.findOne(type: FlatButton, label: label, shouldFind: shouldFind);
 
-Future<void> _operateResettingProgressDialog(WidgetAssistant assistant, { bool shouldConfirm }) 
-    async {
+Future<void> _operateResettingProgressDialog(WidgetAssistant assistant, 
+    { bool shouldConfirm, bool assureNoDialog = false }) async {
         final restoreBtnFinder = _findRestoreBtn(shouldFind: true);
         await assistant.tapWidget(restoreBtnFinder);
-        await assistant.tapWidget(_findBtnByLabel(shouldConfirm ? 'Yes': 'No'));
+
+        final actionBtnFinder = _findBtnByLabel(shouldConfirm ? 'Yes': 'No', 
+            shouldFind: !assureNoDialog);
+        if (!assureNoDialog)
+            await assistant.tapWidget(actionBtnFinder);
+    }
+
+Future<int> _getIndexOfFirstWordWithProgress(WidgetTester tester, 
+    MockWordStorage storage) async {
+        final words = (await _fetchWords(tester, storage)).toList();
+        int wordWithProgressIndex = words.indexWhere(
+            (w) => w.studyProgress > WordStudyStage.unknown);
+            
+        if (wordWithProgressIndex == -1) {
+            wordWithProgressIndex = 0;
+            await storage.updateWordProgress(words[wordWithProgressIndex].id, 
+                WordStudyStage.learned);
+        }
+            
+        return wordWithProgressIndex;
     }

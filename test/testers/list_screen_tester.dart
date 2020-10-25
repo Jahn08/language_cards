@@ -184,23 +184,25 @@ class ListScreenTester {
         return itemsToRemove;
     }
 
-    Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant) async {
-        final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
-        final tilesFinderLength = assistant.tester.widgetList(tilesFinder).length - 1;
-        final middleTileIndex = (tilesFinderLength / 2).round();
-        
-        final tilesToSelect = {
-            0: tilesFinder.first,
-            middleTileIndex: tilesFinder.at(middleTileIndex),
-            tilesFinderLength: tilesFinder.last
-        };
-        final itemsToRemove = new Map<int, String>();
-        for (final tileFinder in tilesToSelect.entries) {
-            itemsToRemove[tileFinder.key] =
-                (assistant.tester.widget<CheckboxListTile>(tileFinder.value).title as Text).data;
-            await assistant.tapWidget(tileFinder.value);
-        }
+    Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
+        async {
+            final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
+            final lastTileIndex = assistant.tester.widgetList(tilesFinder).length - 1;
+            final middleTileIndex = chosenIndex == null || chosenIndex == 0 || 
+                chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
+            
+            final tilesToSelect = {
+                0: tilesFinder.first,
+                middleTileIndex: tilesFinder.at(middleTileIndex),
+                lastTileIndex: tilesFinder.last
+            };
+            final itemsToRemove = new Map<int, String>();
+            for (final tileFinder in tilesToSelect.entries) {
+                itemsToRemove[tileFinder.key] =
+                    (assistant.tester.widget<CheckboxListTile>(tileFinder.value).title as Text).data;
+                await assistant.tapWidget(tileFinder.value);
+            }
 
-        return itemsToRemove;
-    }
+            return itemsToRemove;
+        }
 }

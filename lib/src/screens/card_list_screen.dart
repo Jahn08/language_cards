@@ -4,6 +4,7 @@ import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import './list_screen.dart';
+import '../models/word_study_stage.dart';
 import '../router.dart';
 
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
@@ -73,10 +74,11 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     @override
     Future<bool> handleNavBarOption(int tappedIndex, Iterable<StoredWord> markedItems,
         BuildContext scaffoldContext) async { 
-        final listOfMarkedItems = markedItems.toList();
-        if (listOfMarkedItems.length == 0 || !(await new ConfirmDialog(
+        final itemsToReset = markedItems.where(
+            (card) => card.studyProgress != WordStudyStage.unknown).toList();
+        if (itemsToReset.length == 0 || !(await new ConfirmDialog(
             title: 'Confirm Resetting Study Progress', 
-            content: 'The study progress of the ${listOfMarkedItems.length}' +
+            content: 'The study progress of the ${itemsToReset.length}' +
                 ' marked cards will be reset. Continue?',
             actions: {
                 true: 'Yes',   
@@ -85,12 +87,12 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
             return false;
 
         setState(() {
-            listOfMarkedItems.forEach((w) => w.resetStudyProgress());
-            widget.storage.update(listOfMarkedItems);
+            itemsToReset.forEach((w) => w.resetStudyProgress());
+            widget.storage.update(itemsToReset);
         });
 
         Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(
-            content: new Text('The study progress of the ${listOfMarkedItems.length}' + 
+            content: new Text('The study progress of the ${itemsToReset.length}' + 
                 ' cards has been reset')));
   
         return true;

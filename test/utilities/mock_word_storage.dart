@@ -83,6 +83,22 @@ class MockWordStorage extends BaseStorage<StoredWord> {
         _sortWords();
     }
 
+    Future<void> updateWordProgress(int id, int studyProgress) async {
+        final wordToUpdate = _words.firstWhere((w) => w.id == id, orElse: null);
+        
+        if (wordToUpdate == null)
+            return;
+
+        await upsert(new StoredWord(wordToUpdate.text,
+            id:  wordToUpdate.id,
+            packId:  wordToUpdate.packId,
+            studyProgress: studyProgress,
+            partOfSpeech: wordToUpdate.partOfSpeech,
+            transcription: wordToUpdate.transcription,
+            translation: wordToUpdate.translation
+        ));
+    }
+
     @override
     Future<void> upsert(StoredWord word) => _save([word]);
 
