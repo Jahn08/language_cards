@@ -4,7 +4,7 @@ import 'package:language_cards/src/models/language.dart';
 import './mock_word_storage.dart';
 import './randomiser.dart';
 
-class MockPackStorage implements BaseStorage<StoredPack> {
+class MockPackStorage extends BaseStorage<StoredPack> {
     static const int packNumber = 4;
 
     final List<StoredPack> _packs = _generatePacks(packNumber);
@@ -16,31 +16,19 @@ class MockPackStorage implements BaseStorage<StoredPack> {
     static void _sort(List<StoredPack> packs) => 
         packs.sort((a, b) => a.name.compareTo(b.name));
 
+    @override
     Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: 100),
                 () async {
                     final futurePacks = _packs.skip(skipCount ?? 0).take(takeCount ?? 10)
                         .map((p) async {
-                            final wordsNumber = (await this.wordStorage.getLength(parentId: p.id));
-                            return new StoredPack.copy(p, cardsNumber: wordsNumber);
+                            p.cardsNumber = (await this.wordStorage.getLength(parentId: p.id));
+                            return p;
                         });
+
                     return Future.wait<StoredPack>(futurePacks);
                 });
-    }
-
-    Future<bool> save(List<StoredPack> packs) async {
-        packs.forEach((pack) {
-            if (pack.id > 0)
-                _packs.removeWhere((w) => w.id == pack.id);
-            else
-                pack.id = _packs.length + 1;
-
-            _packs.add(pack);
-        });
-        _sort(_packs);
-        
-        return Future.value(true);
     }
 
     Future<StoredPack> find(int id) async {
@@ -48,11 +36,12 @@ class MockPackStorage implements BaseStorage<StoredPack> {
             return null;
 
         final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);
-        final wordsNumber = await this.wordStorage.getLength(parentId: pack.id);
-        return new StoredPack.copy(pack, cardsNumber: wordsNumber);
+        final cardsNumber = await this.wordStorage.getLength(parentId: pack.id);
+        pack.cardsNumber = cardsNumber;
+
+        return pack;
     }
 
-    // TODO: A temporary method to debug rendering a list of word packs
     static List<StoredPack> _generatePacks(int length) {
         final generatedPacks = new List<StoredPack>.generate(length, 
             (index) => generatePack(index + 1));
@@ -71,10 +60,38 @@ class MockPackStorage implements BaseStorage<StoredPack> {
             to: Language.russian
         );
 
-    Future<void> remove(Iterable<int> ids) {
+    @override
+    Future<void> delete(List<int> ids) {
         _packs.removeWhere((w) => ids.contains(w.id));
         return Future.value();
     }
 
     StoredPack getRandom() => Randomiser.nextElement(_packs);
+
+    @override
+    List<StoredPack> convertToEntity(List<Map<String, dynamic>> values) {
+        throw UnimplementedError();
+    }
+
+    @override
+    String get entityName => '';
+
+    @override
+    Future<void> update(List<StoredPack> packs) => _save(packs);
+  
+    Future<void> _save(List<StoredPack> packs) async {
+        packs.forEach((pack) {
+            if (pack.id > 0)
+                _packs.removeWhere((w) => w.id == pack.id);
+            else
+                pack.id = _packs.length + 1;
+
+            _packs.add(pack);
+        });
+
+        _sort(_packs);
+    }
+
+    @override
+    Future<void> upsert(StoredPack pack) => _save([pack]);
 }

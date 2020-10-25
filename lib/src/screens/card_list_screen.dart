@@ -35,7 +35,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   
     @override
     void removeItems(List<int> ids) {
-        widget.storage.remove(ids);
+        widget.storage.delete(ids);
 
         _cardsWereRemoved = true;
     }
@@ -86,7 +86,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
         setState(() {
             listOfMarkedItems.forEach((w) => w.resetStudyProgress());
-            widget.storage.save(listOfMarkedItems);
+            widget.storage.update(listOfMarkedItems);
         });
 
         Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(

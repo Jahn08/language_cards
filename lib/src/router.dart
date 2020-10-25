@@ -11,7 +11,7 @@ class _StorageRouteArgs<T extends StoredEntity> {
 }
 
 class _CardStorageRouteArgs extends _StorageRouteArgs<StoredWord> {
-    _CardStorageRouteArgs([WordStorage storage]): super(storage ?? WordStorage.instance);
+    _CardStorageRouteArgs([WordStorage storage]): super(storage ?? new WordStorage());
 }
 
 class _CardListRouteArgs extends _CardStorageRouteArgs {
@@ -34,7 +34,7 @@ class CardListRoute {
 class _PackStorageRouteArgs extends _StorageRouteArgs<StoredPack> {
 
     _PackStorageRouteArgs([PackStorage storage]): 
-        super(storage ?? PackStorage.instance);
+        super(storage ?? new PackStorage());
 }
 
 class PackListRoute { 
@@ -54,7 +54,7 @@ class _WordCardRouteArgs extends _CardStorageRouteArgs {
     _WordCardRouteArgs({ BaseStorage<StoredWord> storage, 
         BaseStorage<StoredPack> packStorage, int wordId, this.pack }): 
         wordId = wordId ?? 0,
-        packStorage = packStorage ?? PackStorage.instance,
+        packStorage = packStorage ?? new PackStorage(),
         super(storage);
 }
 

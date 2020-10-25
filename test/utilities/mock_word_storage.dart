@@ -6,7 +6,7 @@ import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import './mock_pack_storage.dart';
 import './randomiser.dart';
 
-class MockWordStorage implements BaseStorage<StoredWord> {
+class MockWordStorage extends BaseStorage<StoredWord> {
     final List<StoredWord> _words = _generateWords(18);
 
     MockWordStorage() {
@@ -25,20 +25,6 @@ class MockWordStorage implements BaseStorage<StoredWord> {
 
     Future<int> getLength({ int parentId }) {
         return Future.delayed(new Duration(milliseconds: 100), () => _fetch(parentId).length);
-    }
-
-    Future<bool> save(List<StoredWord> words) async {
-        words.forEach((word) { 
-            if (word.id > 0)
-                _words.removeWhere((w) => w.id == word.id);
-            else
-                word.id = _words.length;
-
-            _words.add(word);
-        });
-        _sortWords();
-        
-        return Future.value(true);
     }
 
     Future<StoredWord> find(int id) =>
@@ -71,10 +57,37 @@ class MockWordStorage implements BaseStorage<StoredWord> {
         );
     }
 
-    Future<void> remove(Iterable<int> ids) {
+    Future<void> delete(List<int> ids) {
         _words.removeWhere((w) => ids.contains(w.id));
         return Future.value();
     }
 
     StoredWord getRandom() => Randomiser.nextElement(_words);
+
+    @override
+    String get entityName => '';
+  
+    @override
+    Future<void> update(List<StoredWord> words) => _save(words);
+
+    Future<void> _save(List<StoredWord> words) async {
+        words.forEach((word) { 
+            if (word.id > 0)
+                _words.removeWhere((w) => w.id == word.id);
+            else
+                word.id = _words.length;
+
+            _words.add(word);
+        });
+
+        _sortWords();
+    }
+
+    @override
+    Future<void> upsert(StoredWord word) => _save([word]);
+
+    @override
+    List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) {
+        throw UnimplementedError();
+    }
 }

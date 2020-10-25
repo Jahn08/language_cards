@@ -32,7 +32,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
         super.onGoingToItem(buildContext, item);
         
-        item.isNone ? Router.goToCardList(context, pack: item): 
+        item != null && item.isNone ? Router.goToCardList(context, pack: item): 
             Router.goToPack(buildContext, packId: item?.id);
     }
 
@@ -41,7 +41,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         widget.storage.fetch(skipCount: skipCount, takeCount: takeCount);
   
     @override
-    void removeItems(List<int> ids) => widget.storage.remove(ids);
+    void removeItems(List<int> ids) => widget.storage.delete(ids);
 
     @override
     String get title => 'Word Packs';

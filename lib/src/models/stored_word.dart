@@ -1,7 +1,17 @@
 import './stored_entity.dart';
+import './stored_pack.dart';
 import './word_study_stage.dart';
 
 class StoredWord extends StoredEntity {
+    static const String entityName = 'Cards';
+
+    static const textFieldName = 'text';
+    static const transcriptionFieldName = 'transcription';
+    static const partOfSpeechFieldName = 'part_of_speech';
+    static const translationFieldName = 'translation';
+    static const studyProgressFieldName = 'study_progress';
+    static const packIdFieldName = 'pack_id';
+
     int _packId;
     
     final String text;
@@ -21,6 +31,15 @@ class StoredWord extends StoredEntity {
         _studyProgress = studyProgress ?? WordStudyStage.unknown,
         super(id: id);
 
+    StoredWord.fromDbMap(Map<String, dynamic> values):
+        this(values[textFieldName], 
+            id: values[StoredEntity.idFieldName], 
+            packId: values[packIdFieldName],
+            transcription: values[transcriptionFieldName],
+            studyProgress: values[studyProgressFieldName],
+            partOfSpeech: values[partOfSpeechFieldName],
+            translation: values[translationFieldName]);
+
     int get packId => _packId;
 
     set packId(int value) {
@@ -30,4 +49,36 @@ class StoredWord extends StoredEntity {
     int get studyProgress => _studyProgress;
 
     void resetStudyProgress() => _studyProgress = WordStudyStage.unknown;
+
+    @override
+    String get tableName => entityName;
+
+    @override
+    String get foreignTableName => StoredPack.entityName;
+
+    @override
+    Map<String, dynamic> toDbMap() {
+        final map = super.toDbMap();
+        map.addAll({
+            textFieldName: text,
+            transcriptionFieldName: transcription,
+            partOfSpeechFieldName: partOfSpeech,
+            translationFieldName: translation,
+            studyProgressFieldName: studyProgress,
+            packIdFieldName: packId
+        });
+
+        return map;
+    }
+
+    @override
+    String get columnsExpr => 
+        """ $textFieldName TEXT NOT NULL,
+            $transcriptionFieldName TEXT,
+            $partOfSpeechFieldName TEXT,
+            $translationFieldName TEXT NOT NULL,
+            $studyProgressFieldName INTEGER NOT NULL,
+            $packIdFieldName INTEGER,
+            FOREIGN KEY($packIdFieldName) 
+                REFERENCES $foreignTableName(${StoredEntity.idFieldName}) """;
 }

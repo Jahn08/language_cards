@@ -204,7 +204,7 @@ class CardScreenState extends State<CardScreen> {
                         );
                         final cardWasAdded = wordToSave.isNew || 
                             widget.pack?.id != _pack.id;
-                        widget._wordStorage.save([wordToSave]);
+                        widget._wordStorage.upsert(wordToSave);
 
                         Router.goToCardList(context, pack: _pack, 
                             cardWasAdded: cardWasAdded);

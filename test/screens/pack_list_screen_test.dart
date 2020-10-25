@@ -146,8 +146,7 @@ Future<void> _testIncreasingNumberOfCards(WidgetTester tester,
 
     await tester.runAsync(() async {
         final randomWord = MockWordStorage.generateWord(packId: pack.id);
-        final saveOutcome = await storage.wordStorage.save([randomWord]);
-        expect(saveOutcome, true);
+        await storage.wordStorage.update([randomWord]);
     });
 
     await _goBackToPackList(assistant, pack.name);
