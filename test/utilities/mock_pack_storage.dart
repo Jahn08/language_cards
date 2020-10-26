@@ -79,7 +79,7 @@ class MockPackStorage extends BaseStorage<StoredPack> {
     @override
     Future<void> update(List<StoredPack> packs) => _save(packs);
   
-    Future<void> _save(List<StoredPack> packs) async {
+    Future<List<StoredPack>> _save(List<StoredPack> packs) async {
         packs.forEach((pack) {
             if (pack.id > 0)
                 _packs.removeWhere((w) => w.id == pack.id);
@@ -90,8 +90,10 @@ class MockPackStorage extends BaseStorage<StoredPack> {
         });
 
         _sort(_packs);
+        return packs;
     }
 
     @override
-    Future<void> upsert(StoredPack pack) => _save([pack]);
+    Future<StoredPack> upsert(StoredPack pack) async => 
+        (await _save([pack])).first;
 }

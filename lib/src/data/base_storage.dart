@@ -32,11 +32,13 @@ abstract class BaseStorage<T extends StoredEntity> {
         await DbProvider.close();
     }
 
-    Future<void> upsert(T entity) async {
+    Future<T> upsert(T entity) async {
         if (entity.isNew)
-            await connection.add(entityName, entity.toDbMap());
+            entity.id = await connection.add(entityName, entity.toDbMap());
         else
             await update([entity]);
+        
+        return entity;         
     }
 
     Future<void> update(List<T> entities) async {

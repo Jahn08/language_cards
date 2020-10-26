@@ -93,7 +93,7 @@ class DbProvider {
         }
 
     Future<void> update(String tableName, List<Map<String, dynamic>> entities) async {
-            await _perform<void>(tableName, () async {
+        await _perform<void>(tableName, () async {
                 final batch = _db.batch();
                 entities.forEach((values) { 
                     batch.update(tableName, 

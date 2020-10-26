@@ -20,6 +20,7 @@ class PackScreenState extends State<PackScreen> {
     String _fromLang;
     String _toLang;
 
+    StoredPack _foundPack;
     bool _initialised = false;
 
     final _languages = Enum.mapStringValues(Language.values);
@@ -53,6 +54,7 @@ class PackScreenState extends State<PackScreen> {
 
                 final foundPack = snapshot.data;
                 if (foundPack != null && foundPack.id > 0 && !_initialised) {
+                    _foundPack = foundPack;
                     _initialised = true;
 
                     _name = foundPack.name;
@@ -87,28 +89,23 @@ class PackScreenState extends State<PackScreen> {
                 onValidate: _validateLanguages)
         ];
 
-        if (!_isNew)
+        if (!_isNew && _foundPack != null)
             children.add(new FlatButton.icon(
                 icon: new Icon(Icons.filter_1),
                 label: new Text('Show $_cardsNumber Cards'),
-                onPressed: () => Router.goToCardList(context, pack: _buildPack())
+                onPressed: () => Router.goToCardList(context, pack: _foundPack)
             ));
         
-        children.add(new RaisedButton(
-            child: new Text('Save'),
-            onPressed: () {
-                final state = _key.currentState;
-                if (!state.validate())
-                    return;
-
-                state.save();
-
-                _storage.upsert(_buildPack());
-
-                Router.goToPackList(context);
-            }
-        ));
-
+        final isStateDirty = _isNew || (_foundPack != null && (
+            _foundPack.name != _name || _foundPack.to != _languages[_toLang] ||
+            _foundPack.from != _languages[_fromLang]));
+        children.addAll([
+            _buildSaveBtn('Save', (_) => Router.goToPackList(context), isDisabled: !isStateDirty),
+            _buildSaveBtn('Save and Add Cards', 
+                (savedPack) => Router.goToCardList(context, pack: savedPack), 
+                isDisabled: !isStateDirty)
+        ]);
+        
         return new Column(children: children);
     }
 
@@ -120,6 +117,21 @@ class PackScreenState extends State<PackScreen> {
         to: _languages[_toLang],
         from: _languages[_fromLang]
     );
+
+    RaisedButton _buildSaveBtn(String title, Function afterSaving(StoredPack pack), 
+        { bool isDisabled }) => 
+        new RaisedButton(
+            child: new Text(title),
+            onPressed: isDisabled ? null: () async {
+                final state = _key.currentState;
+                if (!state.validate())
+                    return;
+
+                state.save();
+
+                afterSaving(await _storage.upsert(_buildPack()));
+            }
+        );
 }
 
 class PackScreen extends StatefulWidget {

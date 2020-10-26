@@ -70,7 +70,7 @@ class MockWordStorage extends BaseStorage<StoredWord> {
     @override
     Future<void> update(List<StoredWord> words) => _save(words);
 
-    Future<void> _save(List<StoredWord> words) async {
+    Future<List<StoredWord>> _save(List<StoredWord> words) async {
         words.forEach((word) { 
             if (word.id > 0)
                 _words.removeWhere((w) => w.id == word.id);
@@ -81,6 +81,7 @@ class MockWordStorage extends BaseStorage<StoredWord> {
         });
 
         _sortWords();
+        return words;
     }
 
     Future<void> updateWordProgress(int id, int studyProgress) async {
@@ -100,7 +101,8 @@ class MockWordStorage extends BaseStorage<StoredWord> {
     }
 
     @override
-    Future<void> upsert(StoredWord word) => _save([word]);
+    Future<StoredWord> upsert(StoredWord word) async => 
+        (await _save([word])).first;
 
     @override
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) {
