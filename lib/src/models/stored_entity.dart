@@ -28,7 +28,7 @@ abstract class StoredEntity {
     String get tableExpr {
         const keyClause = '$idFieldName INTEGER PRIMARY KEY AUTOINCREMENT';
 
-        return """CREATE TABLE $tableName (
+        return """CREATE TABLE IF NOT EXISTS $tableName (
             $keyClause,
             $columnsExpr
         );""";

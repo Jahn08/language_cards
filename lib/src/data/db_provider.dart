@@ -50,8 +50,8 @@ class DbProvider {
         final dbPath = join(docDir.path, 'language_cards.db');
 
         _db = await openDatabase(dbPath, 
-            version: 1,
-            onCreate: (newDb, _) async {
+            version: 3,
+            onUpgrade: (newDb, _, __) async {
                 try {
                     final creationClauses = _compileCreationClauses(_tableEntities);
                     final creationClausesLength = creationClauses.length;
