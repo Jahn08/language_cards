@@ -1,6 +1,7 @@
+import 'dart:convert';
 import './language.dart';
 
-enum Theme {
+enum AppTheme {
     light, 
 
     dark
@@ -31,17 +32,17 @@ class StudyParams {
     CardSide get cardSide => _cardSide;
     set cardSide(CardSide value) => _cardSide = value ?? _defaultCardSide;
 
-    StudyParams([Map<String, dynamic> json]) {
-        json = json ?? {};
+    StudyParams([Map<String, dynamic> jsonMap]) {
+        jsonMap = jsonMap ?? {};
 
-        _isBackwardDirection = json[_isBackwardDirectionParam] ?? _defaultBool; 
+        _isBackwardDirection = jsonMap[_isBackwardDirectionParam] ?? _defaultBool; 
 
-        final cardSideIndex = json[_cardSideParam];
+        final cardSideIndex = jsonMap[_cardSideParam];
         _cardSide = cardSideIndex == null ? _defaultCardSide: 
             CardSide.values[cardSideIndex];
     }
 
-    Map<String, dynamic> toJson() => {
+    Map<String, dynamic> toMap() => {
         _isBackwardDirectionParam: _isBackwardDirection,
         _cardSideParam: _cardSide.index
     };
@@ -49,7 +50,7 @@ class StudyParams {
 
 class UserParams {
     static const _defaultLanguage = Language.english;
-    static const _defaultTheme = Theme.light;
+    static const _defaultTheme = AppTheme.light;
 
     static const _interfaceLangParam = 'interfaceLang';
     static const _themeParam = 'theme';
@@ -59,29 +60,29 @@ class UserParams {
     Language get interfaceLang => _interfaceLang;
     set interfaceLang(Language value) => _interfaceLang = value ?? _defaultLanguage;
 
-    Theme _theme;
-    Theme get theme => _theme;
-    set theme(Theme value) => _theme = value ?? _defaultTheme;
+    AppTheme _theme;
+    AppTheme get theme => _theme;
+    set theme(AppTheme value) => _theme = value ?? _defaultTheme;
 
     StudyParams _studyParams;
     StudyParams get studyParams => _studyParams;
     set studyParams(StudyParams value) => _studyParams = value ?? new StudyParams();
 
-    UserParams([Map<String, dynamic> json]) {
-        json = json ?? {};
+    UserParams([String json]) {
+        final jsonMap = json == null ? {}: jsonDecode(json);
 
-        final langIndex = json[_interfaceLangParam];
+        final langIndex = jsonMap[_interfaceLangParam];
         _interfaceLang = langIndex == null ? _defaultLanguage: Language.values[langIndex];
 
-        final themeIndex = json[_themeParam];
-        _theme = themeIndex == null ? _defaultTheme: Theme.values[themeIndex];
+        final themeIndex = jsonMap[_themeParam];
+        _theme = themeIndex == null ? _defaultTheme: AppTheme.values[themeIndex];
 
-        _studyParams = new StudyParams(json[_studyParamsParam]);
+        _studyParams = new StudyParams(jsonMap[_studyParamsParam]);
     }
 
-    Map<String, dynamic> toJson() => {
+    String toJson() => jsonEncode({
         _interfaceLangParam: _interfaceLang.index,
         _themeParam: _theme.index,
-        _studyParamsParam: _studyParams.toJson()
-    };
+        _studyParamsParam: _studyParams.toMap()
+    });
 }

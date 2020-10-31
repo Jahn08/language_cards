@@ -18,7 +18,7 @@ void main() {
         SharedPreferences.setMockInitialValues({});
 
         final expectedLang = Randomiser.nextElement(Language.values);
-        final expectedTheme = Randomiser.nextElement(Theme.values);
+        final expectedTheme = Randomiser.nextElement(AppTheme.values);
         final expectedCardSide = Randomiser.nextElement(CardSide.values);
 
         final params = new UserParams();

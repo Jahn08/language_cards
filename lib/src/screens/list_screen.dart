@@ -81,7 +81,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         return new Scaffold(
             appBar: _buildAppBar(buildContext),
             bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
-            drawer: new SettingsBlocProvider(child: new SettingsPanel()),
+            drawer: new SettingsPanel(),
             body: _buildList(),
             floatingActionButton: _buildNewCardButton(buildContext)
         );

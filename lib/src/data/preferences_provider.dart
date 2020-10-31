@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_params.dart';
 
@@ -9,14 +8,11 @@ class PreferencesProvider {
 
     static Future<UserParams> fetch() async {
         final prefs = await SharedPreferences.getInstance();
-        final userParamsValue = prefs.getString(_userParamsKey);
-
-        return new UserParams(userParamsValue == null ? null: 
-            json.decode(userParamsValue));
+        return new UserParams(prefs.getString(_userParamsKey));
     }
 
     static Future<void> save(UserParams params) async {
         final prefs = await SharedPreferences.getInstance();
-        prefs.setString(_userParamsKey, json.encode(params.toJson()));
+        prefs.setString(_userParamsKey, params.toJson());
     }
 }
