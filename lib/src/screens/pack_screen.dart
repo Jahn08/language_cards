@@ -6,7 +6,7 @@ import '../models/language.dart';
 import '../enum.dart';
 import '../router.dart';
 import '../widgets/loader.dart';
-import '../widgets/navigation_bar.dart';
+import '../widgets/settings_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 
@@ -29,11 +29,9 @@ class PackScreenState extends State<PackScreen> {
 
     @override
     Widget build(BuildContext context) {
-        return new Scaffold(
-            appBar: new NavigationBar(new Text(_isNew ? 'Add Pack': 'Change Pack'), 
-                onGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
-                    Router.goBackToPackList(context)
-            ),
+        return new SettingsScaffold(_isNew ? 'Add Pack': 'Change Pack',
+            onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
+                Router.goBackToPackList(context),
             body: new Form(
                 key: _key,
                 child: _buildFutureFormLayout(widget.packId)

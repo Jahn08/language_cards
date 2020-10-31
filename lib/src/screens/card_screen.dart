@@ -14,6 +14,7 @@ import '../router.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/loader.dart';
+import '../widgets/settings_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 
@@ -78,10 +79,8 @@ class CardScreenState extends State<CardScreen> {
 
     @override
     Widget build(BuildContext context) {
-        return new Scaffold(
-            appBar: new AppBar(
-                title: new Text(_isNew ? 'Add Card' : "Change Card")
-            ),
+        return new SettingsScaffold(
+            _isNew ? 'Add Card' : "Change Card",
             body: new Form(
                 key: _key,
                 child: _buildFutureFormLayout()

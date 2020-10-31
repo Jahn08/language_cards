@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import '../blocs/settings_bloc.dart';
 import '../models/stored_entity.dart';
-import '../widgets/navigation_bar.dart';
-import '../widgets/settings_opener_button.dart';
-import '../widgets/settings_panel.dart';
+import '../widgets/settings_scaffold.dart';
 
 class _CachedItem<TItem> {
     final TItem item;
@@ -78,34 +75,17 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @override
     Widget build(BuildContext buildContext) {
-        return new Scaffold(
-            appBar: _buildAppBar(buildContext),
-            bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
-            drawer: new SettingsPanel(),
-            body: _buildList(),
-            floatingActionButton: _buildNewCardButton(buildContext)
-        );
-    }
-
-    Widget _buildAppBar(BuildContext buildContext) {
-        final barTitle = new Text(title);
-        final settingsOpenerBtn = new SettingsOpenerButton();
-        final editorActions = <Widget>[_editorMode ? _buildEditorDoneButton(): 
-            _buildEditorButton()];
-
-        if (canGoBack)
-            return new NavigationBar(barTitle, 
-                leading: settingsOpenerBtn,
-                actions: editorActions,
-                onGoingBack: () {
+        return new SettingsScaffold(title,
+            barActions: <Widget>[_editorMode ? _buildEditorDoneButton(): 
+                _buildEditorButton()],
+            onNavGoingBack: canGoBack ? 
+                () {
                     _deleteAllMarkedForRemoval();
                     onGoingBack(buildContext);
-                });
-            
-        return new AppBar(
-            leading: settingsOpenerBtn,
-            title: barTitle,
-            actions: editorActions
+                }: null,
+            bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
+            body: _buildList(),
+            floatingActionButton: _buildNewCardButton(buildContext)
         );
     }
 
