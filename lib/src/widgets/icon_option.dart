@@ -3,11 +3,11 @@ import './asset_icon.dart';
 
 class IconOption extends StatelessWidget {
     final Widget _iconWidget;
-    final bool _isSelected;
+    final bool isSelected;
     
     IconOption({ @required Widget icon, bool isSelected }): 
         _iconWidget = icon,
-        _isSelected = isSelected ?? false;
+        isSelected = isSelected ?? false;
 
     @override
     Widget build(BuildContext context) {
@@ -17,7 +17,7 @@ class IconOption extends StatelessWidget {
             child: _iconWidget,
             margin: EdgeInsets.all(5),
             decoration: new BoxDecoration(
-                border: _isSelected ? new Border.all(
+                border: isSelected ? new Border.all(
                     color: Colors.blueGrey,
                     width: 2
                 ): null

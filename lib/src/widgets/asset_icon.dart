@@ -17,7 +17,7 @@ class AssetIcon extends Image {
         height: HEIGHT
     );
 
-    static AssetIcon buildByLanguage(Language lang) {
+    static AssetIcon getByLanguage(Language lang) {
         switch (lang) {
             case Language.english:
                 return britishFlag;

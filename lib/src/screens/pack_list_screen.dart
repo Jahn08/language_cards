@@ -11,9 +11,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     @override
     Widget getItemSubtitle(StoredPack item) => item.isNone ? null: new Row(
         children: <Widget>[
-            new IconOption(icon: AssetIcon.buildByLanguage(item.from)),
+            new IconOption(icon: AssetIcon.getByLanguage(item.from)),
             new Icon(Icons.arrow_right),
-            new IconOption(icon: AssetIcon.buildByLanguage(item.to))
+            new IconOption(icon: AssetIcon.getByLanguage(item.to))
         ]
     );
     
