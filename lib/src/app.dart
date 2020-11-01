@@ -48,7 +48,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                         return new MaterialPageRoute(
                             settings: settings,
                             builder: (context) => new PackScreen(params.storage, 
-                                packId: params.packId, refreshed: params.refreshed));
+                                packId: params.packId, packName: params.packName, 
+                                refreshed: params.refreshed));
                     }
                         
                     return new MaterialPageRoute(

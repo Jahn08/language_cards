@@ -146,26 +146,28 @@ class _SettingsPanel extends StatefulWidget {
     _SettingsPanelState createState() => new _SettingsPanelState();
 }
 
-class SettingsScaffold extends Scaffold {
+class BarScaffold extends Scaffold {
 
-    SettingsScaffold(String title, { 
+    BarScaffold(String title, { 
+        bool showSettings,
         Widget bottomNavigationBar,
         Widget body,
         Widget floatingActionButton,
         List<Widget> barActions,
         void Function() onNavGoingBack,
     }): super(
-        drawer: new _SettingsPanel(), 
-        appBar: _buildAppBar(title, actions: barActions, onGoingBack: onNavGoingBack),
+        drawer: (showSettings ?? false) ? new _SettingsPanel(): null, 
+        appBar: _buildAppBar(title, actions: barActions, onGoingBack: onNavGoingBack, 
+            showSettings: showSettings),
         body: body,
         bottomNavigationBar: bottomNavigationBar,
         floatingActionButton: floatingActionButton
     );
 
     static Widget _buildAppBar(String title, 
-        { List<Widget> actions,  void Function() onGoingBack }) {
+        { List<Widget> actions,  void Function() onGoingBack, bool showSettings }) {
 
-        final openerBtn = new SettingsOpenerButton();
+        final openerBtn = (showSettings ?? false) ? new SettingsOpenerButton(): null;
         return onGoingBack == null ? 
             new AppBar(actions: actions, leading: openerBtn, title: new Text(title)):
             new NavigationBar(new Text(title), actions: actions, onGoingBack: onGoingBack, 

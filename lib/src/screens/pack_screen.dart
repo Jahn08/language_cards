@@ -6,7 +6,7 @@ import '../models/language.dart';
 import '../enum.dart';
 import '../router.dart';
 import '../widgets/loader.dart';
-import '../widgets/settings_scaffold.dart';
+import '../widgets/bar_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 
@@ -29,7 +29,11 @@ class PackScreenState extends State<PackScreen> {
 
     @override
     Widget build(BuildContext context) {
-        return new SettingsScaffold(_isNew ? 'Add Pack': 'Change Pack',
+        final packName = _isNew ? _name: widget.packName;
+        final packNameFormatted = (packName?.isEmpty ?? true) ? '': ' "$packName"';
+
+        return new BarScaffold(
+            (_isNew ? 'Add Pack': 'Change Pack') + packNameFormatted,
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context),
             body: new Form(
@@ -135,11 +139,14 @@ class PackScreenState extends State<PackScreen> {
 class PackScreen extends StatefulWidget {
     final int packId;
 
+    final String packName;
+
     final bool refreshed;
     
     final BaseStorage<StoredPack> _storage;
     
-    PackScreen(BaseStorage<StoredPack> storage, { this.packId = 0, this.refreshed = false }): 
+    PackScreen(BaseStorage<StoredPack> storage, 
+        { this.packName, this.packId = 0, this.refreshed = false }): 
         _storage = storage;
 
     @override

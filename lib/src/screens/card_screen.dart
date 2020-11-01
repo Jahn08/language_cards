@@ -14,7 +14,7 @@ import '../router.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/loader.dart';
-import '../widgets/settings_scaffold.dart';
+import '../widgets/bar_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 
@@ -71,16 +71,15 @@ class CardScreenState extends State<CardScreen> {
 
         await new ConfirmDialog<bool>(
             title: 'Choose Pack', 
-            content: 'You should choose a pack to make automatic translation' + 
-                ' available for the word',
+            content: 'You should choose a pack to enable automatic translation',
             actions: { true: 'OK' }
         ).show(buildContext);
     }
 
     @override
     Widget build(BuildContext context) {
-        return new SettingsScaffold(
-            _isNew ? 'Add Card' : "Change Card",
+        return new BarScaffold(
+            _isNew ? 'Add Card' : 'Change Card',
             body: new Form(
                 key: _key,
                 child: _buildFutureFormLayout()

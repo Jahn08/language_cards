@@ -68,10 +68,13 @@ class WordCardRoute {
 class _PackRouteArgs extends _PackStorageRouteArgs {
     final int packId;
 
+    final String packName;
+
     final bool refreshed;
 
-    _PackRouteArgs({ BaseStorage<StoredPack> storage, int packId, bool refreshed }): 
-        packId = packId ?? 0,
+    _PackRouteArgs({ BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }): 
+        packId = pack?.id ?? 0,
+        packName = pack?.name ?? '',
         refreshed = refreshed ?? false,
         super(storage);
 }
@@ -123,9 +126,9 @@ class Router {
     static goHome(BuildContext context) => Navigator.pushNamed(context, initialRouteName);
 
     static goToPack(BuildContext context, 
-        { BaseStorage<StoredPack> storage, int packId, bool refreshed }) {
+        { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {
         Navigator.pushNamed(context, _packRouteName, 
-            arguments: new _PackRouteArgs(storage: storage, packId: packId, refreshed: refreshed));
+            arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
     }
 
     static goBackToPack(BuildContext context) => _goBackUntil(context, _packRouteName);

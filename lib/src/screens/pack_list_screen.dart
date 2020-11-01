@@ -33,7 +33,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         super.onGoingToItem(buildContext, item);
         
         item != null && item.isNone ? Router.goToCardList(context, pack: item): 
-            Router.goToPack(buildContext, packId: item?.id);
+            Router.goToPack(buildContext, pack: item);
     }
 
     @override
@@ -44,7 +44,10 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     void removeItems(List<int> ids) => widget.storage.delete(ids);
 
     @override
-    String get title => 'Word Packs';
+    bool get showSettings => true;
+
+    @override
+    String get title => 'Card Packs';
 
     @override
     bool get canGoBack => false;

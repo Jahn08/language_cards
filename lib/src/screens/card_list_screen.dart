@@ -42,7 +42,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    String get title => widget.pack?.name ?? 'Word Cards';
+    String get title {
+        final packName = widget.pack?.name;        
+        return 'Cards' + ((packName?.isEmpty ?? true) ? '': ' of Pack "$packName"');
+    }
 
     @override
     bool get canGoBack => true;
@@ -56,7 +59,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
                 Router.goBackToPackList(context);
         else
             shouldRefreshPack ? 
-                Router.goToPack(context, packId: widget.pack?.id, refreshed: true): 
+                Router.goToPack(context, pack: widget.pack, refreshed: true): 
                 Router.goBackToPack(context);
     }
 
