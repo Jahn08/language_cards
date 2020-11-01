@@ -6,7 +6,6 @@ import '../models/language.dart';
 import '../models/user_params.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
-import '../widgets/settings_opener_button.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
 
@@ -146,15 +145,25 @@ class _SettingsPanel extends StatefulWidget {
     _SettingsPanelState createState() => new _SettingsPanelState();
 }
 
+class _SettingsOpenerButton extends StatelessWidget {
+    @override
+    Widget build(BuildContext context) {
+        return new IconButton(
+            icon: new Icon(Icons.settings),
+            onPressed: () => Scaffold.of(context).openDrawer()
+        );
+    }
+}
+
 class BarScaffold extends Scaffold {
 
     BarScaffold(String title, { 
+        @required Widget body,
         bool showSettings,
-        Widget bottomNavigationBar,
-        Widget body,
-        Widget floatingActionButton,
+        BottomNavigationBar bottomNavigationBar,
+        FloatingActionButton floatingActionButton,
         List<Widget> barActions,
-        void Function() onNavGoingBack,
+        void Function() onNavGoingBack
     }): super(
         drawer: (showSettings ?? false) ? new _SettingsPanel(): null, 
         appBar: _buildAppBar(title, actions: barActions, onGoingBack: onNavGoingBack, 
@@ -167,7 +176,7 @@ class BarScaffold extends Scaffold {
     static Widget _buildAppBar(String title, 
         { List<Widget> actions,  void Function() onGoingBack, bool showSettings }) {
 
-        final openerBtn = (showSettings ?? false) ? new SettingsOpenerButton(): null;
+        final openerBtn = (showSettings ?? false) ? new _SettingsOpenerButton(): null;
         return onGoingBack == null ? 
             new AppBar(actions: actions, leading: openerBtn, title: new Text(title)):
             new NavigationBar(new Text(title), actions: actions, onGoingBack: onGoingBack, 

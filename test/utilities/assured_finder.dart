@@ -5,16 +5,20 @@ class AssuredFinder {
 
     AssuredFinder._();
 
-    static Finder findOne({ String label, IconData icon, Type type, bool shouldFind }) => 
-        _find(expectSeveral: false, icon: icon, label: label, type: type, shouldFind: shouldFind);
+    static Finder findOne(
+        { Key key, String label, IconData icon, Type type, bool shouldFind }) => 
+        _find(key: key, expectSeveral: false, icon: icon, label: label, 
+            type: type, shouldFind: shouldFind);
 
-    static Finder _find({ String label, IconData icon, Type type,
+    static Finder _find({ Key key, String label, IconData icon, Type type,
         bool shouldFind, bool expectSeveral }) {
         
         Finder finder;
-        if (label != null && type != null)
+        if (key != null)
+            finder = find.byKey(key);
+        else if (label != null && type != null)
             finder = find.widgetWithText(type, label);
-        if (label != null)
+        else if (label != null)
             finder = find.text(label);
         else if(icon != null)
             finder = find.byIcon(icon);

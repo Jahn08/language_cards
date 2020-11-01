@@ -311,7 +311,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     void removeItems(List<int> ids);
 
-    Widget _buildNewCardButton(BuildContext buildContext) {
+    FloatingActionButton _buildNewCardButton(BuildContext buildContext) {
         final theme = Theme.of(buildContext);
         return new FloatingActionButton(
             onPressed: () => onGoingToItem(buildContext),
