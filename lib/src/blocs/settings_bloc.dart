@@ -15,12 +15,14 @@ class SettingsBloc {
         if (_params == null)
             _params = await PreferencesProvider.fetch();
 
-        return _params;
+        return new UserParams(_params.toJson());
     }
 
-    Future<void> save() async {
-        await PreferencesProvider.save(_params);
-        _listeners.forEach((listener) => listener?.call(_params));
+    Future<void> save(UserParams params) async {
+        await PreferencesProvider.save(params);
+        _params = null;
+
+        _listeners.forEach((listener) => listener?.call(params));
     }
 
     void addOnSaveListener(OnSaveListener listener) {

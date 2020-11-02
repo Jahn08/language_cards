@@ -128,7 +128,7 @@ void main() {
         });
     });
 
-     testWidgets('Saves and hides settings after clicking the apply button on the panel', 
+    testWidgets('Saves and hides settings after clicking the apply button on the panel', 
         (tester) async {
             PreferencesTester.resetSharedPreferences();
             final defaultUserParams = await PreferencesProvider.fetch();
@@ -150,12 +150,33 @@ void main() {
             await assistant.tapWidget(nonChosenOptionsFinder.first);
             await assistant.tapWidget(nonChosenOptionsFinder.last);
 
-            await assistant.pressButtonDirectlyByLabel('Apply');
+            await _applySettings(assistant);
 
             final savedUserParams = await PreferencesProvider.fetch();
             expect(savedUserParams.theme == defaultUserParams.theme, false);
             expect(savedUserParams.interfaceLang == defaultUserParams.interfaceLang, false);
         });
+
+    testWidgets('Resets settings after clicking the reset button on the panel', (tester) async {
+        final userParams = await PreferencesTester.saveNonDefaultUserParams();
+        final defaultUserParams = new UserParams();
+        expect(userParams.theme == defaultUserParams.theme, false);
+        expect(userParams.interfaceLang == defaultUserParams.interfaceLang, false);
+
+        await _pumpScaffoldWithSettings(tester);
+
+        final settingsBtnFinder = _assureSettingsBtn(true);
+        final assistant = new WidgetAssistant(tester);
+        await assistant.tapWidget(settingsBtnFinder);
+
+        await assistant.pressButtonDirectlyByLabel('Reset');
+
+        await _applySettings(assistant);
+
+        final storedUserParams = await PreferencesProvider.fetch();
+        expect(storedUserParams.theme == defaultUserParams.theme, true);
+        expect(storedUserParams.interfaceLang == defaultUserParams.interfaceLang, true);
+    });
 }
 
 Future<void> _buildInsideApp(WidgetTester tester, Widget child) async => 
@@ -177,4 +198,6 @@ Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async =>
             showSettings: true
         )
     ));
-    
+
+Future<void> _applySettings(WidgetAssistant assistant) async => 
+    await assistant.pressButtonDirectlyByLabel('Apply');

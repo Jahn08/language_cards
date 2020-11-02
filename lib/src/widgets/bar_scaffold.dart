@@ -9,27 +9,36 @@ import '../widgets/navigation_bar.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
 
+    UserParams _params;
+
     String _originalParams;
 
     @override
     Widget build(BuildContext context) {
         final bloc = SettingsBlocProvider.of(context);
-        return new FutureLoader<UserParams>(bloc.userParams, (params) {
-                final children = <Widget>[_buildHeader()];
-                
-                if (_originalParams == null)
-                    _originalParams = params.toJson();
-                
-                children.addAll(_buildLanguageSection(params));
-                children.addAll(_buildAppearanceSection(params));
-                children.addAll(_buildContactsSection());
-                children.addAll(_buildHelpSection());
+        return _params == null ? new FutureLoader<UserParams>(bloc.userParams, 
+            (params) => _buildControlsFromParams(bloc, params)): _buildControls(bloc);
+    }
 
-                children.add(_buildApplyButton(bloc, params));
+    Widget _buildControlsFromParams(SettingsBloc bloc, UserParams params) {
+        _params = params;
+        return _buildControls(bloc);
+    }
 
-                return new Drawer(child: new ListView(children: children));
-            }
-        );
+    Widget _buildControls(SettingsBloc bloc) {
+        final children = <Widget>[_buildHeader()];
+        
+        if (_originalParams == null)
+            _originalParams = _params.toJson();
+        
+        children.addAll(_buildLanguageSection());
+        children.addAll(_buildAppearanceSection());
+        children.addAll(_buildContactsSection());
+        children.addAll(_buildHelpSection());
+
+        children.add(_buildApplyButton(bloc));
+
+        return new Drawer(child: new ListView(children: children));
     }
 
     Widget _buildHeader() {
@@ -45,12 +54,12 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         );
     }
 
-    List<Widget> _buildLanguageSection(UserParams params) {
+    List<Widget> _buildLanguageSection() {
         return <Widget>[
             _buildSubsectionHeader('Language'),
             new Row(children: <Widget>[
-                _buildLanguageOption(Language.english, params),
-                _buildLanguageOption(Language.russian, params)
+                _buildLanguageOption(Language.english, _params),
+                _buildLanguageOption(Language.russian, _params)
             ])
         ];
     }
@@ -83,18 +92,18 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         );
     }
 
-    List<Widget> _buildAppearanceSection(UserParams params) {
+    List<Widget> _buildAppearanceSection() {
         return <Widget>[
             _buildSubsectionHeader('Appearance'),
             new Row(children: <Widget>[
-                _buildAppearanceOption(AppTheme.dark, params),
-                _buildAppearanceOption(AppTheme.light, params)
+                _buildAppearanceOption(AppTheme.dark),
+                _buildAppearanceOption(AppTheme.light)
             ])
         ];
     }
 
-    Widget _buildAppearanceOption(AppTheme theme, UserParams params) {
-        final isSelected = theme == params.theme;
+    Widget _buildAppearanceOption(AppTheme theme) {
+        final isSelected = theme == _params.theme;
 
         return new GestureDetector(
             child: new IconOption(
@@ -109,7 +118,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
                 if (isSelected)
                     return;
 
-                setState(() => params.theme = theme);
+                setState(() => _params.theme = theme);
             }
         );
     }
@@ -126,15 +135,21 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         ];
     }
 
-    Widget _buildApplyButton(SettingsBloc bloc, UserParams params) {
-        return new Center(
-            child: new RaisedButton(
-                child: new Text('Apply'),
-                onPressed: _originalParams == params.toJson() ? null: () async {
-                    await bloc.save();
-                    Navigator.pop(context);
-                }
-            )
+    Widget _buildApplyButton(SettingsBloc bloc) {
+        return new Column(
+            children: [
+                new RaisedButton(
+                    child: new Text('Reset'),
+                    onPressed: () => setState(() => _params = new UserParams())
+                ),
+                new RaisedButton(
+                    child: new Text('Apply'),
+                    onPressed: _originalParams == _params.toJson() ? null: () async {
+                        await bloc.save(_params);
+                        Navigator.pop(context);
+                    }
+                )
+            ] 
         );
     }
 }
