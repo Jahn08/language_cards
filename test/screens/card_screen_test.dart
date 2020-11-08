@@ -17,12 +17,10 @@ void main() {
     testWidgets('Builds a screen displaying fields for a word from a storage', 
         (tester) async {
             final wordToShow = await _displayWord(tester);
-            
             expect(find.widgetWithText(TextField, wordToShow.text), findsOneWidget);
             expect(find.widgetWithText(TextField, wordToShow.translation), findsOneWidget);
             
-            var transcriptionFieldFinder = find.widgetWithText(TextField, wordToShow.transcription);
-            expect(transcriptionFieldFinder, findsOneWidget);
+            expect(find.widgetWithText(TextField, wordToShow.transcription), findsOneWidget);
 
             final posField = tester.widget<DropdownButton<String>>(
                 find.byType(_typify<DropdownButton<String>>()));
@@ -212,7 +210,8 @@ Future<StoredWord> _displayWord(WidgetTester tester, { Client client,
     await tester.pumpWidget(TestRootWidget.buildAsAppHome(
         child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
         wordId: wordToShow.id, pack: pack, client: client)));
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(new Duration(milliseconds: 200));
 
     if (shouldHideWarningDialog) {
         final emptyPackWarnDialogBtnFinder = _findWarningDialogButton();
@@ -227,22 +226,23 @@ Finder _findWarningDialogButton() => find.widgetWithText(FlatButton, 'OK');
 
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {
-    final expectedChangedText = await _enterChangedText(tester, fieldValueToChange);
+        final expectedChangedText = await _enterChangedText(tester, fieldValueToChange);
 
-    final refocusedFieldFinder = find.widgetWithText(TextField, fieldValueToRefocus);
-    await new WidgetAssistant(tester).tapWidget(refocusedFieldFinder);
+        final refocusedFieldFinder = find.widgetWithText(TextField, fieldValueToRefocus);
+        await new WidgetAssistant(tester).tapWidget(refocusedFieldFinder);
 
-    final initiallyFocusedFieldFinder = find.widgetWithText(TextField, expectedChangedText);
-    expect(initiallyFocusedFieldFinder, findsOneWidget);
+        final initiallyFocusedFieldFinder = find.widgetWithText(TextField, expectedChangedText);
+        expect(initiallyFocusedFieldFinder, findsOneWidget);
 
-    final refocusedField = tester.widget<TextField>(refocusedFieldFinder);
-    expect(refocusedField.focusNode.hasFocus, true);
-}
+        final refocusedField = tester.widget<TextField>(refocusedFieldFinder);
+        expect(refocusedField.focusNode.hasFocus, true);
+    }
 
 Future<String> _enterChangedText(WidgetTester tester, String initialText) async {
     final changedText = initialText.substring(1);
     await tester.enterText(find.widgetWithText(TextField, initialText), changedText);
-    await tester.pumpAndSettle();
+    
+    await new WidgetAssistant(tester).pumpAndAnimate();
 
     return changedText;
 }
@@ -257,7 +257,6 @@ Future<void> _testSavingChangedValue(WidgetTester tester,
     final expectedChangedText = await _enterChangedText(tester, valueToChangeGetter(wordToShow));
 
     await new WidgetAssistant(tester).tapWidget(_findSaveButton());
-    await tester.pumpAndSettle();
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
@@ -377,9 +376,9 @@ Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
 Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
     final newText = await _enterChangedText(tester, wordText);
     final textFinder = find.widgetWithText(TextField, newText);
-    tester.widget<TextField>(textFinder).onEditingComplete();
 
-    await tester.pumpAndSettle();
+    tester.widget<TextField>(textFinder).onEditingComplete();
+    await new WidgetAssistant(tester).pumpAndAnimate();
 }
 
 Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool nullifyPack }) 

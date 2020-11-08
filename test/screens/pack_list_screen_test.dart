@@ -97,14 +97,15 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
             );
         }));
 
-    await tester.pumpAndSettle(new Duration(milliseconds: 900));
+    await tester.pump(new Duration(milliseconds: 500));
 
     return storage;
 }
 
 Future<StoredPack> _getFirstPackWithCards(MockPackStorage storage, WidgetTester tester) async => 
     await tester.runAsync<StoredPack>(
-        () async => (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0));
+        () async => (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 
+            && p.name != StoredPack.noneName));
 
 Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
     MockPackStorage storage, StoredPack pack) async {
@@ -168,7 +169,7 @@ Future<void> _goToCardList(WidgetAssistant assistant, String packName) async {
 }
 
 Finder _findPackTileByName(String name) {
-    final nonePackTileFinder = find.ancestor(of: find.text(StoredPack.noneName), 
+    final nonePackTileFinder = find.ancestor(of: find.text(name), 
         matching: find.byType(ListTile), matchRoot: true);
     expect(nonePackTileFinder, findsOneWidget);
 
@@ -188,7 +189,7 @@ Future<void> _goBack(WidgetAssistant assistant) async {
     final backBtnFinders = find.byType(BackButton);
     assistant.tester.widget<BackButton>(backBtnFinders.first).onPressed.call();
 
-    await assistant.tester.pumpAndSettle();
+    await assistant.pumpAndAnimate();
 }
 
 Future<void> _assertPackCardNumber(WidgetTester tester, MockPackStorage storage, 

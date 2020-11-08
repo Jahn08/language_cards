@@ -24,13 +24,22 @@ class WidgetAssistant {
         expect(foundKey, findsOneWidget);
 
         await tester.tap(foundKey);
-        await tester.pumpAndSettle();
+        await pumpAndAnimate();
+    }
+
+    Future<void> pumpAndAnimate() async {
+        if (!tester.hasRunningAnimations)
+            await tester.pump();
+
+        if (tester.hasRunningAnimations)
+            await tester.pumpAndSettle();
     }
 
     Future<void> tapWidget(Finder widgetFinder) async {
         expect(widgetFinder, findsOneWidget);
         await tester.tap(widgetFinder);
-        await tester.pumpAndSettle();
+
+        await pumpAndAnimate();
     }
 
     Future<void> pressButtonDirectlyByLabel(String label) async {
@@ -41,6 +50,6 @@ class WidgetAssistant {
         expect(btnFinder, findsOneWidget);
         tester.widget<RaisedButton>(btnFinder).onPressed();
 
-        await tester.pumpAndSettle();
+        await pumpAndAnimate();
     }
 }

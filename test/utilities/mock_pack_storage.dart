@@ -19,7 +19,7 @@ class MockPackStorage extends BaseStorage<StoredPack> {
     @override
     Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) {
         return Future.delayed(
-            new Duration(milliseconds: 100),
+            new Duration(milliseconds: 50),
                 () async {
                     final futurePacks = _packs.skip(skipCount ?? 0).take(takeCount ?? 10)
                         .map((p) async {

@@ -54,7 +54,7 @@ void main() {
         _assertKeyboardIsHidden();
         expect((tester.widget(foundResult) as EditableText).focusNode.hasFocus, false);
 
-        await tester.pumpAndSettle(const Duration(milliseconds: 100));
+        await tester.pump(const Duration(milliseconds: 100));
     });
 }
 

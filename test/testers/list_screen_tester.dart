@@ -134,7 +134,7 @@ class ListScreenTester {
     Future<void> pumpScreen(WidgetTester tester) async {
         await tester.pumpWidget(TestRootWidget.buildAsAppHome(
             child: _screenBuilder()));
-        await tester.pumpAndSettle(new Duration(milliseconds: 900));
+        await tester.pump(new Duration(milliseconds: 500));
     }
 
     Future<void> activateEditorMode(WidgetAssistant assistant) async {
