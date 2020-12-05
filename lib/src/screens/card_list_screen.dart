@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Router;
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
@@ -67,7 +67,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     List<BottomNavigationBarItem> getNavBarOptions(bool allSelected) {
         final options = super.getNavBarOptions(allSelected);
         options.add(new BottomNavigationBarItem(
-            title: new Text('Reset Progress'),
+            label: 'Reset Progress',
             icon: new Icon(Icons.restore)
         ));
 

@@ -37,11 +37,11 @@ void main() {
                     items: <BottomNavigationBarItem>[
                         new BottomNavigationBarItem(
                             icon: navBarItemIcon,
-                            title: new Text(bottomNavBarFirstItemTitle)
+                            label: bottomNavBarFirstItemTitle
                         ),
                         new BottomNavigationBarItem(
                             icon: navBarItemIcon,
-                            title: new Text(bottomNavBarSecondItemTitle)
+                            label: bottomNavBarSecondItemTitle
                         )
                     ]
                 ),

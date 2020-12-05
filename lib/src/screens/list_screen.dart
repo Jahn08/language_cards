@@ -167,11 +167,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         final options = new List<BottomNavigationBarItem>();
         options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.delete),
-            title: new Text('Remove')
+            label: 'Remove'
         ));
         options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.select_all),
-            title: new Text('${allSelected ? 'Unselect': 'Select'} All')
+            label: '${allSelected ? 'Unselect': 'Select'} All'
         ));
 
         return options;

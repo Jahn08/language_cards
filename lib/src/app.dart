@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Router;
 import './blocs/settings_bloc.dart';
 import './data/configuration.dart';
 import './models/user_params.dart';

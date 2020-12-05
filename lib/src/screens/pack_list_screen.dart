@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Router;
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../widgets/asset_icon.dart';

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
