@@ -83,7 +83,7 @@ void main() {
 
     testWidgets('Displays no card pack name for a word from a storage without a pack', 
         (tester) async {
-            await _displayWord(tester);
+            await _displayWord(tester, pack: StoredPack.none);
             
             await _testDisplayingPackName(tester);
         });
@@ -312,7 +312,7 @@ Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester,
 
     final expectedPack = await _changePack(tester, () => newPackGetter(wordToShow));
 
-    await new WidgetAssistant(tester).tapWidget(_findSaveButton());
+    await new WidgetAssistant(tester).pressButtonDirectly(_findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
@@ -356,7 +356,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
         final wordToShow = await _displayWord(tester, client: client,
             shouldHideWarningDialog: false, 
             pack: hasPack ? MockPackStorage.generatePack(
-                Randomiser.nextInt(MockPackStorage.packNumber)): null);
+                Randomiser.nextInt(MockPackStorage.packNumber)): StoredPack.none);
         
         await _assureWarningDialog(tester, !hasPack);
 

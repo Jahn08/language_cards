@@ -54,7 +54,9 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     void onGoingBack(BuildContext context) {
         final shouldRefreshPack = _cardsWereRemoved || widget.cardWasAdded;
 
-        if (widget.pack != null && widget.pack.isNone)
+        if (widget.pack == null)
+            Router.goHome(context);
+        if (widget.pack.isNone)
             shouldRefreshPack ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context);
         else

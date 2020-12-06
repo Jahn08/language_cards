@@ -76,7 +76,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @override
     Widget build(BuildContext buildContext) {
         return new BarScaffold(title,
-            showSettings: showSettings,
             barActions: <Widget>[_editorMode ? _buildEditorDoneButton(): 
                 _buildEditorButton()],
             onNavGoingBack: canGoBack ? 
@@ -92,9 +91,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @protected
     String get title;
-
-    @protected
-    bool get showSettings => false;
 
     Widget _buildEditorButton() => new FlatButton(
         onPressed: () {

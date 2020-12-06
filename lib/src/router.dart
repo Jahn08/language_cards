@@ -95,7 +95,11 @@ class Router {
 
     static const String _packListRouteName = 'packList';
 
-    static String get initialRouteName => _packListRouteName;
+    static const String _studyModeRouteName = 'studyMode';
+
+    static const String _mainMenuRouteName = 'mainMenu';
+
+    static String get initialRouteName => _mainMenuRouteName;
 
     static goToCard(BuildContext context, 
         { BaseStorage<StoredWord> storage, int wordId, StoredPack pack }) {
@@ -118,12 +122,17 @@ class Router {
                 return new CardListRoute.fromArguments(settings.arguments);
             case _packRouteName:
                 return new PackRoute.fromArguments(settings.arguments);
-            default:        
+            case _packListRouteName:       
                 return new PackListRoute.fromArguments(settings.arguments);
+            default:
+                return null;
         }
     }
 
     static goHome(BuildContext context) => Navigator.pushNamed(context, initialRouteName);
+
+    static goToStudyMode(BuildContext context) => 
+        Navigator.pushNamed(context, _studyModeRouteName);
 
     static goToPack(BuildContext context, 
         { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {

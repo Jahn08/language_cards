@@ -3,13 +3,16 @@ import './blocs/settings_bloc.dart';
 import './data/configuration.dart';
 import './models/user_params.dart';
 import './router.dart';
+import './screens/main_screen.dart';
+import './screens/pack_list_screen.dart';
 import './screens/pack_screen.dart';
 import './screens/card_list_screen.dart';
 import './screens/card_screen.dart';
-import './screens/pack_list_screen.dart';
 import './widgets/loader.dart';
 
 class App extends StatelessWidget {
+    
+    static const IconData cardListIcon = Icons.filter_1;
 
     @override
     Widget build(BuildContext context) => 
@@ -34,7 +37,12 @@ class _ThemedAppState extends State<_ThemedApp> {
                 initialRoute: Router.initialRouteName,
                 onGenerateRoute: (settings) {
                     final route = Router.getRoute(settings);
-                    if (route is WordCardRoute)
+                    if (route == null)
+                        return new MaterialPageRoute(
+                            settings: settings,
+                            builder: (context) => new MainScreen()
+                        );
+                    else if (route is WordCardRoute)
                         return _buildCardRoute(route, settings);
                     else if (route is CardListRoute) {
                         final params = route.params;
@@ -54,7 +62,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                         
                     return new MaterialPageRoute(
                         settings: settings,
-                        builder: (context) => new PackListScreen((route as PackListRoute).params.storage));
+                        builder: (context) => 
+                            new PackListScreen((route as PackListRoute).params.storage));
                 }
             );
         });

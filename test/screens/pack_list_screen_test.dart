@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import '../testers/list_screen_tester.dart';
@@ -76,6 +77,11 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
         onGenerateRoute: (settings) {
             final route = Router.getRoute(settings);
 
+            if (route == null)
+                return new MaterialPageRoute(
+                    settings: settings,
+                    builder: (context) => new TestRootWidget(child: new MainScreen())
+                );
             if (route is CardListRoute)
                 return new MaterialPageRoute(
                     settings: settings,
@@ -98,6 +104,9 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
         }));
 
     await tester.pump(new Duration(milliseconds: 500));
+
+    final finder = find.byIcon(Icons.library_books);
+    await new WidgetAssistant(tester).tapWidget(finder);
 
     return storage;
 }

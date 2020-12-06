@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
+import '../app.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../models/language.dart';
@@ -93,7 +94,7 @@ class PackScreenState extends State<PackScreen> {
 
         if (!_isNew && _foundPack != null)
             children.add(new FlatButton.icon(
-                icon: new Icon(Icons.filter_1),
+                icon: new Icon(App.cardListIcon),
                 label: new Text('Show $_cardsNumber Cards'),
                 onPressed: () => Router.goToCardList(context, pack: _foundPack)
             ));

@@ -39,6 +39,8 @@ class CardScreenState extends State<CardScreen> {
 
     bool _initialised = false;
 
+    Future<StoredWord> futureWord;
+
     CardScreenState([Client client]): 
         this._client = client,
         super();
@@ -47,11 +49,16 @@ class CardScreenState extends State<CardScreen> {
     void initState() {
         super.initState();
 
-        _setPack(widget.pack ?? StoredPack.none);
+        if (widget.pack != null || _isNew)
+            _setPack(widget.pack ?? StoredPack.none);
+
+        futureWord = _isNew ? 
+            Future.value(new StoredWord('')): _retrieveWord();
+        
         _studyProgress = WordStudyStage.unknown;
     }
 
-    _setPack(StoredPack newPack) {
+    void _setPack(StoredPack newPack) {
         _pack = newPack;
 
         _disposeDictionary();
@@ -59,16 +66,14 @@ class CardScreenState extends State<CardScreen> {
             new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to, 
                 client: _client);
 
-        WidgetsBinding.instance.addPostFrameCallback(
-            (_) => _warnWhenEmptyDictionary(context));
+        if (_dictionary == null)
+            WidgetsBinding.instance.addPostFrameCallback(
+                (_) => _warnWhenEmptyDictionary(context));
     }
 
     _disposeDictionary() => _dictionary?.dispose();
 
     Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
-        if (_dictionary != null)
-            return;
-
         await new ConfirmDialog<bool>(
             title: 'Choose Pack', 
             content: 'You should choose a pack to enable automatic translation',
@@ -90,8 +95,6 @@ class CardScreenState extends State<CardScreen> {
     bool get _isNew => widget.wordId == 0;
 
     Widget _buildFutureFormLayout() {
-        final futureWord = _isNew || _initialised ? 
-            Future.value(new StoredWord('')): widget._wordStorage.find(widget.wordId);
         return new FutureBuilder(
             future: futureWord,
             builder: (context, AsyncSnapshot<StoredWord> snapshot) {
@@ -112,6 +115,16 @@ class CardScreenState extends State<CardScreen> {
                 return _buildFormLayout();
             }
         );
+    }
+
+    Future<StoredWord> _retrieveWord() async {
+        final word = await widget._wordStorage.find(widget.wordId);
+    
+        if (widget.pack == null)
+            _setPack(word.packId > 0 ? await widget._packStorage.find(word.packId): 
+                StoredPack.none);
+
+        return word;
     }
 
     Widget _buildFormLayout() {

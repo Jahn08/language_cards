@@ -44,16 +44,13 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     void removeItems(List<int> ids) => widget.storage.delete(ids);
 
     @override
-    bool get showSettings => true;
-
-    @override
     String get title => 'Card Packs';
 
     @override
-    bool get canGoBack => false;
+    bool get canGoBack => true;
 
     @override
-    void onGoingBack(BuildContext context) {}
+    void onGoingBack(BuildContext context) => Router.goHome(context);
 
     @override
     bool isRemovableItem(StoredPack item) => !item.isNone;
