@@ -17,7 +17,7 @@ class MockPackStorage extends BaseStorage<StoredPack> {
         packs.sort((a, b) => a.name.compareTo(b.name));
 
     @override
-    Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) {
+    Future<List<StoredPack>> fetch({ List<int> parentIds, int skipCount, int takeCount }) {
         return Future.delayed(
             new Duration(milliseconds: 50),
                 () async {

@@ -15,16 +15,16 @@ class MockWordStorage extends BaseStorage<StoredWord> {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) {
+    Future<List<StoredWord>> fetch({ List<int> parentIds, int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(parentId).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+            () => _fetch(parentIds).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
-    Iterable<StoredWord> _fetch([int parentId]) => parentId == null ? _words : 
-        _words.where((w) => w.packId == parentId);
+    Iterable<StoredWord> _fetch([List<int> parentIds]) => parentIds == null ? _words : 
+        _words.where((w) => parentIds.contains(w.packId));
 
     Future<int> getLength({ int parentId }) {
-        return Future.delayed(new Duration(milliseconds: 50), () => _fetch(parentId).length);
+        return Future.delayed(new Duration(milliseconds: 50), () => _fetch([parentId]).length);
     }
 
     Future<StoredWord> find(int id) =>

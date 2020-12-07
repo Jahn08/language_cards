@@ -9,10 +9,10 @@ class WordStorage extends BaseStorage<StoredWord> {
     @override
     String get entityName => StoredWord.entityName;
 
-    Future<List<StoredWord>> fetch({ int parentId, int skipCount, int takeCount }) async {
+    Future<List<StoredWord>> fetch({ List<int> parentIds, int skipCount, int takeCount }) async {
         return fetchInternally(skipCount: skipCount, takeCount: takeCount, 
             orderBy: StoredWord.textFieldName, parentField: StoredWord.packIdFieldName,
-            parentId: parentId);
+            parentIds: parentIds);
     }
 
     @override

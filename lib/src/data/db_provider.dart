@@ -114,19 +114,19 @@ class DbProvider {
     Future<int> delete(String tableName, List<dynamic> ids) {
         return _perform<int>(tableName, 
             () => _db.delete(tableName, 
-                where: _composeInFilterClause(StoredEntity.idFieldName, ids),
+                where: _composeInFilterClause(StoredEntity.idFieldName, ids.length),
                 whereArgs: ids
             ));
     }
 
-    String _composeInFilterClause(String fieldName, List<dynamic> values) {
-        final whereParamExpr = List.filled(values.length, '?').join(', ');
+    String _composeInFilterClause(String fieldName, int valuesCount) {
+        final whereParamExpr = List.filled(valuesCount, '?').join(', ');
         return '$fieldName IN ($whereParamExpr)';
     }
         
     Future<Map<T, int>> getGroupLength<T>(String tableName, 
         { @required String groupField, @required List<T> groupValues }) {
-            final filterClause = _composeInFilterClause(groupField, groupValues);
+            final filterClause = _composeInFilterClause(groupField, groupValues.length);
             return _perform(tableName, () async {
                 const lengthField = 'length';
                 final res = await _db.rawQuery('''SELECT $groupField, COUNT(*) $lengthField 
@@ -145,9 +145,14 @@ class DbProvider {
                 limit: take,
                 offset: skip,
                 orderBy: orderBy,
-                where: filters == null ? null: 
-                    filters.keys.map((field) => '"$field"=?').join(' AND '),
-                whereArgs: filters == null ? null: filters.values.toList()
+                where: filters == null ? null: filters.entries.map((entry) {
+                    final length = entry.value is Iterable<dynamic> ? entry.value.length: 1;
+                    return _composeInFilterClause(entry.key, length);
+                }).join(' AND '),
+                whereArgs: filters == null ? null: filters.values.fold([], (prevEl, el) {
+                    el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
+                    return prevEl;
+                })
             ));
         }
 

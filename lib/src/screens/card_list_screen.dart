@@ -32,7 +32,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     @override
     Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount) =>
         widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, 
-            parentId: widget.pack?.id);
+            parentIds: widget.pack == null ? null: [widget.pack.id]);
   
     @override
     void removeItems(List<int> ids) {
@@ -56,7 +56,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
         if (widget.pack == null)
             Router.goHome(context);
-        if (widget.pack.isNone)
+        else if (widget.pack.isNone)
             shouldRefreshPack ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context);
         else

@@ -14,22 +14,23 @@ class PackStorage extends BaseStorage<StoredPack> {
         values.map((w) => new StoredPack.fromDbMap(w)).toList();
 
     @override
-    Future<List<StoredPack>> fetch({ int parentId, int skipCount, int takeCount }) async {
-        final isFirstRequest = skipCount == null || skipCount == 0;
-        if (isFirstRequest)
-            takeCount = (takeCount ?? BaseStorage.itemsPerPageByDefault) - 1;
+    Future<List<StoredPack>> fetch({ int skipCount, int takeCount, List<int> parentIds }) 
+        async {
+            final isFirstRequest = skipCount == null || skipCount == 0;
+            if (isFirstRequest)
+                takeCount = (takeCount ?? BaseStorage.itemsPerPageByDefault) - 1;
 
-        final packs = await super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            orderBy: StoredPack.nameFieldName);
+            final packs = await super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
+                orderBy: StoredPack.nameFieldName);
 
-        if (isFirstRequest)
-            packs.insert(0, StoredPack.none);
+            if (isFirstRequest)
+                packs.insert(0, StoredPack.none);
 
-        final lengths = await new WordStorage().getLength(packs.map((p) => p.id).toList());
-        packs.forEach((p) => p.cardsNumber = lengths[p.id]);
+            final lengths = await new WordStorage().getLength(packs.map((p) => p.id).toList());
+            packs.forEach((p) => p.cardsNumber = lengths[p.id]);
 
-        return packs;
-    }
+            return packs;
+        }
 
     @override
     Future<StoredPack> find(int id) async {
