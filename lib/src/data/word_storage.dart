@@ -16,18 +16,22 @@ class WordStorage extends BaseStorage<StoredWord> {
     Future<List<StoredWord>> _fetchInternally({ List<int> parentIds, int skipCount, 
         int takeCount }) =>
         super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            orderBy: StoredWord.textFieldName, parentField: StoredWord.packIdFieldName);
+            orderBy: StoredWord.textFieldName, parentIds: parentIds,
+            parentField: StoredWord.packIdFieldName);
 
     @override
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) => 
         values.map((w) => new StoredWord.fromDbMap(w)).toList();
 
-    Future<Map<int, int>> getLength(List<int> parentIds) =>
-        connection.getGroupLength<int>(entityName, 
-            groupField: StoredWord.packIdFieldName, groupValues: parentIds);
+    Future<Map<int, int>> groupByParent(List<int> parentIds) async {
+        final groups = (await connection.groupBy<int>(entityName, 
+            groupField: StoredWord.packIdFieldName, groupValues: parentIds));
+        return new Map<int, int>.fromIterable(groups, 
+            key: (g) => g[StoredWord.packIdFieldName], value: (g) => g.length);
+    }
 
     Future<Map<int, Map<int, int>>> groupByStudyLevels() async {
-        final groups = await connection.countGroups(entityName, 
+        final groups = await connection.groupBySeveral(entityName, 
             groupFields: [StoredWord.packIdFieldName, StoredWord.studyProgressFieldName]);
 
         return groups.fold<Map<int, Map<int, int>>>(new Map<int, Map<int, int>>(),

@@ -23,8 +23,8 @@ class MockWordStorage extends BaseStorage<StoredWord> {
     Iterable<StoredWord> _fetch([List<int> parentIds]) => parentIds == null ? _words : 
         _words.where((w) => parentIds.contains(w.packId));
 
-    Future<int> getLength({ int parentId }) {
-        return Future.delayed(new Duration(milliseconds: 50), () => _fetch([parentId]).length);
+    Future<int> groupByParent(List<int> parentIds) {
+        return Future.delayed(new Duration(milliseconds: 50), () => _fetch(parentIds).length);
     }
 
     Future<StoredWord> find(int id) =>

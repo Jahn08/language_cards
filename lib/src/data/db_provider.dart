@@ -6,7 +6,7 @@ import './data_group.dart';
 import '../models/stored_entity.dart';
 
 class DbProvider {
-    
+
     static DbProvider _provider;
 
     final List<StoredEntity> _tableEntities;
@@ -126,7 +126,7 @@ class DbProvider {
         return '$fieldName IN ($whereParamExpr)';
     }
         
-    Future<Map<T, int>> getGroupLength<T>(String tableName, 
+    Future<List<DataGroup>> groupBy<T>(String tableName, 
         { @required String groupField, @required List<T> groupValues }) {
             final filterClause = _composeInFilterClause(groupField, groupValues.length);
             return _perform(tableName, () async {
@@ -134,8 +134,7 @@ class DbProvider {
                     filterClause: filterClause);
                 final res = await _db.rawQuery(groupClause, groupValues);
                 
-                return new Map.fromIterable(res, key: (gr) => gr[groupField], 
-                    value: (gr) => gr[DataGroup.lengthField] as int);
+                return res.map((v) => new DataGroup(v)).toList();
             });
         }
 
@@ -148,7 +147,7 @@ class DbProvider {
             FROM $tableName$whereClause GROUP BY $fieldClause''';
     }
 
-    Future<List<DataGroup>> countGroups<T>(String tableName, 
+    Future<List<DataGroup>> groupBySeveral<T>(String tableName, 
         { @required List<String> groupFields }) {
             return _perform(tableName, () async {
                 final groupClause = _composeGroupClause(tableName, groupFields: groupFields, );

@@ -23,7 +23,7 @@ class MockPackStorage extends BaseStorage<StoredPack> {
                 () async {
                     final futurePacks = _packs.skip(skipCount ?? 0).take(takeCount ?? 10)
                         .map((p) async {
-                            p.cardsNumber = (await this.wordStorage.getLength(parentId: p.id));
+                            p.cardsNumber = (await this.wordStorage.groupByParent([p.id]));
                             return p;
                         });
 
@@ -36,7 +36,7 @@ class MockPackStorage extends BaseStorage<StoredPack> {
             return null;
 
         final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);
-        final cardsNumber = await this.wordStorage.getLength(parentId: pack.id);
+        final cardsNumber = await this.wordStorage.groupByParent([pack.id]);
         pack.cardsNumber = cardsNumber;
 
         return pack;

@@ -27,7 +27,8 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
             if (isFirstRequest)
                 packs.insert(0, StoredPack.none);
 
-            final lengths = await new WordStorage().getLength(packs.map((p) => p.id).toList());
+            final lengths = await new WordStorage().groupByParent(
+                packs.map((p) => p.id).toList());
             packs.forEach((p) => p.cardsNumber = lengths[p.id]);
 
             return packs;
@@ -45,7 +46,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         final pack = await super.find(id);
 
         if (pack != null) {
-            final cardsNumber = await new WordStorage().getLength([pack.id]);
+            final cardsNumber = await new WordStorage().groupByParent([pack.id]);
             pack.cardsNumber = cardsNumber[pack.id];
         }
         
