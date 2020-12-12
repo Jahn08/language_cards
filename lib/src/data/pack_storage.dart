@@ -1,10 +1,12 @@
 import '../data/base_storage.dart';
 import '../data/word_storage.dart';
+import '../models/study_pack.dart';
 import '../models/stored_pack.dart';
+import './study_storage.dart';
 
 export '../models/stored_pack.dart';
 
-class PackStorage extends BaseStorage<StoredPack> {
+class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
     @override
     String get entityName => StoredPack.entityName;
@@ -20,8 +22,7 @@ class PackStorage extends BaseStorage<StoredPack> {
             if (isFirstRequest)
                 takeCount = (takeCount ?? BaseStorage.itemsPerPageByDefault) - 1;
 
-            final packs = await super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-                orderBy: StoredPack.nameFieldName);
+            final packs = await _fetchInternally(skipCount: skipCount, takeCount: takeCount);
 
             if (isFirstRequest)
                 packs.insert(0, StoredPack.none);
@@ -31,6 +32,10 @@ class PackStorage extends BaseStorage<StoredPack> {
 
             return packs;
         }
+
+    Future<List<StoredPack>> _fetchInternally({ int takeCount, int skipCount }) =>
+        super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
+            orderBy: StoredPack.nameFieldName);
 
     @override
     Future<StoredPack> find(int id) async {
@@ -45,5 +50,16 @@ class PackStorage extends BaseStorage<StoredPack> {
         }
         
         return pack;
+    }
+
+    @override
+    Future<List<StudyPack>> fetchStudyPacks() async {
+        final packs = await _fetchInternally();
+        final packMap = new Map<int, StoredPack>.fromIterable(packs, 
+            key: (p) => p.id, value: (p) => p);
+        
+        return (await new WordStorage().groupByStudyLevels())
+            .entries.where((e) => e.key > 0)
+            .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
     }
 }

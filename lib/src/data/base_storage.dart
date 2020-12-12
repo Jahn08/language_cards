@@ -21,7 +21,7 @@ abstract class BaseStorage<T extends StoredEntity> {
     Future<List<T>> fetchInternally({ int takeCount, int skipCount, 
         String orderBy, List<int> parentIds, String parentField }) async {
             final wordValues = await connection.fetch(entityName, 
-                take: takeCount ?? itemsPerPageByDefault, 
+                take: takeCount, 
                 filters: parentIds == null || parentIds.length == 0 ? null: 
                     { parentField: parentIds },
                 orderBy: orderBy, 

@@ -2,9 +2,11 @@ import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart';
+import './data_group.dart';
 import '../models/stored_entity.dart';
 
 class DbProvider {
+    
     static DbProvider _provider;
 
     final List<StoredEntity> _tableEntities;
@@ -128,13 +130,31 @@ class DbProvider {
         { @required String groupField, @required List<T> groupValues }) {
             final filterClause = _composeInFilterClause(groupField, groupValues.length);
             return _perform(tableName, () async {
-                const lengthField = 'length';
-                final res = await _db.rawQuery('''SELECT $groupField, COUNT(*) $lengthField 
-                    FROM $tableName WHERE $filterClause GROUP BY $groupField''', 
-                    groupValues);
-
+                final groupClause = _composeGroupClause(tableName, groupFields: [groupField], 
+                    filterClause: filterClause);
+                final res = await _db.rawQuery(groupClause, groupValues);
+                
                 return new Map.fromIterable(res, key: (gr) => gr[groupField], 
-                    value: (gr) => gr[lengthField] as int);
+                    value: (gr) => gr[DataGroup.lengthField] as int);
+            });
+        }
+
+    String _composeGroupClause(String tableName, { 
+        @required List<String> groupFields, String filterClause }) { 
+        final fieldClause = groupFields.join(', ');
+        final whereClause = filterClause == null || filterClause.isEmpty ? '':
+            ' WHERE $filterClause';
+        return '''SELECT $fieldClause, COUNT(*) ${DataGroup.lengthField} 
+            FROM $tableName$whereClause GROUP BY $fieldClause''';
+    }
+
+    Future<List<DataGroup>> countGroups<T>(String tableName, 
+        { @required List<String> groupFields }) {
+            return _perform(tableName, () async {
+                final groupClause = _composeGroupClause(tableName, groupFields: groupFields, );
+                final res = await _db.rawQuery(groupClause);
+
+                return res.map((v) => new DataGroup(v)).toList();
             });
         }
 

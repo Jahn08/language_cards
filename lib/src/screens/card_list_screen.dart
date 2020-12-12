@@ -6,20 +6,21 @@ import '../dialogs/confirm_dialog.dart';
 import './list_screen.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
+import '../widgets/one_line_text.dart';
 
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     bool _cardsWereRemoved = false;
 
     @override
-    Widget getItemSubtitle(StoredWord item) => super.buildOneLineText(item.translation);
+    Widget getItemSubtitle(StoredWord item) => new OneLineText(item.translation);
     
     @override
-    Widget getItemTitle(StoredWord item) => super.buildOneLineText(item.text);
+    Widget getItemTitle(StoredWord item) => new OneLineText(item.text);
     
     @override
     Widget getItemTrailing(StoredWord item) => new Column(children: <Widget>[
-        super.buildOneLineText(item.partOfSpeech),
-        super.buildOneLineText('${item.studyProgress}%')
+        new OneLineText(item.partOfSpeech),
+        new OneLineText('${item.studyProgress}%')
     ]);
 
     @override

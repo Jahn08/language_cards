@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import './models/stored_entity.dart';
 import './data/base_storage.dart';
-import './data/word_storage.dart';
 import './data/pack_storage.dart';
+import './data/study_storage.dart';
+import './data/word_storage.dart';
 
 class _StorageRouteArgs<T extends StoredEntity> {
     final BaseStorage<T> storage;
@@ -65,6 +66,20 @@ class WordCardRoute {
         params = arguments is _WordCardRouteArgs ? arguments : new _WordCardRouteArgs();
 }
 
+class _StudyStorageRouteArgs {
+    final StudyStorage storage;
+
+    _StudyStorageRouteArgs([StudyStorage storage]):
+        storage = storage ?? new PackStorage();
+}
+
+class StudyPreparerRoute { 
+    final _StudyStorageRouteArgs params;
+
+    StudyPreparerRoute.fromArguments(Object arguments): 
+        params = arguments is _StudyStorageRouteArgs ? arguments : new _StudyStorageRouteArgs();
+}
+
 class _PackRouteArgs extends _PackStorageRouteArgs {
     final int packId;
 
@@ -95,7 +110,7 @@ class Router {
 
     static const String _packListRouteName = 'packList';
 
-    static const String _studyModeRouteName = 'studyMode';
+    static const String _studyPreparerRouteName = 'studyPreparer';
 
     static const String _mainMenuRouteName = 'mainMenu';
 
@@ -124,6 +139,8 @@ class Router {
                 return new PackRoute.fromArguments(settings.arguments);
             case _packListRouteName:       
                 return new PackListRoute.fromArguments(settings.arguments);
+            case _studyPreparerRouteName:       
+                return new StudyPreparerRoute.fromArguments(settings.arguments);
             default:
                 return null;
         }
@@ -131,8 +148,9 @@ class Router {
 
     static goHome(BuildContext context) => Navigator.pushNamed(context, initialRouteName);
 
-    static goToStudyMode(BuildContext context) => 
-        Navigator.pushNamed(context, _studyModeRouteName);
+    static goToStudyPreparation(BuildContext context, [StudyStorage storage]) => 
+        Navigator.pushNamed(context, _studyPreparerRouteName, 
+            arguments: new _StudyStorageRouteArgs(storage));
 
     static goToPack(BuildContext context, 
         { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {

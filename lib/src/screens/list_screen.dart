@@ -196,9 +196,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildList() => new Scrollbar(
         child: new ListView.builder(
             itemCount: _items.length,
-            itemBuilder: (listContext, index) => _editorMode ?
-                _buildCheckListItem(listContext, index):
-                _buildDismissibleListItem(listContext, index),
+            itemBuilder: _editorMode ? _buildCheckListItem: _buildDismissibleListItem,
             controller: _scrollController
         )
     );
@@ -238,10 +236,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             subtitle: getItemSubtitle(item),
             onTap: () => isReadonly ? null: onGoingToItem(buildContext, item)
         );
-
-    @protected
-    Widget buildOneLineText(String data) => 
-        new Text(data, maxLines: 1, overflow: TextOverflow.ellipsis);
 
     Widget _buildDismissibleListItem(BuildContext buildContext, int itemIndex) {
         final item = _items[itemIndex];

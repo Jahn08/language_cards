@@ -75,7 +75,7 @@ class ListScreenTester {
 
                 int index = 0;
                 final items = new Map.fromEntries(tester.widgetList<CheckboxListTile>(tilesFinder)
-                    .map((t) => new MapEntry(index++, (t.title as Text).data)));
+                    .map((t) => new MapEntry(index++, _extractTitle(tester, t))));
 
                 final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
                 await assistant.tapWidget(removeBtnFinder);
@@ -83,7 +83,7 @@ class ListScreenTester {
                 final listTiles = tester.widgetList<CheckboxListTile>(tilesFinder).toList();
                 for (final item in items.entries) {
                     final listTile = listTiles.elementAt(item.key);
-                    expect((listTile.title as Text).data, item.value);
+                    expect(_extractTitle(tester, listTile), item.value);
                 }
             });
 
@@ -108,7 +108,7 @@ class ListScreenTester {
                 final listTile = listTiles.elementAt(item.key);
                 
                 expect(listTile.value, false);
-                expect((listTile.title as Text).data, item.value);
+                expect(_extractTitle(tester, listTile), item.value);
             }
         });
 
@@ -170,6 +170,14 @@ class ListScreenTester {
         return tilesFinder;
     }
 
+    String _extractTitle(WidgetTester tester, CheckboxListTile tile) {
+        final textWidgetFinder = find.descendant(of: find.byWidget(tile.title), 
+            matching: find.byType(Text));
+        expect(textWidgetFinder, findsOneWidget);
+
+        return (tester.widget(textWidgetFinder) as Text).data;
+    }
+
     Future<Map<int, String>> _removeItemsInEditor(WidgetTester tester) async {
         await pumpScreen(tester);
 
@@ -187,7 +195,8 @@ class ListScreenTester {
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
             final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
-            final lastTileIndex = assistant.tester.widgetList(tilesFinder).length - 1;
+            final tester = assistant.tester;
+            final lastTileIndex = tester.widgetList(tilesFinder).length - 1;
             final middleTileIndex = chosenIndex == null || chosenIndex == 0 || 
                 chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
             
@@ -198,8 +207,8 @@ class ListScreenTester {
             };
             final itemsToRemove = new Map<int, String>();
             for (final tileFinder in tilesToSelect.entries) {
-                itemsToRemove[tileFinder.key] =
-                    (assistant.tester.widget<CheckboxListTile>(tileFinder.value).title as Text).data;
+                itemsToRemove[tileFinder.key] = _extractTitle(tester, 
+                    tester.widget<CheckboxListTile>(tileFinder.value));
                 await assistant.tapWidget(tileFinder.value);
             }
 

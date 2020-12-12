@@ -1,24 +1,19 @@
 import 'package:flutter/material.dart' hide Router;
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
-import '../widgets/asset_icon.dart';
-import '../widgets/icon_option.dart';
 import './list_screen.dart';
 import '../router.dart';
+import '../widgets/one_line_text.dart';
+import '../widgets/translation_indicator.dart';
 
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
-    Widget getItemSubtitle(StoredPack item) => item.isNone ? null: new Row(
-        children: <Widget>[
-            new IconOption(icon: AssetIcon.getByLanguage(item.from)),
-            new Icon(Icons.arrow_right),
-            new IconOption(icon: AssetIcon.getByLanguage(item.to))
-        ]
-    );
+    Widget getItemSubtitle(StoredPack item) => 
+        item.isNone ? null: new TranslationIndicator(item.from, item.to);
     
     @override
-    Widget getItemTitle(StoredPack item) => super.buildOneLineText(item.name);
+    Widget getItemTitle(StoredPack item) => new OneLineText(item.name);
     
     @override
     Widget getItemTrailing(StoredPack item) => new Container(

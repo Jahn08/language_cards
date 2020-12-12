@@ -17,13 +17,12 @@ class MainScreen extends StatelessWidget {
     Widget _buildMenu(BuildContext context) {
         return new Column(
             children: [
-                _buildEmptyMenuRow(),
-                _buildEmptyMenuRow(),
-                _buildMenuRow([
+                _buildRow(flex: 2),
+                _buildRow(children: [
                     _buildMenuItem('Study Mode', Icons.school, 
-                        () => Router.goToStudyMode(context))
+                        () => Router.goToStudyPreparation(context))
                 ]),
-                _buildMenuRow([
+                _buildRow(children: [
                     _buildMenuItem('Word Packs', Icons.library_books, 
                         () => Router.goToPackList(context)),
                     _buildMenuItem('Word Cards', App.cardListIcon, 
@@ -33,16 +32,15 @@ class MainScreen extends StatelessWidget {
         );
     }
 
-    Widget _buildEmptyMenuRow() =>  _buildMenuRow([]);
-
-    Widget _buildMenuRow(List<Widget> children) {
-        return new Expanded(
+    Widget _buildRow({ List<Widget> children, int flex }) => 
+        new Flexible(
+            fit: FlexFit.tight,
+            flex: flex ?? 1,
             child: new Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch, 
-                children: children
+                children: children ?? []
             )
         );
-    }
 
     Widget _buildMenuItem(String title, IconData icon, void Function() onClick) {
         return new Expanded(

@@ -20,4 +20,19 @@ class WordStudyStage {
 
         return WordStudyStage.values.where((v) => v <= stage).toList();
     }
+
+    static String stringify(int stage) {
+        switch (stage) {
+            case recognisedOnce:
+                return 'Barely Known';
+            case familiar:
+                return 'Familiar';
+            case wellKnown:
+                return 'Well Known';
+            case learned:
+                return 'Learned';
+            default:
+                return 'New';
+        }
+    }
 }
