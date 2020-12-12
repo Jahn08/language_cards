@@ -24,7 +24,6 @@ class WordStudyStage {
     static String stringify(int stage) {
         switch (stage) {
             case recognisedOnce:
-                return 'Barely Known';
             case familiar:
                 return 'Familiar';
             case wellKnown:

@@ -65,6 +65,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                     levels[en.key] += en.value;
                 })
             );
+        levels['All'] = levels.values.reduce((res, el) => res + el);
 
         return new ListView(
             children: levels.entries.map((lvl) => new ListTile(title: new Text(lvl.key), 
