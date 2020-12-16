@@ -108,4 +108,20 @@ class MockWordStorage extends BaseStorage<StoredWord> {
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) {
         throw UnimplementedError();
     }
+
+    Future<Map<int, Map<int, int>>> groupByStudyLevels() {
+        return Future.value(_words.fold<Map<int, Map<int, int>>>({},
+            (res, w) {
+                final packId = w.packId;
+                if (!res.containsKey(packId))
+                    res[packId] = new Map<int, int>();
+
+                if (res[packId].containsKey(w.studyProgress))
+                    res[packId][w.studyProgress] += 1;
+                else
+                    res[packId][w.studyProgress] = 1;
+
+                return res;
+            }));
+    }
 }

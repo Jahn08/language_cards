@@ -1,10 +1,11 @@
 import 'package:language_cards/src/data/base_storage.dart';
+import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/language.dart';
 import './mock_word_storage.dart';
 import './randomiser.dart';
 
-class MockPackStorage extends BaseStorage<StoredPack> {
+class MockPackStorage extends BaseStorage<StoredPack> with StudyStorage {
     static const int packNumber = 4;
 
     final List<StoredPack> _packs = _generatePacks(packNumber);
@@ -17,18 +18,22 @@ class MockPackStorage extends BaseStorage<StoredPack> {
         packs.sort((a, b) => a.name.compareTo(b.name));
 
     @override
-    Future<List<StoredPack>> fetch({ List<int> parentIds, int skipCount, int takeCount }) {
-        return Future.delayed(
-            new Duration(milliseconds: 50),
-                () async {
-                    final futurePacks = _packs.skip(skipCount ?? 0).take(takeCount ?? 10)
-                        .map((p) async {
-                            p.cardsNumber = (await this.wordStorage.groupByParent([p.id]));
-                            return p;
-                        });
+    Future<List<StoredPack>> fetch({ List<int> parentIds, int skipCount, int takeCount }) =>
+        _fetchInternally(skipCount: skipCount, takeCount: takeCount ?? 10);
 
-                    return Future.wait<StoredPack>(futurePacks);
-                });
+    Future<List<StoredPack>> _fetchInternally({ int skipCount, int takeCount }) {
+        return Future.delayed(new Duration(milliseconds: 50),
+            () async {
+                var futurePacks = _packs.skip(skipCount ?? 0);
+                
+                if (takeCount != null && takeCount > 0)
+                    futurePacks = futurePacks.take(takeCount);
+
+                return Future.wait<StoredPack>(futurePacks.map((p) async {
+                    p.cardsNumber = (await this.wordStorage.groupByParent([p.id]));
+                    return p;
+                }));
+            });
     }
 
     Future<StoredPack> find(int id) async {
@@ -96,4 +101,15 @@ class MockPackStorage extends BaseStorage<StoredPack> {
     @override
     Future<StoredPack> upsert(StoredPack pack) async => 
         (await _save([pack])).first;
+
+    @override
+    Future<List<StudyPack>> fetchStudyPacks() async {
+        final packs = await _fetchInternally();
+        final packMap = new Map<int, StoredPack>.fromIterable(packs, 
+            key: (p) => p.id, value: (p) => p);
+        
+        return (await wordStorage.groupByStudyLevels())
+            .entries.where((e) => e.key > 0)
+            .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
+    }
 }
