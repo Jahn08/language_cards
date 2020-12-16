@@ -6,10 +6,10 @@ import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
+import '../mocks/pack_storage_mock.dart';
+import '../mocks/root_widget_mock.dart';
+import '../mocks/word_storage_mock.dart';
 import '../testers/list_screen_tester.dart';
-import '../utilities/mock_pack_storage.dart';
-import '../utilities/mock_word_storage.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -67,11 +67,11 @@ void main() {
     });
 }
 
-PackListScreen _buildPackListScreen([MockPackStorage storage]) => 
-    new PackListScreen(storage ?? new MockPackStorage());
+PackListScreen _buildPackListScreen([PackStorageMock storage]) => 
+    new PackListScreen(storage ?? new PackStorageMock());
     
-Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
-    final storage = new MockPackStorage();
+Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
+    final storage = new PackStorageMock();
     await tester.pumpWidget(new MaterialApp(
         initialRoute: Router.initialRouteName,
         onGenerateRoute: (settings) {
@@ -80,26 +80,26 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
             if (route == null)
                 return new MaterialPageRoute(
                     settings: settings,
-                    builder: (context) => new TestRootWidget(child: new MainScreen())
+                    builder: (context) => new RootWidgetMock(child: new MainScreen())
                 );
             if (route is CardListRoute)
                 return new MaterialPageRoute(
                     settings: settings,
-                    builder: (context) => new TestRootWidget(
+                    builder: (context) => new RootWidgetMock(
                         child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
                             cardWasAdded: cardWasAdded))
                 );
             else if (route is PackRoute)
                 return new MaterialPageRoute(
                     settings: settings,
-                    builder: (context) => new TestRootWidget(
+                    builder: (context) => new RootWidgetMock(
                         child: new PackScreen(storage, packId: route.params.packId, 
                             refreshed: route.params.refreshed))
                 );
 
             return new MaterialPageRoute(
                 settings: settings,
-                builder: (context) => new TestRootWidget(child: _buildPackListScreen(storage))
+                builder: (context) => new RootWidgetMock(child: _buildPackListScreen(storage))
             );
         }));
 
@@ -111,13 +111,13 @@ Future<MockPackStorage> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
     return storage;
 }
 
-Future<StoredPack> _getFirstPackWithCards(MockPackStorage storage, WidgetTester tester) async => 
+Future<StoredPack> _getFirstPackWithCards(PackStorageMock storage, WidgetTester tester) async => 
     await tester.runAsync<StoredPack>(
         () async => (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 
             && p.name != StoredPack.noneName));
 
 Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
-    MockPackStorage storage, StoredPack pack) async {
+    PackStorageMock storage, StoredPack pack) async {
     final expectedNumberOfCards = pack.cardsNumber;
         
     final assistant = new WidgetAssistant(tester);
@@ -133,7 +133,7 @@ Future<void> _testShowingCardsWithoutChanging(WidgetTester tester,
 }
 
 Future<void> _testDecreasingNumberOfCards(WidgetTester tester, 
-    MockPackStorage storage, StoredPack pack) async {
+    PackStorageMock storage, StoredPack pack) async {
     final expectedNumberOfCards = pack.cardsNumber - 1;
     
     final assistant = new WidgetAssistant(tester);
@@ -148,14 +148,14 @@ Future<void> _testDecreasingNumberOfCards(WidgetTester tester,
 }
 
 Future<void> _testIncreasingNumberOfCards(WidgetTester tester, 
-    MockPackStorage storage, StoredPack pack) async {
+    PackStorageMock storage, StoredPack pack) async {
     final expectedNumberOfCards = pack.cardsNumber + 1;
 
     final assistant = new WidgetAssistant(tester);
     await _goToCardList(assistant, pack.name);
 
     await tester.runAsync(() async {
-        final randomWord = MockWordStorage.generateWord(packId: pack.id);
+        final randomWord = WordStorageMock.generateWord(packId: pack.id);
         await storage.wordStorage.update([randomWord]);
     });
 
@@ -201,7 +201,7 @@ Future<void> _goBack(WidgetAssistant assistant) async {
     await assistant.pumpAndAnimate();
 }
 
-Future<void> _assertPackCardNumber(WidgetTester tester, MockPackStorage storage, 
+Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage, 
     StoredPack pack, int expectedNumber) async {
     final tileWithCardsFinder = find.ancestor(of: find.text(pack.name), 
         matching: find.byType(ListTile));
@@ -216,6 +216,6 @@ Future<void> _assertPackCardNumber(WidgetTester tester, MockPackStorage storage,
     });
 }
 
-Future<StoredPack> _getNonePack(MockPackStorage storage, WidgetTester tester) async => 
+Future<StoredPack> _getNonePack(PackStorageMock storage, WidgetTester tester) async => 
     await tester.runAsync<StoredPack>(
         () async => (await storage.fetch()).firstWhere((p) => p.name == StoredPack.noneName));

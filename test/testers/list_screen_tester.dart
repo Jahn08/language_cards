@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 class ListScreenTester {
@@ -132,7 +132,7 @@ class ListScreenTester {
     String _buildDescription(String outline) => '$screenName: $outline';
 
     Future<void> pumpScreen(WidgetTester tester) async {
-        await tester.pumpWidget(TestRootWidget.buildAsAppHome(
+        await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
             child: _screenBuilder()));
         await tester.pump(new Duration(milliseconds: 500));
     }

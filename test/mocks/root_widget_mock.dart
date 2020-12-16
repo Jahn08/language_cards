@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class TestRootWidget extends StatelessWidget {
+class RootWidgetMock extends StatelessWidget {
     final Widget _child;
     final Function(BuildContext) _onBuildCallback;
 
-    TestRootWidget({ Function(BuildContext) onBuilding, Widget child }):
+    RootWidgetMock({ Function(BuildContext) onBuilding, Widget child }):
         _onBuildCallback = onBuilding,
         _child = child;
 
@@ -25,6 +25,6 @@ class TestRootWidget extends StatelessWidget {
 
     static Widget buildAsAppHome({ Function(BuildContext) onBuilding, Widget child }) =>
         new MaterialApp(onGenerateRoute: (settings) => new MaterialPageRoute(
-            builder: (context) => new TestRootWidget(onBuilding: onBuilding, child: child)
+            builder: (context) => new RootWidgetMock(onBuilding: onBuilding, child: child)
         ));
 }

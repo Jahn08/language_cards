@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import './randomiser.dart';
-import './test_root_widget.dart';
+import '../mocks/root_widget_mock.dart';
 import './widget_assistant.dart';
 
 class DialogOpener {
@@ -14,7 +14,7 @@ class DialogOpener {
     }) async {
         BuildContext context;
         final dialogBtnKey = new Key(Randomiser.nextString());
-        await tester.pumpWidget(TestRootWidget.buildAsAppHome(
+        await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
             onBuilding: (inContext) => context = inContext,
             child: new RaisedButton(
                 key: dialogBtnKey,

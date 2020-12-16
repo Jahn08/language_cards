@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
+import '../mocks/root_widget_mock.dart';
 import '../utilities/randomiser.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -63,7 +63,7 @@ Future<Finder> _createKeyboard(WidgetTester tester, { bool show }) async {
     final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(''), 
         new FocusNode(), '', key: fieldKey);
 
-    await tester.pumpWidget(TestRootWidget.buildAsAppHome(child: fieldWithKeyboard));
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: fieldWithKeyboard));
 
     final foundResult = find.byKey(fieldKey);
     expect(foundResult, findsWidgets);

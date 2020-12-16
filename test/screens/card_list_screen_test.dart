@@ -3,13 +3,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import '../mocks/word_storage_mock.dart';
 import '../testers/list_screen_tester.dart';
 import '../utilities/assured_finder.dart';
-import '../utilities/mock_word_storage.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
-    final wordStorage = new MockWordStorage();
+    final wordStorage = new WordStorageMock();
     final screenTester = _buildScreenTester(wordStorage);
     screenTester.testEditorMode();
 
@@ -82,7 +82,7 @@ void main() {
 
     testWidgets('Shows no dialog to reset study progress for cards without progress', 
         (tester) async {
-            final storage = new MockWordStorage();
+            final storage = new WordStorageMock();
             final inScreenTester = _buildScreenTester(storage);
 
             final words = await _fetchWords(tester, storage);
@@ -101,11 +101,11 @@ void main() {
         });
 }
 
-ListScreenTester _buildScreenTester(MockWordStorage storage) => 
+ListScreenTester _buildScreenTester(WordStorageMock storage) => 
     new ListScreenTester('Card', () => new CardListScreen(storage));
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
-    ListScreenTester screenTester, MockWordStorage storage) async {
+    ListScreenTester screenTester, WordStorageMock storage) async {
     List<StoredWord> words;
     await tester.runAsync(() async => words = (await storage.fetch()));
 
@@ -125,7 +125,7 @@ Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester,
     return assuredWords;
 }
 
-Future<List<StoredWord>> _fetchWords(WidgetTester tester, MockWordStorage storage) async {
+Future<List<StoredWord>> _fetchWords(WidgetTester tester, WordStorageMock storage) async {
     List<StoredWord> words;
     await tester.runAsync(() async => words = (await storage.fetch()));
 
@@ -150,7 +150,7 @@ Future<void> _operateResettingProgressDialog(WidgetAssistant assistant,
     }
 
 Future<int> _getIndexOfFirstWordWithProgress(WidgetTester tester, 
-    MockWordStorage storage) async {
+    WordStorageMock storage) async {
         final words = (await _fetchWords(tester, storage)).toList();
         int wordWithProgressIndex = words.indexWhere(
             (w) => w.studyProgress > WordStudyStage.unknown);

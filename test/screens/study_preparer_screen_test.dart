@@ -5,9 +5,9 @@ import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
+import '../mocks/pack_storage_mock.dart';
+import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
-import '../utilities/mock_pack_storage.dart';
-import '../utilities/test_root_widget.dart';
 import '../utilities/widget_assistant.dart';
 
 main() {
@@ -83,19 +83,19 @@ main() {
 }
 
 Future<StudyStorage> _pumpScreen(WidgetTester tester) async {
-    final storage = new MockPackStorage();
+    final storage = new PackStorageMock();
     await tester.pumpWidget(
-        TestRootWidget.buildAsAppHome(child: new StudyPreparerScreen(storage)));
+        RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage)));
     await tester.pump(new Duration(milliseconds: 500));
 
     return storage;
 }
 
-Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, MockPackStorage storage) async =>
+Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock storage) async =>
     (await tester.runAsync<List<StoredPack>>(() => storage.fetch()))
         .where((p) => !p.isNone).toList();
 
-Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, MockPackStorage storage) =>
+Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, PackStorageMock storage) =>
     tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks());
 
 Finder _findCheckTiles() =>

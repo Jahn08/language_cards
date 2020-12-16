@@ -6,10 +6,10 @@ import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
+import '../mocks/pack_storage_mock.dart';
 import '../utilities/http_responder.dart';
-import '../utilities/mock_pack_storage.dart';
 import '../utilities/randomiser.dart';
-import '../utilities/test_root_widget.dart';
+import '../mocks/root_widget_mock.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -29,8 +29,8 @@ void main() {
 
     testWidgets('Displays a card pack for a word from a storage', 
         (tester) async {
-            final expectedPack = MockPackStorage.generatePack(
-                Randomiser.nextInt(MockPackStorage.packNumber));
+            final expectedPack = PackStorageMock.generatePack(
+                Randomiser.nextInt(PackStorageMock.packNumber));
             await _displayWord(tester, pack: expectedPack);
 
             await _testDisplayingPackName(tester, expectedPack);
@@ -38,7 +38,7 @@ void main() {
 
     testWidgets('Displays no button showing study progress for a card with the zero progress', 
         (tester) async {
-            final storage = new MockPackStorage();
+            final storage = new PackStorageMock();
             final wordWithoutProgress = storage.wordStorage.getRandom();
             if (wordWithoutProgress.studyProgress != WordStudyStage.unknown)
                 wordWithoutProgress.resetStudyProgress();
@@ -50,7 +50,7 @@ void main() {
 
     testWidgets('Displays a button showing study progress for a card and resetting it', 
         (tester) async {
-            final storage = new MockPackStorage();
+            final storage = new PackStorageMock();
             StoredWord wordWithProgress;
             await tester.runAsync(() async {
                 final words = (await storage.wordStorage.fetch());
@@ -90,7 +90,7 @@ void main() {
 
     testWidgets('Displays a currently chosen pack as highlighted in the dialog and changes it', 
         (tester) async {
-            final storage = new MockPackStorage();
+            final storage = new PackStorageMock();
             final expectedPack = storage.getRandom();
             await _displayWord(tester, storage: storage, pack: expectedPack);
             
@@ -160,7 +160,7 @@ void main() {
     
     testWidgets('Saves all changes to a word whereas the word transcription field is still focused', 
         (tester) async {
-            final storage = new MockPackStorage();
+            final storage = new PackStorageMock();
             final wordToShow = await _displayWord(tester, storage: storage);
 
             final assistant = new WidgetAssistant(tester);
@@ -176,14 +176,14 @@ void main() {
     
     testWidgets('Saves a new pack for a card', 
         (tester) async {
-            final storage = new MockPackStorage();
+            final storage = new PackStorageMock();
             await _testChangingPack(storage, tester, 
                 (word) async => await _fetchAnotherPack(storage, word.packId));
         });
     
     testWidgets('Saves the none pack for a card', 
         (tester) async {
-            await _testChangingPack(new MockPackStorage(), tester, 
+            await _testChangingPack(new PackStorageMock(), tester, 
                 (word) => Future.value(StoredPack.none));
         });
 
@@ -201,13 +201,13 @@ void main() {
 }
 
 Future<StoredWord> _displayWord(WidgetTester tester, { Client client, 
-        MockPackStorage storage, StoredPack pack, 
+        PackStorageMock storage, StoredPack pack, 
         StoredWord wordToShow, bool shouldHideWarningDialog = true }) async {
-    storage = storage ?? new MockPackStorage();
+    storage = storage ?? new PackStorageMock();
     final wordStorage = storage.wordStorage;
     wordToShow = wordToShow ?? wordStorage.getRandom();
 
-    await tester.pumpWidget(TestRootWidget.buildAsAppHome(
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
         child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
         wordId: wordToShow.id, pack: pack, client: client)));
     await tester.pump();
@@ -251,7 +251,7 @@ Type _typify<T>() => T;
 
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
-    final storage = new MockPackStorage();
+    final storage = new PackStorageMock();
     final wordToShow = await _displayWord(tester, storage: storage);
 
     final expectedChangedText = await _enterChangedText(tester, valueToChangeGetter(wordToShow));
@@ -301,12 +301,12 @@ Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPa
 
 Finder _findPackButton() => _findFlatButtonByIcon(Icons.folder_open);
 
-Future<StoredPack> _fetchAnotherPack(MockPackStorage storage, int curPackId, 
+Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId, 
     { canBeNonePack = false }) async => 
         (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId && 
             (canBeNonePack || !p.isNone));
 
-Future<void> _testChangingPack(MockPackStorage storage, WidgetTester tester, 
+Future<void> _testChangingPack(PackStorageMock storage, WidgetTester tester, 
     Future<StoredPack> Function(StoredWord) newPackGetter) async {
     final wordToShow = await _displayWord(tester, storage: storage);
 
@@ -355,8 +355,8 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
         
         final wordToShow = await _displayWord(tester, client: client,
             shouldHideWarningDialog: false, 
-            pack: hasPack ? MockPackStorage.generatePack(
-                Randomiser.nextInt(MockPackStorage.packNumber)): StoredPack.none);
+            pack: hasPack ? PackStorageMock.generatePack(
+                Randomiser.nextInt(PackStorageMock.packNumber)): StoredPack.none);
         
         await _assureWarningDialog(tester, !hasPack);
 
@@ -389,10 +389,10 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
             return HttpResponder.respondWithJson({});
         });
         
-        final storage = new MockPackStorage();
+        final storage = new PackStorageMock();
         final wordToShow = await _displayWord(tester, storage: storage, 
-            client: client, pack: nullifyPack ? MockPackStorage.generatePack(
-                Randomiser.nextInt(MockPackStorage.packNumber)): null);
+            client: client, pack: nullifyPack ? PackStorageMock.generatePack(
+                Randomiser.nextInt(PackStorageMock.packNumber)): null);
         
         await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
                 _fetchAnotherPack(storage, wordToShow.packId));

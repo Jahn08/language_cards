@@ -2,17 +2,17 @@ import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/language.dart';
-import './mock_word_storage.dart';
-import './randomiser.dart';
+import 'word_storage_mock.dart';
+import '../utilities/randomiser.dart';
 
-class MockPackStorage extends BaseStorage<StoredPack> with StudyStorage {
+class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     static const int packNumber = 4;
 
     final List<StoredPack> _packs = _generatePacks(packNumber);
 
-    final MockWordStorage wordStorage = new MockWordStorage();
+    final WordStorageMock wordStorage = new WordStorageMock();
 
-    MockPackStorage();
+    PackStorageMock();
 
     static void _sort(List<StoredPack> packs) => 
         packs.sort((a, b) => a.name.compareTo(b.name));

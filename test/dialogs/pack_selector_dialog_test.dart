@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/dialogs/pack_selector_dialog.dart';
+import '../mocks/pack_storage_mock.dart';
 import '../testers/selector_dialog_tester.dart';
-import '../utilities/mock_pack_storage.dart';
 
 void main() {
 
     testWidgets('Shows the pack dialog according to items passed as arguments', (tester) async {
-        final storage = new MockPackStorage();
+        final storage = new PackStorageMock();
         final chosenPack = storage.getRandom();
 
         final dialogTester = new SelectorDialogTester(tester, 
@@ -37,8 +37,8 @@ void main() {
         });
 }
 
-Future<List<StoredPack>> _generatePacks(WidgetTester tester, [MockPackStorage storage]) async {
-    storage = storage ?? new MockPackStorage();
+Future<List<StoredPack>> _generatePacks(WidgetTester tester, [PackStorageMock storage]) async {
+    storage = storage ?? new PackStorageMock();
         
     List<StoredPack> packs;
     await tester.runAsync(() async => packs = await storage.fetch());

@@ -3,13 +3,13 @@ import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
-import './mock_pack_storage.dart';
-import './randomiser.dart';
+import 'pack_storage_mock.dart';
+import '../utilities/randomiser.dart';
 
-class MockWordStorage extends BaseStorage<StoredWord> {
+class WordStorageMock extends BaseStorage<StoredWord> {
     final List<StoredWord> _words = _generateWords(18);
 
-    MockWordStorage() {
+    WordStorageMock() {
         _sortWords();
     }
 
@@ -52,7 +52,7 @@ class MockWordStorage extends BaseStorage<StoredWord> {
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-            packId: packId ?? Randomiser.nextInt(MockPackStorage.packNumber) + 1,
+            packId: packId ?? Randomiser.nextInt(PackStorageMock.packNumber) + 1,
             studyProgress: Randomiser.nextElement(studyStages)
         );
     }
