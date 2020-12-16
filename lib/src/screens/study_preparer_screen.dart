@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:language_cards/src/models/word_study_stage.dart';
+import '../consts.dart';
 import '../router.dart';
 import '../data/study_storage.dart';
 import '../widgets/bar_scaffold.dart';
@@ -43,7 +44,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                         _excludedPacks.addAll(stPacks.map((p) => p.pack.id));
                 });
             },
-            child: new Text('${allSelected ? 'Unselect': 'Select'} All')
+            child: new Text(Consts.getSelectorLabel(allSelected))
         );
     }
 
@@ -60,12 +61,10 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         final levels = new Map<String, int>.fromIterable(WordStudyStage.values,
             key: (k) => WordStudyStage.stringify(k), value: (_) => 0);
         stPacks.where((p) => !_excludedPacks.contains(p.pack.id))
-            .map((e) => e.cardsByStage).forEach((el) =>
-                el.entries.forEach((en) {
-                    levels[en.key] += en.value;
-                })
-            );
-        levels['All'] = levels.values.reduce((res, el) => res + el);
+            .expand((e) => e.cardsByStage.entries)
+            .forEach((en) => levels[en.key] += en.value);
+        levels[StudyPreparerScreen.allWordsCategoryName] = 
+            levels.values.reduce((res, el) => res + el);
 
         return new ListView(
             children: levels.entries.map((lvl) => new ListTile(title: new Text(lvl.key), 
@@ -102,6 +101,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 }
 
 class StudyPreparerScreen extends StatefulWidget {
+
+    static const String allWordsCategoryName = 'All';
 
     final StudyStorage storage;
 

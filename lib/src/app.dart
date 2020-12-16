@@ -13,8 +13,6 @@ import './widgets/loader.dart';
 
 class App extends StatelessWidget {
     
-    static const IconData cardListIcon = Icons.filter_1;
-
     @override
     Widget build(BuildContext context) => 
         new SettingsBlocProvider(child: new _ThemedApp());

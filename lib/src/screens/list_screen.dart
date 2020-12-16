@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../consts.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
 
@@ -167,7 +168,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         ));
         options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.select_all),
-            label: '${allSelected ? 'Unselect': 'Select'} All'
+            label: Consts.getSelectorLabel(allSelected)
         ));
 
         return options;

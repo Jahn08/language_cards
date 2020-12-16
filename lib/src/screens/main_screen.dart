@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
-import '../app.dart';
+import '../consts.dart';
 import '../router.dart';
 import '../widgets/bar_scaffold.dart';
 
@@ -25,7 +25,7 @@ class MainScreen extends StatelessWidget {
                 _buildRow(children: [
                     _buildMenuItem('Word Packs', Icons.library_books, 
                         () => Router.goToPackList(context)),
-                    _buildMenuItem('Word Cards', App.cardListIcon, 
+                    _buildMenuItem('Word Cards', Consts.cardListIcon, 
                         () => Router.goToCardList(context))
                 ])
             ]
