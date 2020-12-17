@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/dialogs/pack_selector_dialog.dart';
+import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../testers/selector_dialog_tester.dart';
 
@@ -19,8 +20,8 @@ void main() {
 
                 final optionTile = option.child as ListTile;
                 expect((optionTile.title as Text).data, pack.name);
-                expect((optionTile.subtitle as Text).data.contains(pack.cardsNumber.toString()), 
-                    true);
+                expect((optionTile.subtitle as CardNumberIndicator).data.contains(
+                    pack.cardsNumber.toString()), true);
                 expect(optionTile.trailing != null, pack.id == chosenPack.id);
             }, ListTile);
     });

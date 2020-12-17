@@ -3,6 +3,7 @@ import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import './list_screen.dart';
 import '../router.dart';
+import '../widgets/card_number_indicator.dart';
 import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 
@@ -15,7 +16,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
     Widget getItemSubtitle(StoredPack item) => 
-        new Text("Cards: " + item.cardsNumber.toString());
+        new CardNumberIndicator(item.cardsNumber);
     
     @override
     Widget getItemTitle(StoredPack item) => new OneLineText(item.name);

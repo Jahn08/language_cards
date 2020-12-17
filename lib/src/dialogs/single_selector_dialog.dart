@@ -47,7 +47,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
         onPressed: () => returnResult(_context, item),
         child: new ListTile(
             title: new Text(getItemTitle(item)),
-            subtitle: new Text(getItemSubtitle(item)),
+            subtitle: getItemSubtitle(item),
             trailing: getItemTrailing(item)
         )
     );
@@ -65,7 +65,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     String getItemTitle(T item);
 
     @protected
-    String getItemSubtitle(T item);
+    Widget getItemSubtitle(T item);
 
     @protected
     Widget getItemTrailing(T item);

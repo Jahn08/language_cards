@@ -4,6 +4,7 @@ import '../consts.dart';
 import '../router.dart';
 import '../data/study_storage.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/card_number_indicator.dart';
 import '../widgets/loader.dart';
 import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
@@ -95,8 +96,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
             },
             secondary: new TranslationIndicator(pack.from, pack.to),
             title: new OneLineText(pack.name),
-            subtitle: new Row(children: [new TranslationIndicator(pack.from, pack.to),
-                new Text('Cards: ${stPack.cardsOverall}')])
+            subtitle: new CardNumberIndicator(stPack.cardsOverall)
         );
     }
 }

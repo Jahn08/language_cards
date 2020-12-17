@@ -7,7 +7,7 @@ class WordSelectorDialog extends SingleSelectorDialog<Word> {
         super(context, 'Choose a word definition');
    
     @override
-    String getItemSubtitle(Word item) => item.partOfSpeech;
+    Widget getItemSubtitle(Word item) => new Text(item.partOfSpeech);
   
     @override
     String getItemTitle(Word item) => item.translations.join('; ');

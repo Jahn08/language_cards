@@ -5,6 +5,7 @@ import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
+import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
@@ -17,11 +18,12 @@ main() {
             final storage = await _pumpScreen(tester);
 
             final packs = await _fetchNamedPacks(tester, storage);
-            expect(_findCheckTiles().evaluate().length, packs.length);
+            expect(_findCheckTiles(), findsNWidgets(packs.length));
             
             _assureCheckedTiles(tester, packs, (p, packTileFinder) {
                 expect(find.descendant(of: packTileFinder, 
-                    matching: find.text('Cards: ${p.cardsNumber}')), findsOneWidget);
+                    matching: find.text(new CardNumberIndicator(p.cardsNumber).data)), 
+                    findsOneWidget);
             });
             
             final studyPacks = await _fetchStudyPacks(tester, storage);
