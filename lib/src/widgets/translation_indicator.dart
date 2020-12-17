@@ -15,15 +15,23 @@ class TranslationIndicator extends StatelessWidget {
         assert(this.from != this.to);
     }
 
+    TranslationIndicator.empty():
+        this.from = null,
+        this.to = null;
+
     @override
     Widget build(BuildContext context) => new Container(
         margin: new EdgeInsets.only(right: 5),
         child: new Stack(
             children: <Widget>[
-                new IconOption(icon: AssetIcon.getByLanguage(this.from)),
+                new IconOption(icon: this.from == null ? _buildEmptyContainer(): 
+                    AssetIcon.getByLanguage(this.from)),
                 new Positioned(left: AssetIcon.WIDTH / 2, 
-                    child: IconOption(icon: AssetIcon.getByLanguage(this.to)))
+                    child: IconOption(icon: this.to == null ? _buildEmptyContainer(): 
+                        AssetIcon.getByLanguage(this.to)))
             ]
         )
     );
+
+    Widget _buildEmptyContainer() => new Container();
 }

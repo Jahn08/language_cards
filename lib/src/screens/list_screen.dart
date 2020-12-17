@@ -216,6 +216,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         _itemsMarkedInEditor.remove(item.id);
                 });
             },
+            secondary: getItemLeading(item),
             title: getItemTitle(item),
             subtitle: getItemSubtitle(item)
         ) : _buildListTile(buildContext, item, isReadonly: true);
@@ -225,6 +226,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     bool isRemovableItem(TItem item) => true;
 
     @protected
+    Widget getItemLeading(TItem item) => null;
+
+    @protected
     Widget getItemTitle(TItem item);
 
     @protected
@@ -232,6 +236,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildListTile(BuildContext buildContext, TItem item, 
         { bool isReadonly = false }) => new ListTile(
+            leading: getItemLeading(item),
             title: getItemTitle(item),
             trailing: getItemTrailing(item),
             subtitle: getItemSubtitle(item),
@@ -271,7 +276,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
     @protected
-    Widget getItemTrailing(TItem item);
+    Widget getItemTrailing(TItem item) => null;
 
     _recoverMarkedForRemoval(List<int> ids) {
         final entries = _getEntriesMarkedForRemoval(ids).toList();

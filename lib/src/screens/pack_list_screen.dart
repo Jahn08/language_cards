@@ -9,20 +9,17 @@ import '../widgets/translation_indicator.dart';
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
+    Widget getItemLeading(StoredPack item) => 
+        item.isNone ? new TranslationIndicator.empty():
+            new TranslationIndicator(item.from, item.to);
+
+    @override
     Widget getItemSubtitle(StoredPack item) => 
-        item.isNone ? null: new TranslationIndicator(item.from, item.to);
+        new Text("Cards: " + item.cardsNumber.toString());
     
     @override
     Widget getItemTitle(StoredPack item) => new OneLineText(item.name);
     
-    @override
-    Widget getItemTrailing(StoredPack item) => new Container(
-        decoration: new BoxDecoration(
-            borderRadius: new BorderRadius.all(new Radius.circular(5))
-        ),
-        child: new Text(item.cardsNumber.toString()),
-    );
-
     @override
     void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
         super.onGoingToItem(buildContext, item);

@@ -93,6 +93,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                         _excludedPacks.add(pack.id);
                 });
             },
+            secondary: new TranslationIndicator(pack.from, pack.to),
             title: new OneLineText(pack.name),
             subtitle: new Row(children: [new TranslationIndicator(pack.from, pack.to),
                 new Text('Cards: ${stPack.cardsOverall}')])
