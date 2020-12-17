@@ -49,7 +49,7 @@ void main() {
 }
 
 Word _buildRandomWord() => new Word(Randomiser.nextString(), 
-    partOfSpeech: Randomiser.nextElement(Word.PARTS_OF_SPEECH), 
+    partOfSpeech: Randomiser.nextElement(Word.parts_of_speech), 
     transcription: Randomiser.nextString(), 
     translations: Randomiser.nextStringList(maxLength: 3));
 

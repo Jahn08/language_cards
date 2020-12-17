@@ -1,10 +1,10 @@
 class Word {
-    static const String _DEFAULT_PART_OF_SPEECH = 'collocation';
+    static const String _default_part_of_speech = 'collocation';
 
-    static const List<String> PARTS_OF_SPEECH = [
+    static const List<String> parts_of_speech = [
         'adjective',
         'adverb',
-        _DEFAULT_PART_OF_SPEECH,
+        _default_part_of_speech,
         'conjunction',
         'idiom',
         'interjection',
@@ -44,6 +44,6 @@ class Word {
         translationJson.map((value) => value['text'] as String).toList();
 
     static String _lookUpPartOfSpeech(String givenPos) =>
-        PARTS_OF_SPEECH.firstWhere((pos) => givenPos == pos, 
-            orElse: () => _DEFAULT_PART_OF_SPEECH);
+        parts_of_speech.firstWhere((pos) => givenPos == pos, 
+            orElse: () => _default_part_of_speech);
 }

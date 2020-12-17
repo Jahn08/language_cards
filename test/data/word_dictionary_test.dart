@@ -100,7 +100,7 @@ void main() {
 
             final defaultPartOfSpeech = words?.first?.partOfSpeech;
             expect(defaultPartOfSpeech == null, false);
-            expect(Word.PARTS_OF_SPEECH.contains(defaultPartOfSpeech), true);
+            expect(Word.parts_of_speech.contains(defaultPartOfSpeech), true);
 
             expect(words?.every((w) => w.partOfSpeech == defaultPartOfSpeech), true);
         });

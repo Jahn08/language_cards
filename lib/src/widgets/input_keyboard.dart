@@ -3,7 +3,7 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 
 abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMixin<String>
     implements PreferredSizeWidget {
-    static const double _KEYBOARD_HEIGHT = 270;
+    static const double _keyboard_height = 270;
 
     final List<String> _symbols;
     final double _symbolSize;
@@ -21,7 +21,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
     @override
     Widget build(BuildContext context) {
         const int rows = 4;
-        final height = _KEYBOARD_HEIGHT / (rows + 1) - 5;
+        final height = _keyboard_height / (rows + 1) - 5;
 
         final itemsPerRow = ((_symbols.length + 4) / rows).ceil();
         final screenWidth = MediaQuery.of(context).size.width;
@@ -38,7 +38,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 
         return new Container(
             color: Colors.grey[300],
-            height: _KEYBOARD_HEIGHT,
+            height: _keyboard_height,
             width: double.maxFinite,
             child: new Wrap(
                 alignment: WrapAlignment.spaceEvenly,
@@ -120,5 +120,5 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
     ValueNotifier<String> get notifier => _notifier;
 
     @override
-    Size get preferredSize => new Size.fromHeight(_KEYBOARD_HEIGHT);
+    Size get preferredSize => new Size.fromHeight(_keyboard_height);
 }

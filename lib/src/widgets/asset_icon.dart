@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import '../models/language.dart';
 
 class AssetIcon extends Image {
-    static const double WIDTH = 40;
-    static const double HEIGHT = 20;
+    static const double widthValue = 40;
+    static const double heightValue = 20;
 
     static final AssetIcon russianFlag = new AssetIcon('flag_ru');
     static final AssetIcon britishFlag = new AssetIcon('flag_uk');
@@ -13,8 +13,8 @@ class AssetIcon extends Image {
         image: new AssetImage(join('assets', 'images', '$name.jpg')), 
         color: null,
         fit: BoxFit.fill,
-        width: WIDTH,
-        height: HEIGHT
+        width: widthValue,
+        height: heightValue
     );
 
     static AssetIcon getByLanguage(Language lang) {

@@ -9,7 +9,7 @@ class WidgetAssistant {
     WidgetAssistant(this.tester);
 
     Future<List<String>> enterRandomTranscription() async {
-        const symbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
+        const symbols = EnglishPhoneticKeyboard.phonetic_symbols;
         final expectedSymbols = [Randomiser.nextElement(symbols),
             Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
 

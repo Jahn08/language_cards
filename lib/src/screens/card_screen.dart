@@ -169,7 +169,7 @@ class CardScreenState extends State<CardScreen> {
                     'Phonetic Notation', 
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledDropdown(Word.PARTS_OF_SPEECH, label: 'Part of Speech',
+                new StyledDropdown(Word.parts_of_speech, label: 'Part of Speech',
                     initialValue: this._partOfSpeech,
                     onChanged: (value) => setState(() => this._partOfSpeech = value)),
                 new StyledTextField('Translation', isRequired: true, 

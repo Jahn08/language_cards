@@ -1,12 +1,12 @@
 class DictionaryParams {
-    static const String _API_KEY_PROP_NAME = 'api_key';
+    static const String _api_key_prop_name = 'api_key';
 
     final String apiKey;
 
     DictionaryParams({ this.apiKey });
 
     DictionaryParams.fromJson(Map<String, dynamic> json): 
-        apiKey = json[_API_KEY_PROP_NAME];
+        apiKey = json[_api_key_prop_name];
 
     DictionaryParams merge(DictionaryParams params) {
         if (params?.apiKey == null || params.apiKey.isEmpty)
@@ -15,22 +15,22 @@ class DictionaryParams {
         return new DictionaryParams(apiKey: params.apiKey);
     }
 
-    Map<String, dynamic> toJson() => { _API_KEY_PROP_NAME: apiKey };
+    Map<String, dynamic> toJson() => { _api_key_prop_name: apiKey };
 }
 
 class AppParams {
-    static const String _DICTIONARY_PROP_NAME = 'dictionary';
+    static const String _dictionary_prop_name = 'dictionary';
 
     final DictionaryParams dictionary;
 
     AppParams({ this.dictionary });
 
     AppParams.fromJson(Map<String, dynamic> json): 
-        dictionary = new DictionaryParams.fromJson(json[_DICTIONARY_PROP_NAME]);
+        dictionary = new DictionaryParams.fromJson(json[_dictionary_prop_name]);
 
     AppParams merge(AppParams params) {
         return new AppParams(dictionary: params?.dictionary ?? dictionary);
     }
 
-    Map<String, dynamic> toJson() => {_DICTIONARY_PROP_NAME: dictionary };
+    Map<String, dynamic> toJson() => {_dictionary_prop_name: dictionary };
 }

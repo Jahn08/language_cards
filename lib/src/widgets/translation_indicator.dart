@@ -26,7 +26,7 @@ class TranslationIndicator extends StatelessWidget {
             children: <Widget>[
                 new IconOption(icon: this.from == null ? _buildEmptyContainer(): 
                     AssetIcon.getByLanguage(this.from)),
-                new Positioned(left: AssetIcon.WIDTH / 2, 
+                new Positioned(left: AssetIcon.widthValue / 2, 
                     child: IconOption(icon: this.to == null ? _buildEmptyContainer(): 
                         AssetIcon.getByLanguage(this.to)))
             ]

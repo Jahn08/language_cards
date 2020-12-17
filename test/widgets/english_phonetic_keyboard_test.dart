@@ -15,7 +15,7 @@ void main() {
         _assertKeyboardIsHidden();
         await _showKeyboard(tester, foundResult);
 
-        EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) { 
+        EnglishPhoneticKeyboard.phonetic_symbols.forEach((symbol) { 
             expect(find.widgetWithText(InkWell, symbol), findsWidgets);
         });
     });
@@ -81,7 +81,7 @@ Future<void> _showKeyboard(WidgetTester tester, Finder foundKeyboard) async {
 
 void _assertKeyboardIsHidden() {
     expect(find.byType(EnglishPhoneticKeyboard), findsNothing);
-    EnglishPhoneticKeyboard.PHONETIC_SYMBOLS.forEach((symbol) => 
+    EnglishPhoneticKeyboard.phonetic_symbols.forEach((symbol) => 
         expect(find.text(symbol), findsNothing));
 } 
 

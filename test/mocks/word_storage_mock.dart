@@ -42,12 +42,12 @@ class WordStorageMock extends BaseStorage<StoredWord> {
     }
 
     static StoredWord generateWord({ int id, int packId }) {
-        const phoneticSymbols = EnglishPhoneticKeyboard.PHONETIC_SYMBOLS;
+        const phoneticSymbols = EnglishPhoneticKeyboard.phonetic_symbols;
 
         const studyStages = WordStudyStage.values;
         return new StoredWord(Randomiser.nextString(), 
             id: id, 
-            partOfSpeech: Word.PARTS_OF_SPEECH[Randomiser.nextInt(Word.PARTS_OF_SPEECH.length)],
+            partOfSpeech: Word.parts_of_speech[Randomiser.nextInt(Word.parts_of_speech.length)],
             translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 

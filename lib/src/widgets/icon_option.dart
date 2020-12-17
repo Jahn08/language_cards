@@ -12,8 +12,8 @@ class IconOption extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
         return new Container(
-            width: AssetIcon.WIDTH,
-            height: AssetIcon.HEIGHT,
+            width: AssetIcon.widthValue,
+            height: AssetIcon.heightValue,
             child: _iconWidget,
             margin: EdgeInsets.all(5),
             decoration: new BoxDecoration(

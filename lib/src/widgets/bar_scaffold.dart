@@ -108,8 +108,8 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         return new GestureDetector(
             child: new IconOption(
                 icon: new Container(
-                    height: AssetIcon.HEIGHT,
-                    width: AssetIcon.WIDTH,
+                    height: AssetIcon.heightValue,
+                    width: AssetIcon.widthValue,
                     color: Colors.blueGrey[theme == AppTheme.dark ? 900: 100]
                 ), 
                 isSelected: isSelected
