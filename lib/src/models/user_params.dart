@@ -8,25 +8,31 @@ enum AppTheme {
 }
 
 enum CardSide {
-    text,
+    front,
 
-    translation,
+    back,
 
-    random,
+    random
+}
 
-    openText
+enum StudyDirection {
+    forward,
+
+    backward,
+
+    random
 }
 
 class StudyParams {
-    static const _defaultBool = false;
-    static const _defaultCardSide = CardSide.text;
+    static const _defaultCardSide = CardSide.front;
+    static const _defaultDirection = StudyDirection.forward;
 
-    static const _isBackwardDirectionParam = 'isBackwardDirection';
+    static const _directionParam = 'direction';
     static const _cardSideParam = 'cardSide';
 
-    bool _isBackwardDirection;
-    bool get isBackwardDirection => _isBackwardDirection;
-    set isBackwardDirection(bool value) => _isBackwardDirection = value ?? _defaultBool;
+    StudyDirection _direction;
+    StudyDirection get direction => _direction;
+    set direction(StudyDirection value) => _direction = value ?? _defaultDirection;
 
     CardSide _cardSide;
     CardSide get cardSide => _cardSide;
@@ -35,7 +41,9 @@ class StudyParams {
     StudyParams([Map<String, dynamic> jsonMap]) {
         jsonMap = jsonMap ?? {};
 
-        _isBackwardDirection = jsonMap[_isBackwardDirectionParam] ?? _defaultBool; 
+        final directionIndex = jsonMap[_directionParam];
+        _direction = directionIndex == null ? _defaultDirection:
+            StudyDirection.values[directionIndex]; 
 
         final cardSideIndex = jsonMap[_cardSideParam];
         _cardSide = cardSideIndex == null ? _defaultCardSide: 
@@ -43,7 +51,7 @@ class StudyParams {
     }
 
     Map<String, dynamic> toMap() => {
-        _isBackwardDirectionParam: _isBackwardDirection,
+        _directionParam: _direction.index,
         _cardSideParam: _cardSide.index
     };
 }

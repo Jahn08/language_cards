@@ -16,6 +16,7 @@ class PreferencesTester {
             params.interfaceLang = Randomiser.nextElement(Language.values);
             params.theme = Randomiser.nextElement(AppTheme.values);
             params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
+            params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
 
             return params;
         });
@@ -38,6 +39,8 @@ class PreferencesTester {
                 params.theme, AppTheme.values);
             params.studyParams.cardSide = _getFirstDistinctFrom(
                 params.studyParams.cardSide, CardSide.values);
+            params.studyParams.direction = _getFirstDistinctFrom(
+                params.studyParams.direction, StudyDirection.values);
 
             return params;
         });
