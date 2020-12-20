@@ -81,11 +81,11 @@ class StudyPreparerRoute {
 }
 
 class _StudyModeRouteArgs extends _CardStorageRouteArgs {
-    final List<int> packIds;
+    final List<StoredPack> packs;
 
     final List<int> studyStageIds;
 
-    _StudyModeRouteArgs(this.packIds, [this.studyStageIds, WordStorage storage]):
+    _StudyModeRouteArgs(this.packs, [this.studyStageIds, WordStorage storage]):
         super(storage);
 }
 
@@ -172,10 +172,10 @@ class Router {
         Navigator.pushNamed(context, _studyPreparerRouteName, 
             arguments: new _StudyStorageRouteArgs(storage));
 
-    static goToStudyMode(BuildContext context, { @required List<int> packIds,
+    static goToStudyMode(BuildContext context, { @required List<StoredPack> packs,
         List<int> studyStageIds, WordStorage storage }) => 
         Navigator.pushNamed(context, _studyModeRouteName, 
-            arguments: new _StudyModeRouteArgs(packIds, studyStageIds, storage));
+            arguments: new _StudyModeRouteArgs(packs, studyStageIds, storage));
 
     static goToPack(BuildContext context, 
         { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {

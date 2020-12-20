@@ -56,7 +56,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                     else if (route is StudyModeRoute) {
                         final params = route.params;
                         return new StudyScreen(params.storage, 
-                            packIds: params.packIds, 
+                            packs: params.packs, 
                             studyStageIds: params.studyStageIds);
                     }
                         

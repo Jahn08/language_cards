@@ -67,14 +67,13 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         levels[StudyPreparerScreen.allWordsCategoryName] = 
             levels.values.reduce((res, el) => res + el);
 
-        final includedPackIds = includedPacks.map((p) => p.pack.id).toList();
         return new ListView(
             children: levels.entries.map((lvl) => 
                 new ListTile(
                     title: new Text(lvl.key), 
                     trailing: new Text(lvl.value.toString()), 
                     onTap: lvl.value < 2 ? null: () => Router.goToStudyMode(context, 
-                        packIds: includedPackIds, 
+                        packs: includedPacks.map((p) => p.pack).toList(), 
                         studyStageIds: WordStudyStage.fromString(lvl.key)),
                     dense: true, 
                     visualDensity: VisualDensity.comfortable

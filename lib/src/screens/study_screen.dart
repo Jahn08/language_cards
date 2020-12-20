@@ -5,16 +5,20 @@ import '../enum.dart';
 import '../router.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
+import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../models/user_params.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/loader.dart';
+import '../widgets/translation_indicator.dart';
 
 class _StudyScreenState extends State<StudyScreen> {
     
     Future<List<StoredWord>> _futureCards;
 
     List<StoredWord> _cards;
+
+    Map<int, StoredPack> _packMap;
     
     int _curCardIndex;
 
@@ -43,8 +47,11 @@ class _StudyScreenState extends State<StudyScreen> {
         
         _curCardIndex = 0;
 
+        _packMap = new Map<int, StoredPack>.fromIterable(widget.packs, 
+            key: (p) => p.id, value: (p) => p);
         _futureCards = widget.storage.fetchFiltered(
-            parentIds: widget.packIds, studyStageIds: widget.studyStageIds);
+            parentIds: _packMap.keys.toList(), 
+            studyStageIds: widget.studyStageIds);
     }
 
     @override
@@ -124,8 +131,25 @@ class _StudyScreenState extends State<StudyScreen> {
 
         return new Column(
             children: [
-                _buildRow(),
+                _buildRow(child: _buildPackLabel(_packMap[card.packId])),
                 _buildRow(child: _buildCard(card), flex: 2)
+            ]
+        );
+    }
+
+    Widget _buildPackLabel(StoredPack pack) {
+
+        return new Row(
+            crossAxisAlignment: CrossAxisAlignment.end,
+            children: [
+                new Container(
+                    child: new TranslationIndicator(pack.from, pack.to), 
+                    margin: EdgeInsets.only(left: 5)
+                ),
+                new Container(
+                    child: new Text(pack.name),
+                    margin: EdgeInsets.all(5)
+                )
             ]
         );
     }
@@ -266,11 +290,11 @@ class StudyScreen extends StatefulWidget {
     
     final WordStorage storage;
 
-    final List<int> packIds;
+    final List<StoredPack> packs;
 
     final List<int> studyStageIds;
 
-    StudyScreen(this.storage, { @required this.packIds, this.studyStageIds });
+    StudyScreen(this.storage, { @required this.packs, this.studyStageIds });
 
     @override
     _StudyScreenState createState() => new _StudyScreenState();
