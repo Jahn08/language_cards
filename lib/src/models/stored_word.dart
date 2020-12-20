@@ -47,6 +47,16 @@ class StoredWord extends StoredEntity {
     }
 
     int get studyProgress => _studyProgress;
+    
+    bool incrementProgress() {
+        final newStage = WordStudyStage.nextStage(_studyProgress);
+
+        if (newStage == _studyProgress)
+            return false;
+
+        _studyProgress = newStage;
+        return true;
+    }
 
     void resetStudyProgress() => _studyProgress = WordStudyStage.unknown;
 
