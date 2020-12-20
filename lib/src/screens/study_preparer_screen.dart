@@ -61,16 +61,24 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     Widget _buildStudyLevelList(List<StudyPack> stPacks) {
         final levels = new Map<String, int>.fromIterable(WordStudyStage.values,
             key: (k) => WordStudyStage.stringify(k), value: (_) => 0);
-        stPacks.where((p) => !_excludedPacks.contains(p.pack.id))
-            .expand((e) => e.cardsByStage.entries)
+        final includedPacks = stPacks.where((p) => !_excludedPacks.contains(p.pack.id)).toList();
+        includedPacks.expand((e) => e.cardsByStage.entries)
             .forEach((en) => levels[en.key] += en.value);
         levels[StudyPreparerScreen.allWordsCategoryName] = 
             levels.values.reduce((res, el) => res + el);
 
+        final includedPackIds = includedPacks.map((p) => p.pack.id).toList();
         return new ListView(
-            children: levels.entries.map((lvl) => new ListTile(title: new Text(lvl.key), 
-                trailing: new Text(lvl.value.toString()), dense: true, 
-                    visualDensity: VisualDensity.comfortable)).toList()
+            children: levels.entries.map((lvl) => 
+                new ListTile(
+                    title: new Text(lvl.key), 
+                    trailing: new Text(lvl.value.toString()), 
+                    onTap: lvl.value < 2 ? null: () => Router.goToStudyMode(context, 
+                        packIds: includedPackIds, 
+                        studyStageIds: WordStudyStage.fromString(lvl.key)),
+                    dense: true, 
+                    visualDensity: VisualDensity.comfortable
+                )).toList()
         );
     }
 

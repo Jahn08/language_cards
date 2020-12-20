@@ -80,6 +80,22 @@ class StudyPreparerRoute {
         params = arguments is _StudyStorageRouteArgs ? arguments : new _StudyStorageRouteArgs();
 }
 
+class _StudyModeRouteArgs extends _CardStorageRouteArgs {
+    final List<int> packIds;
+
+    final List<int> studyStageIds;
+
+    _StudyModeRouteArgs(this.packIds, [this.studyStageIds, WordStorage storage]):
+        super(storage);
+}
+
+class StudyModeRoute { 
+    final _StudyModeRouteArgs params;
+
+    StudyModeRoute.fromArguments(Object arguments): 
+        params = arguments is _StudyModeRouteArgs ? arguments : new _StudyModeRouteArgs([]);
+}
+
 class _PackRouteArgs extends _PackStorageRouteArgs {
     final int packId;
 
@@ -112,6 +128,8 @@ class Router {
 
     static const String _studyPreparerRouteName = 'studyPreparer';
 
+    static const String _studyModeRouteName = 'studyMode';
+
     static const String _mainMenuRouteName = 'mainMenu';
 
     static String get initialRouteName => _mainMenuRouteName;
@@ -141,6 +159,8 @@ class Router {
                 return new PackListRoute.fromArguments(settings.arguments);
             case _studyPreparerRouteName:       
                 return new StudyPreparerRoute.fromArguments(settings.arguments);
+            case _studyModeRouteName:
+                return new StudyModeRoute.fromArguments(settings.arguments);
             default:
                 return null;
         }
@@ -151,6 +171,11 @@ class Router {
     static goToStudyPreparation(BuildContext context, [StudyStorage storage]) => 
         Navigator.pushNamed(context, _studyPreparerRouteName, 
             arguments: new _StudyStorageRouteArgs(storage));
+
+    static goToStudyMode(BuildContext context, { @required List<int> packIds,
+        List<int> studyStageIds, WordStorage storage }) => 
+        Navigator.pushNamed(context, _studyModeRouteName, 
+            arguments: new _StudyModeRouteArgs(packIds, studyStageIds, storage));
 
     static goToPack(BuildContext context, 
         { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {

@@ -8,6 +8,7 @@ import './screens/card_screen.dart';
 import './screens/main_screen.dart';
 import './screens/pack_list_screen.dart';
 import './screens/pack_screen.dart';
+import './screens/study_screen.dart';
 import './screens/study_preparer_screen.dart';
 import './widgets/loader.dart';
 
@@ -52,6 +53,12 @@ class _ThemedAppState extends State<_ThemedApp> {
                     }
                     else if (route is StudyPreparerRoute)
                         return new StudyPreparerScreen(route.params.storage);
+                    else if (route is StudyModeRoute) {
+                        final params = route.params;
+                        return new StudyScreen(params.storage, 
+                            packIds: params.packIds, 
+                            studyStageIds: params.studyStageIds);
+                    }
                         
                     return new PackListScreen((route as PackListRoute).params.storage);
                 })
