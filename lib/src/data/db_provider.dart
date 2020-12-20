@@ -164,14 +164,16 @@ class DbProvider {
                 limit: take,
                 offset: skip,
                 orderBy: orderBy,
-                where: filters == null ? null: filters.entries.map((entry) {
-                    final length = entry.value is Iterable<dynamic> ? entry.value.length: 1;
-                    return _composeInFilterClause(entry.key, length);
-                }).join(' AND '),
-                whereArgs: filters == null ? null: filters.values.fold([], (prevEl, el) {
-                    el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
-                    return prevEl;
-                })
+                where: filters == null || filters.isEmpty ? null: 
+                    filters.entries.map((entry) {
+                        final length = entry.value is Iterable<dynamic> ? entry.value.length: 1;
+                        return _composeInFilterClause(entry.key, length);
+                    }).join(' AND '),
+                whereArgs: filters == null || filters.isEmpty ? null: 
+                    filters.values.fold([], (prevEl, el) {
+                        el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
+                        return prevEl;
+                    })
             ));
         }
 

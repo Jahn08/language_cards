@@ -15,15 +15,15 @@ abstract class BaseStorage<T extends StoredEntity> {
     @protected
     DbProvider get connection => DbProvider.getInstance(_entities);
 
-    Future<List<T>> fetch({ int skipCount, int takeCount, List<int> parentIds });
+    Future<List<T>> fetch({ int skipCount, int takeCount }) => 
+        fetchInternally(takeCount: takeCount, skipCount: skipCount);
 
     @protected
-    Future<List<T>> fetchInternally({ int takeCount, int skipCount, 
-        String orderBy, List<int> parentIds, String parentField }) async {
+    Future<List<T>> fetchInternally({ int skipCount, int takeCount, 
+        String orderBy, Map<String, List<dynamic>> filters }) async {
             final wordValues = await connection.fetch(entityName, 
                 take: takeCount, 
-                filters: parentIds == null || parentIds.length == 0 ? null: 
-                    { parentField: parentIds },
+                filters: filters,
                 orderBy: orderBy, 
                 skip: skipCount);
             return convertToEntity(wordValues);

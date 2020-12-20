@@ -9,15 +9,24 @@ class WordStorage extends BaseStorage<StoredWord> {
     @override
     String get entityName => StoredWord.entityName;
 
-    Future<List<StoredWord>> fetch({ List<int> parentIds, int skipCount, int takeCount }) =>
+    Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
+        int skipCount, int takeCount }) =>
         _fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            parentIds: parentIds);
+            parentIds: parentIds, studyStageIds: studyStageIds);
 
-    Future<List<StoredWord>> _fetchInternally({ List<int> parentIds, int skipCount, 
-        int takeCount }) =>
-        super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            orderBy: StoredWord.textFieldName, parentIds: parentIds,
-            parentField: StoredWord.packIdFieldName);
+    Future<List<StoredWord>> _fetchInternally({ List<int> parentIds, List<int> studyStageIds,
+        int skipCount, int takeCount }) {
+            final filters = new Map<String, List<dynamic>>();
+
+            if (parentIds != null && parentIds.length > 0)
+                filters[StoredWord.packIdFieldName] = parentIds;
+
+            if (studyStageIds != null && studyStageIds.length > 0)
+                filters[StoredWord.studyProgressFieldName] = studyStageIds;
+
+            return super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
+                orderBy: StoredWord.textFieldName, filters: filters);
+        }
 
     @override
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) => 

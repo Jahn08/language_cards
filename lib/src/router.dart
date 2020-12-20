@@ -20,7 +20,7 @@ class _CardListRouteArgs extends _CardStorageRouteArgs {
 
     final bool cardWasAdded;
 
-    _CardListRouteArgs({ BaseStorage<StoredWord> storage, bool cardWasAdded, this.pack }):
+    _CardListRouteArgs({ WordStorage storage, bool cardWasAdded, this.pack }):
         cardWasAdded = cardWasAdded ?? false, 
         super(storage);
 }

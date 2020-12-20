@@ -30,7 +30,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
                     futurePacks = futurePacks.take(takeCount);
 
                 return Future.wait<StoredPack>(futurePacks.map((p) async {
-                    p.cardsNumber = (await this.wordStorage.groupByParent([p.id]));
+                    p.cardsNumber = (await this.wordStorage.groupByParent([p.id]))[p.id];
                     return p;
                 }));
             });
@@ -41,8 +41,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
             return null;
 
         final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);
-        final cardsNumber = await this.wordStorage.groupByParent([pack.id]);
-        pack.cardsNumber = cardsNumber;
+        final cardNumberGroups = await this.wordStorage.groupByParent([pack.id]);
+        pack.cardsNumber = cardNumberGroups[pack.id];
 
         return pack;
     }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' hide Router;
-import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
@@ -32,7 +31,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount) =>
-        widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, 
+        widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
             parentIds: widget.pack == null ? null: [widget.pack.id]);
   
     @override
@@ -106,7 +105,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 }
 
 class CardListScreen extends StatefulWidget {
-    final BaseStorage<StoredWord> storage;
+    final WordStorage storage;
 
     final StoredPack pack;
 

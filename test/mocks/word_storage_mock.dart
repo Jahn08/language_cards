@@ -1,4 +1,4 @@
-import 'package:language_cards/src/data/base_storage.dart';
+import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -6,7 +6,7 @@ import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
-class WordStorageMock extends BaseStorage<StoredWord> {
+class WordStorageMock extends WordStorage {
     final List<StoredWord> _words = _generateWords(18);
 
     WordStorageMock() {
@@ -15,16 +15,31 @@ class WordStorageMock extends BaseStorage<StoredWord> {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    Future<List<StoredWord>> fetch({ List<int> parentIds, int skipCount, int takeCount }) {
+    @override
+    Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
+        int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
             () => _fetch(parentIds).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+    }
+
+    @override
+    Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
+        return Future.delayed(new Duration(milliseconds: 25),
+            () => _fetch().skip(skipCount ?? 0).take(takeCount ?? 10).toList());
     }
 
     Iterable<StoredWord> _fetch([List<int> parentIds]) => parentIds == null ? _words : 
         _words.where((w) => parentIds.contains(w.packId));
 
-    Future<int> groupByParent(List<int> parentIds) {
-        return Future.delayed(new Duration(milliseconds: 50), () => _fetch(parentIds).length);
+    @override
+    Future<Map<int, int>> groupByParent(List<int> parentIds) {
+        return Future.delayed(new Duration(milliseconds: 50), 
+            () {
+                final cards = _fetch();
+                return new Map<int, int>.fromIterable(parentIds, key: (id) => id,
+                    value: (id) => cards.where((c) => c.packId == id).length);
+
+            });
     }
 
     Future<StoredWord> find(int id) =>
