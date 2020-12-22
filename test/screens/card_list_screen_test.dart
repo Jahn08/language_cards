@@ -106,8 +106,7 @@ ListScreenTester _buildScreenTester(WordStorageMock storage) =>
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
     ListScreenTester screenTester, WordStorageMock storage) async {
-    List<StoredWord> words;
-    await tester.runAsync(() async => words = (await storage.fetch()));
+    final words = await tester.runAsync(() => storage.fetch());
 
     final assuredWords = <StoredWord>[];
     final listItemFinders = find.descendant(

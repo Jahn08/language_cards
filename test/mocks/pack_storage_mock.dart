@@ -6,9 +6,9 @@ import 'word_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
 class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
-    static const int packNumber = 4;
+    static const int namedPacksNumber = 4;
 
-    final List<StoredPack> _packs = _generatePacks(packNumber);
+    final List<StoredPack> _packs = _generatePacks();
 
     final WordStorageMock wordStorage = new WordStorageMock();
 
@@ -18,8 +18,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         packs.sort((a, b) => a.name.compareTo(b.name));
 
     @override
-    Future<List<StoredPack>> fetch({ List<int> parentIds, int skipCount, int takeCount }) =>
-        _fetchInternally(skipCount: skipCount, takeCount: takeCount ?? 10);
+    Future<List<StoredPack>> fetch({ int skipCount, int takeCount }) =>
+        _fetchInternally(skipCount: skipCount, takeCount: takeCount);
 
     Future<List<StoredPack>> _fetchInternally({ int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 50),
@@ -47,8 +47,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         return pack;
     }
 
-    static List<StoredPack> _generatePacks(int length) {
-        final generatedPacks = new List<StoredPack>.generate(length, 
+    static List<StoredPack> _generatePacks() {
+        final generatedPacks = new List<StoredPack>.generate(namedPacksNumber, 
             (index) => generatePack(index + 1));
         _sort(generatedPacks);
 

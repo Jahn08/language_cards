@@ -19,26 +19,28 @@ class WordStorageMock extends WordStorage {
     Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
         int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(parentIds).skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+            () => _fetch(parentIds: parentIds, skipCount: skipCount, takeCount: takeCount));
     }
 
     @override
     Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch().skip(skipCount ?? 0).take(takeCount ?? 10).toList());
+            () => _fetch(skipCount: skipCount, takeCount: takeCount));
     }
 
-    Iterable<StoredWord> _fetch([List<int> parentIds]) => parentIds == null ? _words : 
-        _words.where((w) => parentIds.contains(w.packId));
+    List<StoredWord> _fetch({ List<int> parentIds, int skipCount, int takeCount }) {
+        final values = (parentIds == null ? _words : 
+            _words.where((w) => parentIds.contains(w.packId))).skip(skipCount ?? 0);
+        return ((takeCount ?? 0) == 0 ? values: values.take(takeCount)).toList();
+    }
 
     @override
     Future<Map<int, int>> groupByParent(List<int> parentIds) {
         return Future.delayed(new Duration(milliseconds: 50), 
             () {
-                final cards = _fetch();
+                final cards = _fetch(parentIds: parentIds);
                 return new Map<int, int>.fromIterable(parentIds, key: (id) => id,
                     value: (id) => cards.where((c) => c.packId == id).length);
-
             });
     }
 
@@ -67,7 +69,7 @@ class WordStorageMock extends WordStorage {
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-            packId: packId ?? Randomiser.nextInt(PackStorageMock.packNumber) + 1,
+            packId: packId ?? Randomiser.nextInt(PackStorageMock.namedPacksNumber) + 1,
             studyProgress: Randomiser.nextElement(studyStages)
         );
     }

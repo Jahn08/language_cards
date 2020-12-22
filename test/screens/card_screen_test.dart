@@ -30,7 +30,7 @@ void main() {
     testWidgets('Displays a card pack for a word from a storage', 
         (tester) async {
             final expectedPack = PackStorageMock.generatePack(
-                Randomiser.nextInt(PackStorageMock.packNumber));
+                Randomiser.nextInt(PackStorageMock.namedPacksNumber));
             await _displayWord(tester, pack: expectedPack);
 
             await _testDisplayingPackName(tester, expectedPack);
@@ -356,7 +356,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
         final wordToShow = await _displayWord(tester, client: client,
             shouldHideWarningDialog: false, 
             pack: hasPack ? PackStorageMock.generatePack(
-                Randomiser.nextInt(PackStorageMock.packNumber)): StoredPack.none);
+                Randomiser.nextInt(PackStorageMock.namedPacksNumber)): StoredPack.none);
         
         await _assureWarningDialog(tester, !hasPack);
 
@@ -392,7 +392,7 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
         final storage = new PackStorageMock();
         final wordToShow = await _displayWord(tester, storage: storage, 
             client: client, pack: nullifyPack ? PackStorageMock.generatePack(
-                Randomiser.nextInt(PackStorageMock.packNumber)): null);
+                Randomiser.nextInt(PackStorageMock.namedPacksNumber)): null);
         
         await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
                 _fetchAnotherPack(storage, wordToShow.packId));
