@@ -87,7 +87,7 @@ main() {
 Future<StudyStorage> _pumpScreen(WidgetTester tester) async {
     final storage = new PackStorageMock();
     await tester.pumpWidget(
-        RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage)));
+        RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage), noBar: true));
     await tester.pump(new Duration(milliseconds: 500));
 
     return storage;
