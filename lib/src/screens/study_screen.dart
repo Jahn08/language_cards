@@ -63,12 +63,11 @@ class _StudyScreenState extends State<StudyScreen> {
             if (_isStudyOver) {
                 _isStudyOver = false;
                 WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => new ConfirmDialog(
+                    (_) => ConfirmDialog.buildOkDialog(
                         title: 'The Study Cicle Is Over', 
                         content: 'Well Done! You have finished the study.\n\n' + 
                             'Continue studying the same cards and you will ' +
-                            'definitely hone them to perfection!', 
-                        actions: { true: 'OK' }
+                            'definitely hone them to perfection!'
                     ).show(context));
             }
 

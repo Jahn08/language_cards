@@ -74,10 +74,9 @@ class CardScreenState extends State<CardScreen> {
     _disposeDictionary() => _dictionary?.dispose();
 
     Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
-        await new ConfirmDialog<bool>(
+        await ConfirmDialog.buildOkDialog(
             title: 'Choose Pack', 
-            content: 'You should choose a pack to enable automatic translation',
-            actions: { true: 'OK' }
+            content: 'You should choose a pack to enable automatic translation'
         ).show(buildContext);
     }
 

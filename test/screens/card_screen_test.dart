@@ -3,6 +3,7 @@ import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
+import 'package:language_cards/src/dialogs/confirm_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
@@ -222,7 +223,8 @@ Future<StoredWord> _displayWord(WidgetTester tester, { Client client,
     return wordToShow;
 }
 
-Finder _findWarningDialogButton() => find.widgetWithText(FlatButton, 'OK');
+Finder _findWarningDialogButton() => 
+    find.widgetWithText(FlatButton, ConfirmDialog.okActions.entries.first.value);
 
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {

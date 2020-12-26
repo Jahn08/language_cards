@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import './outcome_dialog.dart';
 
 class ConfirmDialog<TResult> extends OutcomeDialog<TResult> {
+    
+    static const Map<bool, String> okActions = const { true: 'OK' };
+
     final String title;
 
     final String content;
@@ -11,6 +14,9 @@ class ConfirmDialog<TResult> extends OutcomeDialog<TResult> {
     ConfirmDialog({ @required this.title, @required this.content, 
         @required Map<TResult, String> actions }):
         _actions = actions ?? new Map<TResult, String>();
+
+    static ConfirmDialog<bool> buildOkDialog({ @required String title, @required String content }) =>
+        ConfirmDialog<bool>(title: title, content: content, actions: okActions);
 
     Future<TResult> show(BuildContext context) async {
         if (_actions.length == 0)
