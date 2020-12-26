@@ -52,4 +52,18 @@ class WidgetAssistant {
 
         await pumpAndAnimate();
     }
+
+    Future<void> swipeWidgetLeft(Finder widgetFinder) async =>
+        _swipeWidget(widgetFinder, toRight: false);
+
+    Future<void> _swipeWidget(Finder widgetFinder, { bool toRight = false }) async {
+        expect(widgetFinder, findsOneWidget);
+        await tester.fling(widgetFinder, 
+            toRight ? tester.getTopRight(widgetFinder): tester.getTopLeft(widgetFinder), 200);
+
+        await pumpAndAnimate();
+    }
+
+    Future<void> swipeWidgetRight(Finder widgetFinder) async =>
+        _swipeWidget(widgetFinder, toRight: true);
 }

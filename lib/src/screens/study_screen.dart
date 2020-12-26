@@ -277,9 +277,8 @@ class _StudyScreenState extends State<StudyScreen> {
         setState(() {
             _curCardIndex = newIndex;
 
-            final isNewCicle = _curCardIndex == 0;
-            _shouldReorderCards = isNewCicle;
-            _isStudyOver = isNewCicle && isNextIndex;
+            _isStudyOver = _curCardIndex == 0 && isNextIndex;
+            _shouldReorderCards = _isStudyOver;
         });
 
     T _nextValue<T>(List<T> values, T curValue) =>
