@@ -9,6 +9,7 @@ import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../models/user_params.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
 import '../widgets/translation_indicator.dart';
 
@@ -28,11 +29,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
     bool _shouldReorderCards;
 
-    bool _shouldShowOppositeCardSide;
-
     bool _isStudyOver;
-
-    bool _wasFrontCardSide;
 
     @override
     initState() {
@@ -42,7 +39,6 @@ class _StudyScreenState extends State<StudyScreen> {
         _cardSide = CardSide.front;
         
         _shouldReorderCards = true;
-        _shouldShowOppositeCardSide = false;
         _isStudyOver = false;
         
         _curCardIndex = 0;
@@ -154,18 +150,8 @@ class _StudyScreenState extends State<StudyScreen> {
     }
 
     Widget _buildCard(StoredWord card) {
-        bool isFrontSide;
-        if (_shouldShowOppositeCardSide) {
-            _shouldShowOppositeCardSide = false;
-            isFrontSide = !_wasFrontCardSide;
-        }
-        else
-            isFrontSide = _cardSide == CardSide.random ? new Random().nextBool():
-                _cardSide == CardSide.front;
-
-        String subtext = (card.transcription ?? '').isEmpty ? '': '[${card.transcription}]\n';
-        if ((card.partOfSpeech ?? '').isNotEmpty)
-            subtext += '${card.partOfSpeech}';
+        final isFrontSide = _cardSide == CardSide.random ? new Random().nextBool():
+            _cardSide == CardSide.front;
 
         bool isSwipingToRight = false;
         return new GestureDetector(
@@ -178,29 +164,36 @@ class _StudyScreenState extends State<StudyScreen> {
                 else
                     _setNextCard();
             },
-            child: new Card(
-                elevation: 10,
-                margin: EdgeInsets.only(left: 10, right: 10),
-                child: new InkWell(
-                    onTap: () => setState(() {
-                        _wasFrontCardSide = isFrontSide;
-                        _shouldShowOppositeCardSide = true;
-                    }),
-                    child: new Container(
-                        child: new Column(
-                            children: [
-                                if (isFrontSide) 
-                                    _buildStudyLevelRow(card.studyProgress),
-                                _buildRow(child: new Center(
-                                    child: new ListTile(
-                                        title: _buildCenteredBigText(isFrontSide ? 
-                                            card.text: card.translation),
-                                        subtitle: isFrontSide ? 
-                                            new Text(subtext, textAlign: TextAlign.center): null
-                                    )
-                                ), flex: 2)
-                            ]
-                        )
+            child: new FlipCard(
+                front: _buildCardSide(isFront: isFrontSide, card: card),
+                back: _buildCardSide(isFront: !isFrontSide, card: card)
+            )
+        );
+    }
+
+    Widget _buildCardSide({ bool isFront, StoredWord card }) {
+        String subtext = (card.transcription ?? '').isEmpty ? '': '[${card.transcription}]\n';
+        if ((card.partOfSpeech ?? '').isNotEmpty)
+            subtext += '${card.partOfSpeech}';
+
+        return new Card(
+            elevation: 10,
+            margin: EdgeInsets.only(left: 10, right: 10),
+            child: new InkWell(
+                child: new Container(
+                    child: new Column(
+                        children: [
+                            if (isFront) 
+                                _buildStudyLevelRow(card.studyProgress),
+                            _buildRow(child: new Center(
+                                child: new ListTile(
+                                    title: _buildCenteredBigText(isFront ? 
+                                        card.text: card.translation),
+                                    subtitle: isFront ? 
+                                        new Text(subtext, textAlign: TextAlign.center): null
+                                )
+                            ), flex: 2)
+                        ]
                     )
                 )
             )

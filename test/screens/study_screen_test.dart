@@ -7,6 +7,7 @@ import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_screen.dart';
+import 'package:language_cards/src/widgets/flip_card.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
@@ -95,10 +96,7 @@ void main() {
                 final cards = _sortCards(
                     await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
-                final assistant = new WidgetAssistant(tester);
-                final cardFinder = find.byType(Card);
-                
-                await assistant.swipeWidgetRight(cardFinder);
+                await new WidgetAssistant(tester).swipeWidgetRight(_findCardWidget());
 
                 _assureDialogExistence(false);
                 _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
@@ -134,7 +132,8 @@ void main() {
             await _reverseCardSide(assistant);
             
             const firstIndex = 0;
-            _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
+            _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex, 
+                isReversed: true);
             
             await _reverseCardSide(assistant);
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: firstIndex);
@@ -178,15 +177,16 @@ List<StoredWord> _sortCards(List<StoredWord> cards, [bool isBackward = false]) {
 }
 
 void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
-    List<StoredWord> cards, { int expectedIndex, StoredWord card }) {
+    List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
     expectedIndex = expectedIndex ?? 0;
     final expectedCard = card ?? cards.elementAt(expectedIndex);
-
-    expect(find.descendant(of: find.byType(Card), 
+    
+    final cardFinder = _findCurrentCardSide(isReversed: isReversed);
+    expect(find.descendant(of: cardFinder, 
         matching: find.text(expectedCard.text)), findsOneWidget);
 
     final cardOtherTexts = tester.widgetList<Text>(
-        find.descendant(of: find.byType(Card), matching: find.byType(Text))).toList();
+        find.descendant(of: cardFinder, matching: find.byType(Text))).toList();
     cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.partOfSpeech));
     cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.transcription));
     
@@ -196,6 +196,11 @@ void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
     _assurePackNameRendering(packs, expectedCard.packId);
 
     _assureCardsNumberRendering(tester, cards.length, expectedIndex);
+}
+
+Finder _findCurrentCardSide({ bool isReversed }) {
+    final cardFinder = find.byType(Card);
+    return (isReversed ?? false) ? cardFinder.last: cardFinder.first;
 }
 
 void _assurePackNameRendering(List<StoredPack> packs, int packId) {
@@ -218,6 +223,8 @@ Future<void> _testChangingStudyModes(WidgetTester tester, List<dynamic> modeValu
     } while (++i < modeValues.length);
 }
 
+Finder _findCardWidget() => find.byType(FlipCard);
+
 Future<void> _pressButtonContainingText(WidgetAssistant assistant, String text) async {
     final btnFinder = find.ancestor(
         of: find.byWidgetPredicate((w) => w is Text && 
@@ -238,7 +245,7 @@ Future<void> _testForwardSorting(WidgetTester tester, { bool shouldSwipe }) asyn
     await _goToNextCard(assistant, shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(find.byType(Card));
+    await assistant.swipeWidgetRight(_findCardWidget());
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
 }
 
@@ -256,7 +263,7 @@ Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) asy
     await _goToNextCard(assistant, shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(find.byType(Card));
+    await assistant.swipeWidgetRight(_findCardWidget());
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
 }
 
@@ -278,7 +285,7 @@ Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async
     final nextCard = _getShownCard(tester, cards);
     _assureFrontSideRendering(tester, packs, cards, card: nextCard, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(find.byType(Card));
+    await assistant.swipeWidgetRight(_findCardWidget());
 
     _assureFrontSideRendering(tester, packs, cards, card: firstCard, expectedIndex: 0);
 }
@@ -289,8 +296,7 @@ StoredWord _getShownCard(WidgetTester tester, List<StoredWord> cards) {
 }
 
 String _getShownCardText(WidgetTester tester) {
-    final cardFinder = find.byType(Card);
-    final cardTileFinder = find.descendant(of: cardFinder, 
+    final cardTileFinder = find.descendant(of: _findCurrentCardSide(), 
         matching: find.byType(ListTile));
 
     return (tester.widget<ListTile>(cardTileFinder).title as Text).data;
@@ -314,17 +320,19 @@ List<StoredPack> _takeEnoughCards(List<StoredPack> packs) {
 
 Future<void> _goToNextCard(WidgetAssistant assistant, bool bySwiping) async {
     if (bySwiping)
-        await assistant.swipeWidgetLeft(find.byType(Card));
+        await assistant.swipeWidgetLeft(_findCardWidget());
     else
         await assistant.tapWidget(find.widgetWithText(RaisedButton, 'Next'));
 }
 
 void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,
-    List<StoredWord> cards, { int expectedIndex, StoredWord card }) {
+    List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
     expectedIndex = expectedIndex ?? 0;
     final expectedCard = card ?? cards.elementAt(expectedIndex);
 
-    expect(find.descendant(of: find.byType(Card), 
+    //_assureCardSideIsShown(tester, isFront: false);
+    final cardFinder = _findCurrentCardSide(isReversed: isReversed);
+    expect(find.descendant(of: cardFinder, 
         matching: find.text(expectedCard.translation)), findsOneWidget);
 
     _assurePackNameRendering(packs, expectedCard.packId);
@@ -342,14 +350,14 @@ Future<void> _testReversingFrontCardSide(WidgetTester tester, { bool shouldSwipe
     final assistant = new WidgetAssistant(tester);
     await _reverseCardSide(assistant);
     
-    _assureBackSideRendering(tester, packs, cards, expectedIndex: 0);
+    _assureBackSideRendering(tester, packs, cards, expectedIndex: 0, isReversed: true);
 
     await _goToNextCard(assistant, shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 }
 
 Future<void> _reverseCardSide(WidgetAssistant assistant) async => 
-    await assistant.tapWidget(find.byType(Card));
+    await assistant.tapWidget(_findCardWidget());
 
 Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();
@@ -370,9 +378,9 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
     _assureBackSideRendering(tester, packs, cards, expectedIndex: nextIndex);
 
     await _reverseCardSide(assistant);
-    _assureFrontSideRendering(tester, packs, cards, expectedIndex: nextIndex);
+    _assureFrontSideRendering(tester, packs, cards, expectedIndex: nextIndex, isReversed: true);
 
-    await assistant.swipeWidgetRight(find.byType(Card));
+    await assistant.swipeWidgetRight(_findCardWidget());
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
 }
 
@@ -407,10 +415,10 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
         await _reverseCardSide(assistant);
         if (isFrontSide)
             _assureBackSideRendering(tester, packs, cards, card: curCard, 
-                expectedIndex: curIndex);
+                expectedIndex: curIndex, isReversed: true);
         else
             _assureFrontSideRendering(tester, packs, cards, card: curCard, 
-                expectedIndex: curIndex);
+                expectedIndex: curIndex, isReversed: true);
 
     } while (++curIndex < 2);
 }
