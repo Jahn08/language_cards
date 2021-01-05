@@ -52,7 +52,6 @@ flutter:
   assets:
     - assets/images/flag_ru.jpg
     - assets/images/flag_uk.jpg
-    - assets/cfg/secret_params.json
     - assets/cfg/params.json
     
   # An image asset can refer to one or more resolution-specific "variants", see
