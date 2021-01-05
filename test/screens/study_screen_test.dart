@@ -83,26 +83,51 @@ void main() {
             _assureDialogBtnExistence(false);
         });
 
-        testWidgets('Shows no dialog after going backward from the first card to the last one', 
-            (tester) async {
-                final packStorage = new PackStorageMock();
+    testWidgets('Shows no dialog after going backward from the first card to the last one', 
+        (tester) async {
+            final packStorage = new PackStorageMock();
 
-                final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
-                await _pumpScreen(tester, packStorage, packs);
+            final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+            await _pumpScreen(tester, packStorage, packs);
 
-                final cards = _sortCards(
-                    await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-                await _goThroughCardList(tester, cards.length);
-                final dialogBtnFinder = _assureDialogBtnExistence(true);
+            final cards = _sortCards(
+                await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+            await _goThroughCardList(tester, cards.length);
+            final dialogBtnFinder = _assureDialogBtnExistence(true);
 
-                final assistant = new WidgetAssistant(tester);
-                await assistant.tapWidget(dialogBtnFinder);
+            final assistant = new WidgetAssistant(tester);
+            await assistant.tapWidget(dialogBtnFinder);
 
-                await assistant.swipeWidgetRight(_findCardWidget());
+            await assistant.swipeWidgetRight(_findCardWidget());
 
-                _assureDialogBtnExistence(false);
-                _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
-            });
+            _assureDialogBtnExistence(false);
+            _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
+        });
+
+    testWidgets('Increases study progress for a card after clicking the Learn button and moves next', 
+      (tester) async {
+          final packStorage = new PackStorageMock();
+
+          final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+          final cards = _sortCards(
+              await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+          final cardToLearn = cards.first;
+
+          if (cardToLearn.studyProgress == WordStudyStage.learned)
+            await packStorage.wordStorage.updateWordProgress(cardToLearn.id, 
+                WordStudyStage.familiar);
+
+          final curStudyProgress = cardToLearn.studyProgress;
+
+          await _pumpScreen(tester, packStorage, packs);
+
+          final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: RaisedButton, 
+            shouldFind: true);
+          await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
+
+          _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+          expect(cardToLearn.studyProgress - curStudyProgress, 25);
+      });
 
     testWidgets('Shows the back side of a card when tapping it and the front side of the next one when swiping left', 
         (tester) async => _testReversingFrontCardSide(tester, shouldSwipe: true));
@@ -432,7 +457,7 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
 
 Future<void> _goThroughCardList(WidgetTester tester, int listLength) async {
   final assistant = new WidgetAssistant(tester);
-            
+  
   int index = 0;
   do {
       await _goToNextCard(assistant, true);
