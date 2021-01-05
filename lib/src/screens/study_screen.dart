@@ -15,6 +15,8 @@ import '../widgets/translation_indicator.dart';
 
 class _StudyScreenState extends State<StudyScreen> {
     
+    final PageController _controller = new PageController();
+
     Future<List<StoredWord>> _futureCards;
 
     List<StoredWord> _cards;
@@ -53,8 +55,12 @@ class _StudyScreenState extends State<StudyScreen> {
     @override
     Widget build(BuildContext context) =>
         new FutureLoader<List<StoredWord>>(_futureCards, (cards) {
-            if (_cards == null || _cards.isEmpty)
+            bool shouldTakeAllCards = false;
+            if (_cards == null || _cards.isEmpty) {
                 _cards = cards;
+                
+                shouldTakeAllCards = true;
+            }
 
             if (_isStudyOver) {
                 _isStudyOver = false;
@@ -65,9 +71,11 @@ class _StudyScreenState extends State<StudyScreen> {
                             'Continue studying the same cards and you will ' +
                             'definitely hone them to perfection!'
                     ).show(context));
+            
+                shouldTakeAllCards = true;
             }
 
-            _orderCards();
+            _orderCards(shouldTakeAllCards);
             return new BarScaffold(
                 '${_curCardIndex + 1} of ${cards.length} Cards',
                 body: _buildLayout(),
@@ -75,15 +83,18 @@ class _StudyScreenState extends State<StudyScreen> {
             );
         });
 
-    void _orderCards() {
+    void _orderCards(bool shouldTakeAllCards) {
         if (!_shouldReorderCards)
             return;
 
         _shouldReorderCards = false;
         
-        final shouldTakeAllCards = _curCardIndex == 0;
+        final startIndex = _curCardIndex + 1;
         final listToOrder = shouldTakeAllCards ? 
-            _cards: _cards.sublist(_curCardIndex, _cards.length);
+            _cards: _cards.sublist(startIndex, _cards.length);
+
+        if (listToOrder.length <= 1)
+            return;
 
         switch (_studyDirection) {
             case StudyDirection.forward:
@@ -95,22 +106,19 @@ class _StudyScreenState extends State<StudyScreen> {
                 listToOrder.sort((a, b) => b.text.compareTo(a.text));
                 break;
             default:
-                listToOrder.shuffle();
+                listToOrder.shuffle(new Random());
                 break;
         }
 
         if (!shouldTakeAllCards)
-            _cards.replaceRange(_curCardIndex, _cards.length, listToOrder);
+            _cards.replaceRange(startIndex, _cards.length, listToOrder);
     }
 
     Widget _buildLayout() {
-        final card = _cards[_curCardIndex];
-
         return new Column(
             children: [
-                _buildRow(child: _buildCardLayout(card), flex: 2),
-                _buildRow(),
-                _buildRow(child: _buildButtonPanel(card))
+                _buildRow(child: _buildCardLayout(), flex: 3),
+                _buildRow(child: _buildButtonPanel(_cards[_curCardIndex]))
             ]
         );
     }
@@ -122,13 +130,19 @@ class _StudyScreenState extends State<StudyScreen> {
             child: child ?? Container()
         );
 
-    Widget _buildCardLayout(StoredWord card) {
-
-        return new Column(
-            children: [
-                _buildRow(child: _buildPackLabel(_packMap[card.packId])),
-                _buildRow(child: _buildCard(card), flex: 2)
-            ]
+    Widget _buildCardLayout() {
+        return new PageView.builder(
+            controller: _controller,
+            onPageChanged: (index) => _setIndexCard(_getIndexCard(index)),
+            itemBuilder: (context, index) {
+                final card = _cards[_getIndexCard(index)];
+                return new Column(
+                    children: [
+                        _buildRow(child: _buildPackLabel(_packMap[card.packId])),
+                        _buildRow(child: _buildCard(card), flex: 9)
+                    ]
+                );
+            }
         );
     }
 
@@ -150,24 +164,12 @@ class _StudyScreenState extends State<StudyScreen> {
     }
 
     Widget _buildCard(StoredWord card) {
-        final isFrontSide = _cardSide == CardSide.random ? new Random().nextBool():
+       final isFrontSide = _cardSide == CardSide.random ? new Random().nextBool():
             _cardSide == CardSide.front;
 
-        bool isSwipingToRight = false;
-        return new GestureDetector(
-            onPanUpdate: (event) {
-                isSwipingToRight = event.delta.dx > 0;
-            },
-            onPanEnd: (event) {
-                if (isSwipingToRight)
-                    _setPrevCard();
-                else
-                    _setNextCard();
-            },
-            child: new FlipCard(
-                front: _buildCardSide(isFront: isFrontSide, card: card),
-                back: _buildCardSide(isFront: !isFrontSide, card: card)
-            )
+        return new FlipCard(
+            front: _buildCardSide(isFront: isFrontSide, card: card),
+            back: _buildCardSide(isFront: !isFrontSide, card: card)
         );
     }
 
@@ -183,8 +185,7 @@ class _StudyScreenState extends State<StudyScreen> {
                 child: new Container(
                     child: new Column(
                         children: [
-                            if (isFront) 
-                                _buildStudyLevelRow(card.studyProgress),
+                            _buildStudyLevelRow(card.studyProgress),
                             _buildRow(child: new Center(
                                 child: new ListTile(
                                     title: _buildCenteredBigText(isFront ? 
@@ -253,28 +254,31 @@ class _StudyScreenState extends State<StudyScreen> {
         );
     }
 
-    void _setPrevCard() => _setIndexCard(_prevIndex(_cards, _curCardIndex));
+    void _setNextCard() => _controller.nextPage(curve: Curves.linear, 
+        duration: new Duration(milliseconds: 200));
 
-    int _prevIndex<T>(List<T> values, int curValIndex) =>
-        curValIndex > 0 ? curValIndex - 1: values.length - 1;
+    void _setIndexCard(int newIndex) {
+        newIndex = newIndex < 0 || newIndex == _cards.length ? 0: newIndex;
+        _isStudyOver = newIndex == 0 && _curCardIndex == _cards.length - 1;
+        
+        setState(() { 
+            _curCardIndex = newIndex;
+            _shouldReorderCards = true; 
+        });
+    }
 
-    void _setNextCard() => 
-        _setIndexCard(_nextIndex(_cards, _curCardIndex), true);
+    int _getIndexCard(int newIndex) {
+        final cardsLength = _cards.length;
+        return newIndex >= cardsLength ? newIndex % cardsLength: 
+            (newIndex < 0 ? cardsLength - 1: newIndex);
+    }
+
+    T _nextValue<T>(List<T> values, T curValue) =>
+        values[_nextIndex(values, values.indexOf(curValue))];
 
     int _nextIndex<T>(List<T> values, int curValIndex) =>
         curValIndex == -1 || curValIndex == values.length - 1 ? 
             0: curValIndex + 1;
-
-    void _setIndexCard(int newIndex, [bool isNextIndex = false]) => 
-        setState(() {
-            _curCardIndex = newIndex;
-
-            _isStudyOver = _curCardIndex == 0 && isNextIndex;
-            _shouldReorderCards = _isStudyOver;
-        });
-
-    T _nextValue<T>(List<T> values, T curValue) =>
-        values[_nextIndex(values, values.indexOf(curValue))];
 }
 
 class StudyScreen extends StatefulWidget {

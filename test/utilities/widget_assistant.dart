@@ -29,7 +29,7 @@ class WidgetAssistant {
 
     Future<void> pumpAndAnimate() async {
         if (!tester.hasRunningAnimations)
-            await tester.pump();
+            await tester.pump(new Duration(milliseconds: 100));
 
         if (tester.hasRunningAnimations)
             await tester.pumpAndSettle();
@@ -53,17 +53,16 @@ class WidgetAssistant {
         await pumpAndAnimate();
     }
 
-    Future<void> swipeWidgetLeft(Finder widgetFinder) async =>
+    Future<void> swipeWidgetLeft(Finder widgetFinder) =>
         _swipeWidget(widgetFinder, toRight: false);
 
     Future<void> _swipeWidget(Finder widgetFinder, { bool toRight = false }) async {
         expect(widgetFinder, findsOneWidget);
-        await tester.fling(widgetFinder, 
-            toRight ? tester.getTopRight(widgetFinder): tester.getTopLeft(widgetFinder), 200);
 
+        await tester.fling(widgetFinder, new Offset((toRight ? 1: -1) * 400.0, 0), 400);
         await pumpAndAnimate();
     }
 
-    Future<void> swipeWidgetRight(Finder widgetFinder) async =>
+    Future<void> swipeWidgetRight(Finder widgetFinder) =>
         _swipeWidget(widgetFinder, toRight: true);
 }
