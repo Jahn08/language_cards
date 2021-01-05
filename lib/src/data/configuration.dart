@@ -1,7 +1,8 @@
 import 'package:flutter/widgets.dart';
-import 'package:path/path.dart' show join;
 import 'dart:convert'show jsonDecode;
 import '../models/app_params.dart';
+import '../utilities/joiner.dart';
+
 export '../models/app_params.dart';
 
 class Configuration {
@@ -15,11 +16,12 @@ class Configuration {
     }
 
     static _load(BuildContext context) async {
-        final cfgRootFolderPath = join('assets', 'cfg');
+        final cfgRootFolderPath = joinPaths(['assets', 'cfg']);
 
         final configs = await Future.wait([
-            _tryLoadParams(join(cfgRootFolderPath, 'secret_params.json'), context, isSecret: true), 
-            _tryLoadParams(join(cfgRootFolderPath, 'params.json'), context)]);
+            _tryLoadParams(joinPaths([cfgRootFolderPath, 'secret_params.json']), 
+              context, isSecret: true), 
+            _tryLoadParams(joinPaths([cfgRootFolderPath, 'params.json']), context)]);
 
         final secretConfig = _filterConfigs(configs, isSecret: true);
         final config = _filterConfigs(configs, isSecret: false);

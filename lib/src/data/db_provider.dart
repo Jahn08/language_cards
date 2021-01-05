@@ -1,9 +1,9 @@
 import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 import './data_group.dart';
 import '../models/stored_entity.dart';
+import '../utilities/joiner.dart';
 
 class DbProvider {
 
@@ -49,7 +49,7 @@ class DbProvider {
             return;
 
         final docDir = await getApplicationDocumentsDirectory();
-        final dbPath = join(docDir.path, 'language_cards.db');
+        final dbPath = joinPaths([docDir.path, 'language_cards.db']);
 
         _db = await openDatabase(dbPath, 
             version: 3,
