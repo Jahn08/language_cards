@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
-import 'package:language_cards/src/enum.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_screen.dart';
+import 'package:language_cards/src/utilities/enum.dart';
 import 'package:language_cards/src/widgets/flip_card.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';

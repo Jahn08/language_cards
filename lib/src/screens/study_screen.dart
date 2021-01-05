@@ -1,13 +1,13 @@
 import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
 import 'package:language_cards/src/models/word_study_stage.dart';
-import '../enum.dart';
 import '../router.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../models/user_params.dart';
+import '../utilities/enum.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
