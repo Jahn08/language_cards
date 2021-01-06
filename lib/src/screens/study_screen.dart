@@ -68,8 +68,7 @@ class _StudyScreenState extends State<StudyScreen> {
                     (_) => ConfirmDialog.buildOkDialog(
                         title: 'The Study Cicle Is Over', 
                         content: 'Well Done! You have finished the study.\n\n' + 
-                            'Continue studying the same cards and you will ' +
-                            'definitely hone them to perfection!'
+                          'You can repeat the study to hone the cards to perfection'
                     ).show(context));
             
                 shouldTakeAllCards = true;
@@ -179,7 +178,7 @@ class _StudyScreenState extends State<StudyScreen> {
             subtext += '${card.partOfSpeech}';
 
         return new Card(
-            elevation: 10,
+            elevation: 25,
             margin: EdgeInsets.only(left: 10, right: 10),
             child: new InkWell(
                 child: new Container(

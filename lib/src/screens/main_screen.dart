@@ -18,27 +18,23 @@ class MainScreen extends StatelessWidget {
         return new Column(
             children: [
                 _buildRow(flex: 2),
-                _buildRow(children: [
-                    _buildMenuItem('Study Mode', Icons.school, 
-                        () => Router.goToStudyPreparation(context))
-                ]),
-                _buildRow(children: [
-                    _buildMenuItem('Word Packs', Icons.library_books, 
-                        () => Router.goToPackList(context)),
-                    _buildMenuItem('Word Cards', Consts.cardListIcon, 
-                        () => Router.goToCardList(context))
-                ])
+                _buildRow(child: _buildMenuItem('Study Mode', Icons.school, 
+                  () => Router.goToStudyPreparation(context))),
+                _buildRow(child: _buildMenuItem('Word Packs', Icons.library_books, 
+                  () => Router.goToPackList(context))),
+                _buildRow(child: _buildMenuItem('Word Cards', Consts.cardListIcon, 
+                  () => Router.goToCardList(context)))
             ]
         );
     }
 
-    Widget _buildRow({ List<Widget> children, int flex }) => 
+    Widget _buildRow({ Widget child, int flex }) => 
         new Flexible(
             fit: FlexFit.tight,
             flex: flex ?? 1,
             child: new Row(
                 crossAxisAlignment: CrossAxisAlignment.stretch, 
-                children: children ?? []
+                children: child == null ? []: [child]
             )
         );
 

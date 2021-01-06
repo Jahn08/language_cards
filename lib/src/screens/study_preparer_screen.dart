@@ -52,9 +52,9 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     Widget _buildLayout(List<StudyPack> stPacks) => 
         new Column(
             children: [
-                new Flexible(child: _buildStudyLevelList(stPacks), fit: FlexFit.tight),
+                new Flexible(child: _buildStudyLevelList(stPacks), flex: 2, fit: FlexFit.tight),
                 new Divider(thickness: 2),
-                new Flexible(child: _buildList(stPacks), flex: 2)
+                new Flexible(child: _buildList(stPacks), flex: 3)
             ]
         );
 
