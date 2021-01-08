@@ -4,10 +4,14 @@ import './icon_option.dart';
 import '../blocs/settings_bloc.dart';
 import '../models/language.dart';
 import '../models/user_params.dart';
+import '../utilities/enum.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
+import '../widgets/styled_dropdown.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
+
+	static const double _bigFontSize = 20;
 
     UserParams _params;
 
@@ -33,6 +37,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         
         children.addAll(_buildLanguageSection());
         children.addAll(_buildAppearanceSection());
+        children.addAll(_buildStudySection());
         children.addAll(_buildContactsSection());
         children.addAll(_buildHelpSection());
 
@@ -46,11 +51,14 @@ class _SettingsPanelState extends State<_SettingsPanel> {
             child:new DrawerHeader(
                 child: new Text(
                     'Settings',
-                    style: new TextStyle(fontWeight: FontWeight.w800),
+                    style: new TextStyle(
+						fontSize: _bigFontSize,
+						fontWeight: FontWeight.w800
+					),
                     textAlign: TextAlign.center
                 )
             ),
-            height: 50
+            height: 60
         );
     }
 
@@ -69,9 +77,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
             padding: EdgeInsets.only(left: 5), 
             child: new Text(
                 title,
-                style: new TextStyle(
-                    fontWeight: FontWeight.bold
-                )
+                style: new TextStyle(fontSize: _bigFontSize)
             ));
     }
 
@@ -94,7 +100,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 
     List<Widget> _buildAppearanceSection() {
         return <Widget>[
-            _buildSubsectionHeader('Appearance'),
+            _buildSubsectionHeader('Theme'),
             new Row(children: <Widget>[
                 _buildAppearanceOption(AppTheme.dark),
                 _buildAppearanceOption(AppTheme.light)
@@ -122,6 +128,45 @@ class _SettingsPanelState extends State<_SettingsPanel> {
             }
         );
     }
+
+	List<Widget> _buildStudySection() {
+		final directionDic = Enum.mapStringValues(StudyDirection.values);
+		final sideDic = Enum.mapStringValues(CardSide.values);
+
+		return <Widget>[
+            _buildSubsectionHeader('Study'),
+            new Row(children: <Widget>[
+				_wrapWithExpandableContainer(
+					new StyledDropdown(directionDic.keys, 
+						label: 'Card Sorting',
+						initialValue: Enum.stringifyValue(_params.studyParams.direction),
+						onChanged: (newValue) {
+							setState(() => _params.studyParams.direction = directionDic[newValue]);
+						}
+					)
+				)
+            ]),
+			new Row(children: <Widget>[
+				_wrapWithExpandableContainer(
+					new StyledDropdown(sideDic.keys, 
+						label: 'Card Side',
+						initialValue: Enum.stringifyValue(_params.studyParams.cardSide),
+						onChanged: (newValue) {
+							setState(() => _params.studyParams.cardSide = sideDic[newValue]);
+						}
+					)
+				)
+            ])
+        ];
+    }
+
+	Widget _wrapWithExpandableContainer(Widget child) =>
+		new Expanded(
+			child: new Container(
+				child: child, 
+				margin: EdgeInsets.only(bottom: 5, top: 10)
+			)
+		);
 
     List<Widget> _buildContactsSection() {
         return <Widget>[

@@ -2,6 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
 import 'package:language_cards/src/models/word_study_stage.dart';
 import '../router.dart';
+import '../blocs/settings_bloc.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
@@ -33,12 +34,11 @@ class _StudyScreenState extends State<StudyScreen> {
 
     bool _isStudyOver;
 
+	Future<UserParams> _futureParams;
+
     @override
     initState() {
         super.initState();
-
-        _studyDirection = StudyDirection.forward;
-        _cardSide = CardSide.front;
         
         _shouldReorderCards = true;
         _isStudyOver = false;
@@ -53,34 +53,46 @@ class _StudyScreenState extends State<StudyScreen> {
     }
 
     @override
-    Widget build(BuildContext context) =>
-        new FutureLoader<List<StoredWord>>(_futureCards, (cards) {
-            bool shouldTakeAllCards = false;
-            if (_cards == null || _cards.isEmpty) {
-                _cards = cards;
-                
-                shouldTakeAllCards = true;
-            }
+    Widget build(BuildContext context) {
+		if (_futureParams == null)
+        	_futureParams = SettingsBlocProvider.of(context).userParams;
 
-            if (_isStudyOver) {
-                _isStudyOver = false;
-                WidgetsBinding.instance.addPostFrameCallback(
-                    (_) => ConfirmDialog.buildOkDialog(
-                        title: 'The Study Cicle Is Over', 
-                        content: 'Well Done! You have finished the study.\n\n' + 
-                          'You can repeat the study to hone the cards to perfection'
-                    ).show(context));
-            
-                shouldTakeAllCards = true;
-            }
+		return new FutureLoader<UserParams>(_futureParams, (userParams) =>
+			new FutureLoader<List<StoredWord>>(_futureCards, (cards) {
+				final studyParams = userParams.studyParams;
+				if (_studyDirection == null)
+					_studyDirection = studyParams.direction;
+				if (_cardSide == null)
+					_cardSide = studyParams.cardSide;
 
-            _orderCards(shouldTakeAllCards);
-            return new BarScaffold(
-                '${_curCardIndex + 1} of ${cards.length} Cards',
-                body: _buildLayout(),
-                onNavGoingBack: () => Router.goToStudyPreparation(context)
-            );
-        });
+				bool shouldTakeAllCards = false;
+				if (_cards == null || _cards.isEmpty) {
+					_cards = cards;
+					
+					shouldTakeAllCards = true;
+				}
+
+				if (_isStudyOver) {
+					_isStudyOver = false;
+					WidgetsBinding.instance.addPostFrameCallback(
+						(_) => ConfirmDialog.buildOkDialog(
+							title: 'The Study Cicle Is Over', 
+							content: 'Well Done! You have finished the study.\n\n' + 
+							'You can repeat the study to hone the cards to perfection'
+						).show(context));
+				
+					shouldTakeAllCards = true;
+				}
+
+				_orderCards(shouldTakeAllCards);
+				return new BarScaffold(
+					'${_curCardIndex + 1} of ${cards.length} Cards',
+					body: _buildLayout(),
+					onNavGoingBack: () => Router.goToStudyPreparation(context)
+				);
+			})
+		);
+	} 
 
     void _orderCards(bool shouldTakeAllCards) {
         if (!_shouldReorderCards)
@@ -278,6 +290,13 @@ class _StudyScreenState extends State<StudyScreen> {
     int _nextIndex<T>(List<T> values, int curValIndex) =>
         curValIndex == -1 || curValIndex == values.length - 1 ? 
             0: curValIndex + 1;
+
+	@override
+	dispose() {
+		_controller?.dispose();
+
+		super.dispose();
+	}
 }
 
 class StudyScreen extends StatefulWidget {

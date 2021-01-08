@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
@@ -11,16 +12,19 @@ import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/word_storage_mock.dart';
+import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
 
+	setUp(() => PreferencesTester.resetSharedPreferences());
+
     testWidgets('Renders card data along with buttons for configuring the study mode', 
         (tester) async {
             final packStorage = new PackStorageMock();
             final packs = await _pumpScreen(tester, packStorage);
-            
+			
             expect(find.descendant(of: find.byType(RaisedButton, skipOffstage: false), 
                 matching: find.byType(Text, skipOffstage: false)), findsNWidgets(4));
 
@@ -172,8 +176,13 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
     if (packs == null)
         packs = await _fetchNamedPacks(tester, packStorage);
 
-    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(noBar: true,
-        child: new StudyScreen(packStorage.wordStorage, packs: packs)));
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
+		noBar: true,
+        child: new SettingsBlocProvider(
+			child: new StudyScreen(packStorage.wordStorage, packs: packs)
+		)
+	));
+    await tester.pump();
     await tester.pump(new Duration(milliseconds: 500));
 
     return packs;
@@ -400,7 +409,7 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
 
     final assistant = new WidgetAssistant(tester);
     await _pressButtonContainingText(assistant, Enum.stringifyValue(CardSide.front));
-
+	
     const firstIndex = 0;
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
     
