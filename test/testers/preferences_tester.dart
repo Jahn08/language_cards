@@ -11,39 +11,36 @@ class PreferencesTester {
     static resetSharedPreferences() => SharedPreferences.setMockInitialValues({});
 
     static Future<UserParams> saveRandomUserParams() async {
-        return _saveParams(() {
-            final params = new UserParams();
-            params.interfaceLang = Randomiser.nextElement(Language.values);
-            params.theme = Randomiser.nextElement(AppTheme.values);
-            params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
-            params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
+        final params = new UserParams();
+		params.interfaceLang = Randomiser.nextElement(Language.values);
+		params.theme = Randomiser.nextElement(AppTheme.values);
+		params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
+		params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
+		
+		await _saveParams(params);
 
-            return params;
-        });
+		return params;
     }
 
-    static Future<UserParams> _saveParams(UserParams Function() paramsBuilder) async {
+    static Future<void> _saveParams(UserParams params) async {
         resetSharedPreferences();
-
-        final params = paramsBuilder();
         await PreferencesProvider.save(params);
-        return params;
     }
 
     static Future<UserParams> saveNonDefaultUserParams() async {
-        return _saveParams(() {
-            final params = new UserParams();
-            params.interfaceLang = _getFirstDistinctFrom(
-                params.interfaceLang, Language.values);
-            params.theme = _getFirstDistinctFrom(
-                params.theme, AppTheme.values);
-            params.studyParams.cardSide = _getFirstDistinctFrom(
-                params.studyParams.cardSide, CardSide.values);
-            params.studyParams.direction = _getFirstDistinctFrom(
-                params.studyParams.direction, StudyDirection.values);
+		final params = new UserParams();
+		params.interfaceLang = _getFirstDistinctFrom(
+			params.interfaceLang, Language.values);
+		params.theme = _getFirstDistinctFrom(
+			params.theme, AppTheme.values);
+		params.studyParams.cardSide = _getFirstDistinctFrom(
+			params.studyParams.cardSide, CardSide.values);
+		params.studyParams.direction = _getFirstDistinctFrom(
+			params.studyParams.direction, StudyDirection.values);
+	   
+	    await _saveParams(params);
 
-            return params;
-        });
+		return params;
     }
 
     static T _getFirstDistinctFrom<T>(T value, List<T> values) =>

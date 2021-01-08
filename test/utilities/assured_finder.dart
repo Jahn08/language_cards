@@ -32,4 +32,6 @@ class AssuredFinder {
 
     static Finder findSeveral({ String label, Type type, bool shouldFind }) =>
         _find(expectSeveral: true, label: label, type: type, shouldFind: shouldFind);
+
+	static Type typify<T>() => T;
 }

@@ -8,6 +8,7 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
 import '../mocks/pack_storage_mock.dart';
+import '../utilities/assured_finder.dart';
 import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
 import '../mocks/root_widget_mock.dart';
@@ -24,7 +25,7 @@ void main() {
             expect(find.widgetWithText(TextField, wordToShow.transcription), findsOneWidget);
 
             final posField = tester.widget<DropdownButton<String>>(
-                find.byType(_typify<DropdownButton<String>>()));
+                find.byType(AssuredFinder.typify<DropdownButton<String>>()));
             expect(posField.value, wordToShow.partOfSpeech);
         });
 
@@ -248,8 +249,6 @@ Future<String> _enterChangedText(WidgetTester tester, String initialText) async 
 
     return changedText;
 }
-
-Type _typify<T>() => T;
 
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {

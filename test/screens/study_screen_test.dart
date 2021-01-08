@@ -33,6 +33,16 @@ void main() {
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
         });
 
+	testWidgets('Renders the study mode buttons in accordance with user preferences', (tester) async {
+		final expectedParams = await PreferencesTester.saveNonDefaultUserParams();
+
+		await _pumpScreen(tester, new PackStorageMock());
+		
+		final studyParams = expectedParams.studyParams;
+		expect(_findButtonEndingWithText(Enum.stringifyValue(studyParams.direction)), findsOneWidget);
+		expect(_findButtonEndingWithText(Enum.stringifyValue(studyParams.cardSide)), findsOneWidget);
+	});
+
     testWidgets('Renders a name for a chosen sorting mode when clicking on the button', 
         (tester) async {
             await _pumpScreen(tester, new PackStorageMock());
@@ -258,20 +268,19 @@ Future<void> _testChangingStudyModes(WidgetTester tester, List<dynamic> modeValu
 
     int i = 0;
     do {
-        await _pressButtonContainingText(assistant, Enum.stringifyValue(modeValues[i]));
+        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(modeValues[i]));
     } while (++i < modeValues.length);
 }
 
 Finder _findCardWidget() => find.byType(PageView);
 
-Future<void> _pressButtonContainingText(WidgetAssistant assistant, String text) async {
-    final btnFinder = find.ancestor(
-        of: find.byWidgetPredicate((w) => w is Text && 
-            w.data.contains(text), skipOffstage: false),
-        matching: find.byType(RaisedButton, skipOffstage: false));
+Future<void> _pressButtonEndingWithText(WidgetAssistant assistant, String text) => 
+	assistant.pressButtonDirectly(_findButtonEndingWithText(text));
 
-    await assistant.pressButtonDirectly(btnFinder);
-}
+Finder _findButtonEndingWithText(String text) => 
+	find.ancestor(of: find.byWidgetPredicate((w) => w is Text && 
+		w.data.endsWith(text), skipOffstage: false),
+        matching: find.byType(RaisedButton, skipOffstage: false));
 
 Future<void> _testForwardSorting(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();
@@ -297,7 +306,7 @@ Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) asy
         await _fetchPackedCards(tester, packs, packStorage.wordStorage), true);
 
     final assistant = new WidgetAssistant(tester);
-    await _pressButtonContainingText(assistant, 
+    await _pressButtonEndingWithText(assistant, 
         Enum.stringifyValue(StudyDirection.forward));
 
     await _goToNextCard(assistant, shouldSwipe);
@@ -316,7 +325,7 @@ Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async
     final assistant = new WidgetAssistant(tester);
 
     for (final sortMode in [StudyDirection.forward, StudyDirection.backward])
-        await _pressButtonContainingText(assistant, Enum.stringifyValue(sortMode));
+        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(sortMode));
 
     final firstCard = _getShownCard(tester, cards);
 
@@ -408,7 +417,7 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
         await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
     final assistant = new WidgetAssistant(tester);
-    await _pressButtonContainingText(assistant, Enum.stringifyValue(CardSide.front));
+    await _pressButtonEndingWithText(assistant, Enum.stringifyValue(CardSide.front));
 	
     const firstIndex = 0;
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
@@ -435,7 +444,7 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
     final assistant = new WidgetAssistant(tester);
 
     for (final sideMode in [CardSide.front, CardSide.back])
-        await _pressButtonContainingText(assistant, Enum.stringifyValue(sideMode));
+        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(sideMode));
 
     int curIndex = 0;
     do {

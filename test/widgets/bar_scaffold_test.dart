@@ -4,10 +4,12 @@ import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/user_params.dart';
+import 'package:language_cards/src/utilities/enum.dart';
 import 'package:language_cards/src/widgets/asset_icon.dart';
 import 'package:language_cards/src/widgets/bar_scaffold.dart';
 import 'package:language_cards/src/widgets/icon_option.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
+import 'package:language_cards/src/widgets/styled_dropdown.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/randomiser.dart';
@@ -126,6 +128,25 @@ void main() {
             expect(tester.widget<Container>(colouredContainerFinder).color,
                 Colors.blueGrey[theme == AppTheme.dark ? 900: 100]);
         });
+
+		final dropdowns = tester.widgetList<StyledDropdown>(
+			AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
+		expect(dropdowns.length, 2);
+
+		final cardSides = Enum.mapStringValues(CardSide.values).keys;
+		dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
+		
+		final studyDirections = Enum.mapStringValues(StudyDirection.values).keys;
+		dropdowns.singleWhere((d) => d.options.every((op) => studyDirections.contains(op)));
+
+		final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
+		final dropdownBtns = tester.widgetList<DropdownButton<String>>(
+			AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true));
+		expect(dropdownBtns.length, 2);
+
+		final studyParams = userParams.studyParams;
+		[Enum.stringifyValue(studyParams.cardSide), Enum.stringifyValue(studyParams.direction)]
+			.every((p) => dropdownBtns.contains((d) => d.value == p));
     });
 
     testWidgets('Saves and hides settings after clicking the apply button on the panel', 
@@ -150,11 +171,26 @@ void main() {
             await assistant.tapWidget(nonChosenOptionsFinder.first);
             await assistant.tapWidget(nonChosenOptionsFinder.last);
 
+			final defStudyParams = defaultUserParams.studyParams;
+			final expectedCardSide = CardSide.back;
+			await _chooseDropdownItem<CardSide>(tester, defStudyParams.cardSide, expectedCardSide);
+			
+			final expectedDirection = StudyDirection.random;
+			await _chooseDropdownItem<StudyDirection>(tester, defStudyParams.direction, 
+				expectedDirection);
+
             await _applySettings(assistant);
 
             final savedUserParams = await PreferencesProvider.fetch();
             expect(savedUserParams.theme == defaultUserParams.theme, false);
             expect(savedUserParams.interfaceLang == defaultUserParams.interfaceLang, false);
+            
+			final studyParams = savedUserParams.studyParams;
+			expect(studyParams.cardSide == defStudyParams.cardSide, false);
+			expect(studyParams.cardSide, expectedCardSide);
+
+			expect(studyParams.direction == defStudyParams.direction, false);
+			expect(studyParams.direction, expectedDirection);
         });
 
     testWidgets('Resets settings after clicking the reset button on the panel', (tester) async {
@@ -162,6 +198,10 @@ void main() {
         final defaultUserParams = new UserParams();
         expect(userParams.theme == defaultUserParams.theme, false);
         expect(userParams.interfaceLang == defaultUserParams.interfaceLang, false);
+
+		final defStudyParams = defaultUserParams.studyParams;
+	    expect(userParams.studyParams.cardSide == defStudyParams.cardSide, false);
+		expect(userParams.studyParams.direction == defStudyParams.direction, false);
 
         await _pumpScaffoldWithSettings(tester);
 
@@ -174,8 +214,12 @@ void main() {
         await _applySettings(assistant);
 
         final storedUserParams = await PreferencesProvider.fetch();
-        expect(storedUserParams.theme == defaultUserParams.theme, true);
-        expect(storedUserParams.interfaceLang == defaultUserParams.interfaceLang, true);
+        expect(storedUserParams.theme, defaultUserParams.theme);
+        expect(storedUserParams.interfaceLang, defaultUserParams.interfaceLang);
+		
+		final curStudyParams = storedUserParams.studyParams;
+	    expect(curStudyParams.cardSide, defStudyParams.cardSide);
+		expect(curStudyParams.direction, defStudyParams.direction);
     });
 }
 
@@ -201,3 +245,15 @@ Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async =>
 
 Future<void> _applySettings(WidgetAssistant assistant) async => 
     await assistant.pressButtonDirectlyByLabel('Apply');
+
+Future<void> _chooseDropdownItem<T>(WidgetTester tester, T curValue, T valueToChoose) async {
+	final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
+	final cardSideDropdownFinder = find.widgetWithText(dropDownBtnType, 
+		Enum.stringifyValue(curValue));
+	
+	final widgetAssistant = new WidgetAssistant(tester);
+	await widgetAssistant.tapWidget(cardSideDropdownFinder);
+	
+	await widgetAssistant.tapWidget(
+		find.text(Enum.stringifyValue(valueToChoose)).hitTestable());
+}
