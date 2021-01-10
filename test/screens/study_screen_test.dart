@@ -120,27 +120,27 @@ void main() {
 
     testWidgets('Increases study progress for a card after clicking the Learn button and moves next', 
       (tester) async {
-          final packStorage = new PackStorageMock();
+          	final packStorage = new PackStorageMock();
 
-          final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
-          final cards = _sortCards(
-              await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-          final cardToLearn = cards.first;
+			final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+			final cards = _sortCards(
+				await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+			var cardToLearn = cards.first;
 
-          if (cardToLearn.studyProgress == WordStudyStage.learned)
-            await packStorage.wordStorage.updateWordProgress(cardToLearn.id, 
-                WordStudyStage.familiar);
+			if (cardToLearn.studyProgress == WordStudyStage.learned)
+				cardToLearn = await packStorage.wordStorage.updateWordProgress(cardToLearn.id, 
+					WordStudyStage.familiar);
 
-          final curStudyProgress = cardToLearn.studyProgress;
+			final curStudyProgress = cardToLearn.studyProgress;
 
-          await _pumpScreen(tester, packStorage, packs);
+			await _pumpScreen(tester, packStorage, packs);
 
-          final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: RaisedButton, 
-            shouldFind: true);
-          await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
+			final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: RaisedButton, 
+				shouldFind: true);
+			await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
 
-          _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
-          expect(cardToLearn.studyProgress - curStudyProgress, 25);
+			_assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+			expect(cardToLearn.studyProgress - curStudyProgress, 25);
       });
 
     testWidgets('Shows the back side of a card when tapping it and the front side of the next one when swiping left', 

@@ -101,13 +101,13 @@ class WordStorageMock extends WordStorage {
         return words;
     }
 
-    Future<void> updateWordProgress(int id, int studyProgress) async {
+    Future<StoredWord> updateWordProgress(int id, int studyProgress) async {
         final wordToUpdate = _words.firstWhere((w) => w.id == id, orElse: null);
         
         if (wordToUpdate == null)
-            return;
+            return null;
 
-        await upsert(new StoredWord(wordToUpdate.text,
+        return upsert(new StoredWord(wordToUpdate.text,
             id:  wordToUpdate.id,
             packId:  wordToUpdate.packId,
             studyProgress: studyProgress,
