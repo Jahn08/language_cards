@@ -1,18 +1,57 @@
 import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
-import 'package:language_cards/src/models/word_study_stage.dart';
+import 'package:http/http.dart';
 import '../router.dart';
 import '../blocs/settings_bloc.dart';
+import '../data/configuration.dart';
+import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
+import '../dialogs/cancellable_dialog.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../models/user_params.dart';
+import '../models/word_study_stage.dart';
 import '../utilities/enum.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
 import '../widgets/translation_indicator.dart';
+
+class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPack>> {
+
+	final String apiKey;
+
+	final StoredWord card;
+    
+    final StoredPack pack;
+
+    final Client client;
+
+    final BaseStorage<StoredWord> wordStorage;
+
+	_CardEditorDialog({ @required this.apiKey, @required this.card, @required this.pack, 
+		@required this.client, @required this.wordStorage }): 
+		super();
+
+	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) =>
+        showDialog(
+            context: context, 
+            builder: (buildContext) => new SimpleDialog(
+				children: [
+					new CardEditor(apiKey, card: card, pack: pack, client: client,
+						wordStorage: wordStorage, packStorage: new PackStorage(),
+						hideNonePack: true, 
+						afterSave: (card, pack, _) {
+							returnResult(buildContext, new MapEntry(card, pack));
+						}), 
+					new Center(child: buildCancelBtn(context))
+				],
+                title: new Text('Change Card'),
+            )
+        );
+}
 
 class _StudyScreenState extends State<StudyScreen> {
     
@@ -87,6 +126,36 @@ class _StudyScreenState extends State<StudyScreen> {
 				_orderCards(shouldTakeAllCards);
 				return new BarScaffold(
 					'${_curCardIndex + 1} of ${cards.length} Cards',
+					barActions: [
+						new FlatButton(
+							child: new Text('Edit'),
+							onPressed: () async {
+								final apiKey = (await Configuration.getParams(context))
+									.dictionary.apiKey;
+								final curCard = _cards[_curCardIndex];
+
+								final updatedPackedCard = await new _CardEditorDialog(
+									apiKey: apiKey,
+									card: curCard,
+									pack: _packMap[curCard.packId],
+									client: widget.client,
+									wordStorage: widget.storage
+								).show(context);
+
+								if (updatedPackedCard == null)
+									return;
+
+								final updatedCard = updatedPackedCard.key;
+								if (curCard.packId != updatedCard.packId && 
+									!_packMap.containsKey(updatedCard.packId))
+									_packMap[updatedCard.packId] = updatedPackedCard.value;
+
+								setState(() {
+									_cards[_curCardIndex] = updatedCard;			  
+								});
+							}
+						)
+					],
 					body: _buildLayout(),
 					onNavGoingBack: () => Router.goToStudyPreparation(context)
 				);
@@ -307,7 +376,9 @@ class StudyScreen extends StatefulWidget {
 
     final List<int> studyStageIds;
 
-    StudyScreen(this.storage, { @required this.packs, this.studyStageIds });
+    final Client client;
+
+    StudyScreen(this.storage, { @required this.packs, this.studyStageIds, this.client });
 
     @override
     _StudyScreenState createState() => new _StudyScreenState();

@@ -165,8 +165,13 @@ class CardEditorState extends State<CardEditor> {
                     icon: new Icon(Icons.folder_open),
                     label: new Text('Card Pack: ${_pack.name}'),
                     onPressed: () async {
-                        if (_futurePacks == null)
+                        if (_futurePacks == null) {
                             _futurePacks = widget._packStorage.fetch();
+
+							if (widget.hideNonePack ?? false)
+								_futurePacks = _futurePacks.then(
+									(ps) => ps.where((p) => !p.isNone).toList());
+						}
                         
                         final chosenPack = await new PackSelectorDialog(context, _pack.id)
                             .showAsync(_futurePacks);
@@ -238,9 +243,11 @@ class CardEditor extends StatefulWidget {
     
 	final void Function(StoredWord card, StoredPack pack, bool cardWasAdded) afterSave;
 
+	final bool hideNonePack;
+
     CardEditor(String apiKey, { @required BaseStorage<StoredWord> wordStorage, 
         @required BaseStorage<StoredPack> packStorage, @required this.afterSave,
-		Client client, int wordId, this.pack, this.card }): 
+		Client client, int wordId, this.pack, this.card, this.hideNonePack }): 
         _apiKey = apiKey,
         _client = client,
         _packStorage = packStorage,
