@@ -8,10 +8,10 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
 import '../mocks/pack_storage_mock.dart';
-import '../utilities/assured_finder.dart';
+import '../mocks/root_widget_mock.dart';
+import '../testers/card_editor_tester.dart';
 import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
-import '../mocks/root_widget_mock.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -19,14 +19,7 @@ void main() {
     testWidgets('Builds a screen displaying fields for a word from a storage', 
         (tester) async {
             final wordToShow = await _displayWord(tester);
-            expect(find.widgetWithText(TextField, wordToShow.text), findsOneWidget);
-            expect(find.widgetWithText(TextField, wordToShow.translation), findsOneWidget);
-            
-            expect(find.widgetWithText(TextField, wordToShow.transcription), findsOneWidget);
-
-            final posField = tester.widget<DropdownButton<String>>(
-                find.byType(AssuredFinder.typify<DropdownButton<String>>()));
-            expect(posField.value, wordToShow.partOfSpeech);
+			new CardEditorTester(tester).assureRenderingCardFields(wordToShow);
         });
 
     testWidgets('Displays a card pack for a word from a storage', 
@@ -47,7 +40,7 @@ void main() {
 
             await _displayWord(tester, storage: storage, wordToShow: wordWithoutProgress);
 
-            _findStudyProgressButton(shouldFind: false);
+            CardEditorTester.findStudyProgressButton(shouldFind: false);
         });
 
     testWidgets('Displays a button showing study progress for a card and resetting it', 
@@ -66,18 +59,16 @@ void main() {
 
             await _displayWord(tester, storage: storage, wordToShow: wordWithProgress);
 
-            final progressBtnFinder = _findStudyProgressButton();
-            final progressLabelFinder = find.descendant(of: progressBtnFinder, 
-                matching: find.byType(Text));
-            expect(progressLabelFinder, findsOneWidget);
-            expect(tester.widget<Text>(progressLabelFinder)
-                .data.contains('${wordWithProgress.studyProgress}%'), true);
+			new CardEditorTester(tester).assureNonZeroStudyProgress(
+				wordWithProgress.studyProgress);
 
             final assistant = new WidgetAssistant(tester);
-            await assistant.tapWidget(progressBtnFinder);
-            _findStudyProgressButton(shouldFind: false);
 
-            await assistant.pressButtonDirectly(_findSaveButton());
+			await assistant.tapWidget(
+				CardEditorTester.findStudyProgressButton(shouldFind: true));
+            CardEditorTester.findStudyProgressButton(shouldFind: false);
+
+            await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
 
             final changedWord = await storage.wordStorage.find(wordWithProgress.id);
             expect(changedWord.studyProgress, WordStudyStage.unknown);
@@ -97,16 +88,17 @@ void main() {
             await _displayWord(tester, storage: storage, pack: expectedPack);
             
             final assistant = new WidgetAssistant(tester);
-            final packBtnFinder = _findPackButton();
+            final packBtnFinder = CardEditorTester.findPackButton();
             await assistant.tapWidget(packBtnFinder);
 
-            final packTileFinder = _findListTileByTitle(expectedPack.name);
+            final packTileFinder = CardEditorTester.findListTileByTitle(expectedPack.name);
             _assureTileIsTicked(packTileFinder);
 
             StoredPack anotherExpectedPack;
             await tester.runAsync(() async => 
                 anotherExpectedPack = await _fetchAnotherPack(storage, expectedPack.id));
-            final anotherPackTileFinder = _findListTileByTitle(anotherExpectedPack.name);
+            final anotherPackTileFinder = 
+				CardEditorTester.findListTileByTitle(anotherExpectedPack.name);
             await assistant.tapWidget(anotherPackTileFinder);
 
             await assistant.tapWidget(packBtnFinder);
@@ -170,7 +162,7 @@ void main() {
 
             final expectedChangedTr = await _changeTranscription(assistant, wordToShow.transcription);
 
-            await assistant.pressButtonDirectly(_findSaveButton());
+            await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
 
             final changedWord = await storage.wordStorage.find(wordToShow.id);
             expect(changedWord?.transcription, expectedChangedTr);
@@ -229,7 +221,8 @@ Finder _findWarningDialogButton() =>
 
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {
-        final expectedChangedText = await _enterChangedText(tester, fieldValueToChange);
+        final expectedChangedText = 
+			await new CardEditorTester(tester).enterChangedText(fieldValueToChange);
 
         final refocusedFieldFinder = find.widgetWithText(TextField, fieldValueToRefocus);
         await new WidgetAssistant(tester).tapWidget(refocusedFieldFinder);
@@ -241,30 +234,20 @@ Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValue
         expect(refocusedField.focusNode.hasFocus, true);
     }
 
-Future<String> _enterChangedText(WidgetTester tester, String initialText) async {
-    final changedText = initialText.substring(1);
-    await tester.enterText(find.widgetWithText(TextField, initialText), changedText);
-    
-    await new WidgetAssistant(tester).pumpAndAnimate();
-
-    return changedText;
-}
-
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
     final storage = new PackStorageMock();
     final wordToShow = await _displayWord(tester, storage: storage);
 
-    final expectedChangedText = await _enterChangedText(tester, valueToChangeGetter(wordToShow));
+    final expectedChangedText = 
+		await new CardEditorTester(tester).enterChangedText(valueToChangeGetter(wordToShow));
 
-    await new WidgetAssistant(tester).tapWidget(_findSaveButton());
+    await new WidgetAssistant(tester).tapWidget(CardEditorTester.findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
     expect(valueToChangeGetter(changedWord), expectedChangedText);
 }
-
-Finder _findSaveButton() => find.widgetWithText(RaisedButton, 'Save');
 
 Future<void> _showTranscriptionKeyboard(WidgetAssistant assistant, String transcription) async {
     final transcriptionFinder = find.widgetWithText(TextField, transcription);
@@ -278,29 +261,11 @@ Future<String> _changeTranscription(WidgetAssistant assistant, String curTranscr
     return curTranscription + expectedSymbols.join();
 }
 
-Finder _findStudyProgressButton({ bool shouldFind = true }) => 
-    _findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
-
-Finder _findFlatButtonByIcon(IconData icon, { bool shouldFind = true }) {
-    final flatBtnFinder = find.ancestor(of: find.byIcon(icon), 
-        matching: find.byWidgetPredicate((widget) => widget is FlatButton));
-    expect(flatBtnFinder, shouldFind ? findsOneWidget: findsNothing);
-
-    return flatBtnFinder;
-}
-
 Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPack]) async {
     await _displayWord(tester, pack: expectedPack);
-    
-    final packBtnFinder = _findPackButton();
-    final packLabelFinder = find.descendant(of: packBtnFinder, matching: find.byType(Text));
-    expect(packLabelFinder, findsOneWidget);
-    
-    final packLabel = tester.widget<Text>(packLabelFinder);
-    expect(packLabel.data.endsWith(expectedPack?.name ?? StoredPack.noneName), true);
-}
 
-Finder _findPackButton() => _findFlatButtonByIcon(Icons.folder_open);
+	new CardEditorTester(tester).assureRenderingPack(expectedPack);
+}
 
 Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId, 
     { canBeNonePack = false }) async => 
@@ -313,7 +278,7 @@ Future<void> _testChangingPack(PackStorageMock storage, WidgetTester tester,
 
     final expectedPack = await _changePack(tester, () => newPackGetter(wordToShow));
 
-    await new WidgetAssistant(tester).pressButtonDirectly(_findSaveButton());
+    await new WidgetAssistant(tester).pressButtonDirectly(CardEditorTester.findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
@@ -321,25 +286,14 @@ Future<void> _testChangingPack(PackStorageMock storage, WidgetTester tester,
 }
 
 Future<StoredPack> _changePack(WidgetTester tester,
-    Future<StoredPack> Function() newPackGetter) async {
-    final assistant = new WidgetAssistant(tester);
-    await assistant.tapWidget(_findPackButton());
+	Future<StoredPack> Function() newPackGetter) async {
 
     StoredPack expectedPack;
     await tester.runAsync(() async => expectedPack = await newPackGetter());
 
-    final packTileFinder = _findListTileByTitle(expectedPack.name);
-    await assistant.tapWidget(packTileFinder);
+	await new CardEditorTester(tester).changePack(expectedPack);
 
     return expectedPack;
-}
-
-Finder _findListTileByTitle(String title) {
-    final tileFinder = find.ancestor(of: find.text(title), 
-        matching: find.byType(ListTile));
-    expect(tileFinder, findsOneWidget); 
-
-    return tileFinder;
 }
 
 void _assureTileIsTicked(Finder tileFinder) => 
@@ -375,7 +329,7 @@ Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
 }
 
 Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
-    final newText = await _enterChangedText(tester, wordText);
+    final newText = await new CardEditorTester(tester).enterChangedText(wordText);
     final textFinder = find.widgetWithText(TextField, newText);
 
     tester.widget<TextField>(textFinder).onEditingComplete();

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:http/http.dart';
 import '../router.dart';
 import '../blocs/settings_bloc.dart';
-import '../data/configuration.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/cancellable_dialog.dart';
@@ -31,8 +30,10 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 
     final BaseStorage<StoredWord> wordStorage;
 
+    final BaseStorage<StoredPack> packStorage;
+
 	_CardEditorDialog({ @required this.apiKey, @required this.card, @required this.pack, 
-		@required this.client, @required this.wordStorage }): 
+		@required this.client, @required this.wordStorage, @required this.packStorage }): 
 		super();
 
 	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) =>
@@ -41,7 +42,7 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
             builder: (buildContext) => new SimpleDialog(
 				children: [
 					new CardEditor(apiKey, card: card, pack: pack, client: client,
-						wordStorage: wordStorage, packStorage: new PackStorage(),
+						wordStorage: wordStorage, packStorage: packStorage,
 						hideNonePack: true, 
 						afterSave: (card, pack, _) {
 							returnResult(buildContext, new MapEntry(card, pack));
@@ -127,19 +128,17 @@ class _StudyScreenState extends State<StudyScreen> {
 				return new BarScaffold(
 					'${_curCardIndex + 1} of ${cards.length} Cards',
 					barActions: [
-						new FlatButton(
+						new TextButton(
 							child: new Text('Edit'),
 							onPressed: () async {
-								final apiKey = (await Configuration.getParams(context))
-									.dictionary.apiKey;
 								final curCard = _cards[_curCardIndex];
-
 								final updatedPackedCard = await new _CardEditorDialog(
-									apiKey: apiKey,
+									apiKey: widget.apiKey,
 									card: curCard,
 									pack: _packMap[curCard.packId],
 									client: widget.client,
-									wordStorage: widget.storage
+									wordStorage: widget.storage,
+									packStorage: widget.packStorage
 								).show(context);
 
 								if (updatedPackedCard == null)
@@ -370,7 +369,11 @@ class _StudyScreenState extends State<StudyScreen> {
 
 class StudyScreen extends StatefulWidget {
     
+	final String apiKey;
+
     final WordStorage storage;
+
+    final BaseStorage<StoredPack> packStorage;
 
     final List<StoredPack> packs;
 
@@ -378,7 +381,8 @@ class StudyScreen extends StatefulWidget {
 
     final Client client;
 
-    StudyScreen(this.storage, { @required this.packs, this.studyStageIds, this.client });
+    StudyScreen(this.apiKey, this.storage, 
+		{ @required this.packs, @required this.packStorage, this.studyStageIds, this.client });
 
     @override
     _StudyScreenState createState() => new _StudyScreenState();

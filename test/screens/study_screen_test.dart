@@ -12,6 +12,8 @@ import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/word_storage_mock.dart';
+import '../testers/cancellable_dialog_tester.dart';
+import '../testers/card_editor_tester.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
@@ -179,6 +181,95 @@ void main() {
             await _reverseCardSide(assistant);
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: firstIndex);
         });
+
+	testWidgets('Renders a dialog for editing a current card after clicking the Edit button',
+        (tester) async { 
+			final packStorage = new PackStorageMock();
+			final packs = await _pumpScreen(tester, packStorage);
+
+			await _openEditorMode(tester);
+
+            final cards = _sortCards(
+                await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+			final cardToEdit = cards.first;
+
+			final editorTester = new CardEditorTester(tester);
+			editorTester.assureRenderingCardFields(cardToEdit);
+			editorTester.assureRenderingPack(_findPack(packs, cardToEdit.packId));
+
+			if (cardToEdit.studyProgress == WordStudyStage.unknown)
+				CardEditorTester.findStudyProgressButton(shouldFind: false);
+			else
+				editorTester.assureNonZeroStudyProgress(cardToEdit.studyProgress);
+		});
+	
+	testWidgets('Cancels changes in the dialog for editing a card when clicking the Cancel button',
+        (tester) async { 
+			final packStorage = new PackStorageMock();
+			final packs = await _pumpScreen(tester, packStorage);
+
+			await _openEditorMode(tester);
+
+			final wordStorage = packStorage.wordStorage;
+            final cards = _sortCards(await _fetchPackedCards(tester, packs, wordStorage));
+			final cardToEdit = cards.first;
+			
+			final initialTranslation = cardToEdit.translation;
+			final changedTranslation = 
+				await new CardEditorTester(tester).enterChangedText(initialTranslation);
+
+			await CancellableDialogTester.assureCancellingDialog(tester);
+
+            final storedCard = await wordStorage.find(cardToEdit.id);
+            expect(storedCard.translation, initialTranslation);
+
+			final expectedIndex = 0;
+			_assureFrontSideRendering(tester, packs, cards, card: storedCard, 
+				expectedIndex: expectedIndex);
+
+            await _reverseCardSide(new WidgetAssistant(tester));
+            _assureBackSideRendering(tester, packs, cards, card: storedCard, 
+				expectedIndex: expectedIndex, isReversed: true);
+
+			AssuredFinder.findOne(label: changedTranslation, shouldFind: false);
+		});
+
+	testWidgets('Saves changes after editing a card in the dialog and shows the changed card',
+        (tester) async { 
+			final packStorage = new PackStorageMock();
+			final packs = await _pumpScreen(tester, packStorage);
+
+			await _openEditorMode(tester);
+
+			final wordStorage = packStorage.wordStorage;
+            final cards = _sortCards(await _fetchPackedCards(tester, packs, wordStorage));
+			final cardToEdit = cards.first;
+			
+			final editorTester = new CardEditorTester(tester);
+			
+			final initialTranslation = cardToEdit.translation;
+			final changedTranslation = await editorTester.enterChangedText(initialTranslation);
+			
+			final initialPack = _findPack(packs, cardToEdit.packId);
+			final changedPack = packs.firstWhere((p) => !p.isNone && p.id != cardToEdit.packId);
+			await editorTester.changePack(changedPack);
+
+			await new WidgetAssistant(tester).tapWidget(CardEditorTester.findSaveButton());
+			
+			final storedCard = await wordStorage.find(cardToEdit.id);
+            expect(storedCard.translation, changedTranslation);
+            expect(storedCard.packId, changedPack.id);
+
+			final expectedIndex = 0;
+			_assureFrontSideRendering(tester, packs, cards, card: storedCard, 
+				expectedIndex: expectedIndex);
+			AssuredFinder.findOne(label: initialPack.name, shouldFind: false);
+
+            await _reverseCardSide(new WidgetAssistant(tester));
+            _assureBackSideRendering(tester, packs, cards, card: storedCard, 
+				expectedIndex: expectedIndex, isReversed: true);
+			AssuredFinder.findOne(label: initialTranslation, shouldFind: false);
+		});
 }
 
 Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packStorage,
@@ -189,7 +280,8 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		noBar: true,
         child: new SettingsBlocProvider(
-			child: new StudyScreen(packStorage.wordStorage, packs: packs)
+			child: new StudyScreen('', packStorage.wordStorage, 
+				packs: packs, packStorage: packStorage)
 		)
 	));
     await tester.pump();
@@ -238,7 +330,8 @@ void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
     final cardOtherTexts = tester.widgetList<Text>(
         find.descendant(of: cardFinder, matching: find.byType(Text))).toList();
     cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.partOfSpeech));
-    cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.transcription));
+    expect(cardOtherTexts.where((w) => w.data.contains(expectedCard.transcription)).length, 1, 
+		reason: 'There should be one widget with transcription: ${expectedCard.transcription}');
     
     expect(find.text(WordStudyStage.stringify(expectedCard.studyProgress)), findsNWidgets(2));
 
@@ -253,9 +346,12 @@ Finder _findCurrentCardSide({ bool isReversed }) {
 }
 
 void _assurePackNameRendering(List<StoredPack> packs, int packId) {
-    final expectedPack = packs.singleWhere((p) => p.id == packId);
+    final expectedPack = _findPack(packs, packId);
     AssuredFinder.findOne(shouldFind: true, label: expectedPack.name);
 }
+
+StoredPack _findPack(List<StoredPack> packs, int packId) => 
+	packs.singleWhere((p) => p.id == packId);
 
 void _assureCardsNumberRendering(WidgetTester tester, int cardsNumber, int curCardIndex) {
     tester.widgetList<Text>(find.descendant(of: find.byType(NavigationBar),
@@ -474,10 +570,13 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
 }
 
 Future<void> _goThroughCardList(WidgetTester tester, int listLength) async {
-  final assistant = new WidgetAssistant(tester);
-  
-  int index = 0;
-  do {
-      await _goToNextCard(assistant, true);
-  } while (++index < listLength);
+	final assistant = new WidgetAssistant(tester);
+	
+	int index = 0;
+	do {
+		await _goToNextCard(assistant, true);
+	} while (++index < listLength);
 }
+
+Future<void> _openEditorMode(WidgetTester tester) => 
+	new WidgetAssistant(tester).tapWidget(find.widgetWithText(TextButton, 'Edit'));

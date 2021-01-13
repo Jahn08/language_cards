@@ -53,12 +53,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                     }
                     else if (route is StudyPreparerRoute)
                         return new StudyPreparerScreen(route.params.storage);
-                    else if (route is StudyModeRoute) {
-                        final params = route.params;
-                        return new StudyScreen(params.storage, 
-                            packs: params.packs, 
-                            studyStageIds: params.studyStageIds);
-                    }
+                    else if (route is StudyModeRoute)
+                        return _buildStudyScreen(context, route);
                         
                     return new PackListScreen((route as PackListRoute).params.storage);
                 })
@@ -84,6 +80,14 @@ class _ThemedAppState extends State<_ThemedApp> {
             (data) => new CardScreen(data.dictionary.apiKey, 
                 wordStorage: params.storage, packStorage: params.packStorage,
                 wordId: params.wordId, pack: params.pack));
+    }
+
+	Widget _buildStudyScreen(BuildContext context, StudyModeRoute route) {
+        final params = route.params;
+        return new FutureLoader(Configuration.getParams(context), 
+            (data) => new StudyScreen(data.dictionary.apiKey, 
+				params.storage, packStorage: params.packStorage, packs: params.packs, 
+				studyStageIds: params.studyStageIds));
     }
 
     @override

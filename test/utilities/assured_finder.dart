@@ -33,5 +33,13 @@ class AssuredFinder {
     static Finder findSeveral({ String label, Type type, bool shouldFind }) =>
         _find(expectSeveral: true, label: label, type: type, shouldFind: shouldFind);
 
+	static Finder findFlatButtonByIcon(IconData icon, { bool shouldFind }) {
+		final flatBtnFinder = find.ancestor(of: find.byIcon(icon), 
+			matching: find.byWidgetPredicate((widget) => widget is FlatButton));
+		expect(flatBtnFinder, (shouldFind ?? false) ? findsOneWidget: findsNothing);
+
+		return flatBtnFinder;
+	}
+
 	static Type typify<T>() => T;
 }

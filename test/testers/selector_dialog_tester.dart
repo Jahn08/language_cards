@@ -4,6 +4,7 @@ import 'package:language_cards/src/dialogs/selector_dialog.dart';
 import '../utilities/dialog_opener.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
+import 'cancellable_dialog_tester.dart';
 
 class SelectorDialogTester<T> {
     final WidgetTester tester;
@@ -14,15 +15,13 @@ class SelectorDialogTester<T> {
         SelectorDialog<T> Function(BuildContext) dialogBuilder):
         _dialogBuilder = dialogBuilder;
 
-    Future<void> testCancelling(List<T> items,) async {
+    Future<void> testCancelling(List<T> items) async {
         T dialogResult;
         await showDialog(items, (item) => dialogResult = item);
 
-        final assistant = new WidgetAssistant(tester);
-        await assistant.pressButtonDirectlyByLabel('Cancel');
+		await CancellableDialogTester.assureCancellingDialog(tester);
 
         expect(dialogResult, null);
-        expect(find.byType(SimpleDialog), findsNothing);
     }
 
     Future<void> showDialog(List<T> items, [Function(T) onDialogClose]) =>
