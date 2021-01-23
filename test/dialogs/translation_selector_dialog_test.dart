@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/translation_selector_dialog.dart';
+import '../testers/dialog_tester.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 import '../testers/selector_dialog_tester.dart';
@@ -14,7 +15,7 @@ void main() {
         await dialogTester.showDialog([], (tr) => dialogResult = tr);
 
         expect(dialogResult, null);
-        expect(find.byType(SimpleDialog), findsNothing);
+		new DialogTester().assureDialog(shouldFind: false);
     });
 
     testWidgets('Shows the translation dialog according to items passed as an argument', 
@@ -49,7 +50,7 @@ void main() {
         expect(dialogResult.contains(availableItems[chosenOptionIndex]), true);
         expect(dialogResult.contains(availableItems[anotherChosenOptionIndex]), true);
         
-        expect(find.byType(SimpleDialog), findsNothing);
+		new DialogTester().assureDialog(shouldFind: false);
     });
 
     testWidgets('Returns all translations chosen by ticking the title checkbox', (tester) async {

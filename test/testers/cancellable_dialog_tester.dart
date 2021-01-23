@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import '../utilities/widget_assistant.dart';
+import 'dialog_tester.dart';
 
-class CancellableDialogTester {
+class CancellableDialogTester extends DialogTester {
 
-	static Future<void> assureCancellingDialog(WidgetTester tester) async {
+	@protected
+	final WidgetTester tester;
+	
+	CancellableDialogTester(this.tester);
+
+	Future<void> assureCancellingDialog() async {
 		final assistant = new WidgetAssistant(tester);
         await assistant.pressButtonDirectlyByLabel('Cancel');
 
-        expect(find.byType(SimpleDialog), findsNothing);
+		assureDialog(shouldFind: false);
 	}
 }

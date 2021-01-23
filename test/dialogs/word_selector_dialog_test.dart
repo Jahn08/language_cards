@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/dialogs/word_selector_dialog.dart';
+import '../testers/dialog_tester.dart';
 import '../testers/selector_dialog_tester.dart';
 import '../utilities/randomiser.dart';
 
@@ -14,7 +15,7 @@ void main() {
         await dialogTester.showDialog([], (word) => dialogResult = word);
         expect(dialogResult, null);
 
-        expect(find.byType(SimpleDialog), findsNothing);
+		new DialogTester().assureDialog(shouldFind: false);
     });
 
     testWidgets('Shows the word dialog according to items passed as an argument', (tester) async {

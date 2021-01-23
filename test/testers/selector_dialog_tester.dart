@@ -6,20 +6,19 @@ import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 import 'cancellable_dialog_tester.dart';
 
-class SelectorDialogTester<T> {
-    final WidgetTester tester;
+class SelectorDialogTester<T> extends CancellableDialogTester {
 
     final SelectorDialog<T> Function(BuildContext) _dialogBuilder;
 
-    SelectorDialogTester(this.tester, 
+    SelectorDialogTester(WidgetTester tester, 
         SelectorDialog<T> Function(BuildContext) dialogBuilder):
-        _dialogBuilder = dialogBuilder;
+        _dialogBuilder = dialogBuilder, super(tester);
 
     Future<void> testCancelling(List<T> items) async {
         T dialogResult;
         await showDialog(items, (item) => dialogResult = item);
 
-		await CancellableDialogTester.assureCancellingDialog(tester);
+		await assureCancellingDialog();
 
         expect(dialogResult, null);
     }
@@ -42,7 +41,7 @@ class SelectorDialogTester<T> {
         await new WidgetAssistant(tester).tapWidget(chosenOptionFinder);
 
         expect(dialogResult, items[chosenOptionIndex]);
-        expect(find.byType(SimpleDialog), findsNothing);
+		assureDialog(shouldFind: false);
     }
 
     Future<void> testRenderingOptions(List<T> items, 

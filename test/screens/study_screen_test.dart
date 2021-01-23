@@ -221,8 +221,8 @@ void main() {
 			final changedTranslation = 
 				await new CardEditorTester(tester).enterChangedText(initialTranslation);
 
-			await CancellableDialogTester.assureCancellingDialog(tester);
-
+			await new CancellableDialogTester(tester).assureCancellingDialog();
+			
             final storedCard = await wordStorage.find(cardToEdit.id);
             expect(storedCard.translation, initialTranslation);
 
