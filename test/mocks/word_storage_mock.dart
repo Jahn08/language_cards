@@ -67,7 +67,7 @@ class WordStorageMock extends WordStorage {
             partOfSpeech: Word.parts_of_speech[Randomiser.nextInt(Word.parts_of_speech.length)],
             translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
                 (index) => Randomiser.nextString()).join('; '),
-            transcription: new List<String>.generate(Randomiser.nextInt(7) + 1, 
+            transcription: new List<String>.generate(Randomiser.nextInt(5) + 5, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
             packId: packId ?? Randomiser.nextInt(PackStorageMock.namedPacksNumber) + 1,
             studyProgress: Randomiser.nextElement(studyStages)
