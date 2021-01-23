@@ -11,6 +11,7 @@ import 'package:language_cards/src/utilities/enum.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
+import '../mocks/speaker_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/cancellable_dialog_tester.dart';
 import '../testers/card_editor_tester.dart';
@@ -281,7 +282,7 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
 		noBar: true,
         child: new SettingsBlocProvider(
 			child: new StudyScreen('', packStorage.wordStorage, 
-				packs: packs, packStorage: packStorage)
+				packs: packs, packStorage: packStorage, defaultSpeaker: new SpeakerMock())
 		)
 	));
     await tester.pump();

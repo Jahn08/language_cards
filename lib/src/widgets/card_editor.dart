@@ -10,11 +10,13 @@ import '../dialogs/confirm_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
 import '../models/word.dart';
+import '../utilities/speaker.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/loader.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
+import '../widgets/speaker_button.dart';
 
 class CardEditorState extends State<CardEditor> {
     final _key = new GlobalKey<FormState>();
@@ -60,7 +62,7 @@ class CardEditorState extends State<CardEditor> {
         _pack = newPack;
 
         _disposeDictionary();
-        _dictionary = _pack == null || _pack.isNone ? null: 
+        _dictionary = _isNonePack ? null: 
             new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to, 
                 client: _client);
 
@@ -70,6 +72,8 @@ class CardEditorState extends State<CardEditor> {
     }
 
     _disposeDictionary() => _dictionary?.dispose();
+
+	bool get _isNonePack => _pack == null || _pack.isNone;
 
     Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
         await ConfirmDialog.buildOkDialog(
@@ -116,40 +120,12 @@ class CardEditorState extends State<CardEditor> {
     Widget _buildFormLayout() {
         return new Column(
             children: <Widget>[
-                new StyledTextField('Word Text', isRequired: true, 
-                    onChanged: (value, submitted) async {
-                        if (!submitted || _dictionary == null) {
-                            setState(() => _text = value);
-                            return;
-                        }
-                        
-                        if (value == null || value.isEmpty)
-                            return;
-
-                        final article = await _dictionary.lookUp(value);
-                        final chosenWord = await new WordSelectorDialog(context)
-                            .show(article.words);
-
-                        String translation;
-                        if (chosenWord != null)
-                            translation = await new TranslationSelectorDialog(context)
-                                .show(chosenWord.translations);
-
-                        setState(() {
-                            if (chosenWord == null) {
-                                _text = value;
-                                return;
-                            }
-
-                            _text = chosenWord.text;
-                            _partOfSpeech = chosenWord.partOfSpeech;
-                            _transcription = chosenWord.transcription;
-                            _studyProgress = WordStudyStage.unknown;
-
-                            if (translation != null)
-                                _translation = translation;
-                        });
-                    }, initialValue: this._text),
+				_isNonePack || _text == null || _text.isEmpty ? _buiildCardTextField(): 
+					new Row(children: [
+						new Expanded(child:_buiildCardTextField()), 
+							new SpeakerButton(_pack.from, (speaker) => speaker.speak(_text), 
+							defaultSpeaker: widget._defaultSpeaker)
+						]),
                 new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 
                     _transcriptionFocusNode,
                     'Phonetic Notation', 
@@ -215,6 +191,42 @@ class CardEditorState extends State<CardEditor> {
         );
     }
 
+	Widget _buiildCardTextField() =>
+		new StyledTextField('Text', isRequired: true, 
+			onChanged: (value, submitted) async {
+				if (!submitted || _dictionary == null) {
+					setState(() => _text = value);
+					return;
+				}
+				
+				if (value == null || value.isEmpty)
+					return;
+
+				final article = await _dictionary.lookUp(value);
+				final chosenWord = await new WordSelectorDialog(context)
+					.show(article.words);
+
+				String translation;
+				if (chosenWord != null)
+					translation = await new TranslationSelectorDialog(context)
+						.show(chosenWord.translations);
+
+				setState(() {
+					if (chosenWord == null) {
+						_text = value;
+						return;
+					}
+
+					_text = chosenWord.text;
+					_partOfSpeech = chosenWord.partOfSpeech;
+					_transcription = chosenWord.transcription;
+					_studyProgress = WordStudyStage.unknown;
+
+					if (translation != null)
+						_translation = translation;
+				});
+			}, initialValue: this._text);
+
     @override
     dispose() {
         _disposeDictionary();
@@ -237,6 +249,8 @@ class CardEditor extends StatefulWidget {
 
     final Client _client;
 
+    final ISpeaker _defaultSpeaker;
+
     final BaseStorage<StoredWord> _wordStorage;
 
     final BaseStorage<StoredPack> _packStorage;
@@ -247,9 +261,11 @@ class CardEditor extends StatefulWidget {
 
     CardEditor(String apiKey, { @required BaseStorage<StoredWord> wordStorage, 
         @required BaseStorage<StoredPack> packStorage, @required this.afterSave,
-		Client client, int wordId, this.pack, this.card, this.hideNonePack }): 
+		Client client, ISpeaker defaultSpeaker, int wordId, 
+		this.pack, this.card, this.hideNonePack }): 
         _apiKey = apiKey,
         _client = client,
+        _defaultSpeaker = defaultSpeaker,
         _packStorage = packStorage,
         _wordStorage = wordStorage,
 		wordId = card?.id ?? wordId ?? 0;

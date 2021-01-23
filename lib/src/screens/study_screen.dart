@@ -12,6 +12,7 @@ import '../models/stored_word.dart';
 import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
 import '../utilities/enum.dart';
+import '../utilities/speaker.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
@@ -28,12 +29,15 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 
     final Client client;
 
+    final ISpeaker defaultSpeaker;
+
     final BaseStorage<StoredWord> wordStorage;
 
     final BaseStorage<StoredPack> packStorage;
 
 	_CardEditorDialog({ @required this.apiKey, @required this.card, @required this.pack, 
-		@required this.client, @required this.wordStorage, @required this.packStorage }): 
+		@required this.wordStorage, @required this.packStorage,
+		this.client, this.defaultSpeaker }): 
 		super();
 
 	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) =>
@@ -41,7 +45,8 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
             context: context, 
             builder: (buildContext) => new SimpleDialog(
 				children: [
-					new CardEditor(apiKey, card: card, pack: pack, client: client,
+					new CardEditor(apiKey, card: card, pack: pack, 
+						client: client, defaultSpeaker: defaultSpeaker,
 						wordStorage: wordStorage, packStorage: packStorage,
 						hideNonePack: true, 
 						afterSave: (card, pack, _) {
@@ -137,6 +142,7 @@ class _StudyScreenState extends State<StudyScreen> {
 									card: curCard,
 									pack: _packMap[curCard.packId],
 									client: widget.client,
+									defaultSpeaker: widget.defaultSpeaker,
 									wordStorage: widget.storage,
 									packStorage: widget.packStorage
 								).show(context);
@@ -381,8 +387,11 @@ class StudyScreen extends StatefulWidget {
 
     final Client client;
 
+    final ISpeaker defaultSpeaker;
+
     StudyScreen(this.apiKey, this.storage, 
-		{ @required this.packs, @required this.packStorage, this.studyStageIds, this.client });
+		{ @required this.packs, @required this.packStorage, this.studyStageIds, 
+		this.client, this.defaultSpeaker });
 
     @override
     _StudyScreenState createState() => new _StudyScreenState();
