@@ -202,6 +202,8 @@ void main() {
 				CardEditorTester.findStudyProgressButton(shouldFind: false);
 			else
 				editorTester.assureNonZeroStudyProgress(cardToEdit.studyProgress);
+		
+			CardEditorTester.findSpeakerButton(shouldFind: true);
 		});
 	
 	testWidgets('Cancels changes in the dialog for editing a card when clicking the Cancel button',

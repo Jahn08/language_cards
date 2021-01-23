@@ -3,8 +3,6 @@ import '../models/language.dart';
 
 abstract class ISpeaker {
 
-	Future<bool> setLanguage(Language newLang);
-
 	Future<void> speak(String text);
 }
 
@@ -18,7 +16,7 @@ class Speaker implements ISpeaker {
 
 	Speaker._(): _tts = new FlutterTts();
 
-	Future<bool> setLanguage(Language newLang) async {
+	Future<bool> _setLanguage(Language newLang) async {
 		if (newLang == _lang)
 			return true;
 
@@ -51,7 +49,7 @@ class Speaker implements ISpeaker {
 		if (_instance == null)
 			_instance = new Speaker._();
 
-		if (!(await _instance.setLanguage(lang)))
+		if (!(await _instance._setLanguage(lang)))
 			return null;
 
 		return _instance;

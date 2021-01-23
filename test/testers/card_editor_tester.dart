@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/widgets/speaker_button.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -33,6 +34,8 @@ class CardEditorTester {
 	static Finder findPackButton() => 
 		AssuredFinder.findFlatButtonByIcon(Icons.folder_open, shouldFind: true);
 
+	static Finder findSpeakerButton({ bool shouldFind }) => 
+		AssuredFinder.findOne(type: SpeakerButton, shouldFind: shouldFind);
 	
 	void assureNonZeroStudyProgress(int studyProgress) {
 		final progressBtnFinder = findStudyProgressButton(shouldFind: true);

@@ -10,6 +10,7 @@ import 'package:language_cards/src/screens/card_screen.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/speaker_mock.dart';
+import '../mocks/word_storage_mock.dart';
 import '../testers/card_editor_tester.dart';
 import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
@@ -107,6 +108,38 @@ void main() {
             _assureTileIsTicked(anotherPackTileFinder);
         });
 
+	testWidgets('Displays no button to pronounce card text if there is no pack', 
+        (tester) async {
+            await _displayWord(tester, pack: StoredPack.none);
+
+			CardEditorTester.findSpeakerButton(shouldFind: false);
+		});
+	
+	testWidgets('Displays no button to pronounce card text with empty text', 
+        (tester) async {
+			final storage = new PackStorageMock();
+			final pack = storage.getRandom();
+			await _displayWord(tester, storage: storage, pack: pack,
+				wordToShow: WordStorageMock.generateWord(packId: pack.id));
+
+			CardEditorTester.findSpeakerButton(shouldFind: false);
+		});
+
+	testWidgets('Displays a button to pronounce card text', 
+        (tester) async {
+			final storage = new PackStorageMock();
+			final pack = storage.getRandom();
+			final card = storage.wordStorage.getRandom();
+
+			String spokenText;
+			await _displayWord(tester, storage: storage, pack: pack, wordToShow: card,
+				speaker: new SpeakerMock(onSpeak: (text) => spokenText = text));
+
+			await new WidgetAssistant(tester).tapWidget(
+				CardEditorTester.findSpeakerButton(shouldFind: true));
+			expect(spokenText, card.text);
+		});
+	
     testWidgets('Switches focus to the translation field after changes in the word text field', 
         (tester) async {
             final wordToShow = await _displayWord(tester);
@@ -197,14 +230,16 @@ void main() {
 
 Future<StoredWord> _displayWord(WidgetTester tester, { Client client, 
         PackStorageMock storage, StoredPack pack, 
-        StoredWord wordToShow, bool shouldHideWarningDialog = true }) async {
+        StoredWord wordToShow, SpeakerMock speaker,
+		bool shouldHideWarningDialog = true }) async {
     storage = storage ?? new PackStorageMock();
     final wordStorage = storage.wordStorage;
     wordToShow = wordToShow ?? wordStorage.getRandom();
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
         child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
-        wordId: wordToShow.id, pack: pack, client: client, defaultSpeaker: new SpeakerMock())));
+        wordId: wordToShow.id, pack: pack, client: client, 
+		defaultSpeaker: speaker ?? new SpeakerMock())));
     await tester.pump();
     await tester.pump(new Duration(milliseconds: 200));
 
