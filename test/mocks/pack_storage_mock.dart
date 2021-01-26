@@ -18,10 +18,10 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         packs.sort((a, b) => a.name.compareTo(b.name));
 
     @override
-    Future<List<StoredPack>> fetch({ int skipCount, int takeCount }) =>
-        _fetchInternally(skipCount: skipCount, takeCount: takeCount);
+    Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) =>
+        _fetchInternally(textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
-    Future<List<StoredPack>> _fetchInternally({ int skipCount, int takeCount }) {
+    Future<List<StoredPack>> _fetchInternally({ String textFilter, int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 50),
             () async {
                 var futurePacks = _packs.skip(skipCount ?? 0);
@@ -112,4 +112,11 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
             .entries.where((e) => e.key > 0)
             .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
     }
+
+	@override
+	String get textFilterFieldName => throw UnimplementedError();
+
+	@override
+	Future<List<String>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
+        Future.value(_packs.map((p) => p.name[0]).toList());
 }

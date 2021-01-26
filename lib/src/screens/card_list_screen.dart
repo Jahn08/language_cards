@@ -30,10 +30,12 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount) =>
+    Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount, String text) =>
         widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
-            parentIds: widget.pack == null ? null: [widget.pack.id]);
+            parentIds: _parentIds, text: text);
   
+	List<int> get _parentIds => widget.pack == null ? null: [widget.pack.id];
+
     @override
     void removeItems(List<int> ids) {
         widget.storage.delete(ids);
@@ -102,6 +104,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   
         return true;
     }
+
+	@override
+	Future<List<String>> getFilterIndexes() => 
+		widget.storage.groupByTextIndexAndParent(_parentIds);
 }
 
 class CardListScreen extends StatefulWidget {

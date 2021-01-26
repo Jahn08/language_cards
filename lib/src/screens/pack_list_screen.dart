@@ -30,8 +30,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     }
 
     @override
-    Future<List<StoredPack>> fetchNextItems(int skipCount, int takeCount) => 
-        widget.storage.fetch(skipCount: skipCount, takeCount: takeCount);
+    Future<List<StoredPack>> fetchNextItems(int skipCount, int takeCount, String text) => 
+        widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, textFilter: text);
   
     @override
     void removeItems(List<int> ids) => widget.storage.delete(ids);
@@ -47,6 +47,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
     bool isRemovableItem(StoredPack item) => !item.isNone;
+
+	@override
+	Future<List<String>> getFilterIndexes() => widget.storage.groupByTextIndex();
 }
 
 class PackListScreen extends StatefulWidget {

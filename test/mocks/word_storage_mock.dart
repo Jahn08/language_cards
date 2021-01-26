@@ -17,20 +17,26 @@ class WordStorageMock extends WordStorage {
 
     @override
     Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
-        int skipCount, int takeCount }) {
+        String text, int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(parentIds: parentIds, skipCount: skipCount, takeCount: takeCount));
+            () => _fetch(parentIds: parentIds, text: text, 
+				skipCount: skipCount, takeCount: takeCount));
     }
 
     @override
-    Future<List<StoredWord>> fetch({ int skipCount, int takeCount }) {
+    Future<List<StoredWord>> fetch({ String textFilter, int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(skipCount: skipCount, takeCount: takeCount));
+            () => _fetch(skipCount: skipCount, text: textFilter, takeCount: takeCount));
     }
 
-    List<StoredWord> _fetch({ List<int> parentIds, int skipCount, int takeCount }) {
-        final values = (parentIds == null ? _words : 
-            _words.where((w) => parentIds.contains(w.packId))).skip(skipCount ?? 0);
+    List<StoredWord> _fetch({ List<int> parentIds, String text, int skipCount, int takeCount }) {
+        var values = (parentIds == null ? _words : 
+            _words.where((w) => parentIds.contains(w.packId)));
+
+		if (text != null && text.isNotEmpty)
+			values = values.where((w) => w.text.contains(text));
+		
+		values = values.skip(skipCount ?? 0);
         return ((takeCount ?? 0) == 0 ? values: values.take(takeCount)).toList();
     }
 
@@ -141,4 +147,8 @@ class WordStorageMock extends WordStorage {
                 return res;
             }));
     }
+
+	@override
+	Future<List<String>> groupByTextIndexAndParent([List<int> parentIds]) => 
+		Future.value(_fetch(parentIds: parentIds).map((c) => c.text[0]).toList());
 }

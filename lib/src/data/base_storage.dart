@@ -15,23 +15,29 @@ abstract class BaseStorage<T extends StoredEntity> {
     @protected
     DbProvider get connection => DbProvider.getInstance(_entities);
 
-    Future<List<T>> fetch({ int skipCount, int takeCount }) => 
-        fetchInternally(takeCount: takeCount, skipCount: skipCount);
+    Future<List<T>> fetch({ String textFilter, int skipCount, int takeCount }) => 
+        fetchInternally(textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
 
     @protected
     Future<List<T>> fetchInternally({ int skipCount, int takeCount, 
-        String orderBy, Map<String, List<dynamic>> filters }) async {
+        String orderBy, String textFilter, Map<String, List<dynamic>> filters }) async {
+			final inFilters = new Map<String, dynamic>.from(filters ?? {});
+
+			if (textFilter != null && textFilter.isNotEmpty)
+				inFilters[textFilterFieldName] = '$textFilter%';
+
             final wordValues = await connection.fetch(entityName, 
                 take: takeCount, 
-                filters: filters,
+                filters: inFilters,
                 orderBy: orderBy, 
                 skip: skipCount);
             return convertToEntity(wordValues);
         }
 
-    Future<void> closeConnection() async {
-        await DbProvider.close();
-    }
+	@protected
+	String get textFilterFieldName;
+
+    Future<void> closeConnection() => DbProvider.close();
 
     Future<T> upsert(T entity) async {
         if (entity.isNew)
@@ -58,4 +64,17 @@ abstract class BaseStorage<T extends StoredEntity> {
 
     @protected
     List<T> convertToEntity(List<Map<String, dynamic>> values);
+
+	Future<List<String>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) async {
+		final mainGroupFieldKey = connection.composeSubstrFunc(textFilterFieldName, 1);
+		final groupFields = [mainGroupFieldKey];
+
+		if (groupValues != null && groupValues.isNotEmpty)
+			groupFields.addAll(groupValues.keys);
+
+		final groups = (await connection.groupBySeveral(entityName, 
+            groupFields: groupFields, groupValues: groupValues));
+        return groups.map((g) => g.fields[mainGroupFieldKey] as String)
+			.toList()..sort();
+	}
 }

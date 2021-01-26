@@ -126,14 +126,15 @@ class DbProvider {
         return '$fieldName IN ($whereParamExpr)';
     }
         
-    Future<List<DataGroup>> groupBy<T>(String tableName, 
-        { @required String groupField, @required List<T> groupValues }) {
-            final filterClause = _composeInFilterClause(groupField, groupValues.length);
+    Future<List<DataGroup>> groupBy(String tableName, 
+        { @required String groupField, List<dynamic> groupValues }) {
+            final filterClause = groupValues == null || groupValues.isEmpty ? 
+				null: _composeInFilterClause(groupField, groupValues.length);
             return _perform(tableName, () async {
                 final groupClause = _composeGroupClause(tableName, groupFields: [groupField], 
                     filterClause: filterClause);
                 final res = await _db.rawQuery(groupClause, groupValues);
-                
+
                 return res.map((v) => new DataGroup(v)).toList();
             });
         }
@@ -147,15 +148,23 @@ class DbProvider {
             FROM $tableName$whereClause GROUP BY $fieldClause''';
     }
 
-    Future<List<DataGroup>> groupBySeveral<T>(String tableName, 
-        { @required List<String> groupFields }) {
+    Future<List<DataGroup>> groupBySeveral(String tableName, 
+        { @required List<String> groupFields, Map<String, List<dynamic>> groupValues }) {
+            final filterClause = groupValues == null || groupValues.isEmpty ? null: 
+				_joinWithAndOperator(groupFields.where((f) => groupValues.containsKey(f))
+					.map((f) => _composeInFilterClause(f, groupValues[f].length)));
+
             return _perform(tableName, () async {
-                final groupClause = _composeGroupClause(tableName, groupFields: groupFields, );
-                final res = await _db.rawQuery(groupClause);
+                final groupClause = _composeGroupClause(tableName, groupFields: groupFields, 
+					filterClause: filterClause);
+                final res = await _db.rawQuery(groupClause, 
+					groupValues?.values?.expand((v) => v)?.toList());
 
                 return res.map((v) => new DataGroup(v)).toList();
             });
         }
+
+	String _joinWithAndOperator(Iterable items) => items.join(' AND ');
 
     Future<List<Map<String, dynamic>>> fetch(String tableName, { @required String orderBy,
         int take, int skip, Map<String, dynamic> filters }) {
@@ -165,10 +174,13 @@ class DbProvider {
                 offset: skip,
                 orderBy: orderBy,
                 where: filters == null || filters.isEmpty ? null: 
-                    filters.entries.map((entry) {
+                    _joinWithAndOperator(filters.entries.map((entry) {
+						if (entry.value is String)
+							return '${entry.key} LIKE ?';
+
                         final length = entry.value is Iterable<dynamic> ? entry.value.length: 1;
                         return _composeInFilterClause(entry.key, length);
-                    }).join(' AND '),
+                    })),
                 whereArgs: filters == null || filters.isEmpty ? null: 
                     filters.values.fold([], (prevEl, el) {
                         el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
@@ -191,4 +203,7 @@ class DbProvider {
 
         _db = null;
     }
+
+	String composeSubstrFunc(String fieldName, int length) => 
+		'SUBSTR(UPPER($fieldName), 1, $length)'; 
 }

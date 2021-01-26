@@ -22,10 +22,14 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     bool _canFetch = false;
     
     bool _editorMode;
+    bool _searchMode;
 
     int _pageIndex = 0;
 
     BuildContext _scaffoldContext;
+
+	List<String> _filterIndexes;
+	String _curFilterIndex;
 
     final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
     final Map<int, _CachedItem<TItem>> _itemsMarkedInEditor = {};
@@ -38,22 +42,35 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         super.initState();
         
         _editorMode = false;
+		_searchMode = false;
+
+		_initFilterIndexes();
 
         _scrollController.addListener(_expandListOnScroll);
 
         _fetchItems();
     }
 
-    _fetchItems() async {
+	Future<void> _initFilterIndexes() async {
+		final filterIndexes = await getFilterIndexes();
+		
+		WidgetsBinding.instance.addPostFrameCallback((_) => 
+			setState(() => _filterIndexes = filterIndexes));
+	}
+
+	@protected
+	Future<List<String>> getFilterIndexes();
+
+    Future<void> _fetchItems([String text]) async {
         _canFetch = false;
-        final nextItems = await _fetchNextItems();
+        final nextItems = await _fetchNextItems(text);
 
         _canFetch = true;
 
         if (nextItems.length == 0)
             _endOfData = true;
         else
-            setState(() { _items.addAll(nextItems); });
+			setState(() => _items.addAll(nextItems));
     }
 
     _expandListOnScroll() {
@@ -61,11 +78,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             _fetchItems();
     }
 
-    Future<List<TItem>> _fetchNextItems() => 
-        fetchNextItems(_pageIndex++ * _itemsPerPage, _itemsPerPage);
+    Future<List<TItem>> _fetchNextItems([String text]) => 
+        fetchNextItems(_pageIndex++ * _itemsPerPage, _itemsPerPage, text);
 
     @protected
-    Future<List<TItem>> fetchNextItems(int skipCount, int takeCount);
+    Future<List<TItem>> fetchNextItems(int skipCount, int takeCount, String text);
 
     @override
     dispose() {
@@ -76,16 +93,22 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @override
     Widget build(BuildContext buildContext) {
+		final isSearchModeAvailable = _curFilterIndex != null || 
+			_items.length > _itemsPerPage / 3;
         return new BarScaffold(title,
-            barActions: <Widget>[_editorMode ? _buildEditorDoneButton(): 
-                _buildEditorButton()],
+            barActions: <Widget>[
+				_editorMode ? _buildEditorDoneButton(): _buildEditorButton(),
+				
+				if (isSearchModeAvailable)
+					(_searchMode ? _buildSearchDoneButton(): _buildSearchButton())
+			],
             onNavGoingBack: canGoBack ? 
                 () {
                     _deleteAllMarkedForRemoval();
                     onGoingBack(buildContext);
                 }: null,
             bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
-            body: _buildList(),
+            body: _buildListView(),
             floatingActionButton: _buildNewCardButton(buildContext)
         );
     }
@@ -108,6 +131,22 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             });
         },
         child: new Text('Done')
+    );
+
+	Widget _buildSearchButton() => new IconButton(
+			onPressed: _filterIndexes == null ? null: () {
+				setState(() => _searchMode = true);
+			},
+			icon: new Icon(Icons.search)
+		);
+
+	Widget _buildSearchDoneButton() => new IconButton(
+        onPressed: () {
+			_refetchItems();
+
+            setState(() => _searchMode = false);
+        },
+		icon: new Icon(Icons.search_off)
     );
 
     @protected
@@ -193,6 +232,44 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                 _deleteMarkedForRemoval(itemIdsToRemove);
         });
     }
+
+    Widget _buildListView() {
+        return new Flex(
+			direction: Axis.horizontal,
+			children: [
+				new Flexible(child: _buildList(), flex: 8, fit: FlexFit.tight),
+				
+				if (_searchMode)
+					new Flexible(child: 
+						new Scrollbar(
+							child: new ListView(
+								shrinkWrap: true,
+								children: _filterIndexes.map((i) => _buildFilterIndex(i)).toList()
+							)
+						)
+					)
+			]
+		);
+    }
+
+    Widget _buildFilterIndex(String index) {
+		return new TextButton(
+			onPressed: () => _refetchItems(index), 
+			child: new Text(index)
+		);
+    }
+
+	void _refetchItems([String text]) {
+		if (_curFilterIndex == text)
+			return;
+
+		_curFilterIndex = text;
+
+		_pageIndex = 0;
+		_items.clear();
+
+		_fetchItems(text);
+	}
 
     Widget _buildList() => new Scrollbar(
         child: new ListView.builder(

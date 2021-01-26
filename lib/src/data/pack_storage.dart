@@ -16,13 +16,14 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         values.map((w) => new StoredPack.fromDbMap(w)).toList();
 
     @override
-    Future<List<StoredPack>> fetch({ int skipCount, int takeCount, List<int> parentIds }) 
+    Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) 
         async {
             final isFirstRequest = skipCount == null || skipCount == 0;
             if (isFirstRequest)
                 takeCount = (takeCount ?? BaseStorage.itemsPerPageByDefault) - 1;
 
-            final packs = await _fetchInternally(skipCount: skipCount, takeCount: takeCount);
+            final packs = await _fetchInternally(
+				textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
             if (isFirstRequest)
                 packs.insert(0, StoredPack.none);
@@ -34,9 +35,12 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
             return packs;
         }
 
-    Future<List<StoredPack>> _fetchInternally({ int takeCount, int skipCount }) =>
-        super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            orderBy: StoredPack.nameFieldName);
+    Future<List<StoredPack>> _fetchInternally({ String textFilter, int takeCount, int skipCount }) =>
+        super.fetchInternally(textFilter: textFilter, skipCount: skipCount, 
+			takeCount: takeCount, orderBy: StoredPack.nameFieldName);
+	
+	@override
+	String get textFilterFieldName => StoredPack.nameFieldName;
 
     @override
     Future<StoredPack> find(int id) async {
