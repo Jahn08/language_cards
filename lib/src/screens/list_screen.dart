@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../consts.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
+import '../utilities/styler.dart';
 
 class _CachedItem<TItem> {
     final TItem item;
@@ -108,7 +109,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                     onGoingBack(buildContext);
                 }: null,
             bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
-            body: _buildListView(),
+            body: _buildListView(buildContext),
             floatingActionButton: _buildNewCardButton(buildContext)
         );
     }
@@ -233,7 +234,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         });
     }
 
-    Widget _buildListView() {
+    Widget _buildListView(BuildContext context) {
         return new Flex(
 			direction: Axis.horizontal,
 			children: [
@@ -244,7 +245,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 						new Scrollbar(
 							child: new ListView(
 								shrinkWrap: true,
-								children: _filterIndexes.map((i) => _buildFilterIndex(i)).toList()
+								children: _filterIndexes.map((i) => _buildFilterIndex(context, i))
+									.toList()
 							)
 						)
 					)
@@ -252,11 +254,21 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		);
     }
 
-    Widget _buildFilterIndex(String index) {
-		return new TextButton(
+    Widget _buildFilterIndex(BuildContext context, String index) {
+		final textBtn = new TextButton(
 			onPressed: () => _refetchItems(index), 
 			child: new Text(index)
 		);
+
+		if (index == _curFilterIndex)
+			return new Container(
+				child: textBtn, 
+				decoration: new BoxDecoration(
+					border: new Border.all(color: new Styler(context).primaryColor)
+				)
+			);
+				
+		return textBtn;
     }
 
 	void _refetchItems([String text]) {
@@ -385,14 +397,12 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void removeItems(List<int> ids);
 
     FloatingActionButton _buildNewCardButton(BuildContext buildContext) {
-        final theme = Theme.of(buildContext);
         return new FloatingActionButton(
             onPressed: () => onGoingToItem(buildContext),
             child: new Icon(Icons.add_circle), 
             mini: true,
             tooltip: 'New Card',
-            backgroundColor: (theme.floatingActionButtonTheme.backgroundColor ?? 
-                theme.colorScheme.secondary).withOpacity(0.3)
+            backgroundColor: new Styler(buildContext).floatingActionButtonColor
         );
     }
 

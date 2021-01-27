@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import './selector_dialog.dart';
+import '../utilities/styler.dart';
 
 class _CheckboxListState extends State<_CheckboxList> {
     final _chosenItems = <String>[];
@@ -14,11 +15,10 @@ class _CheckboxListState extends State<_CheckboxList> {
             )
         ));
 
-        final theme = Theme.of(context);
         return new Scrollbar(
             child: new SimpleDialog(
                 title: new CheckboxListTile(
-                    title: new Text(this.widget.title, style: theme.textTheme.headline6),
+                    title: new Text(this.widget.title, style: new Styler(context).titleStyle),
                     value: widget.items.length == _chosenItems.length,
                     onChanged: (value) => setState(() {
                         _chosenItems.clear();
