@@ -149,6 +149,11 @@ class WordStorageMock extends WordStorage {
     }
 
 	@override
-	Future<List<String>> groupByTextIndexAndParent([List<int> parentIds]) => 
-		Future.value(_fetch(parentIds: parentIds).map((c) => c.text[0]).toList());
+	Future<Map<String, int>> groupByTextIndexAndParent([List<int> parentIds]) => 
+		Future.value(_fetch(parentIds: parentIds).fold<Map<String, int>>({}, (res, c) {
+			final index = c.text[0].toUpperCase();
+			res[index] = (res[index] ?? 0) + 1;
+
+			return res;
+		}));
 }

@@ -106,7 +106,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
 	@override
-	Future<List<String>> getFilterIndexes() => 
+	Future<Map<String, int>> getFilterIndexes() => 
 		widget.storage.groupByTextIndexAndParent(_parentIds);
 }
 

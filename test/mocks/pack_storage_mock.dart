@@ -117,6 +117,11 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 	String get textFilterFieldName => throw UnimplementedError();
 
 	@override
-	Future<List<String>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
-        Future.value(_packs.map((p) => p.name[0]).toList());
+	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
+		Future.value(_packs.fold<Map<String, int>>({}, (res, p) {
+			final index = p.name[0].toUpperCase();
+			res[index] = (res[index] ?? 0) + 1;
+
+			return res;
+		}));
 }

@@ -65,7 +65,7 @@ abstract class BaseStorage<T extends StoredEntity> {
     @protected
     List<T> convertToEntity(List<Map<String, dynamic>> values);
 
-	Future<List<String>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) async {
+	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) async {
 		final mainGroupFieldKey = connection.composeSubstrFunc(textFilterFieldName, 1);
 		final groupFields = [mainGroupFieldKey];
 
@@ -74,7 +74,7 @@ abstract class BaseStorage<T extends StoredEntity> {
 
 		final groups = (await connection.groupBySeveral(entityName, 
             groupFields: groupFields, groupValues: groupValues));
-        return groups.map((g) => g.fields[mainGroupFieldKey] as String)
-			.toList()..sort();
+        return new Map.fromEntries(
+			groups.map((g) => new MapEntry(g.fields[mainGroupFieldKey] as String, g.length)));
 	}
 }

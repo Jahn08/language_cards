@@ -91,4 +91,7 @@ class StoredWord extends StoredEntity {
             $packIdFieldName INTEGER,
             FOREIGN KEY($packIdFieldName) 
                 REFERENCES $foreignTableName(${StoredEntity.idFieldName}) """;
+
+	@override
+	String get textData => this.text;
 }

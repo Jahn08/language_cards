@@ -35,4 +35,6 @@ abstract class StoredEntity {
     }
 
     String get columnsExpr;
+
+	String get textData;
 }

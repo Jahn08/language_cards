@@ -49,7 +49,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     bool isRemovableItem(StoredPack item) => !item.isNone;
 
 	@override
-	Future<List<String>> getFilterIndexes() => widget.storage.groupByTextIndex();
+	Future<Map<String, int>> getFilterIndexes() => widget.storage.groupByTextIndex();
 }
 
 class PackListScreen extends StatefulWidget {

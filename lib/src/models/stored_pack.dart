@@ -62,4 +62,7 @@ class StoredPack extends StoredEntity {
         """ $nameFieldName TEXT NOT NULL,
             $fromFieldName INTEGER NOT NULL,
             $toFieldName INTEGER NOT NULL""";
+
+	@override
+	String get textData => this.name;
 }

@@ -19,17 +19,17 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     static const int _navBarRemovalOptionIndex = 0;
     static const int _navBarSelectAllOptionIndex = 1;
 
-    bool _endOfData = false;
+    bool _isEndOfData = false;
     bool _canFetch = false;
     
-    bool _editorMode;
-    bool _searchMode;
+    bool _isEditorMode;
+    bool _isSearchMode;
 
     int _pageIndex = 0;
 
     BuildContext _scaffoldContext;
 
-	List<String> _filterIndexes;
+	Map<String, int> _filterIndexes;
 	String _curFilterIndex;
 
     final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
@@ -42,8 +42,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     initState() {
         super.initState();
         
-        _editorMode = false;
-		_searchMode = false;
+        _isEditorMode = false;
+		_isSearchMode = false;
 
 		_initFilterIndexes();
 
@@ -60,7 +60,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	}
 
 	@protected
-	Future<List<String>> getFilterIndexes();
+	Future<Map<String, int>> getFilterIndexes();
 
     Future<void> _fetchItems([String text]) async {
         _canFetch = false;
@@ -69,13 +69,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         _canFetch = true;
 
         if (nextItems.length == 0)
-            _endOfData = true;
+            _isEndOfData = true;
         else
 			setState(() => _items.addAll(nextItems));
     }
 
     _expandListOnScroll() {
-        if (_scrollController.position.extentAfter < 500 && !_endOfData && _canFetch)
+        if (_scrollController.position.extentAfter < 500 && !_isEndOfData && _canFetch)
             _fetchItems();
     }
 
@@ -94,32 +94,34 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @override
     Widget build(BuildContext buildContext) {
-		final isSearchModeAvailable = _curFilterIndex != null || 
-			_items.length > _itemsPerPage / 3;
+		
         return new BarScaffold(title,
             barActions: <Widget>[
-				_editorMode ? _buildEditorDoneButton(): _buildEditorButton(),
+				_isEditorMode ? _buildEditorDoneButton(): _buildEditorButton(),
 				
-				if (isSearchModeAvailable)
-					(_searchMode ? _buildSearchDoneButton(): _buildSearchButton())
+				if (_isSearchMode || _isSearchModeAvailable)
+					(_isSearchMode ? _buildSearchDoneButton(): _buildSearchButton())
 			],
             onNavGoingBack: canGoBack ? 
                 () {
                     _deleteAllMarkedForRemoval();
                     onGoingBack(buildContext);
                 }: null,
-            bottomNavigationBar: _editorMode ? _buildBottomBar(): null,
+            bottomNavigationBar: _isEditorMode ? _buildBottomBar(): null,
             body: _buildListView(buildContext),
             floatingActionButton: _buildNewCardButton(buildContext)
         );
     }
+
+	bool get _isSearchModeAvailable => 
+		_curFilterIndex != null ||  _items.length > _itemsPerPage / 3;
 
     @protected
     String get title;
 
     Widget _buildEditorButton() => new FlatButton(
         onPressed: () {
-            setState(() => _editorMode = true);
+            setState(() => _isEditorMode = true);
         }, 
         child: new Text('Edit')
     );
@@ -128,7 +130,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         onPressed: () {
             setState(() { 
                 _itemsMarkedInEditor.clear();
-                _editorMode = false;
+                _isEditorMode = false;
             });
         },
         child: new Text('Done')
@@ -136,7 +138,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	Widget _buildSearchButton() => new IconButton(
 			onPressed: _filterIndexes == null ? null: () {
-				setState(() => _searchMode = true);
+				setState(() => _isSearchMode = true);
 			},
 			icon: new Icon(Icons.search)
 		);
@@ -145,7 +147,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         onPressed: () {
 			_refetchItems();
 
-            setState(() => _searchMode = false);
+            setState(() => _isSearchMode = false);
         },
 		icon: new Icon(Icons.search_off)
     );
@@ -240,13 +242,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			children: [
 				new Flexible(child: _buildList(), flex: 8, fit: FlexFit.tight),
 				
-				if (_searchMode)
+				if (_isSearchMode)
 					new Flexible(child: 
 						new Scrollbar(
 							child: new ListView(
 								shrinkWrap: true,
-								children: _filterIndexes.map((i) => _buildFilterIndex(context, i))
-									.toList()
+								children: (_filterIndexes.keys.toList()..sort())
+									.map((i) => _buildFilterIndex(context, i)).toList()
 							)
 						)
 					)
@@ -286,7 +288,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildList() => new Scrollbar(
         child: new ListView.builder(
             itemCount: _items.length,
-            itemBuilder: _editorMode ? _buildCheckListItem: _buildDismissibleListItem,
+            itemBuilder: _isEditorMode ? _buildCheckListItem: _buildDismissibleListItem,
             controller: _scrollController
         )
     );
@@ -389,12 +391,47 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-        removeItems(_getEntriesMarkedForRemoval(ids).map((entry) => entry.key).toList());
+		final entriesForRemoval = new Map.fromEntries(_getEntriesMarkedForRemoval(ids));
+        removeItems(entriesForRemoval.keys.toList());
+		_deleteFilterIndexes(entriesForRemoval.values.map(
+			(v) => (v.item as TItem).textData[0]).toList());
+
         _deleteFromMarkedForRemoval(ids);
     }
 
     @protected
     void removeItems(List<int> ids);
+
+	void _deleteFilterIndexes(List<String> removedIndexes) {
+		if (_curFilterIndex == null) {
+			final grouppedIndexes = removedIndexes.fold<Map<String, int>>({}, (res, val) {
+				final index = val[0].toUpperCase();
+				res[index] = (res[index] ?? 0) + 1;
+				return res;
+			});
+
+			final indexesToRemove = <String>[];
+			grouppedIndexes.forEach((ind, length) {
+				if (_filterIndexes[ind] == length)
+					indexesToRemove.add(ind);
+				else
+					_filterIndexes[ind] -= length;
+			});
+
+			if (indexesToRemove.isNotEmpty)
+				setState(() {
+					indexesToRemove.forEach((ind) => _filterIndexes.remove(ind));
+
+					if (_isSearchMode && !_isSearchModeAvailable)
+						_isSearchMode = false;
+				});
+
+			return;	
+		}
+
+		if (_items.length == 0)
+			_filterIndexes.remove(_curFilterIndex);
+	}
 
     FloatingActionButton _buildNewCardButton(BuildContext buildContext) {
         return new FloatingActionButton(

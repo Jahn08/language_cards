@@ -60,12 +60,12 @@ class WordStorage extends BaseStorage<StoredWord> {
             });
     }
 
-	Future<List<String>> groupByTextIndexAndParent([List<int> parentIds]) => 
+	Future<Map<String, int>> groupByTextIndexAndParent([List<int> parentIds]) => 
 		groupByTextIndex(parentIds == null || parentIds.isEmpty ? 
 			null: { _parentIdField: parentIds });
 
 	@protected
 	@override
-	Future<List<String>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
+	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
 		super.groupByTextIndex();
 }
