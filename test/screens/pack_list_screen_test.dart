@@ -14,8 +14,9 @@ import '../testers/list_screen_tester.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
-    final screenTester = new ListScreenTester('Pack', _buildPackListScreen);
+    final screenTester = new ListScreenTester('Pack', () => _buildPackListScreen());
     screenTester.testEditorMode();
+    screenTester.testSearcherMode(PackStorageMock.generatePack);
 
     testWidgets("Doesn't update a number of cards for a pack without changes in it", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);

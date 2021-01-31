@@ -1,21 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import '../mocks/pack_storage_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/list_screen_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
-    final wordStorage = new WordStorageMock();
-    final screenTester = _buildScreenTester(wordStorage);
+    final screenTester = _buildScreenTester();
     screenTester.testEditorMode();
+    screenTester.testSearcherMode((id) => WordStorageMock.generateWord(id: id));
+
+	testWidgets('switches to the search mode for cards groupped by a pack', (tester) async {
+		final packStorage = new PackStorageMock();
+		final pack = (await tester.runAsync(() => packStorage.fetch()))
+			.firstWhere((p) => !p.isNone && p.cardsNumber > 0);
+		final wordStorage = packStorage.wordStorage;
+
+		final grouppedScreenTester = _buildScreenTester(wordStorage, pack);
+		await grouppedScreenTester.testSwitchingToSearchMode(tester, 
+			newEntityGetter: (index) => WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
+			itemsLengthGetter: () async => 
+				(await tester.runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]))).length,
+			indexGroupsGetter: (_) => 
+				tester.runAsync(() => wordStorage.groupByTextIndexAndParent([pack.id])));
+	});
 
     testWidgets('Renders study progress for each card', (tester) async {
-        await screenTester.pumpScreen(tester);
-        
+        final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
         final words = await _fetchWords(tester, wordStorage);
 
         final listItemFinders = find.descendant(
@@ -31,10 +47,9 @@ void main() {
 
     testWidgets("Cancels resetting study progress for selected cards when it wasn't confirmed", 
         (tester) async {
+            final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
             final wordWithProgressIndex = 
                 await _getIndexOfFirstWordWithProgress(tester, wordStorage);
-            
-            await screenTester.pumpScreen(tester);
 
             final assistant = new WidgetAssistant(tester);
             await screenTester.activateEditorMode(assistant);
@@ -59,10 +74,9 @@ void main() {
         });
 
     testWidgets('Resets study progress for selected cards', (tester) async {
-        final wordWithProgressIndex = 
+        final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
+		final wordWithProgressIndex = 
             await _getIndexOfFirstWordWithProgress(tester, wordStorage);
-
-        await screenTester.pumpScreen(tester);
 
         final assistant = new WidgetAssistant(tester);
         await screenTester.activateEditorMode(assistant);
@@ -101,8 +115,9 @@ void main() {
         });
 }
 
-ListScreenTester _buildScreenTester(WordStorageMock storage) => 
-    new ListScreenTester('Card', () => new CardListScreen(storage));
+ListScreenTester _buildScreenTester([WordStorageMock storage, StoredPack pack]) => 
+    new ListScreenTester('Card', 
+		() => new CardListScreen(storage ?? new WordStorageMock(), pack: pack));
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
     ListScreenTester screenTester, WordStorageMock storage) async {

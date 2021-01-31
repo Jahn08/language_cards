@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../data/base_storage.dart';
 import '../consts.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
@@ -455,4 +456,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         removeItems(_itemsMarkedForRemoval.keys.toList());
         _itemsMarkedForRemoval.clear();
     }
+}
+
+abstract class ListScreen<T extends StoredEntity> extends StatefulWidget {
+	BaseStorage<T> get storage;
 }

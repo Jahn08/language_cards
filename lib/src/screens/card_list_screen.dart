@@ -110,7 +110,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 		widget.storage.groupByTextIndexAndParent(_parentIds);
 }
 
-class CardListScreen extends StatefulWidget {
+class CardListScreen extends ListScreen<StoredWord> {
     final WordStorage storage;
 
     final StoredPack pack;

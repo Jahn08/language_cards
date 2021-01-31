@@ -15,19 +15,22 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     PackStorageMock();
 
     static void _sort(List<StoredPack> packs) => 
-        packs.sort((a, b) => a.name.compareTo(b.name));
+        packs.sort((a, b) => a.isNone ? -1: a.name.compareTo(b.name));
 
     @override
     Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) =>
-        _fetchInternally(textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
+        _fetchInternally(nameFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
-    Future<List<StoredPack>> _fetchInternally({ String textFilter, int skipCount, int takeCount }) {
+    Future<List<StoredPack>> _fetchInternally({ String nameFilter, int skipCount, int takeCount }) {
         return Future.delayed(new Duration(milliseconds: 50),
             () async {
                 var futurePacks = _packs.skip(skipCount ?? 0);
                 
                 if (takeCount != null && takeCount > 0)
                     futurePacks = futurePacks.take(takeCount);
+						
+				if (nameFilter != null && nameFilter.isNotEmpty)
+					futurePacks = futurePacks.where((p) => p.name.startsWith(nameFilter));
 
                 return Future.wait<StoredPack>(futurePacks.map((p) async {
                     p.cardsNumber = (await this.wordStorage.groupByParent([p.id]))[p.id];
@@ -48,12 +51,10 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     }
 
     static List<StoredPack> _generatePacks() {
-        final generatedPacks = new List<StoredPack>.generate(namedPacksNumber, 
-            (index) => generatePack(index + 1));
-        _sort(generatedPacks);
-
         final packs = <StoredPack>[StoredPack.none];
-        packs.addAll(generatedPacks);
+        packs.addAll(new List<StoredPack>.generate(namedPacksNumber, 
+            (index) => generatePack(index + 1)));
+        _sort(packs);
 
         return packs;
     }
@@ -62,7 +63,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         new StoredPack(Randomiser.nextString(), 
             id: id ?? 0, 
             from: Language.english,
-            to: Language.russian
+            to: Language.russian,
+			cardsNumber: 0
         );
 
     @override

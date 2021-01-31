@@ -52,7 +52,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 	Future<Map<String, int>> getFilterIndexes() => widget.storage.groupByTextIndex();
 }
 
-class PackListScreen extends StatefulWidget {
+class PackListScreen extends ListScreen<StoredPack> {
     final BaseStorage<StoredPack> storage;
 
     PackListScreen(this.storage);

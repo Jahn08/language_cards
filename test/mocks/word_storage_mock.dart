@@ -34,7 +34,7 @@ class WordStorageMock extends WordStorage {
             _words.where((w) => parentIds.contains(w.packId)));
 
 		if (text != null && text.isNotEmpty)
-			values = values.where((w) => w.text.contains(text));
+			values = values.where((w) => w.text.startsWith(text));
 		
 		values = values.skip(skipCount ?? 0);
         return ((takeCount ?? 0) == 0 ? values: values.take(takeCount)).toList();
@@ -147,6 +147,10 @@ class WordStorageMock extends WordStorage {
                 return res;
             }));
     }
+
+	@override
+	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
+		groupByTextIndexAndParent();
 
 	@override
 	Future<Map<String, int>> groupByTextIndexAndParent([List<int> parentIds]) => 
