@@ -73,7 +73,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         return Future.value();
     }
 
-    StoredPack getRandom() => Randomiser.nextElement(_packs);
+    StoredPack getRandom() => 
+		Randomiser.nextElement(_packs.where((p) => !p.isNone).toList());
 
     @override
     List<StoredPack> convertToEntity(List<Map<String, dynamic>> values) {
@@ -121,9 +122,9 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 	@override
 	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
 		Future.value(_packs.fold<Map<String, int>>({}, (res, p) {
-			final index = p.name[0].toUpperCase();
-			res[index] = (res[index] ?? 0) + 1;
-
+				final index = p.name[0].toUpperCase();
+				res[index] = (res[index] ?? 0) + 1;
+			
 			return res;
 		}));
 }

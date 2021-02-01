@@ -120,9 +120,9 @@ class CardEditorState extends State<CardEditor> {
     Widget _buildFormLayout() {
         return new Column(
             children: <Widget>[
-				_isNonePack || _text == null || _text.isEmpty ? _buiildCardTextField(): 
+				_isNonePack || _text == null || _text.isEmpty ? _buildCardTextField(): 
 					new Row(children: [
-						new Expanded(child:_buiildCardTextField()), 
+						new Expanded(child:_buildCardTextField()), 
 							new SpeakerButton(_pack.from, (speaker) => speaker.speak(_text), 
 							defaultSpeaker: widget._defaultSpeaker)
 						]),
@@ -191,7 +191,7 @@ class CardEditorState extends State<CardEditor> {
         );
     }
 
-	Widget _buiildCardTextField() =>
+	Widget _buildCardTextField() =>
 		new StyledTextField('Text', isRequired: true, 
 			onChanged: (value, submitted) async {
 				if (!submitted || _dictionary == null) {
