@@ -15,6 +15,8 @@ class _CachedItem<TItem> {
 
 abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
     extends State<TWidget> {
+    static const int _removalTimeoutMs = 2000;
+
     static const int _itemsPerPage = 30;
 
     static const int _navBarRemovalOptionIndex = 0;
@@ -160,7 +162,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void onGoingBack(BuildContext context);
 
     Widget _buildBottomBar() {
-        bool allSelected = _itemsMarkedInEditor.length == _items.length;
+        bool allSelected = _itemsMarkedInEditor.length == _removableItems.length;
         final options = getNavBarOptions(allSelected);
         
         return new BottomNavigationBar(
@@ -189,7 +191,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                     else {
                         setState(() {
                             int index = 0;
-                            _items.forEach((w) =>
+                            _removableItems.forEach((w) =>
                                 _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
                         });
                     }
@@ -201,6 +203,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             }
         );
     }
+
+	Iterable<TItem> get _removableItems => _items.where((w) => isRemovableItem(w));
 
     @protected
     List<BottomNavigationBarItem> getNavBarOptions(bool allSelected) {
@@ -224,6 +228,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void _showItemRemovalInfoSnackBar(BuildContext scaffoldContext, String message, 
         List<int> itemIdsToRemove) {
         final snackBar = Scaffold.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
+			duration: new Duration(milliseconds: _removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(
                 label: 'Undo',
@@ -341,8 +346,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         bool shouldRemove = false;
         return isRemovableItem(item) ? new Dismissible(
             direction: DismissDirection.endToStart,
-            confirmDismiss: (direction) => Future.delayed(new Duration(milliseconds: 2000), 
-                () => shouldRemove),
+            confirmDismiss: (direction) => Future.delayed(
+				new Duration(milliseconds: _removalTimeoutMs), () => shouldRemove),
             background: new Container(
                 color: Colors.deepOrange[300], 
                 child: new FlatButton.icon(
