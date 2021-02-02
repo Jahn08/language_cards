@@ -27,12 +27,14 @@ class WidgetAssistant {
         await pumpAndAnimate();
     }
 
-    Future<void> pumpAndAnimate() async {
+    Future<void> pumpAndAnimate([int durationMs]) async {
+		final duration = new Duration(milliseconds: durationMs ?? 100);
+
         if (!tester.hasRunningAnimations)
-            await tester.pump(new Duration(milliseconds: 100));
+            await tester.pump(duration);
 
         if (tester.hasRunningAnimations)
-            await tester.pumpAndSettle();
+            await tester.pumpAndSettle(duration);
     }
 
     Future<void> tapWidget(Finder widgetFinder) async {

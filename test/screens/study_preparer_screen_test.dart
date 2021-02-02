@@ -120,7 +120,7 @@ void _assureCheckedTiles(WidgetTester tester,
 
 Finder _findPackTile(String packName) {
     final packTileFinder = find.ancestor(of: find.text(packName), 
-        matching: find.byType(CheckboxListTile));
+        matching: find.byType(CheckboxListTile, skipOffstage: false));
     expect(packTileFinder, findsOneWidget);
     return packTileFinder;
 }

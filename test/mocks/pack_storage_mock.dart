@@ -122,8 +122,10 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 	@override
 	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
 		Future.value(_packs.fold<Map<String, int>>({}, (res, p) {
+			if (!p.isNone) {
 				final index = p.name[0].toUpperCase();
 				res[index] = (res[index] ?? 0) + 1;
+			}
 			
 			return res;
 		}));
