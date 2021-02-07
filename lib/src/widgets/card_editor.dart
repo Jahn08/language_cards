@@ -76,7 +76,7 @@ class CardEditorState extends State<CardEditor> {
 	bool get _isNonePack => _pack == null || _pack.isNone;
 
     Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
-        await ConfirmDialog.buildOkDialog(
+        await new ConfirmDialog.ok(
             title: 'Choose Pack', 
             content: 'You should choose a pack to enable automatic translation'
         ).show(buildContext);

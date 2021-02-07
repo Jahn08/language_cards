@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
-import 'package:language_cards/src/dialogs/confirm_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/user_params.dart';
@@ -15,6 +14,7 @@ import '../mocks/speaker_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/cancellable_dialog_tester.dart';
 import '../testers/card_editor_tester.dart';
+import '../testers/dialog_tester.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
@@ -450,10 +450,12 @@ String _getShownCardText(WidgetTester tester) {
     return (tester.widget<ListTile>(cardTileFinder).title as Text).data;
 }
 
-Finder _assureDialogBtnExistence(bool shouldFind) => 
-    AssuredFinder.findOne(type: FlatButton, 
-        label: ConfirmDialog.okActions.entries.first.value, 
-        shouldFind: shouldFind);
+Finder _assureDialogBtnExistence(bool shouldFind) {
+	final dialogBtnFinder = DialogTester.findConfirmationDialog();
+	expect(dialogBtnFinder, AssuredFinder.matchOne(shouldFind: shouldFind)); 
+
+	return dialogBtnFinder;
+}
 
 List<StoredPack> _takeEnoughCards(List<StoredPack> packs) {
     int cardsNumber = 0;

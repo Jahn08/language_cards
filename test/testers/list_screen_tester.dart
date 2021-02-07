@@ -6,8 +6,10 @@ import 'package:language_cards/src/screens/list_screen.dart';
 import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
+import 'dialog_tester.dart';
 
 class ListScreenTester<TEntity extends StoredEntity> {
+
 	static const _searcherModeThreshold = 10;
 
     final ListScreen<TEntity> Function() _screenBuilder;
@@ -199,8 +201,16 @@ class ListScreenTester<TEntity extends StoredEntity> {
         final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
         await assistant.tapWidget(removeBtnFinder);
 
+		await _confirmRemovalIfNecessary(assistant);
+
         return itemsToRemove;
     }
+
+	Future<void> _confirmRemovalIfNecessary(WidgetAssistant assistant) async {
+		final dialogBtnFinder = DialogTester.findConfirmationDialog('Remove');
+		if (findsOneWidget.matches(dialogBtnFinder, {}))
+			await assistant.tapWidget(dialogBtnFinder);
+	}
 
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
@@ -516,6 +526,9 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	Future<void> _deleteSelectedItems(WidgetAssistant assistant) async {
 		final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
 		await assistant.tapWidget(removeBtnFinder);
+		
+		await _confirmRemovalIfNecessary(assistant);
+
 		await assistant.pumpAndAnimate(3000);
 	}
 

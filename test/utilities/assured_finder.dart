@@ -25,8 +25,8 @@ class AssuredFinder {
         else
             finder = find.byType(type);
 
-        expect(finder, (shouldFind ?? false) ? 
-            ((expectSeveral ?? false) ? findsWidgets : findsOneWidget): findsNothing);
+        expect(finder, (expectSeveral ?? false) ? 
+			matchSeveral(shouldFind: shouldFind) : matchOne(shouldFind: shouldFind));
         return finder;
     }
 
@@ -36,10 +36,16 @@ class AssuredFinder {
 	static Finder findFlatButtonByIcon(IconData icon, { bool shouldFind }) {
 		final flatBtnFinder = find.ancestor(of: find.byIcon(icon), 
 			matching: find.byWidgetPredicate((widget) => widget is FlatButton));
-		expect(flatBtnFinder, (shouldFind ?? false) ? findsOneWidget: findsNothing);
+		expect(flatBtnFinder, matchOne(shouldFind: shouldFind));
 
 		return flatBtnFinder;
 	}
 
 	static Type typify<T>() => T;
+
+	static Matcher matchOne({ bool shouldFind }) =>
+		(shouldFind ?? false) ? findsOneWidget: findsNothing;
+
+	static Matcher matchSeveral({ bool shouldFind }) =>
+		(shouldFind ?? false) ?  findsWidgets: findsNothing;
 }

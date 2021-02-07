@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart' hide Router;
+import './list_screen.dart';
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
-import './list_screen.dart';
+import '../dialogs/confirm_dialog.dart';
 import '../router.dart';
 import '../widgets/card_number_indicator.dart';
 import '../widgets/one_line_text.dart';
@@ -34,7 +35,23 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, textFilter: text);
   
     @override
-    void removeItems(List<int> ids) => widget.storage.delete(ids);
+    void deleteItems(List<int> ids) => widget.storage.delete(ids);
+
+	Future<bool> shouldContinueRemoval(List<StoredPack> itemsToRemove) async {
+		final filledPackNames = itemsToRemove.where((p) => p.cardsNumber > 0)
+			.map((p) => '"${p.name}"').toList();
+		if (filledPackNames.isEmpty)
+			return true;
+
+		final jointNames = filledPackNames.join(', ');
+		final outcome = await new ConfirmDialog(
+			title: 'Removing Packs with Cards', 
+			content: 'All the cards from $jointNames will be moved to the ${StoredPack.noneName} pack. Continue?', 
+			confirmationLabel: 'Remove'
+		).show(context);
+		
+		return outcome != null && outcome;
+	}
 
     @override
     String get title => 'Card Packs';

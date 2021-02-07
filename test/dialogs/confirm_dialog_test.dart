@@ -1,76 +1,69 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
+import '../utilities/assured_finder.dart';
 import '../utilities/dialog_opener.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
 
-    testWidgets('Renders a dialog with action buttons returning expected results', 
+    testWidgets('Renders a dialog with confirmation/cancellation buttons returning expected results', 
         (tester) async {
 
-            final actions = {
-                Randomiser.nextInt(): Randomiser.nextString(), 
-                Randomiser.nextInt(): Randomiser.nextString(),
-                Randomiser.nextInt(): Randomiser.nextString() 
-            };
-
+			final expectedTitle = Randomiser.nextString();
             await _testDialogRendering(tester, (title, content) => 
-                new ConfirmDialog<int>(title: title, content: content, actions: actions),
-                actions);
+                new ConfirmDialog(title: title, content: content, 
+					confirmationLabel: expectedTitle), 
+					{ true: expectedTitle, false: CancellableDialog.cancellationLabel });
         });
 
-    testWidgets('Renders a dialog with the OK action returning the true value', 
+    testWidgets('Renders a dialog with the only an OK button returning the true value', 
         (tester) async {
 
             await _testDialogRendering(tester, (title, content) => 
-                ConfirmDialog.buildOkDialog(title: title, content: content),
-                ConfirmDialog.okActions);
-        });
+                new ConfirmDialog.ok(title: title, content: content),
+                { true: ConfirmDialog.okLabel });
 
-    testWidgets('Returns null if there have been no actions provided', (tester) async {
-        int dialogOutcome = Randomiser.nextInt();
-        await _openDialog<int>(tester, new ConfirmDialog<int>(title: Randomiser.nextString(), 
-            content: Randomiser.nextString(), actions: {}),
-            onDialogClose: (result) => dialogOutcome = result);
-        
-        expect(dialogOutcome, null);
-    });
+		    _assertTextVisibility(CancellableDialog.cancellationLabel, isVisible: false);
+        });
 }
 
 Future<void> _testDialogRendering<T>(WidgetTester tester, 
-    ConfirmDialog<T> Function(String title, String content) dialogBuilder, 
-    Map<T, String> actions) async {
+    ConfirmDialog Function(String title, String content) dialogBuilder, 
+	Map<bool, String> actions) async {
+
     final title = Randomiser.nextString();
     final content = Randomiser.nextString();
     
     final expectedAction = Randomiser.nextElement(actions.entries.toList());
 
-    T dialogOutcome;
+    bool dialogOutcome;
     await _openDialog(tester, dialogBuilder(title, content), 
         onDialogClose: (result) => dialogOutcome = result);
 
     _assertDialogVisibility(true);
 
-    _assertTextIsVisible(title);
-    _assertTextIsVisible(content);
-    actions.values.forEach((label) => _assertTextIsVisible(label));
+    _assertTextVisibility(title, isVisible: true);
+    _assertTextVisibility(content, isVisible: true);
+    actions.values.forEach((label) => _assertTextVisibility(label, isVisible: true));
 
     await new WidgetAssistant(tester).tapWidget(
-        find.widgetWithText(FlatButton, expectedAction.value));
+        find.widgetWithText(RaisedButton, expectedAction.value));
 
     _assertDialogVisibility(false);
     expect(dialogOutcome, expectedAction.key);
 }
 
-Future<void> _openDialog<T>(WidgetTester tester, ConfirmDialog dialog,
-    { Function(T) onDialogClose }) => 
-        DialogOpener.showDialog<T>(tester, 
+Future<void> _openDialog(WidgetTester tester, ConfirmDialog dialog,
+    { Function(bool) onDialogClose }) => 
+        DialogOpener.showDialog<bool>(tester, 
             dialogExposer: (context) => dialog.show(context), 
             onDialogClose: onDialogClose);
 
 void _assertDialogVisibility(bool isVisible) => 
-    expect(find.byType(AlertDialog), isVisible ? findsOneWidget : findsNothing);
+	AssuredFinder.findOne(type: AlertDialog, shouldFind: isVisible);
 
-void _assertTextIsVisible(String text) => expect(find.text(text), findsOneWidget);
+void _assertTextVisibility(String text, { bool isVisible }) => 
+	AssuredFinder.findOne(label: text, shouldFind: isVisible);

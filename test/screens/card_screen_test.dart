@@ -3,7 +3,6 @@ import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
-import 'package:language_cards/src/dialogs/confirm_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
@@ -12,6 +11,8 @@ import '../mocks/root_widget_mock.dart';
 import '../mocks/speaker_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/card_editor_tester.dart';
+import '../testers/dialog_tester.dart';
+import '../utilities/assured_finder.dart';
 import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
@@ -78,9 +79,7 @@ void main() {
 
     testWidgets('Displays no card pack name for a word from a storage without a pack', 
         (tester) async {
-            await _displayWord(tester, pack: StoredPack.none);
-            
-            await _testDisplayingPackName(tester);
+            await _testDisplayingPackName(tester, StoredPack.none);
         });
 
     testWidgets('Displays a currently chosen pack as highlighted in the dialog and changes it', 
@@ -244,17 +243,23 @@ Future<StoredWord> _displayWord(WidgetTester tester, { Client client,
     await tester.pump(new Duration(milliseconds: 200));
 
     if (shouldHideWarningDialog) {
-        final emptyPackWarnDialogBtnFinder = _findWarningDialogButton();
-        if (findsOneWidget.matches(emptyPackWarnDialogBtnFinder, {}))
+		final nonePack = StoredPack.none;
+		final warningIsExpected = pack == nonePack || (pack == null && wordToShow.packId == nonePack.id);
+        final emptyPackWarnDialogBtnFinder = _findWarningDialogButton(shouldFind: warningIsExpected);
+        if (warningIsExpected)
             await new WidgetAssistant(tester).tapWidget(emptyPackWarnDialogBtnFinder);
     }
     
     return wordToShow;
 }
 
-Finder _findWarningDialogButton() => 
-    find.widgetWithText(FlatButton, ConfirmDialog.okActions.entries.first.value);
+Finder _findWarningDialogButton({ bool shouldFind }) {
+	final dialogBtnFinder = DialogTester.findConfirmationDialog();
+	expect(dialogBtnFinder, AssuredFinder.matchOne(shouldFind: shouldFind));
 
+	return dialogBtnFinder;
+}
+   
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {
         final expectedChangedText = 
@@ -345,8 +350,8 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
         });
         
         final wordToShow = await _displayWord(tester, client: client,
-            shouldHideWarningDialog: false, 
-            pack: hasPack ? PackStorageMock.generatePack(
+            shouldHideWarningDialog: false,
+			pack: hasPack ? PackStorageMock.generatePack(
                 Randomiser.nextInt(PackStorageMock.namedPacksNumber)): StoredPack.none);
         
         await _assureWarningDialog(tester, !hasPack);
@@ -357,8 +362,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
     }
 
 Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
-    final warningBtnFinder = _findWarningDialogButton();
-    expect(warningBtnFinder, shouldFind ? findsOneWidget: findsNothing);
+    final warningBtnFinder = _findWarningDialogButton(shouldFind: shouldFind);
 
     if (shouldFind)
         await new WidgetAssistant(tester).tapWidget(warningBtnFinder);

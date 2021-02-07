@@ -169,8 +169,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             items: options,
             onTap: (tappedIndex) async {
                 if (tappedIndex == _navBarRemovalOptionIndex) {
-                    if (_itemsMarkedInEditor.length == 0)
-                        return;
+                    if (
+						_itemsMarkedInEditor.length == 0 || 
+						!(await shouldContinueRemoval(_itemsMarkedInEditor.values.map((v) => v.item).toList()))
+					) return;
 
                     _itemsMarkedForRemoval.addAll(_itemsMarkedInEditor);
 
@@ -190,9 +192,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         setState(() => _itemsMarkedInEditor.clear());
                     else {
                         setState(() {
-                            int index = 0;
+							int index = 0;
                             _removableItems.forEach((w) =>
-                                _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
+                                 _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
                         });
                     }
                 }
@@ -357,16 +359,19 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                 )
             ),
             key: new Key(item.id.toString()),
-            onDismissed: (direction) {
+            onDismissed: (direction) async {
                 final itemToRemove = _items[itemIndex];
                 _itemsMarkedForRemoval[itemToRemove.id] = 
                     new _CachedItem(itemToRemove, itemIndex);
 
-                _showItemRemovalInfoSnackBar(buildContext, 
-                    'The item ${getItemTitle(itemToRemove)} has been removed',
-                    [itemToRemove.id]);
-
                 setState(() => _items.remove(itemToRemove));
+
+				if (await shouldContinueRemoval([itemToRemove]))
+					_showItemRemovalInfoSnackBar(buildContext, 
+						'The item "${itemToRemove.textData}" has been removed',
+						[itemToRemove.id]);
+				else
+					_recoverMarkedForRemoval([itemToRemove.id]);
             },
             child: _buildListTile(buildContext, item)
         ): _buildListTile(buildContext, item);
@@ -398,15 +403,19 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             return;
 
 		final entriesForRemoval = new Map.fromEntries(_getEntriesMarkedForRemoval(ids));
-        removeItems(entriesForRemoval.keys.toList());
+        deleteItems(entriesForRemoval.keys.toList());
 		_deleteFilterIndexes(entriesForRemoval.values.map(
 			(v) => (v.item as TItem).textData[0]).toList());
 
         _deleteFromMarkedForRemoval(ids);
     }
+	
+    @protected
+    Future<bool> shouldContinueRemoval(List<TItem> itemsToRemove) async => 
+		Future.value(true);
 
     @protected
-    void removeItems(List<int> ids);
+    void deleteItems(List<int> ids);
 
 	void _deleteFilterIndexes(List<String> removedIndexes) {
 		if (_curFilterIndex == null) {
@@ -458,7 +467,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-        removeItems(_itemsMarkedForRemoval.keys.toList());
+        deleteItems(_itemsMarkedForRemoval.keys.toList());
         _itemsMarkedForRemoval.clear();
     }
 }

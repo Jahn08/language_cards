@@ -1,35 +1,47 @@
 import 'package:flutter/material.dart';
-import './outcome_dialog.dart';
+import './cancellable_dialog.dart';
 
-class ConfirmDialog<TResult> extends OutcomeDialog<TResult> {
+class ConfirmDialog extends CancellableDialog<bool> {
     
-    static const Map<bool, String> okActions = const { true: 'OK' };
+	static const String okLabel = 'OK';
 
     final String title;
 
     final String content;
+	
+	final String confirmationLabel;
 
-    final Map<TResult, String> _actions;
+	final bool isCancellable;
 
-    ConfirmDialog({ @required this.title, @required this.content, 
-        @required Map<TResult, String> actions }):
-        _actions = actions ?? new Map<TResult, String>();
+    ConfirmDialog({ 
+		@required title, @required content, @required confirmationLabel 
+	}): this._(
+		title: title, 
+		content: content, 
+		isCancellable: true,
+		confirmationLabel: confirmationLabel
+	);
 
-    static ConfirmDialog<bool> buildOkDialog({ @required String title, @required String content }) =>
-        ConfirmDialog<bool>(title: title, content: content, actions: okActions);
+	ConfirmDialog._({ this.title, this.content, this.isCancellable, this.confirmationLabel });
 
-    Future<TResult> show(BuildContext context) async {
-        if (_actions.length == 0)
-            return null;
+    ConfirmDialog.ok({ @required String title, @required String content }):
+        this._(title: title, content: content, isCancellable: false, confirmationLabel: okLabel);
 
-        return await showDialog(
+    Future<bool> show(BuildContext context) async {
+
+        return await showDialog<bool>(
             context: context, 
             builder: (buildContext) => new AlertDialog(
                 content: new Text(content),
                 title: new Text(title),
-                actions: _actions.entries.map((entry) => 
-                    new FlatButton(child: new Text(entry.value), 
-                        onPressed: () => Navigator.pop(buildContext, entry.key))).toList()
+                actions: [
+					if (isCancellable)
+						buildCancelBtn(context, false),
+					RaisedButton(
+						child: new Text(confirmationLabel), 
+                        	onPressed: () => Navigator.pop(buildContext, true)
+					)
+				]
             )
         );
     }

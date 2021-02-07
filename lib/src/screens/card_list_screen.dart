@@ -37,7 +37,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 	List<int> get _parentIds => widget.pack == null ? null: [widget.pack.id];
 
     @override
-    void removeItems(List<int> ids) {
+    void deleteItems(List<int> ids) {
         widget.storage.delete(ids);
 
         _cardsWereRemoved = true;
@@ -87,10 +87,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
             title: 'Confirm Resetting Study Progress', 
             content: 'The study progress of the ${itemsToReset.length}' +
                 ' marked cards will be reset. Continue?',
-            actions: {
-                true: 'Yes',   
-                false: 'No'
-            }).show(scaffoldContext)))
+            confirmationLabel: 'Yes').show(scaffoldContext)))
             return false;
 
         setState(() {

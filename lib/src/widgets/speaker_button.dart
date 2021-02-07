@@ -22,7 +22,7 @@ class SpeakerButton extends StatelessWidget {
 
 	Widget _buildButton(BuildContext context, ISpeaker speaker) {
 		if (speaker == null)
-			ConfirmDialog.buildOkDialog(
+			new ConfirmDialog.ok(
 				title: 'Text to Speech Is Unavailable', 
 				content: 'The language $lang is absent. ' +
 					'Try installing it in the settings of your device'

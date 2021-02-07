@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/word_storage_mock.dart';
+import '../testers/dialog_tester.dart';
 import '../testers/list_screen_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/widget_assistant.dart';
@@ -149,16 +151,22 @@ Future<List<StoredWord>> _fetchWords(WidgetTester tester, WordStorageMock storag
 Finder _findRestoreBtn({ bool shouldFind }) => 
     AssuredFinder.findOne(icon: Icons.restore, shouldFind: shouldFind);
 
-Finder _findBtnByLabel(String label, { bool shouldFind = true }) => 
-    AssuredFinder.findOne(type: FlatButton, label: label, shouldFind: shouldFind);
+Finder _findBtnByLabel(String label, { bool shouldFind = true }) {
+	final finder = DialogTester.findConfirmationDialog(label);
+	expect(finder, AssuredFinder.matchOne(shouldFind : shouldFind));
+
+	return finder;
+}
 
 Future<void> _operateResettingProgressDialog(WidgetAssistant assistant, 
     { bool shouldConfirm, bool assureNoDialog = false }) async {
         final restoreBtnFinder = _findRestoreBtn(shouldFind: true);
         await assistant.tapWidget(restoreBtnFinder);
 
-        final actionBtnFinder = _findBtnByLabel(shouldConfirm ? 'Yes': 'No', 
-            shouldFind: !assureNoDialog);
+        final actionBtnFinder = _findBtnByLabel(
+			shouldConfirm ? 'Yes': CancellableDialog.cancellationLabel, 
+            shouldFind: !assureNoDialog
+		);
         if (!assureNoDialog)
             await assistant.tapWidget(actionBtnFinder);
     }
