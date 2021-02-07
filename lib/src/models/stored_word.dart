@@ -26,7 +26,7 @@ class StoredWord extends StoredEntity {
 
     StoredWord(this.text, { int id, int packId, String transcription, 
         int studyProgress, this.partOfSpeech, this.translation }):
-        _packId = packId ?? 0,
+        _packId = packId,
         transcription = transcription ?? '',
         _studyProgress = studyProgress ?? WordStudyStage.unknown,
         super(id: id);
@@ -90,7 +90,7 @@ class StoredWord extends StoredEntity {
             $studyProgressFieldName INTEGER NOT NULL,
             $packIdFieldName INTEGER,
             FOREIGN KEY($packIdFieldName) 
-                REFERENCES $foreignTableName(${StoredEntity.idFieldName}) """;
+                REFERENCES $foreignTableName(${StoredEntity.idFieldName}) ON DELETE SET NULL """;
 
 	@override
 	String get textData => this.text;

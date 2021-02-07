@@ -1,7 +1,6 @@
 import 'package:http/http.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
-import 'package:language_cards/src/models/word_study_stage.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
@@ -9,6 +8,7 @@ import '../dialogs/pack_selector_dialog.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
+import '../models/word_study_stage.dart';
 import '../models/word.dart';
 import '../utilities/speaker.dart';
 import '../widgets/english_phonetic_keyboard.dart';
@@ -91,7 +91,7 @@ class CardEditorState extends State<CardEditor> {
 		);
     }
 
-    bool get _isNew => widget.wordId == 0;
+    bool get _isNew => widget.wordId == null;
 
 	Widget _buildLayout(StoredWord foundWord) {
 		if (foundWord != null && !foundWord.isNew && !_initialised) {
@@ -110,9 +110,12 @@ class CardEditorState extends State<CardEditor> {
     Future<StoredWord> _retrieveWord() async {
         final word = await widget._wordStorage.find(widget.wordId);
     
-        if (widget.pack == null)
-            _setPack(word.packId > 0 ? await widget._packStorage.find(word.packId): 
-                StoredPack.none);
+        if (widget.pack == null) {
+			final nonePack = StoredPack.none;
+
+			_setPack(word.packId == nonePack.id ? nonePack: 
+				await widget._packStorage.find(word.packId));
+		}
 
         return word;
     }
@@ -182,7 +185,6 @@ class CardEditorState extends State<CardEditor> {
                         );
                         final cardWasAdded = wordToSave.isNew || 
                             widget.pack?.id != _pack.id;
-
                         widget.afterSave?.call(await widget._wordStorage.upsert(wordToSave), 
 							_pack, cardWasAdded);
                     }
@@ -268,7 +270,7 @@ class CardEditor extends StatefulWidget {
         _defaultSpeaker = defaultSpeaker,
         _packStorage = packStorage,
         _wordStorage = wordStorage,
-		wordId = card?.id ?? wordId ?? 0;
+		wordId = card?.id ?? wordId;
 
     @override
     CardEditorState createState() => new CardEditorState(_client);

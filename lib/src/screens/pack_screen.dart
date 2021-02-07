@@ -44,7 +44,7 @@ class PackScreenState extends State<PackScreen> {
         );
     }
 
-    bool get _isNew => widget.packId == 0;
+    bool get _isNew => widget.packId == null;
 
     Widget _buildFutureFormLayout(int packId) {
         final futurePack = _isNew || _initialised ? 
@@ -56,7 +56,7 @@ class PackScreenState extends State<PackScreen> {
                     return new Loader();
 
                 final foundPack = snapshot.data;
-                if (foundPack != null && foundPack.id > 0 && !_initialised) {
+                if (foundPack != null && !foundPack.isNew && !_initialised) {
                     _foundPack = foundPack;
                     _initialised = true;
 
@@ -147,7 +147,7 @@ class PackScreen extends StatefulWidget {
     final BaseStorage<StoredPack> _storage;
     
     PackScreen(BaseStorage<StoredPack> storage, 
-        { this.packName, this.packId = 0, this.refreshed = false }): 
+        { this.packName, this.packId, this.refreshed = false }): 
         _storage = storage;
 
     @override

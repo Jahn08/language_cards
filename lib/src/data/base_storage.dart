@@ -54,6 +54,9 @@ abstract class BaseStorage<T extends StoredEntity> {
     }
 
     Future<T> find(int id) async {
+		if (id == null)
+			return null;
+
         final values = await connection.findById(entityName, id); 
         return values == null ? null: convertToEntity([values]).first;
     }

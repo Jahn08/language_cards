@@ -54,7 +54,7 @@ class _WordCardRouteArgs extends _CardStorageRouteArgs {
 
     _WordCardRouteArgs({ BaseStorage<StoredWord> storage, 
         BaseStorage<StoredPack> packStorage, int wordId, this.pack }): 
-        wordId = wordId ?? 0,
+        wordId = wordId,
         packStorage = packStorage ?? new PackStorage(),
         super(storage);
 }
@@ -108,7 +108,7 @@ class _PackRouteArgs extends _PackStorageRouteArgs {
     final bool refreshed;
 
     _PackRouteArgs({ BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }): 
-        packId = pack?.id ?? 0,
+        packId = pack?.id,
         packName = pack?.name ?? '',
         refreshed = refreshed ?? false,
         super(storage);

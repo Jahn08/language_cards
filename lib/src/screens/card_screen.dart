@@ -25,11 +25,11 @@ class CardScreen extends StatelessWidget {
     final BaseStorage<StoredPack> packStorage;
     
     CardScreen(this.apiKey, { @required this.wordStorage, @required this.packStorage, 
-		this.client, this.defaultSpeaker, this.pack, this.wordId = 0 });
+		this.client, this.defaultSpeaker, this.pack, this.wordId });
 
     @override
     Widget build(BuildContext context) {
-        return new BarScaffold(this.wordId == 0 ? 'Add Card' : 'Change Card',
+        return new BarScaffold('${this.wordId == null ? 'Add': 'Change'} Card',
             body: new CardEditor(apiKey, wordStorage: wordStorage, packStorage: packStorage,
 				client: client, defaultSpeaker: defaultSpeaker,
 				pack: pack, wordId: wordId, 

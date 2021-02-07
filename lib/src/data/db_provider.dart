@@ -49,10 +49,11 @@ class DbProvider {
             return;
 
         final docDir = await getApplicationDocumentsDirectory();
-        final dbPath = joinPaths([docDir.path, 'language_cards.db']);
+        final dbPath = joinPaths([docDir.path, 'language_cards6.db']);
 
         _db = await openDatabase(dbPath, 
-            version: 3,
+            version: 4,
+			onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
             onUpgrade: (newDb, _, __) async {
                 try {
                     final creationClauses = _compileCreationClauses(_tableEntities);
@@ -116,24 +117,38 @@ class DbProvider {
     Future<int> delete(String tableName, List<dynamic> ids) {
         return _perform<int>(tableName, 
             () => _db.delete(tableName, 
-                where: _composeInFilterClause(StoredEntity.idFieldName, ids.length),
+                where: _composeInFilterClause(StoredEntity.idFieldName, ids),
                 whereArgs: ids
             ));
     }
 
-    String _composeInFilterClause(String fieldName, int valuesCount) {
-        final whereParamExpr = List.filled(valuesCount, '?').join(', ');
-        return '$fieldName IN ($whereParamExpr)';
+    String _composeInFilterClause(String fieldName, List<dynamic> groupValues) {
+        String whereInExpr;
+
+		final nonEmptyValueCount = _getNonNullValues(groupValues).length;
+		if (nonEmptyValueCount > 0)
+        	whereInExpr = '$fieldName IN (${List.filled(nonEmptyValueCount, '?').join(', ')})';
+
+		if (nonEmptyValueCount == groupValues.length)
+			return whereInExpr;
+
+		final whereNullExpr = '$fieldName IS NULL';
+		return whereInExpr == null ? whereNullExpr: _joinWithOrOperator([whereInExpr, whereNullExpr]);
     }
         
+	List<dynamic> _getNonNullValues(Iterable<dynamic> values) => 
+		values == null ? null: values.where((v) => v != null).toList(growable: false);
+
+	String _joinWithOrOperator(Iterable items) => items.join(' OR ');
+
     Future<List<DataGroup>> groupBy(String tableName, 
         { @required String groupField, List<dynamic> groupValues }) {
             final filterClause = groupValues == null || groupValues.isEmpty ? 
-				null: _composeInFilterClause(groupField, groupValues.length);
+				null: _composeInFilterClause(groupField, groupValues);
             return _perform(tableName, () async {
                 final groupClause = _composeGroupClause(tableName, groupFields: [groupField], 
                     filterClause: filterClause);
-                final res = await _db.rawQuery(groupClause, groupValues);
+                final res = await _db.rawQuery(groupClause, _getNonNullValues(groupValues));
 
                 return res.map((v) => new DataGroup(v)).toList();
             });
@@ -152,19 +167,19 @@ class DbProvider {
         { @required List<String> groupFields, Map<String, List<dynamic>> groupValues }) {
             final filterClause = groupValues == null || groupValues.isEmpty ? null: 
 				_joinWithAndOperator(groupFields.where((f) => groupValues.containsKey(f))
-					.map((f) => _composeInFilterClause(f, groupValues[f].length)));
+					.map((f) => _composeInFilterClause(f, groupValues[f])));
 
             return _perform(tableName, () async {
                 final groupClause = _composeGroupClause(tableName, groupFields: groupFields, 
 					filterClause: filterClause);
                 final res = await _db.rawQuery(groupClause, 
-					groupValues?.values?.expand((v) => v)?.toList());
+					_getNonNullValues(groupValues?.values?.expand((v) => v)));
 
                 return res.map((v) => new DataGroup(v)).toList();
             });
         }
 
-	String _joinWithAndOperator(Iterable items) => items.join(' AND ');
+	String _joinWithAndOperator(Iterable<dynamic> items) => items.join(' AND ');
 
     Future<List<Map<String, dynamic>>> fetch(String tableName, { @required String orderBy,
         int take, int skip, Map<String, dynamic> filters }) {
@@ -178,14 +193,14 @@ class DbProvider {
 						if (entry.value is String)
 							return '${entry.key} LIKE ?';
 
-                        final length = entry.value is Iterable<dynamic> ? entry.value.length: 1;
-                        return _composeInFilterClause(entry.key, length);
+                        return _composeInFilterClause(entry.key, 
+							entry.value is Iterable<dynamic> ? entry.value: [entry.value]);
                     })),
                 whereArgs: filters == null || filters.isEmpty ? null: 
-                    filters.values.fold([], (prevEl, el) {
+                    _getNonNullValues(filters.values.fold<List<dynamic>>([], (prevEl, el) {
                         el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
                         return prevEl;
-                    })
+                    }))
             ));
         }
 

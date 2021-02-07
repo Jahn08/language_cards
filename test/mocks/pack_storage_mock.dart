@@ -40,8 +40,8 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     }
 
     Future<StoredPack> find(int id) async {
-        if (id < 0)
-            return null;
+        if (id == null)
+            return StoredPack.none;
 
         final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);
         final cardNumberGroups = await this.wordStorage.groupByParent([pack.id]);
@@ -61,7 +61,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 
     static StoredPack generatePack([int id]) => 
         new StoredPack(Randomiser.nextString(), 
-            id: id ?? 0, 
+            id: id, 
             from: Language.english,
             to: Language.russian,
 			cardsNumber: 0
@@ -89,10 +89,10 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
   
     Future<List<StoredPack>> _save(List<StoredPack> packs) async {
         packs.forEach((pack) {
-            if (pack.id > 0)
-                _packs.removeWhere((w) => w.id == pack.id);
-            else
+            if (pack.id == null)
                 pack.id = _packs.length + 1;
+			else
+			    _packs.removeWhere((w) => w.id == pack.id);
 
             _packs.add(pack);
         });
@@ -112,7 +112,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
             key: (p) => p.id, value: (p) => p);
         
         return (await wordStorage.groupByStudyLevels())
-            .entries.where((e) => e.key > 0)
+            .entries.where((e) => e.key != null)
             .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
     }
 

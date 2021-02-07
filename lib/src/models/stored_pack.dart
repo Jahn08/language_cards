@@ -38,9 +38,9 @@ class StoredPack extends StoredEntity {
 
     int  get cardsNumber => _cardsNumber;
 
-    set cardsNumber(int value) => _cardsNumber =  _getNonNegativeNumber(value);
+    set cardsNumber(int value) => _cardsNumber = _getNonNegativeNumber(value);
 
-    bool get isNone => name == noneName && id == 0;
+    bool get isNone => name == noneName && id == null;
 
     @override
     Map<String, dynamic> toDbMap() {

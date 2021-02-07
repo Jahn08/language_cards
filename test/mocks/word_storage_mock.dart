@@ -51,7 +51,7 @@ class WordStorageMock extends WordStorage {
     }
 
     Future<StoredWord> find(int id) =>
-        Future.value(id > 0 ? _words.firstWhere((w) => w.id == id, orElse: () => null) : null);
+        Future.value(id == null ? null: _words.firstWhere((w) => w.id == id, orElse: () => null));
 
     static List<StoredWord> _generateWords(int length) {
         final cardsWithoutPackNumber = Randomiser.nextInt(3) + 1;
@@ -59,12 +59,12 @@ class WordStorageMock extends WordStorage {
         final words = new List<StoredWord>.generate(cardsWithPackNumber, 
             (index) => generateWord(id: index + 1));
         words.addAll(new List<StoredWord>.generate(cardsWithoutPackNumber,
-            (index) => generateWord(id: cardsWithPackNumber + index + 1, packId: 0)));
+            (index) => generateWord(id: cardsWithPackNumber + index + 1, hasNoPack: true)));
 
         return words;
     }
 
-    static StoredWord generateWord({ int id, int packId }) {
+    static StoredWord generateWord({ int id, int packId, bool hasNoPack = false }) {
         const phoneticSymbols = EnglishPhoneticKeyboard.phonetic_symbols;
 
         const studyStages = WordStudyStage.values;
@@ -75,7 +75,7 @@ class WordStorageMock extends WordStorage {
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(5) + 5, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-            packId: packId ?? Randomiser.nextInt(PackStorageMock.namedPacksNumber) + 1,
+            packId: hasNoPack ? null: packId ?? Randomiser.nextInt(PackStorageMock.namedPacksNumber) + 1,
             studyProgress: Randomiser.nextElement(studyStages)
         );
     }
@@ -95,10 +95,10 @@ class WordStorageMock extends WordStorage {
 
     Future<List<StoredWord>> _save(List<StoredWord> words) async {
         words.forEach((word) { 
-            if (word.id > 0)
-                _words.removeWhere((w) => w.id == word.id);
-            else
+            if (word.id == null)
                 word.id = _words.length;
+            else
+				_words.removeWhere((w) => w.id == word.id);
 
             _words.add(word);
         });

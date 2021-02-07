@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 
 abstract class StoredEntity {
+
     static const idFieldName = 'id';
 
     int _id;
 
-    StoredEntity({ int id }): _id = id ?? 0;
+    StoredEntity({ int id }): _id = id;
 
     int get id => _id;
 
@@ -14,9 +15,10 @@ abstract class StoredEntity {
     }
 
     @protected
-    int getIdFromValue(int value, int curId) => curId == 0 && value > 0 ? value: curId;
+    int getIdFromValue(int value, int curId) => 
+		curId == null && value != null ? value: curId;
 
-    bool get isNew => _id == 0;
+    bool get isNew => _id == null;
 
     String get tableName;
 

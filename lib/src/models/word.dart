@@ -26,13 +26,13 @@ class Word {
     final List<String> translations;
 
     Word(this.text, { int id, String transcription, String partOfSpeech, List<String> translations }):
-        id = id ?? 0,
+        id = id,
         transcription = transcription ?? '',
         partOfSpeech = _lookUpPartOfSpeech(partOfSpeech),
         translations = translations ?? [];
 
     Word.fromJson(Map<String, dynamic> json):
-        id = 0,
+        id = null,
         text = json['text'],
         transcription = json['ts'],
         partOfSpeech = _lookUpPartOfSpeech(json['pos']),

@@ -27,7 +27,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
             if (isFirstRequest)
                 packs.insert(0, StoredPack.none);
-
+			
             final lengths = await new WordStorage().groupByParent(
                 packs.map((p) => p.id).toList());
             packs.forEach((p) => p.cardsNumber = lengths[p.id]);
@@ -44,9 +44,6 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
     @override
     Future<StoredPack> find(int id) async {
-        if (id <= 0)
-            return null;
-
         final pack = await super.find(id);
 
         if (pack != null) {
@@ -64,7 +61,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
             key: (p) => p.id, value: (p) => p);
         
         return (await new WordStorage().groupByStudyLevels())
-            .entries.where((e) => e.key > 0)
+            .entries.where((e) => e.key != null)
             .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
     }
 }
