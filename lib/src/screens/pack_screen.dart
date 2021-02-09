@@ -121,7 +121,7 @@ class PackScreenState extends State<PackScreen> {
         from: _languages[_fromLang]
     );
 
-    RaisedButton _buildSaveBtn(String title, Function afterSaving(StoredPack pack), 
+    RaisedButton _buildSaveBtn(String title, void afterSaving(StoredPack pack), 
         { bool isDisabled }) => 
         new RaisedButton(
             child: new Text(title),
