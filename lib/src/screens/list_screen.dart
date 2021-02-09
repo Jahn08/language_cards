@@ -192,9 +192,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         setState(() => _itemsMarkedInEditor.clear());
                     else {
                         setState(() {
-							int index = 0;
-                            _removableItems.forEach((w) =>
-                                 _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
+							final itemsToMark = _removableItems.toList();
+                            int index = _items.length - itemsToMark.length;
+
+                            itemsToMark.forEach((w) =>
+                                _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
                         });
                     }
                 }

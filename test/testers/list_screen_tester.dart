@@ -61,13 +61,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
                 final assistant = new WidgetAssistant(tester);
                 await activateEditorMode(assistant);
 
-                final selectorFinder = _tryFindingEditorSelectButton(shouldFind: true);
-                await assistant.tapWidget(selectorFinder);
-
+				await _selectAll(assistant);
                 _assureSelectionForAllTilesInEditor(tester, true);
 
-                await assistant.tapWidget(selectorFinder);
-
+				await _selectAll(assistant);
                 _assureSelectionForAllTilesInEditor(tester);
             });
 
@@ -95,7 +92,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
             });
 
         testWidgets(_buildDescription('removes selected items in the editor mode'), (tester) async {
-            final itemsToRemove = await _testRemovingItemsInEditor(tester);
+            final itemsToRemove = await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
 
             _assureSelectionForAllTilesInEditor(tester);
 
@@ -104,19 +101,35 @@ class ListScreenTester<TEntity extends StoredEntity> {
         });
 
         testWidgets(_buildDescription('recovers removed items in their previous order'), (tester) async {
-            final itemsToRemove = await _testRemovingItemsInEditor(tester);
+            final itemsToRemove = await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
 
             final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
-            await new WidgetAssistant(tester).tapWidget(undoBtnFinder);
+            final assistnat = new WidgetAssistant(tester);
+			await assistnat.tapWidget(undoBtnFinder);
+            
+			await _assureRecoveredItems(assistnat, itemsToRemove);
+        });
 
-            final listTiles = tester.widgetList<CheckboxListTile>(
-                AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true));
-            for (final item in itemsToRemove.entries) {
-                final listTile = listTiles.elementAt(item.key);
-                
-                expect(listTile.value, false);
-                expect(_extractTitle(tester, listTile.title), item.value);
-            }
+		testWidgets(_buildDescription('recovers all removed items in their previous order'), (tester) async {
+            final itemsToRemove = await _testRemovingItemsInEditor(tester, (assistant) async {
+				await deactivateEditorMode(assistant);
+				
+				int index = 0;
+				final itemsToCheck = new Map.fromEntries(tester.widgetList<ListTile>(
+					AssuredFinder.findSeveral(type: ListTile, shouldFind: true)
+				).map((t) => new MapEntry(index++, _extractTitle(tester, t.title))));
+
+				await activateEditorMode(assistant);
+				await _selectAll(assistant);
+
+				return itemsToCheck;
+			});
+
+            final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
+            final assistnat = new WidgetAssistant(tester);
+			await assistnat.tapWidget(undoBtnFinder);
+            
+			await _assureRecoveredItems(assistnat, itemsToRemove);
         });
 
         testWidgets(_buildDescription('resets selected items after quitting the editor mode'), 
@@ -190,13 +203,14 @@ class ListScreenTester<TEntity extends StoredEntity> {
         return (tester.widget(textWidgetFinder) as Text).data;
     }
 
-    Future<Map<int, String>> _testRemovingItemsInEditor(WidgetTester tester) async {
+    Future<Map<int, String>> _testRemovingItemsInEditor(WidgetTester tester,
+		Future<Map<int, String>> Function(WidgetAssistant) itemsSelector) async {
         await pumpScreen(tester);
 
         final assistant = new WidgetAssistant(tester);
         await activateEditorMode(assistant);
         
-        final itemsToRemove = await selectSomeItemsInEditor(assistant);
+		final itemsToRemove = await itemsSelector(assistant);
         
         final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
         await assistant.tapWidget(removeBtnFinder);
@@ -212,18 +226,39 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			await assistant.tapWidget(dialogBtnFinder);
 	}
 
+	Future<void> _assureRecoveredItems(
+		WidgetAssistant assistant, Map<int, String> expectedItems) async {
+		final tester = assistant.tester;
+		final checkTiles = tester.widgetList<CheckboxListTile>(
+			AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true));
+		expect(checkTiles.every((t) => !t.value), true);
+
+		await deactivateEditorMode(assistant);
+
+		final listTiles = tester.widgetList<ListTile>(
+			AssuredFinder.findSeveral(type: ListTile, shouldFind: true));
+		for (final item in expectedItems.entries) {
+			final listTile = listTiles.elementAt(item.key);
+			expect(_extractTitle(tester, listTile.title), item.value);
+		}
+	}
+
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
             final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
             final tester = assistant.tester;
-            final lastTileIndex = tester.widgetList(tilesFinder).length - 1;
+
+			final removableItmesLength = tester.widgetList(tilesFinder).length;
+			final lastTileIndex = removableItmesLength - 1;
             final middleTileIndex = chosenIndex == null || chosenIndex == 0 || 
                 chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
 			
+			final overallLength = tester.widgetList(find.byType(ListTile)).length;
+			final indexLag = overallLength - removableItmesLength;
             final tilesToSelect = {
-                0: tilesFinder.first,
-                middleTileIndex: tilesFinder.at(middleTileIndex),
-                lastTileIndex: tilesFinder.last
+                indexLag: tilesFinder.first,
+                middleTileIndex + indexLag: tilesFinder.at(middleTileIndex),
+                lastTileIndex + indexLag: tilesFinder.last
             };
             final itemsToRemove = new Map<int, String>();
             for (final tileFinder in tilesToSelect.entries) {
@@ -517,11 +552,13 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	}
 	
 	Future<void> _deleteAllItemsInEditor(WidgetAssistant assistant) async {
-		final selectorFinder = _tryFindingEditorSelectButton(shouldFind: true);
-		await assistant.tapWidget(selectorFinder);
+		await _selectAll(assistant);
 
 		await _deleteSelectedItems(assistant);
 	}
+
+	Future<void> _selectAll(WidgetAssistant assistant) =>
+		assistant.tapWidget(_tryFindingEditorSelectButton(shouldFind: true));
 
 	Future<void> _deleteSelectedItems(WidgetAssistant assistant) async {
 		final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
