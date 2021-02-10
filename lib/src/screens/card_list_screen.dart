@@ -37,8 +37,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 	List<int> get _parentIds => widget.pack == null ? null: [widget.pack.id];
 
     @override
-    void deleteItems(List<int> ids) {
-        widget.storage.delete(ids);
+    void deleteItems(List<StoredWord> items) {
+        widget.storage.delete(items.map((i) => i.id).toList());
 
         _cardsWereRemoved = true;
     }

@@ -35,7 +35,14 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, textFilter: text);
   
     @override
-    void deleteItems(List<int> ids) => widget.storage.delete(ids);
+    void deleteItems(List<StoredPack> items) {
+		widget.storage.delete(items.map((i) => i.id).toList()).then((res) {
+			final untiedCardsNumber = items.map((i) => i.cardsNumber)
+				.fold(0, (prev, el) => prev + el);
+			if (untiedCardsNumber > 0)
+				setState(() => StoredPack.none.cardsNumber += untiedCardsNumber);
+		});
+	}
 
 	Future<bool> shouldContinueRemoval(List<StoredPack> itemsToRemove) async {
 		final filledPackNames = itemsToRemove.where((p) => p.cardsNumber > 0)

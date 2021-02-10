@@ -34,6 +34,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	Map<String, int> _filterIndexes;
 	String _curFilterIndex;
+	String _filterIndexToDelete;
 
     final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
     final Map<int, _CachedItem<TItem>> _itemsMarkedInEditor = {};
@@ -287,12 +288,22 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		if (_curFilterIndex == text)
 			return;
 
+		_deleteEmptyFilterIndex();
+
 		_curFilterIndex = text;
 
 		_pageIndex = 0;
 		_items.clear();
 
 		_fetchItems(text);
+	}
+
+	void _deleteEmptyFilterIndex() {
+		if (_filterIndexToDelete == null)
+			return;
+		
+		_filterIndexes.remove(_filterIndexToDelete);
+		_filterIndexToDelete = null;
 	}
 
     Widget _buildList() => new Scrollbar(
@@ -394,7 +405,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         });
     }
 
-    List<MapEntry<int, _CachedItem>> _getEntriesMarkedForRemoval(List<int> ids) =>
+    List<MapEntry<int, _CachedItem<TItem>>> _getEntriesMarkedForRemoval(List<int> ids) =>
         _itemsMarkedForRemoval.entries.where((entry) => ids.contains(entry.key)).toList();
 
     _deleteFromMarkedForRemoval(List<int> ids) => 
@@ -405,9 +416,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             return;
 
 		final entriesForRemoval = new Map.fromEntries(_getEntriesMarkedForRemoval(ids));
-        deleteItems(entriesForRemoval.keys.toList());
+        deleteItems(_extractItemsForDeletion(entriesForRemoval.values));
 		_deleteFilterIndexes(entriesForRemoval.values.map(
-			(v) => (v.item as TItem).textData[0]).toList());
+			(v) => v.item.textData[0]).toList());
 
         _deleteFromMarkedForRemoval(ids);
     }
@@ -416,8 +427,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Future<bool> shouldContinueRemoval(List<TItem> itemsToRemove) async => 
 		Future.value(true);
 
+	List<TItem> _extractItemsForDeletion(Iterable<_CachedItem<TItem>> items) =>
+		items.map((i) => i.item).toList();
+
     @protected
-    void deleteItems(List<int> ids);
+    void deleteItems(List<TItem> ids);
 
 	void _deleteFilterIndexes(List<String> removedIndexes) {
 		if (_curFilterIndex == null) {
@@ -447,7 +461,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		}
 
 		if (_items.length == 0)
-			_filterIndexes.remove(_curFilterIndex);
+			_filterIndexToDelete = _curFilterIndex;
 	}
 
     FloatingActionButton _buildNewCardButton(BuildContext buildContext) {
@@ -469,7 +483,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-        deleteItems(_itemsMarkedForRemoval.keys.toList());
+        deleteItems(_extractItemsForDeletion(_itemsMarkedForRemoval.values));
         _itemsMarkedForRemoval.clear();
     }
 }
