@@ -11,12 +11,13 @@ import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/list_screen_tester.dart';
+import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
     final screenTester = new ListScreenTester('Pack', () => _buildPackListScreen());
     screenTester.testEditorMode();
-    screenTester.testSearcherMode(PackStorageMock.generatePack);
+    screenTester.testSearchMode(PackStorageMock.generatePack);
 
     testWidgets("Doesn't update a number of cards for a pack without changes in it", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
@@ -67,6 +68,66 @@ void main() {
         final nonePack = await _getNonePack(storage, tester);
         await _testIncreasingNumberOfCards(tester, storage, nonePack);
     });
+
+	testWidgets("Deletes packs with cards and increases the number of cards without a pack", 
+		(tester) async {
+			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			
+			final tilesToDelete = await screenTester.selectSomeItemsInEditor(assistant);
+			final packToDeleteNames = tilesToDelete.values;
+
+			final packs = await _fetchPacks(storage, tester);
+			final packsToDelete = packs.where((p) => packToDeleteNames.contains(p.name));
+			
+			final untiedCardsCount = packsToDelete.fold<int>(0, (res, i) => res + i.cardsNumber);
+
+			final nonePack = await _getNonePack(storage, tester);
+			final nonePacksNumber = nonePack.cardsNumber;
+			
+			await screenTester.deleteSelectedItems(assistant, shouldAccept: true);
+			await screenTester.deactivateEditorMode(assistant);
+			
+    		await _assertPackCardNumber(tester, storage, nonePack, 
+				nonePacksNumber + untiedCardsCount);
+		});
+
+	testWidgets("Doesn't increase the number of cards without a pack when cancelling their pack deletion", 
+		(tester) async {
+			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			
+			await screenTester.selectSomeItemsInEditor(assistant);
+
+			final nonePack = await _getNonePack(storage, tester);
+			final nonePacksNumber = nonePack.cardsNumber;
+			
+			await screenTester.deleteSelectedItems(assistant, shouldCancel: true);
+			await screenTester.deactivateEditorMode(assistant);
+			
+    		await _assertPackCardNumber(tester, storage, nonePack, nonePacksNumber);
+		});
+
+	testWidgets("Doesn't show warning when removing a pack without cards", 
+		(tester) async {
+			final packWithoutCards = PackStorageMock.generatePack(Randomiser.nextInt(100) + 99);
+			await screenTester.pumpScreen(tester, (st) async {
+				final storage = st as PackStorageMock;
+
+				await tester.runAsync(() => storage.upsert(packWithoutCards));
+			});
+			
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			
+			await screenTester.selectItemsInEditor(assistant, [packWithoutCards.name]);
+
+			await screenTester.deleteSelectedItems(assistant, shouldNotWarn: true);
+		});
 }
 
 PackListScreen _buildPackListScreen([PackStorageMock storage]) => 
@@ -113,10 +174,14 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
     return storage;
 }
 
-Future<StoredPack> _getFirstPackWithCards(PackStorageMock storage, WidgetTester tester) async => 
-    await tester.runAsync<StoredPack>(
-        () async => (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 
-            && p.name != StoredPack.noneName));
+Future<StoredPack> _getFirstPackWithCards(PackStorageMock storage, WidgetTester tester) async =>
+	(await _fetchPacks(storage, tester)).firstWhere(_whereFirstPackWithCards);
+
+Future<List<StoredPack>> _fetchPacks(PackStorageMock storage, WidgetTester tester) =>    
+	tester.runAsync<List<StoredPack>>(() => storage.fetch());
+
+bool _whereFirstPackWithCards(StoredPack p) => 
+	p.cardsNumber > 0 && p.name != StoredPack.noneName;
 
 Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
     PackStorageMock storage, StoredPack pack) async {
@@ -220,5 +285,4 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 }
 
 Future<StoredPack> _getNonePack(PackStorageMock storage, WidgetTester tester) async => 
-    await tester.runAsync<StoredPack>(
-        () async => (await storage.fetch()).firstWhere((p) => p.name == StoredPack.noneName));
+	(await _fetchPacks(storage, tester)).firstWhere((p) => p.name == StoredPack.noneName);

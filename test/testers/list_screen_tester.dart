@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/base_storage.dart';
+import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/models/stored_entity.dart';
 import 'package:language_cards/src/screens/list_screen.dart';
 import '../mocks/root_widget_mock.dart';
@@ -151,9 +152,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
     String _buildDescription(String outline) => '$screenName: $outline';
 
-    Future<BaseStorage<TEntity>> pumpScreen(WidgetTester tester) => _pumpScreen(tester);
-
-	Future<BaseStorage<TEntity>> _pumpScreen(WidgetTester tester, 
+	Future<BaseStorage<TEntity>> pumpScreen(WidgetTester tester, 
 		[Future<void> Function(BaseStorage<TEntity>) beforePumping]) async {
 		final screen = _screenBuilder();
 		final storage = screen.storage;
@@ -220,8 +219,17 @@ class ListScreenTester<TEntity extends StoredEntity> {
         return itemsToRemove;
     }
 
-	Future<void> _confirmRemovalIfNecessary(WidgetAssistant assistant) async {
-		final dialogBtnFinder = DialogTester.findConfirmationDialog('Remove');
+	Future<void> _confirmRemovalIfNecessary(WidgetAssistant assistant, { 
+		bool shouldCancel = false, bool shouldAccept = false, bool shouldNotWarn = false 
+	}) async {
+		final btnLabel = shouldCancel ? CancellableDialog.cancellationLabel: 'Remove';
+		final dialogBtnFinder = DialogTester.findConfirmationDialog(btnLabel);
+
+		if (shouldNotWarn)
+			expect(dialogBtnFinder, findsNothing);
+		else if (shouldCancel || shouldAccept)
+			expect(dialogBtnFinder, findsOneWidget);
+
 		if (findsOneWidget.matches(dialogBtnFinder, {}))
 			await assistant.tapWidget(dialogBtnFinder);
 	}
@@ -246,37 +254,39 @@ class ListScreenTester<TEntity extends StoredEntity> {
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
             final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
-            final tester = assistant.tester;
-
-			final removableItmesLength = tester.widgetList(tilesFinder).length;
-			final lastTileIndex = removableItmesLength - 1;
+            
+			final tester = assistant.tester;
+			final removableItemsLength = tester.widgetList(tilesFinder).length;
+			final lastTileIndex = removableItemsLength - 1;
+            
+			final overallLength = tester.widgetList(find.byType(ListTile)).length;
+			final indexLag = overallLength - removableItemsLength;
             final middleTileIndex = chosenIndex == null || chosenIndex == 0 || 
                 chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
 			
-			final overallLength = tester.widgetList(find.byType(ListTile)).length;
-			final indexLag = overallLength - removableItmesLength;
-            final tilesToSelect = {
-                indexLag: tilesFinder.first,
-                middleTileIndex + indexLag: tilesFinder.at(middleTileIndex),
-                lastTileIndex + indexLag: tilesFinder.last
-            };
+			final tileIndexesToSelect = [0, middleTileIndex, lastTileIndex];
             final itemsToRemove = new Map<int, String>();
-            for (final tileFinder in tilesToSelect.entries) {
-                itemsToRemove[tileFinder.key] = _extractTitle(tester, 
-                    tester.widget<CheckboxListTile>(tileFinder.value).title);
-                await assistant.tapWidget(tileFinder.value);
+            for (final indexToSelect in tileIndexesToSelect) {
+				final index = indexToSelect + indexLag;
+				if (itemsToRemove.containsKey(index))
+					continue;
+				
+				final finder = tilesFinder.at(indexToSelect);
+				itemsToRemove[index] = _extractTitle(tester, 
+                    tester.widget<CheckboxListTile>(finder).title);
+                await assistant.tapWidget(finder);
             }
 
             return itemsToRemove;
         }
 
-	testSearcherMode(TEntity Function(int) newEntityGetter) {
+	testSearchMode(TEntity Function(int) newEntityGetter) {
 
 		testWidgets(_buildDescription('switches to the search mode and back'), 
 			(tester) => testSwitchingToSearchMode(tester, newEntityGetter: newEntityGetter));
 
 		testWidgets(_buildDescription('renders no search mode for a too short list'), (tester) async {
-            final storage = await _pumpScreen(tester, (st) async {
+            final storage = await pumpScreen(tester, (st) async {
 				final items = await tester.runAsync(() => st.fetch());
 
 				if (items.length > _searcherModeThreshold) {
@@ -301,7 +311,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				final indexGroups = await _getIndexGroups(tester, storage);
 			
 				final assistant = new WidgetAssistant(tester);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 
 				final filterGroup = indexGroups.first;
 				final filterIndex = filterGroup.key;
@@ -332,7 +342,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 				
 				final indexGroups = await _getIndexGroups(tester, storage);
 				final filterGroup = indexGroups.first;
@@ -359,7 +369,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 				
 				final indexGroups = await _getIndexGroups(tester, storage);
 				final filterGroupToDelete = indexGroups.first;
@@ -368,8 +378,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await activateEditorMode(assistant);
 				final titlesToDelete = (await tester.runAsync(() => 
 					storage.fetch(textFilter: filterIndexToDelete))).map((i) => i.textData).toList();
-				await _selectItemsInEditor(assistant, titlesToDelete);
-				await _deleteSelectedItems(assistant);
+				await selectItemsInEditor(assistant, titlesToDelete);
+				await deleteSelectedItems(assistant);
 
 				_findFilterIndex(filterIndexToDelete, shouldFind: false);
 			});
@@ -388,10 +398,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await activateEditorMode(assistant);
 				final titlesToDelete = (await tester.runAsync(() => 
 					storage.fetch(textFilter: filterIndexToDelete))).map((i) => i.textData).toList();
-				await _selectItemsInEditor(assistant, titlesToDelete);
-				await _deleteSelectedItems(assistant);
+				await selectItemsInEditor(assistant, titlesToDelete);
+				await deleteSelectedItems(assistant);
 
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 				_findFilterIndex(filterIndexToDelete, shouldFind: false);
 			});
 
@@ -401,7 +411,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 				
 				final indexGroups = await _getIndexGroups(tester, storage);
 				final filterGroupToDelete = indexGroups.firstWhere((e) => e.value > 1);
@@ -411,8 +421,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				final titlesToDelete = (await tester.runAsync(() => 
 					storage.fetch(textFilter: filterIndexToDelete)))
 					.take(1).map((i) => i.textData).toList();
-				await _selectItemsInEditor(assistant, titlesToDelete);
-				await _deleteSelectedItems(assistant);
+				await selectItemsInEditor(assistant, titlesToDelete);
+				await deleteSelectedItems(assistant);
 
 				_findFilterIndex(filterIndexToDelete, shouldFind: true);
 			});
@@ -432,7 +442,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 				await _deleteItemsUntilSearchIsUnavailable(assistant, storage);
 
 				_tryFindingSearcherButton(shouldFind: false);
@@ -446,7 +456,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				final assistant = new WidgetAssistant(tester);
 				await activateEditorMode(assistant);
-				await _activateSearcherMode(assistant);
+				await _activateSearchMode(assistant);
 
 				final indexGroups = await _getIndexGroups(tester, storage);
 				int overallLength = indexGroups.fold<int>(0, (res, e) => res + e.value);
@@ -490,7 +500,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		assureFilterIndexes(indexes, shouldFind: false);				
 
 		final assistant = new WidgetAssistant(tester);
-		await _activateSearcherMode(assistant);
+		await _activateSearchMode(assistant);
 		
 		_tryFindingSearcherButton(shouldFind: false);
 		assureFilterIndexes(indexes, shouldFind: true);
@@ -506,7 +516,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	Future<BaseStorage<TEntity>> _pumpScreenWithEnoughItems(WidgetTester tester, {
 		TEntity Function(int) newEntityGetter, int searcherModeThreshold,
 		Future<int> Function() itemsLengthGetter 
-	}) => _pumpScreen(tester, (st) async {
+	}) => pumpScreen(tester, (st) async {
 			int curLength;
 			if (itemsLengthGetter == null)
 				curLength = (await tester.runAsync(() => st.fetch())).length;
@@ -523,7 +533,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	Finder _tryFindingSearcherEndButton({ bool shouldFind }) => 
         AssuredFinder.findOne(icon: Icons.search_off, shouldFind: shouldFind);
 	
-    Future<void> _activateSearcherMode(WidgetAssistant assistant) =>
+    Future<void> _activateSearchMode(WidgetAssistant assistant) =>
 		assistant.tapWidget(_tryFindingSearcherButton(shouldFind: true));
 
     Finder _tryFindingSearcherButton({ bool shouldFind }) => 
@@ -554,22 +564,26 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	Future<void> _deleteAllItemsInEditor(WidgetAssistant assistant) async {
 		await _selectAll(assistant);
 
-		await _deleteSelectedItems(assistant);
+		await deleteSelectedItems(assistant);
 	}
 
 	Future<void> _selectAll(WidgetAssistant assistant) =>
 		assistant.tapWidget(_tryFindingEditorSelectButton(shouldFind: true));
 
-	Future<void> _deleteSelectedItems(WidgetAssistant assistant) async {
+	Future<void> deleteSelectedItems(WidgetAssistant assistant, {
+		bool shouldCancel = false, bool shouldAccept = false, bool shouldNotWarn = false
+	}) async {
 		final removeBtnFinder = _tryFindingEditorRemoveButton(shouldFind: true);
 		await assistant.tapWidget(removeBtnFinder);
 		
-		await _confirmRemovalIfNecessary(assistant);
-
+		await _confirmRemovalIfNecessary(assistant, shouldCancel: shouldCancel, 
+			shouldAccept: shouldAccept, shouldNotWarn: shouldNotWarn);
 		await assistant.pumpAndAnimate(3000);
+
+		await assistant.pumpAndAnimate(100);
 	}
 
-	Future<void> _selectItemsInEditor(WidgetAssistant assistant, List<String> itemTitles) async {
+	Future<void> selectItemsInEditor(WidgetAssistant assistant, List<String> itemTitles) async {
 
 		for (final title in itemTitles) {
 			final tileFinder = find.widgetWithText(CheckboxListTile, title);
@@ -605,7 +619,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			entities.addAll(await tester.runAsync(() => storage.fetch(textFilter: indexToDelete)));
 
 		await activateEditorMode(assistant);
-		await _selectItemsInEditor(assistant, entities.map((i) => i.textData).toList());
-		await _deleteSelectedItems(assistant);
+		await selectItemsInEditor(assistant, entities.map((i) => i.textData).toList());
+		await deleteSelectedItems(assistant);
 	}
 }

@@ -93,7 +93,7 @@ class WordStorageMock extends WordStorage {
     @override
     Future<void> update(List<StoredWord> words) => _save(words);
 
-    Future<List<StoredWord>> _save(List<StoredWord> words) async {
+    Future<List<StoredWord>> _save(List<StoredWord> words) {
         words.forEach((word) { 
             if (word.id == null)
                 word.id = _words.length;
@@ -104,7 +104,7 @@ class WordStorageMock extends WordStorage {
         });
 
         _sortWords();
-        return words;
+        return Future.value(words);
     }
 
     Future<StoredWord> updateWordProgress(int id, int studyProgress) async {

@@ -1,5 +1,6 @@
 import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/data/study_storage.dart';
+import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'word_storage_mock.dart';
@@ -68,8 +69,15 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         );
 
     @override
-    Future<void> delete(List<int> ids) {
+    Future<void> delete(List<int> ids) async {
         _packs.removeWhere((w) => ids.contains(w.id));
+
+		final updatedCards = (await wordStorage.fetchFiltered(parentIds: ids)).map((c) => 
+			new StoredWord(c.text, id: c.id, packId: null, 
+				partOfSpeech: c.partOfSpeech, studyProgress: c.studyProgress, 
+				transcription: c.transcription, translation: c.translation)).toList();
+		await wordStorage.update(updatedCards);
+
         return Future.value();
     }
 

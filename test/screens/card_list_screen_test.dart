@@ -15,7 +15,7 @@ import '../utilities/widget_assistant.dart';
 void main() {
     final screenTester = _buildScreenTester();
     screenTester.testEditorMode();
-    screenTester.testSearcherMode((id) => WordStorageMock.generateWord(id: id));
+    screenTester.testSearchMode((id) => WordStorageMock.generateWord(id: id));
 
 	testWidgets('Switches to the search mode for cards groupped by a pack', (tester) async {
 		final packStorage = new PackStorageMock();
