@@ -1,0 +1,303 @@
+{
+    "barScaffoldSettingsPanelTitle": "Settings",
+    "@barScaffoldSettingsPanelTitle": {},
+    "barScaffoldSettingsPanelLanguageSectionLabel": "Language",
+    "@barScaffoldSettingsPanelLanguageSectionLabel": {},
+    "barScaffoldSettingsPanelThemeSectionLabel": "Theme",
+    "@barScaffoldSettingsPanelThemeSectionLabel": {},
+    "barScaffoldSettingsPanelStudySectionLabel": "Study",
+    "@barScaffoldSettingsPanelStudySectionLabel": {},
+    "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Card Sorting",
+    "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
+    "barScaffoldSettingsPanelStudySectionCardSideOptionLabel": "Card Side",
+    "@barScaffoldSettingsPanelStudySectionCardSideOptionLabel": {},
+    "barScaffoldSettingsPanelContactsSectionLabel": "Contacts",
+    "@barScaffoldSettingsPanelContactsSectionLabel": {},
+    "barScaffoldSettingsPanelHelpSectionLabel": "Help",
+    "@barScaffoldSettingsPanelHelpSectionLabel": {},
+    "barScaffoldSettingsPanelResettingButtonLabel": "Reset",
+    "@barScaffoldSettingsPanelResettingButtonLabel": {},
+    "barScaffoldSettingsPanelApplyingButtonLabel": "Apply",
+    "@barScaffoldSettingsPanelApplyingButtonLabel": {},
+
+    "cancellableDialogCancellationButtonLabel": "Cancel",
+    "@cancellableDialogCancellationButtonLabel": {
+        "description": "Label for a button cancelling an action clarified by a dialog"
+    },
+
+    "cardEditorChoosingPackDialogTitle": "Choose Pack",
+    "@cardEditorChoosingPackDialogTitle": {},
+    "cardEditorChoosingPackDialogContent": "You should choose a pack to enable automatic translation",
+    "@cardEditorChoosingPackDialogContent": {},
+    "cardEditorTranscriptionTextFieldLabel": "Phonetic Notation",
+    "@cardEditorTranscriptionTextFieldLabel": {},
+    "cardEditorPartOfSpeechDropdownLabel": "Part of Speech",
+    "@cardEditorPartOfSpeechDropdownLabel": {},
+    "cardEditorTranslationTextFieldLabel": "Translation",
+    "@cardEditorTranslationTextFieldLabel": {},
+    "cardEditorChoosingPackButtonLabel": "Card Pack: {packName}",
+    "@cardEditorChoosingPackButtonLabel": {
+        "placeholders": {
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
+    "cardEditorResettingStudyProgressButtonLabel": "Reset {studyLevel} Study Level",
+    "@cardEditorResettingStudyProgressButtonLabel": {
+        "placeholders": {
+            "studyLevel": {
+                "type": "String"
+            }
+        }
+    },
+    "cardEditorCardTextTextFieldLabel": "Text",
+    "@cardEditorCardTextTextFieldLabel": {},
+
+    "cardListScreenWithoutPackTitle": "Cards",
+    "@cardListScreenWithoutPackTitle": {},
+    "cardListScreenWithPackTitle": "Cards of Pack {packName}",
+    "@cardListScreenWithPackTitle": {
+        "placeholders": {
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
+    "cardListScreenBottomNavBarResettingProgressActionLabel": "Reset Progress",
+    "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
+    "cardListScreenResettingProgressDialogTitle": "Confirm Resetting Study Progress",
+    "@cardListScreenResettingProgressDialogTitle": {},
+    "cardListScreenResettingProgressDialogContent": "The study progress of the {cardsToResetLength} marked cards will be reset. Continue?",
+    "@cardListScreenResettingProgressDialogContent": {
+        "placeholders": {
+            "cardsToResetLength": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "cardListScreenResettingProgressDialogConfirmationButtonLabel": "Yes",
+    "@cardListScreenResettingProgressDialogConfirmationButtonLabel": {},
+    "cardListScreenBottomSnackBarResettingProgressInfo": "The study progress of the {cardsToResetNumber} cards has been reset",
+    "@cardListScreenBottomSnackBarResettingProgressInfo": {
+        "placeholders": {
+            "cardsToResetNumber": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    
+    "cardNumberIndicatorContent": "Cards: {cardsNumber}",
+    "@cardNumberIndicatorContent": {
+        "placeholders": {
+            "cardsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+
+    "cardScreenHeadBarAddingCardTitle": "Add Card",
+    "@cardScreenHeadBarAddingCardTitle": {},
+    "cardScreenHeadBarChangingCardTitle": "Change Card",
+    "@cardScreenHeadBarChangingCardTitle": {},
+
+    "confirmDialogOkButtonLabel": "OK",
+    "@confirmDialogOkButtonLabel": {
+        "description": "Label for a button accepting an action clarified by a dialog"
+    },
+
+    "constsSelectAll": "Select All",
+    "@constsSelectAll": {},
+    "constsUnselectAll": "Unselect All",
+    "@constsUnselectAll": {},
+    "constsEmptyValueValidationError": "The field cannot be empty",
+    "@constsEmptyValueValidationError": {},
+    "constsSavingItemButtonLabel": "Save",
+    "@constsSavingItemButtonLabel": {},
+
+    "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} items have been removed",
+    "@listScreenBottomSnackBarRemovedItemsInfo": {
+        "placeholders": {
+            "removedItemsLength": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "listScreenRemovingActionLabel": "Remove",
+    "@listScreenRemovingActionLabel": {},
+    "listScreenBottomSnackBarUndoingActionLabel": "Undo",
+    "@listScreenBottomSnackBarUndoingActionLabel": {},
+    "listScreenBottomSnackBarDismissedItemInfo": "The item {itemText} has been removed",
+    "@listScreenBottomSnackBarDismissedItemInfo": {
+        "placeholders": {
+            "itemText": {
+                "type": "String"
+            }
+        }
+    },
+    "listScreenEditorEditingButtonLabel": "Edit",
+    "@listScreenEditorEditingButtonLabel": {},
+    "listScreenEditorDoneButtonLabel": "Done",
+    "@listScreenEditorDoneButtonLabel": {},
+    "listScreenAddingNewItemButtonTooltip": "New Item",
+    "@listScreenAddingNewItemButtonTooltip": {},
+
+    "mainScreenStudyModeMenuItemLabel": "Study Mode",
+    "@mainScreenStudyModeMenuItemLabel": {},
+    "mainScreenWordCardsMenuItemLabel": "Word Cards",
+    "@mainScreenWordCardsMenuItemLabel": {},
+    "mainScreenWordPacksMenuItemLabel": "Word Packs",
+    "@mainScreenWordPacksMenuItemLabel": {},
+
+    "packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": "Removing Packs with Cards",
+    "@packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": {},
+    "packListScreenRemovingNonEmptyPacksDialogConfirmationContent": "All the cards from {packNames} will be moved to the {nonePackName} pack. Continue?",
+    "@packListScreenRemovingNonEmptyPacksDialogConfirmationContent": {
+        "placeholders": {
+            "packNames": {
+                "type": "String"
+            },
+            "nonePackName": {
+                "type": "String"
+            }
+        }
+    }, 
+    "packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": "Remove",
+    "@packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": {},
+    "packListScreenTitle": "Card Packs",
+    "@packListScreenTitle": {},
+
+    "packScreenListHeadBarAddingPackTitle": "Add Pack",
+    "@packScreenListHeadBarAddingPackTitle": {},
+    "packScreenHeadBarChangingPackTitle": "Change Pack",
+    "@packScreenHeadBarChangingPackTitle": {},
+    "packScreenPackNameTextFieldLabel": "Pack Name",
+    "@packScreenPackNameTextFieldLabel": {},
+    "packScreenTranslationFromDropdownLabel": "Translate from",
+    "@packScreenTranslationFromDropdownLabel": {},
+    "packScreenTranslationToDropdownLabel": "Translate to",
+    "@packScreenTranslationToDropdownLabel": {},
+    "packScreenShowingCardsButtonLabel": "Show {cardsNumber} Cards",
+    "@packScreenShowingCardsButtonLabel": {
+        "placeholders": {
+            "cardsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "packScreenSavingAndAddingCardsButtonLabel": "Save and Add Cards",
+    "@packScreenSavingAndAddingCardsButtonLabel": {},
+    "packScreenSameTranslationDirectionsValidationError": "Translation languages must differ",
+    "@packScreenSameTranslationDirectionsValidationError": {},
+
+    "packSelectorDialogTitle": "Choose a Card Pack",
+    "@packSelectorDialogTitle": {},
+    
+    "singleSelectorDialogTitle": "Choose an Item",
+    "@singleSelectorDialogTitle": {},
+
+    "speakerButtonUnaivailableTTSDialogTitle": "Text to Speech Is Unavailable",
+    "@speakerButtonUnaivailableTTSDialogTitle": {},
+    "speakerButtonUnaivailableTTSDialogContent": "The language {language} is absent. Try installing it in the settings of your device",
+    "@speakerButtonUnaivailableTTSDialogContent": {
+        "placeholders": {
+            "language": {
+                "type": "String"
+            }
+        }
+    },
+    
+    "storedPackNonePackName": "None",
+    "@storedPackNonePackName": {},
+
+    "studyPreparerScreenTitle": "Choose What to Study",
+    "@studyPreparerScreenTitle": {},
+    "studyPreparerScreenAllCardsCategoryName": "All",
+    "@studyPreparerScreenAllCardsCategoryName": {},
+
+    "studyScreenEditingCardDialogTitle": "Change Card",
+    "@studyScreenEditingCardDialogTitle": {},
+    "studyScreenStudyEndDialogTitle": "The Study Cycle Is Over",
+    "@studyScreenStudyEndDialogTitle": {},
+    "studyScreenStudyEndDialogContent": "Well Done! You have finished the study.\n\nYou can repeat the study to hone the cards to perfection",
+    "@studyScreenStudyEndDialogContent": {},
+    "studyScreenTitle": "{curCardIndex} of {cardsNumber} Cards",
+    "@studyScreenTitle": {
+        "placeholders": {
+            "curCardIndex": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "cardsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "studyScreenEditingCardButtonLabel": "Edit",
+    "@studyScreenEditingCardButtonLabel": {},
+    "studyScreenLearningCardButtonLabel": "Learn",
+    "@studyScreenLearningCardButtonLabel": {},
+    "studyScreenNextCardButtonLabel": "Next",
+    "@studyScreenNextCardButtonLabel": {},
+    "studyScreenSortingCardButtonLabel": "Sorting: {studyDirection}",
+    "@studyScreenSortingCardButtonLabel": {
+        "placeholders": {
+            "studyDirection": {
+                "type": "String"
+            }
+        }
+    },
+    "studyScreenCardSideButtonLabel": "Side: {cardSide}",
+    "@studyScreenCardSideButtonLabel": {
+        "placeholders": {
+            "cardSide": {
+                "type": "String"
+            }
+        }
+    },
+
+    "translationSelectorDialogTitle": "Select Translations",
+    "@translationSelectorDialogTitle": {},
+    "translationSelectorDoneButtonLabel": "Done",
+    "@translationSelectorDoneButtonLabel": {},
+
+    "wordSelectorDialogTitle": "Choose a Word Definition",
+    "@wordSelectorDialogTitle": {},
+    "wordStudyStageNewStageName": "New",
+    "@wordStudyStageNewStageName": {},
+    "wordStudyStageFamiliarStageName": "Familiar",
+    "@wordStudyStageFamiliarStageName": {},
+    "wordStudyStageWellKnownStageName": "Well Known",
+    "@wordStudyStageWellKnownStageName": {},
+    "wordStudyStageLearnedStageName": "Learned",
+    "@wordStudyStageLearnedStageName": {},
+    
+    "wordPartsOfSpeechAdjectiveName": "adjective",
+    "@wordPartsOfSpeechAdjectiveName": {},
+    "wordPartsOfSpeechAdverbName": "adverb",
+    "@wordPartsOfSpeechAdverbName": {},
+    "wordPartsOfSpeechConjunctionName": "conjunction",
+    "@wordPartsOfSpeechConjunctionName": {},
+    "wordPartsOfSpeechIdiomName": "idiom",
+    "@wordPartsOfSpeechIdiomName": {},
+    "wordPartsOfSpeechInterjectionName": "interjection",
+    "@wordPartsOfSpeechInterjectionName": {},
+    "wordPartsOfSpeechNounName": "noun",
+    "@wordPartsOfSpeechNounName": {},
+    "wordPartsOfSpeechParticipleName": "participle",
+    "@wordPartsOfSpeechParticipleName": {},
+    "wordPartsOfSpeechPrepositionName": "preposition",
+    "@wordPartsOfSpeechPrepositionName": {},
+    "wordPartsOfSpeechPronounName": "pronoun",
+    "@wordPartsOfSpeechPronounName": {},
+    "wordPartsOfSpeechVerbName": "verb",
+    "@wordPartsOfSpeechVerbName": {},
+    "wordPartsOfSpeechDefault": "collocation",
+    "@wordPartsOfSpeechDefault": {}
+}

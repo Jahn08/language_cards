@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:language_cards/src/models/language.dart';
 import './blocs/settings_bloc.dart';
 import './data/configuration.dart';
 import './models/user_params.dart';
@@ -30,8 +33,20 @@ class _ThemedAppState extends State<_ThemedApp> {
             _bloc.addOnSaveListener(_updateState);
         }
         
+		final enLocale = const Locale('en');
+		final ruLocale = const Locale('ru');
         return new FutureLoader<UserParams>(_bloc.userParams, (params) {
             return new MaterialApp(
+				localizationsDelegates: [
+					AppLocalizations.delegate,
+					GlobalMaterialLocalizations.delegate,
+					GlobalWidgetsLocalizations.delegate
+				],
+				locale: params.interfaceLang == Language.russian ? ruLocale: enLocale,
+				supportedLocales: [
+					enLocale,
+					ruLocale
+				],
                 theme: params.theme == AppTheme.dark ? new ThemeData.dark():
                     new ThemeData.light(),
                 initialRoute: Router.initialRouteName,
