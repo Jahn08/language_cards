@@ -1,4 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter/material.dart' hide Router;
+import 'package:language_cards/src/router.dart';
 
 class RootWidgetMock extends StatelessWidget {
     final Widget _child;
@@ -27,10 +30,21 @@ class RootWidgetMock extends StatelessWidget {
         );
     }
 
-    static Widget buildAsAppHome({ Function(BuildContext) onBuilding, 
-        Widget child, bool noBar }) =>
-        new MaterialApp(onGenerateRoute: (settings) => new MaterialPageRoute(
-            builder: (context) => 
-                new RootWidgetMock(onBuilding: onBuilding, child: child, noBar: noBar)
-        ));
+    static Widget buildAsAppHome({ 
+		Function(BuildContext) onBuilding, 
+		Route<dynamic> Function(RouteSettings) onGenerateRoute,
+		Widget child, 
+		bool noBar 
+	}) => new MaterialApp(
+		localizationsDelegates: [
+			AppLocalizations.delegate,
+			GlobalMaterialLocalizations.delegate,
+			GlobalWidgetsLocalizations.delegate
+		],
+		initialRoute: Router.initialRouteName,
+		onGenerateRoute: onGenerateRoute ?? (settings) => new MaterialPageRoute(
+			builder: (context) => 
+				new RootWidgetMock(onBuilding: onBuilding, child: child, noBar: noBar)
+		)
+	);
 }

@@ -135,9 +135,8 @@ PackListScreen _buildPackListScreen([PackStorageMock storage]) =>
     
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
     final storage = new PackStorageMock();
-    await tester.pumpWidget(new MaterialApp(
-        initialRoute: Router.initialRouteName,
-        onGenerateRoute: (settings) {
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
+		onGenerateRoute: (settings) {
             final route = Router.getRoute(settings);
 
             if (route == null)
@@ -164,7 +163,8 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
                 settings: settings,
                 builder: (context) => new RootWidgetMock(child: _buildPackListScreen(storage))
             );
-        }));
+        })
+	);
 
     await tester.pump(new Duration(milliseconds: 500));
 

@@ -10,6 +10,7 @@ import 'package:language_cards/src/widgets/bar_scaffold.dart';
 import 'package:language_cards/src/widgets/icon_option.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import 'package:language_cards/src/widgets/styled_dropdown.dart';
+import '../mocks/root_widget_mock.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/randomiser.dart';
@@ -223,8 +224,8 @@ void main() {
     });
 }
 
-Future<void> _buildInsideApp(WidgetTester tester, Widget child) async => 
-    await tester.pumpWidget(new MaterialApp(home: child));
+Future<void> _buildInsideApp(WidgetTester tester, Widget child) => 
+    tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: child));
 
 FlatButton _buildBarAction(String label) => new FlatButton(
     key: new Key(Randomiser.nextString()),

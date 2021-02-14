@@ -11,17 +11,13 @@ void main() {
         final expectedSecretApiKey = Randomiser.nextString();
         
         AppParams params;
-        await tester.pumpWidget(
-            new MaterialApp(
-                home: new DefaultAssetBundle(
-                    bundle: new TestAssetBundle.params(
-                        _buildAppParams(Randomiser.nextString()), 
-                        secretParams: _buildAppParams(expectedSecretApiKey)),
-                    child: new RootWidgetMock(onBuilding: (context) async =>
-                        params = await Configuration.getParams(context)),
-                )
-            )
-        );
+        await _pumpApp(tester, new DefaultAssetBundle(
+			bundle: new TestAssetBundle.params(
+				_buildAppParams(Randomiser.nextString()), 
+				secretParams: _buildAppParams(expectedSecretApiKey)),
+			child: new RootWidgetMock(onBuilding: (context) async =>
+				params = await Configuration.getParams(context)),
+		));
 
         expect(params.dictionary?.apiKey, expectedSecretApiKey);
     });
@@ -30,37 +26,29 @@ void main() {
         final expectedApiKey = Randomiser.nextString();
         
         AppParams params;
-        await tester.pumpWidget(
-            new MaterialApp(
-                home: new DefaultAssetBundle(
-                    bundle: new TestAssetBundle.params(
-                        _buildAppParams(expectedApiKey)),
-                    child: new RootWidgetMock(onBuilding: (context) async =>
-                        params = await Configuration.getParams(context, reload: true)),
-                )
-            )
-        );
+        await _pumpApp(tester, new DefaultAssetBundle(
+			bundle: new TestAssetBundle.params(
+				_buildAppParams(expectedApiKey)),
+			child: new RootWidgetMock(onBuilding: (context) async =>
+				params = await Configuration.getParams(context, reload: true)),
+		));
 
         expect(params.dictionary?.apiKey, expectedApiKey);
     });
 
     testWidgets('Throws an error when there is no configuration found', (tester) async {
         Error expectedError;
-        await tester.pumpWidget(
-            new MaterialApp(
-                home: new DefaultAssetBundle(
-                    bundle: new TestAssetBundle.params(null),
-                    child: new RootWidgetMock(onBuilding: (context) async {
-                        try {
-                            await Configuration.getParams(context, reload: true);
-                        }
-                        catch (err) {
-                            expectedError = err;
-                        }
-                    })
-                )   
-            )
-        );
+        await _pumpApp(tester, new DefaultAssetBundle(
+			bundle: new TestAssetBundle.params(null),
+			child: new RootWidgetMock(onBuilding: (context) async {
+				try {
+					await Configuration.getParams(context, reload: true);
+				}
+				catch (err) {
+					expectedError = err;
+				}
+			})
+		));
 
         expect(expectedError is StateError, true);
     });
@@ -68,3 +56,6 @@ void main() {
 
 AppParams _buildAppParams(String apiKey) => 
     new AppParams(dictionary: new DictionaryParams(apiKey: apiKey));
+
+Future<void> _pumpApp(WidgetTester tester, Widget home) => 
+	tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: home));
