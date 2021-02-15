@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
-import './cancellable_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'cancellable_dialog.dart';
 
 class ConfirmDialog extends CancellableDialog<bool> {
-    
-	static const String okLabel = 'OK';
 
     final String title;
 
@@ -25,7 +24,7 @@ class ConfirmDialog extends CancellableDialog<bool> {
 	ConfirmDialog._({ this.title, this.content, this.isCancellable, this.confirmationLabel });
 
     ConfirmDialog.ok({ @required String title, @required String content }):
-        this._(title: title, content: content, isCancellable: false, confirmationLabel: okLabel);
+        this._(title: title, content: content, isCancellable: false);
 
     Future<bool> show(BuildContext context) async {
 
@@ -38,8 +37,9 @@ class ConfirmDialog extends CancellableDialog<bool> {
 					if (isCancellable)
 						buildCancelBtn(context, false),
 					RaisedButton(
-						child: new Text(confirmationLabel), 
-                        	onPressed: () => Navigator.pop(buildContext, true)
+						child: new Text(confirmationLabel ?? 
+							AppLocalizations.of(context).confirmDialogOkButtonLabel), 
+						onPressed: () => Navigator.pop(buildContext, true)
 					)
 				]
             )

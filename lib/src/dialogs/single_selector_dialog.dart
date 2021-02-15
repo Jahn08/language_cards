@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import './selector_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'selector_dialog.dart';
 import '../widgets/loader.dart';
 
 abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
@@ -9,7 +10,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     
     SingleSelectorDialog(BuildContext context, String title):
         _context = context,
-        _title = title ?? 'Choose an item',
+        _title = title ?? AppLocalizations.of(context).singleSelectorDialogTitle,
         super();
 
     Future<T> showAsync(Future<List<T>> futureItems) {

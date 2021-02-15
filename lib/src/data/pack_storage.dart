@@ -1,8 +1,9 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'study_storage.dart';
 import '../data/base_storage.dart';
 import '../data/word_storage.dart';
 import '../models/study_pack.dart';
 import '../models/stored_pack.dart';
-import './study_storage.dart';
 
 export '../models/stored_pack.dart';
 
@@ -55,13 +56,13 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     }
 
     @override
-    Future<List<StudyPack>> fetchStudyPacks() async {
+    Future<List<StudyPack>> fetchStudyPacks(AppLocalizations locale) async {
         final packs = await _fetchInternally();
         final packMap = new Map<int, StoredPack>.fromIterable(packs, 
             key: (p) => p.id, value: (p) => p);
         
         return (await new WordStorage().groupByStudyLevels())
             .entries.where((e) => e.key != null)
-            .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
+            .map((e) => new StudyPack(packMap[e.key], e.value, locale)).toList();
     }
 }

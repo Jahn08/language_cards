@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/base_storage.dart';
 import '../consts.dart';
 import '../models/stored_entity.dart';
@@ -98,10 +99,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @override
     Widget build(BuildContext buildContext) {
-		
+		final locale = AppLocalizations.of(buildContext);
         return new BarScaffold(title,
             barActions: <Widget>[
-				_isEditorMode ? _buildEditorDoneButton(): _buildEditorButton(),
+				_isEditorMode ? _buildEditorDoneButton(locale): _buildEditorButton(locale),
 				
 				if (_isSearchMode || _isSearchModeAvailable)
 					(_isSearchMode ? _buildSearchDoneButton(): _buildSearchButton())
@@ -111,9 +112,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                     _deleteAllMarkedForRemoval();
                     onGoingBack(buildContext);
                 }: null,
-            bottomNavigationBar: _isEditorMode ? _buildBottomBar(): null,
-            body: _buildListView(buildContext),
-            floatingActionButton: _buildNewCardButton(buildContext)
+            bottomNavigationBar: _isEditorMode ? _buildBottomBar(locale): null,
+            body: _buildListView(buildContext, locale),
+            floatingActionButton: _buildNewItemButton(buildContext, locale)
         );
     }
 
@@ -123,22 +124,24 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     String get title;
 
-    Widget _buildEditorButton() => new FlatButton(
-        onPressed: () {
-            setState(() => _isEditorMode = true);
-        }, 
-        child: new Text('Edit')
-    );
+    Widget _buildEditorButton(AppLocalizations locale) => 
+		new FlatButton(
+			onPressed: () {
+				setState(() => _isEditorMode = true);
+			}, 
+			child: new Text(locale.listScreenEditorEditingButtonLabel)
+		);
 
-    Widget _buildEditorDoneButton() => new FlatButton(
-        onPressed: () {
-            setState(() { 
-                _itemsMarkedInEditor.clear();
-                _isEditorMode = false;
-            });
-        },
-        child: new Text('Done')
-    );
+    Widget _buildEditorDoneButton(AppLocalizations locale) => 
+		new FlatButton(
+			onPressed: () {
+				setState(() { 
+					_itemsMarkedInEditor.clear();
+					_isEditorMode = false;
+				});
+			},
+			child: new Text(locale.listScreenEditorDoneButtonLabel)
+		);
 
 	Widget _buildSearchButton() => new IconButton(
 			onPressed: _filterIndexes == null ? null: () {
@@ -162,9 +165,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     void onGoingBack(BuildContext context);
 
-    Widget _buildBottomBar() {
+    Widget _buildBottomBar(AppLocalizations locale) {
         bool allSelected = _itemsMarkedInEditor.length == _removableItems.length;
-        final options = getNavBarOptions(allSelected);
+        final options = getNavBarOptions(allSelected, locale);
         
         return new BottomNavigationBar(
             items: options,
@@ -181,9 +184,12 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         final idsMarkedForRemoval = _itemsMarkedInEditor.keys;
                         _items.removeWhere((w) => idsMarkedForRemoval.contains(w.id));
 
-                        _showItemRemovalInfoSnackBar(_scaffoldContext,
-                            '${_itemsMarkedInEditor.length} items have been removed',
-                            _itemsMarkedInEditor.keys.toList());
+                        _showItemRemovalInfoSnackBar(
+							scaffoldContext: _scaffoldContext,
+							message: locale.listScreenBottomSnackBarRemovedItemsInfo(
+								_itemsMarkedInEditor.length),
+                            itemIdsToRemove: _itemsMarkedInEditor.keys.toList(), 
+							locale: locale);
 
                         _itemsMarkedInEditor.clear();
                     });
@@ -212,15 +218,15 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	Iterable<TItem> get _removableItems => _items.where((w) => isRemovableItem(w));
 
     @protected
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected) {
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale) {
         final options = new List<BottomNavigationBarItem>();
         options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.delete),
-            label: 'Remove'
+            label: locale.constsRemovingItemButtonLabel
         ));
         options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.select_all),
-            label: Consts.getSelectorLabel(allSelected)
+            label: Consts.getSelectorLabel(allSelected, locale)
         ));
 
         return options;
@@ -230,13 +236,15 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Future<bool> handleNavBarOption(int tappedIndex, Iterable<TItem> markedItems,
         BuildContext scaffoldContext) async => Future.value(true);
 
-    void _showItemRemovalInfoSnackBar(BuildContext scaffoldContext, String message, 
-        List<int> itemIdsToRemove) {
+    void _showItemRemovalInfoSnackBar({ 
+		@required BuildContext scaffoldContext, @required String message, 
+		@required List<int> itemIdsToRemove, @required AppLocalizations locale 
+	}) {
         final snackBar = Scaffold.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
 			duration: new Duration(milliseconds: _removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(
-                label: 'Undo',
+                label: locale.listScreenBottomSnackBarUndoingActionLabel,
                 onPressed: () => _recoverMarkedForRemoval(itemIdsToRemove)
             )
         ));
@@ -247,11 +255,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         });
     }
 
-    Widget _buildListView(BuildContext context) {
+    Widget _buildListView(BuildContext context, AppLocalizations locale) {
         return new Flex(
 			direction: Axis.horizontal,
 			children: [
-				new Flexible(child: _buildList(), flex: 8, fit: FlexFit.tight),
+				new Flexible(child: _buildList(locale), flex: 8, fit: FlexFit.tight),
 				
 				if (_isSearchMode)
 					new Flexible(child: 
@@ -306,13 +314,15 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		_filterIndexToDelete = null;
 	}
 
-    Widget _buildList() => new Scrollbar(
-        child: new ListView.builder(
-            itemCount: _items.length,
-            itemBuilder: _isEditorMode ? _buildCheckListItem: _buildDismissibleListItem,
-            controller: _scrollController
-        )
-    );
+    Widget _buildList(AppLocalizations locale) => 
+		new Scrollbar(
+			child: new ListView.builder(
+				itemCount: _items.length,
+				itemBuilder: _isEditorMode ? _buildCheckListItem: 
+					(context, index) => _buildDismissibleListItem(context, index, locale),
+				controller: _scrollController
+			)
+		);
 
     Widget _buildCheckListItem(BuildContext buildContext, int itemIndex) {
         _scaffoldContext = buildContext;
@@ -355,7 +365,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             onTap: () => isReadonly ? null: onGoingToItem(buildContext, item)
         );
 
-    Widget _buildDismissibleListItem(BuildContext buildContext, int itemIndex) {
+    Widget _buildDismissibleListItem(
+		BuildContext buildContext, int itemIndex, AppLocalizations locale
+	) {
         final item = _items[itemIndex];
 
         bool shouldRemove = false;
@@ -366,7 +378,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             background: new Container(
                 color: Colors.deepOrange[300], 
                 child: new FlatButton.icon(
-                    label: new Text('Remove'),
+                    label: new Text(locale.constsRemovingItemButtonLabel),
                     icon: new Icon(Icons.delete), 
                     onPressed: () => shouldRemove = true
                 )
@@ -380,9 +392,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                 setState(() => _items.remove(itemToRemove));
 
 				if (await shouldContinueRemoval([itemToRemove]))
-					_showItemRemovalInfoSnackBar(buildContext, 
-						'The item "${itemToRemove.textData}" has been removed',
-						[itemToRemove.id]);
+					_showItemRemovalInfoSnackBar(
+						scaffoldContext: buildContext,
+						message: locale.listScreenBottomSnackBarDismissedItemInfo(
+							itemToRemove.textData),
+						itemIdsToRemove: [itemToRemove.id],
+						locale: locale
+					);
 				else
 					_recoverMarkedForRemoval([itemToRemove.id]);
             },
@@ -464,15 +480,15 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			_filterIndexToDelete = _curFilterIndex;
 	}
 
-    FloatingActionButton _buildNewCardButton(BuildContext buildContext) {
-        return new FloatingActionButton(
+    FloatingActionButton _buildNewItemButton(
+		BuildContext buildContext, AppLocalizations locale
+	) => new FloatingActionButton(
             onPressed: () => onGoingToItem(buildContext),
             child: new Icon(Icons.add_circle), 
             mini: true,
-            tooltip: 'New Card',
+            tooltip: locale.listScreenAddingNewItemButtonTooltip,
             backgroundColor: new Styler(buildContext).floatingActionButtonColor
         );
-    }
 
     @mustCallSuper
     onGoingToItem(BuildContext buildContext, [TItem item]) {

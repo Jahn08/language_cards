@@ -43,11 +43,12 @@
             }
         }
     },
-    "cardEditorResettingStudyProgressButtonLabel": "Сбросить {studyLevel} этап обучения",
+    "cardEditorResettingStudyProgressButtonLabel": "Сбросить {studyLevel}% прогресса",
     "@cardEditorResettingStudyProgressButtonLabel": {
         "placeholders": {
-            "studyLevel": {
-                "type": "String"
+            "studyProgress": {
+                "type": "int",
+                "format": "compactLong"
             }
         }
     },
@@ -117,8 +118,10 @@
     "@constsEmptyValueValidationError": {},
     "constsSavingItemButtonLabel": "Сохранить",
     "@constsSavingItemButtonLabel": {},
+    "constsRemovingItemButtonLabel": "Удалить",
+    "@constsRemovingItemButtonLabel": {},
 
-    "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} объектов было удалено",
+    "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} записей было удалено",
     "@listScreenBottomSnackBarRemovedItemsInfo": {
         "placeholders": {
             "removedItemsLength": {
@@ -127,11 +130,9 @@
             }
         }
     },
-    "listScreenRemovingActionLabel": "Удалить",
-    "@listScreenRemovingActionLabel": {},
     "listScreenBottomSnackBarUndoingActionLabel": "Восстановить",
     "@listScreenBottomSnackBarUndoingActionLabel": {},
-    "listScreenBottomSnackBarDismissedItemInfo": "Объект {itemText} был удалён",
+    "listScreenBottomSnackBarDismissedItemInfo": "Запись {itemText} была удалена",
     "@listScreenBottomSnackBarDismissedItemInfo": {
         "placeholders": {
             "itemText": {
@@ -143,7 +144,7 @@
     "@listScreenEditorEditingButtonLabel": {},
     "listScreenEditorDoneButtonLabel": "Завершить",
     "@listScreenEditorDoneButtonLabel": {},
-    "listScreenAddingNewItemButtonTooltip": "Новый объект",
+    "listScreenAddingNewItemButtonTooltip": "Новая запись",
     "@listScreenAddingNewItemButtonTooltip": {},
 
     "mainScreenStudyModeMenuItemLabel": "Режим обучения",
@@ -166,15 +167,19 @@
             }
         }
     }, 
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": "Удалить",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": {},
     "packListScreenTitle": "Наборы карточек",
     "@packListScreenTitle": {},
 
-    "packScreenListHeadBarAddingPackTitle": "Добавить набор",
-    "@packScreenListHeadBarAddingPackTitle": {},
-    "packScreenHeadBarChangingPackTitle": "Изменить набор",
-    "@packScreenHeadBarChangingPackTitle": {},
+    "packScreenHeadBarAddingPackTitle": "Добавить набор",
+    "@packScreenHeadBarAddingPackTitle": {},
+    "packScreenHeadBarChangingPackTitle": "Изменить набор {packName}",
+    "@packScreenHeadBarChangingPackTitle": {
+        "placeholders": {
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
     "packScreenPackNameTextFieldLabel": "Имя набора",
     "@packScreenPackNameTextFieldLabel": {},
     "packScreenTranslationFromDropdownLabel": "Перевод с",
@@ -198,7 +203,7 @@
     "packSelectorDialogTitle": "Выбрать набор карточек",
     "@packSelectorDialogTitle": {},
     
-    "singleSelectorDialogTitle": "Выбрать объект",
+    "singleSelectorDialogTitle": "Выбрать запись",
     "@singleSelectorDialogTitle": {},
 
     "speakerButtonUnaivailableTTSDialogTitle": "Озвучивание текста отсутствует",
@@ -298,6 +303,6 @@
     "@wordPartsOfSpeechPronounName": {},
     "wordPartsOfSpeechVerbName": "глагол",
     "@wordPartsOfSpeechVerbName": {},
-    "wordPartsOfSpeechDefault": "выражение",
-    "@wordPartsOfSpeechDefault": {}
+    "wordPartsOfSpeechCollocationName": "выражение",
+    "@wordPartsOfSpeechCollocationName": {}
 }

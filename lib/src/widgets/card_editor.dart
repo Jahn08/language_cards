@@ -1,6 +1,7 @@
 import 'package:http/http.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
@@ -75,25 +76,29 @@ class CardEditorState extends State<CardEditor> {
 
 	bool get _isNonePack => _pack == null || _pack.isNone;
 
-    Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) async {
-        await new ConfirmDialog.ok(
-            title: 'Choose Pack', 
-            content: 'You should choose a pack to enable automatic translation'
-        ).show(buildContext);
-    }
+    Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) 
+		async {
+			final locale = AppLocalizations.of(buildContext);
+			await new ConfirmDialog.ok(
+				title: locale.cardEditorChoosingPackDialogTitle, 
+				content: locale.cardEditorChoosingPackDialogContent
+			).show(buildContext);
+		}
 
     @override
     Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
         return new Form(
 			key: _key,
 			child: widget.card == null ? 
-				new FutureLoader(futureWord, _buildLayout): _buildLayout(widget.card)
+				new FutureLoader(futureWord, (card) => _buildLayout(card, locale)): 
+				_buildLayout(widget.card, locale)
 		);
     }
 
     bool get _isNew => widget.wordId == null;
 
-	Widget _buildLayout(StoredWord foundWord) {
+	Widget _buildLayout(StoredWord foundWord, AppLocalizations locale) {
 		if (foundWord != null && !foundWord.isNew && !_initialised) {
 			_initialised = true;
 
@@ -104,7 +109,7 @@ class CardEditorState extends State<CardEditor> {
 			_studyProgress = foundWord.studyProgress;
 		}
 
-		return _buildFormLayout();
+		return _buildFormLayout(locale);
 	}
 
     Future<StoredWord> _retrieveWord() async {
@@ -120,29 +125,31 @@ class CardEditorState extends State<CardEditor> {
         return word;
     }
 
-    Widget _buildFormLayout() {
+    Widget _buildFormLayout(AppLocalizations locale) {
         return new Column(
             children: <Widget>[
-				_isNonePack || _text == null || _text.isEmpty ? _buildCardTextField(): 
+				_isNonePack || _text == null || _text.isEmpty ? _buildCardTextField(locale): 
 					new Row(children: [
-						new Expanded(child:_buildCardTextField()), 
+						new Expanded(child:_buildCardTextField(locale)), 
 							new SpeakerButton(_pack.from, (speaker) => speaker.speak(_text), 
 							defaultSpeaker: widget._defaultSpeaker)
 						]),
                 new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 
                     _transcriptionFocusNode,
-                    'Phonetic Notation', 
+					locale.cardEditorTranscriptionTextFieldLabel,
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledDropdown(Word.parts_of_speech, label: 'Part of Speech',
+                new StyledDropdown(Word.parts_of_speech, 
+					label: locale.cardEditorPartOfSpeechDropdownLabel,
                     initialValue: this._partOfSpeech,
                     onChanged: (value) => setState(() => this._partOfSpeech = value)),
-                new StyledTextField('Translation', isRequired: true, 
+                new StyledTextField(locale.cardEditorTranslationTextFieldLabel, 
+					isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
                 new FlatButton.icon(
                     icon: new Icon(Icons.folder_open),
-                    label: new Text('Card Pack: ${_pack.name}'),
+                    label: new Text(locale.cardEditorChoosingPackButtonLabel(_pack.name)),
                     onPressed: () async {
                         if (_futurePacks == null) {
                             _futurePacks = widget._packStorage.fetch();
@@ -162,12 +169,14 @@ class CardEditorState extends State<CardEditor> {
                 if (this._studyProgress != WordStudyStage.unknown)
                     new FlatButton.icon(
                         icon: new Icon(Icons.restore),
-                        label: new Text('Reset ${this._studyProgress}% Progress'),
+                        label: new Text(
+							locale.cardEditorResettingStudyProgressButtonLabel(_studyProgress)
+						),
                         onPressed: () =>  setState(
                             () => this._studyProgress = WordStudyStage.unknown)
                     ),
                 new RaisedButton(
-                    child: new Text('Save'),
+                    child: new Text(locale.constsSavingItemButtonLabel),
                     onPressed: () async {
                         final state = _key.currentState;
                         if (!state.validate())
@@ -193,8 +202,9 @@ class CardEditorState extends State<CardEditor> {
         );
     }
 
-	Widget _buildCardTextField() =>
-		new StyledTextField('Text', isRequired: true, 
+	Widget _buildCardTextField(AppLocalizations locale) =>
+		new StyledTextField(locale.cardEditorCardTextTextFieldLabel, 
+			isRequired: true, 
 			onChanged: (value, submitted) async {
 				if (!submitted || _dictionary == null) {
 					setState(() => _text = value);

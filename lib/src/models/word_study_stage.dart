@@ -1,3 +1,5 @@
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+
 class WordStudyStage {
     static const int unknown = 0;
 
@@ -12,13 +14,17 @@ class WordStudyStage {
     static const values = [unknown, recognisedOnce, familiar, 
         wellKnown, learned];
 
-    static const String _familiarStageName = 'Familiar';
+    static String _getFamiliarStageName(AppLocalizations locale) => 
+		locale.wordStudyStageFamiliarStageName;
 
-    static const String _wellKnownStageName = 'Well Known';
+    static String _getWellKnownStageName(AppLocalizations locale) => 
+		locale.wordStudyStageWellKnownStageName;
     
-    static const String _learnedStageName = 'Learned';
+    static String _getLearnedStageName(AppLocalizations locale) =>
+		locale.wordStudyStageLearnedStageName;
     
-    static const String _newStageName = 'New';
+    static String _getNewStageName(AppLocalizations locale) =>
+		locale.wordStudyStageNewStageName;
 
     static int nextStage(int stage) {
         if (stage == learned)
@@ -28,32 +34,30 @@ class WordStudyStage {
             orElse: () => learned);
     }
 
-    static String stringify(int stage) {
+    static String stringify(int stage, AppLocalizations locale) {
         switch (stage) {
             case recognisedOnce:
             case familiar:
-                return _familiarStageName;
+                return _getFamiliarStageName(locale);
             case wellKnown:
-                return _wellKnownStageName;
+                return _getWellKnownStageName(locale);
             case learned:
-                return _learnedStageName;
+                return _getLearnedStageName(locale);
             default:
-                return _newStageName;
+                return _getNewStageName(locale);
         }
     }
 
-    static List<int> fromString(String name) {
-        switch (name) {
-            case _familiarStageName:
-                return [recognisedOnce, familiar];
-            case _wellKnownStageName:
-                return [wellKnown];
-            case _learnedStageName:
-                return [learned];
-            case _newStageName:
-                return [unknown];
-            default:
-                return null;
-        }
+    static List<int> fromString(String name, AppLocalizations locale) {
+        if (name == _getFamiliarStageName(locale))
+			return [recognisedOnce, familiar];
+        else if (name == _getWellKnownStageName(locale))
+			return [wellKnown];
+        else if (name == _getLearnedStageName(locale))
+			return [learned];
+        else if (name == _getNewStageName(locale))
+			return [unknown];
+				
+		return null;
     }
 }

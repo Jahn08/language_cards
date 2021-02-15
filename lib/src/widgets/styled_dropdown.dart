@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import './styled_input_decoration.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'styled_input_decoration.dart';
 
 class StyledDropdown extends StatelessWidget {
     final String label;
@@ -18,6 +19,7 @@ class StyledDropdown extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
         return new DropdownButtonFormField<String>(
             items: options.map((pos) => 
                 new DropdownMenuItem(child: new Text(pos), value: pos)).toList(), 
@@ -26,7 +28,7 @@ class StyledDropdown extends StatelessWidget {
             value: initialValue,
             validator: (text) {
                 if (isRequired && (text == null || text.isEmpty))
-                    return 'The field cannot be empty';
+                    return locale.constsEmptyValueValidationError;
 
                 return onValidate?.call(text);
             } 

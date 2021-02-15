@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-import './outcome_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'outcome_dialog.dart';
 
 abstract class CancellableDialog<TResult> extends OutcomeDialog<TResult> {
 
-    static const String cancellationLabel = 'Cancel';
-
     @protected
-    Widget buildCancelBtn(BuildContext context, [TResult result]) => new RaisedButton(
-        onPressed: () => returnResult(context, result),
-        child: new Text(cancellationLabel),
-        color: Colors.deepOrange[300]
-    );
+    Widget buildCancelBtn(BuildContext context, [TResult result]) {
+		return new RaisedButton(
+			onPressed: () => returnResult(context, result),
+			child: new Text(
+				AppLocalizations.of(context).cancellableDialogCancellationButtonLabel
+			),
+			color: Colors.deepOrange[300]
+		);
+	} 
 }

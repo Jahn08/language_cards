@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'single_selector_dialog.dart';
 import '../models/word.dart';
-import './single_selector_dialog.dart';
 
 class WordSelectorDialog extends SingleSelectorDialog<Word> {
     WordSelectorDialog(BuildContext context):
-        super(context, 'Choose a word definition');
+        super(context, AppLocalizations.of(context).wordSelectorDialogTitle);
    
     @override
     Widget getItemSubtitle(Word item) => new Text(item.partOfSpeech);

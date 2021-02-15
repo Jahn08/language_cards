@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/base_storage.dart';
-import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/models/stored_entity.dart';
 import 'package:language_cards/src/screens/list_screen.dart';
+import 'dialog_tester.dart';
 import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/localizator.dart';
 import '../utilities/widget_assistant.dart';
-import 'dialog_tester.dart';
 
 class ListScreenTester<TEntity extends StoredEntity> {
 
@@ -222,7 +222,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	Future<void> _confirmRemovalIfNecessary(WidgetAssistant assistant, { 
 		bool shouldCancel = false, bool shouldAccept = false, bool shouldNotWarn = false 
 	}) async {
-		final btnLabel = shouldCancel ? CancellableDialog.cancellationLabel: 'Remove';
+		final btnLabel = shouldCancel ? 
+			Localizator.defaultLocalization.cancellableDialogCancellationButtonLabel: 'Remove';
 		final dialogBtnFinder = DialogTester.findConfirmationDialog(btnLabel);
 
 		if (shouldNotWarn)

@@ -17,6 +17,7 @@ import '../testers/card_editor_tester.dart';
 import '../testers/dialog_tester.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/localizator.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -336,7 +337,8 @@ void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
     expect(cardOtherTexts.where((w) => w.data.contains(expectedCard.transcription)).length, 1, 
 		reason: 'There should be one widget with transcription: ${expectedCard.transcription}');
     
-    expect(find.text(WordStudyStage.stringify(expectedCard.studyProgress)), findsNWidgets(2));
+    expect(find.text(WordStudyStage.stringify(expectedCard.studyProgress, 
+		Localizator.defaultLocalization)), findsNWidgets(2));
 
     _assurePackNameRendering(packs, expectedCard.packId);
 
@@ -484,7 +486,9 @@ void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,
     expect(find.descendant(of: cardFinder, 
         matching: find.text(expectedCard.translation)), findsOneWidget);
 
-    expect(find.text(WordStudyStage.stringify(expectedCard.studyProgress)), findsNWidgets(2));
+    expect(find.text(
+		WordStudyStage.stringify(expectedCard.studyProgress, Localizator.defaultLocalization)), 
+		findsNWidgets(2));
 
     _assurePackNameRendering(packs, expectedCard.packId);
 

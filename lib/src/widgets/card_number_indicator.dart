@@ -1,12 +1,13 @@
 import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 class CardNumberIndicator extends StatelessWidget {
 
-    final String data;
+    final int number;
 
-    CardNumberIndicator(int number):
-        data = 'Cards: $number';
+    CardNumberIndicator(this.number);
 
     @override
-    Widget build(BuildContext context) => new Text(data);
+    Widget build(BuildContext context) => 
+		new Text(AppLocalizations.of(context).cardNumberIndicatorContent(number));
 }

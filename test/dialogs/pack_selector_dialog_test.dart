@@ -20,8 +20,7 @@ void main() {
 
                 final optionTile = option.child as ListTile;
                 expect((optionTile.title as Text).data, pack.name);
-                expect((optionTile.subtitle as CardNumberIndicator).data.contains(
-                    pack.cardsNumber.toString()), true);
+                expect((optionTile.subtitle as CardNumberIndicator).number, pack.cardsNumber);
                 expect(optionTile.trailing != null, pack.id == chosenPack.id);
             }, ListTile);
     });

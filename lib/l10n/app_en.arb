@@ -43,11 +43,12 @@
             }
         }
     },
-    "cardEditorResettingStudyProgressButtonLabel": "Reset {studyLevel} Study Level",
+    "cardEditorResettingStudyProgressButtonLabel": "Reset {studyProgress}% Progress",
     "@cardEditorResettingStudyProgressButtonLabel": {
         "placeholders": {
-            "studyLevel": {
-                "type": "String"
+            "studyProgress": {
+                "type": "int",
+                "format": "compactLong"
             }
         }
     },
@@ -117,6 +118,8 @@
     "@constsEmptyValueValidationError": {},
     "constsSavingItemButtonLabel": "Save",
     "@constsSavingItemButtonLabel": {},
+    "constsRemovingItemButtonLabel": "Remove",
+    "@constsRemovingItemButtonLabel": {},
 
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} items have been removed",
     "@listScreenBottomSnackBarRemovedItemsInfo": {
@@ -127,8 +130,6 @@
             }
         }
     },
-    "listScreenRemovingActionLabel": "Remove",
-    "@listScreenRemovingActionLabel": {},
     "listScreenBottomSnackBarUndoingActionLabel": "Undo",
     "@listScreenBottomSnackBarUndoingActionLabel": {},
     "listScreenBottomSnackBarDismissedItemInfo": "The item {itemText} has been removed",
@@ -166,15 +167,19 @@
             }
         }
     }, 
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": "Remove",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationButtonLabel": {},
     "packListScreenTitle": "Card Packs",
     "@packListScreenTitle": {},
 
-    "packScreenListHeadBarAddingPackTitle": "Add Pack",
-    "@packScreenListHeadBarAddingPackTitle": {},
-    "packScreenHeadBarChangingPackTitle": "Change Pack",
-    "@packScreenHeadBarChangingPackTitle": {},
+    "packScreenHeadBarAddingPackTitle": "Add Pack",
+    "@packScreenHeadBarAddingPackTitle": {},
+    "packScreenHeadBarChangingPackTitle": "Change Pack {packName}",
+    "@packScreenHeadBarChangingPackTitle": {
+        "placeholders": {
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
     "packScreenPackNameTextFieldLabel": "Pack Name",
     "@packScreenPackNameTextFieldLabel": {},
     "packScreenTranslationFromDropdownLabel": "Translate from",
@@ -298,6 +303,6 @@
     "@wordPartsOfSpeechPronounName": {},
     "wordPartsOfSpeechVerbName": "verb",
     "@wordPartsOfSpeechVerbName": {},
-    "wordPartsOfSpeechDefault": "collocation",
-    "@wordPartsOfSpeechDefault": {}
+    "wordPartsOfSpeechCollocationName": "collocation",
+    "@wordPartsOfSpeechCollocationName": {}
 }

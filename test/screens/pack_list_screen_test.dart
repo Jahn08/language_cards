@@ -6,11 +6,11 @@ import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
-import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/word_storage_mock.dart';
 import '../testers/list_screen_tester.dart';
+import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -274,9 +274,12 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
         matching: find.byType(ListTile));
     expect(tileWithCardsFinder, findsOneWidget);
     
-    expect(find.descendant(of: tileWithCardsFinder, 
-        matching: find.text(new CardNumberIndicator(expectedNumber).data)), 
-        findsOneWidget);
+    expect(find.descendant(
+		of: tileWithCardsFinder, 
+        matching: find.text(
+			Localizator.defaultLocalization.cardNumberIndicatorContent(expectedNumber)
+		)
+	), findsOneWidget);
 
     await tester.runAsync(() async {
         final actualPackWithCards = await storage.find(pack.id);

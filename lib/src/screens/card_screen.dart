@@ -1,5 +1,6 @@
 import 'package:http/http.dart';
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart' hide Router;
 import '../router.dart';
 import '../data/pack_storage.dart';
@@ -29,7 +30,12 @@ class CardScreen extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-        return new BarScaffold('${this.wordId == null ? 'Add': 'Change'} Card',
+		final locale = AppLocalizations.of(context);
+		final title = this.wordId == null ? 
+			locale.cardScreenHeadBarAddingCardTitle: locale.cardScreenHeadBarChangingCardTitle;
+
+        return new BarScaffold(
+			title,
             body: new CardEditor(apiKey, wordStorage: wordStorage, packStorage: packStorage,
 				client: client, defaultSpeaker: defaultSpeaker,
 				pack: pack, wordId: wordId, 

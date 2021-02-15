@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart' hide Router;
-import 'package:language_cards/src/models/word_study_stage.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
-import '../router.dart';
 import '../data/study_storage.dart';
+import '../models/word_study_stage.dart';
+import '../router.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/card_number_indicator.dart';
 import '../widgets/loader.dart';
@@ -20,21 +21,23 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     @override
     void initState() {
         super.initState();
-
-        _futurePacks = widget.storage.fetchStudyPacks();
     }
 
     @override
     Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
+		if (_futurePacks == null)
+        	_futurePacks = widget.storage.fetchStudyPacks(locale);
+
         return new FutureLoader<List<StudyPack>>(_futurePacks, 
-            (stPacks) => new BarScaffold('Choose What to Study',
-                barActions: <Widget>[_buildSelectorButton(stPacks)],
+            (stPacks) => new BarScaffold(locale.studyPreparerScreenTitle,
+                barActions: <Widget>[_buildSelectorButton(stPacks, locale)],
                 onNavGoingBack: () => Router.goHome(context),
-                body: _buildLayout(stPacks)
+                body: _buildLayout(stPacks, locale)
             ));
     }
 
-    Widget _buildSelectorButton(List<StudyPack> stPacks) {
+    Widget _buildSelectorButton(List<StudyPack> stPacks, AppLocalizations locale) {
         final allSelected = _excludedPacks.isEmpty;
         return new FlatButton(
             onPressed: () {
@@ -45,26 +48,27 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                         _excludedPacks.addAll(stPacks.map((p) => p.pack.id));
                 });
             },
-            child: new Text(Consts.getSelectorLabel(allSelected))
+            child: new Text(Consts.getSelectorLabel(allSelected, locale))
         );
     }
 
-    Widget _buildLayout(List<StudyPack> stPacks) => 
+    Widget _buildLayout(List<StudyPack> stPacks, AppLocalizations locale) => 
         new Column(
             children: [
-                new Flexible(child: _buildStudyLevelList(stPacks), flex: 2, fit: FlexFit.tight),
+                new Flexible(child: _buildStudyLevelList(stPacks, locale), 
+					flex: 2, fit: FlexFit.tight),
                 new Divider(thickness: 2),
                 new Flexible(child: _buildList(stPacks), flex: 3)
             ]
         );
 
-    Widget _buildStudyLevelList(List<StudyPack> stPacks) {
+    Widget _buildStudyLevelList(List<StudyPack> stPacks, AppLocalizations locale) {
         final levels = new Map<String, int>.fromIterable(WordStudyStage.values,
-            key: (k) => WordStudyStage.stringify(k), value: (_) => 0);
+            key: (k) => WordStudyStage.stringify(k, locale), value: (_) => 0);
         final includedPacks = stPacks.where((p) => !_excludedPacks.contains(p.pack.id)).toList();
         includedPacks.expand((e) => e.cardsByStage.entries)
             .forEach((en) => levels[en.key] += en.value);
-        levels[StudyPreparerScreen.allWordsCategoryName] = 
+        levels[locale.studyPreparerScreenAllCardsCategoryName] = 
             levels.values.reduce((res, el) => res + el);
 
         return new ListView(
@@ -74,7 +78,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                     trailing: new Text(lvl.value.toString()), 
                     onTap: lvl.value < 2 ? null: () => Router.goToStudyMode(context, 
                         packs: includedPacks.map((p) => p.pack).toList(), 
-                        studyStageIds: WordStudyStage.fromString(lvl.key)),
+                        studyStageIds: WordStudyStage.fromString(lvl.key, locale)),
                     dense: true, 
                     visualDensity: VisualDensity.comfortable
                 )).toList()
@@ -109,8 +113,6 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 }
 
 class StudyPreparerScreen extends StatefulWidget {
-
-    static const String allWordsCategoryName = 'All';
 
     final StudyStorage storage;
 

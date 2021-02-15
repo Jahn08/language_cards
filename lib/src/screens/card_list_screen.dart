@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
@@ -45,8 +46,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     String get title {
+		final locale = AppLocalizations.of(context);
         final packName = widget.pack?.name;        
-        return 'Cards' + ((packName?.isEmpty ?? true) ? '': ' of Pack "$packName"');
+        return packName?.isEmpty ?? true ? locale.cardListScreenWithoutPackTitle: 
+			locale.cardListScreenWithPackTitle(packName);
     }
 
     @override
@@ -68,10 +71,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected) {
-        final options = super.getNavBarOptions(allSelected);
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale) {
+        final options = super.getNavBarOptions(allSelected, locale);
         options.add(new BottomNavigationBarItem(
-            label: 'Reset Progress',
+            label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
             icon: new Icon(Icons.restore)
         ));
 
@@ -81,13 +84,16 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     @override
     Future<bool> handleNavBarOption(int tappedIndex, Iterable<StoredWord> markedItems,
         BuildContext scaffoldContext) async { 
+		final locale = AppLocalizations.of(scaffoldContext);
         final itemsToReset = markedItems.where(
             (card) => card.studyProgress != WordStudyStage.unknown).toList();
         if (itemsToReset.length == 0 || !(await new ConfirmDialog(
-            title: 'Confirm Resetting Study Progress', 
-            content: 'The study progress of the ${itemsToReset.length}' +
-                ' marked cards will be reset. Continue?',
-            confirmationLabel: 'Yes').show(scaffoldContext)))
+				title: locale.cardListScreenResettingProgressDialogTitle,
+				content: 
+					locale.cardListScreenResettingProgressDialogContent(itemsToReset.length),
+				confirmationLabel: 
+					locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
+			.show(scaffoldContext)))
             return false;
 
         setState(() {
@@ -96,8 +102,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
         });
 
         Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(
-            content: new Text('The study progress of the ${itemsToReset.length}' + 
-                ' cards has been reset')));
+            content: new Text(
+				locale.cardListScreenBottomSnackBarResettingProgressInfo(itemsToReset.length)
+			)
+		));
   
         return true;
     }

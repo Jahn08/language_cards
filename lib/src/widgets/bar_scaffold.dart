@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import './asset_icon.dart';
 import './icon_option.dart';
 import '../blocs/settings_bloc.dart';
@@ -19,38 +20,41 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 
     @override
     Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
         final bloc = SettingsBlocProvider.of(context);
         return _params == null ? new FutureLoader<UserParams>(bloc.userParams, 
-            (params) => _buildControlsFromParams(bloc, params)): _buildControls(bloc);
+            (params) => _buildControlsFromParams(bloc, params, locale)): 
+				_buildControls(bloc, locale);
     }
 
-    Widget _buildControlsFromParams(SettingsBloc bloc, UserParams params) {
+    Widget _buildControlsFromParams(SettingsBloc bloc, UserParams params, 
+		AppLocalizations locale) {
         _params = params;
-        return _buildControls(bloc);
+        return _buildControls(bloc, locale);
     }
 
-    Widget _buildControls(SettingsBloc bloc) {
-        final children = <Widget>[_buildHeader()];
+    Widget _buildControls(SettingsBloc bloc, AppLocalizations locale) {
+        final children = <Widget>[_buildHeader(locale)];
         
         if (_originalParams == null)
             _originalParams = _params.toJson();
         
-        children.addAll(_buildLanguageSection());
-        children.addAll(_buildAppearanceSection());
-        children.addAll(_buildStudySection());
-        children.addAll(_buildContactsSection());
-        children.addAll(_buildHelpSection());
+        children.addAll(_buildLanguageSection(locale));
+        children.addAll(_buildAppearanceSection(locale));
+        children.addAll(_buildStudySection(locale));
+        children.addAll(_buildContactsSection(locale));
+        children.addAll(_buildHelpSection(locale));
 
-        children.add(_buildApplyButton(bloc));
+        children.add(_buildApplyButton(bloc, locale));
 
         return new Drawer(child: new ListView(children: children));
     }
 
-    Widget _buildHeader() {
+    Widget _buildHeader(AppLocalizations locale) {
         return new Container(
             child:new DrawerHeader(
                 child: new Text(
-                    'Settings',
+					locale.barScaffoldSettingsPanelTitle,
                     style: new TextStyle(
 						fontSize: _bigFontSize,
 						fontWeight: FontWeight.w800
@@ -62,9 +66,9 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         );
     }
 
-    List<Widget> _buildLanguageSection() {
+    List<Widget> _buildLanguageSection(AppLocalizations locale) {
         return <Widget>[
-            _buildSubsectionHeader('Language'),
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelLanguageSectionLabel),
             new Row(children: <Widget>[
                 _buildLanguageOption(Language.english, _params),
                 _buildLanguageOption(Language.russian, _params)
@@ -98,9 +102,9 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         );
     }
 
-    List<Widget> _buildAppearanceSection() {
+    List<Widget> _buildAppearanceSection(AppLocalizations locale) {
         return <Widget>[
-            _buildSubsectionHeader('Theme'),
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelThemeSectionLabel),
             new Row(children: <Widget>[
                 _buildAppearanceOption(AppTheme.dark),
                 _buildAppearanceOption(AppTheme.light)
@@ -129,16 +133,16 @@ class _SettingsPanelState extends State<_SettingsPanel> {
         );
     }
 
-	List<Widget> _buildStudySection() {
+	List<Widget> _buildStudySection(AppLocalizations locale) {
 		final directionDic = Enum.mapStringValues(StudyDirection.values);
 		final sideDic = Enum.mapStringValues(CardSide.values);
 
 		return <Widget>[
-            _buildSubsectionHeader('Study'),
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelStudySectionLabel),
             new Row(children: <Widget>[
 				_wrapWithExpandableContainer(
 					new StyledDropdown(directionDic.keys, 
-						label: 'Card Sorting',
+						label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
 						initialValue: Enum.stringifyValue(_params.studyParams.direction),
 						onChanged: (newValue) {
 							setState(() => _params.studyParams.direction = directionDic[newValue]);
@@ -149,7 +153,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 			new Row(children: <Widget>[
 				_wrapWithExpandableContainer(
 					new StyledDropdown(sideDic.keys, 
-						label: 'Card Side',
+						label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
 						initialValue: Enum.stringifyValue(_params.studyParams.cardSide),
 						onChanged: (newValue) {
 							setState(() => _params.studyParams.cardSide = sideDic[newValue]);
@@ -168,27 +172,27 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 			)
 		);
 
-    List<Widget> _buildContactsSection() {
+    List<Widget> _buildContactsSection(AppLocalizations locale) {
         return <Widget>[
-            _buildSubsectionHeader('Contacts')
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelContactsSectionLabel)
         ];
     }
 
-    List<Widget> _buildHelpSection() {
+    List<Widget> _buildHelpSection(AppLocalizations locale) {
         return <Widget>[
-            _buildSubsectionHeader('Help')
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelHelpSectionLabel)
         ];
     }
 
-    Widget _buildApplyButton(SettingsBloc bloc) {
+    Widget _buildApplyButton(SettingsBloc bloc, AppLocalizations locale) {
         return new Column(
             children: [
                 new RaisedButton(
-                    child: new Text('Reset'),
+                    child: new Text(locale.barScaffoldSettingsPanelResettingButtonLabel),
                     onPressed: () => setState(() => _params = new UserParams())
                 ),
                 new RaisedButton(
-                    child: new Text('Apply'),
+                    child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
                     onPressed: _originalParams == _params.toJson() ? null: () async {
                         await bloc.save(_params);
                         Navigator.pop(context);

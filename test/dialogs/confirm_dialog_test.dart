@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/dialog_opener.dart';
+import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -16,7 +16,7 @@ void main() {
             await _testDialogRendering(tester, (title, content) => 
                 new ConfirmDialog(title: title, content: content, 
 					confirmationLabel: expectedTitle), 
-					{ true: expectedTitle, false: CancellableDialog.cancellationLabel });
+					{ true: expectedTitle, false: _cancellationLabel });
         });
 
     testWidgets('Renders a dialog with the only an OK button returning the true value', 
@@ -24,9 +24,9 @@ void main() {
 
             await _testDialogRendering(tester, (title, content) => 
                 new ConfirmDialog.ok(title: title, content: content),
-                { true: ConfirmDialog.okLabel });
+                { true: Localizator.defaultLocalization.confirmDialogOkButtonLabel });
 
-		    _assertTextVisibility(CancellableDialog.cancellationLabel, isVisible: false);
+		    _assertTextVisibility(_cancellationLabel, isVisible: false);
         });
 }
 
@@ -67,3 +67,6 @@ void _assertDialogVisibility(bool isVisible) =>
 
 void _assertTextVisibility(String text, { bool isVisible }) => 
 	AssuredFinder.findOne(label: text, shouldFind: isVisible);
+
+String get _cancellationLabel => 
+	Localizator.defaultLocalization.cancellableDialogCancellationButtonLabel;

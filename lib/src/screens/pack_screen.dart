@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
@@ -30,23 +31,22 @@ class PackScreenState extends State<PackScreen> {
 
     @override
     Widget build(BuildContext context) {
-        final packName = _isNew ? _name: widget.packName;
-        final packNameFormatted = (packName?.isEmpty ?? true) ? '': ' "$packName"';
-
+		final locale = AppLocalizations.of(context);
         return new BarScaffold(
-            (_isNew ? 'Add Pack': 'Change Pack') + packNameFormatted,
+            (_isNew ? locale.packScreenHeadBarAddingPackTitle:
+				locale.packScreenHeadBarChangingPackTitle(_isNew ? _name: widget.packName)),
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context),
             body: new Form(
                 key: _key,
-                child: _buildFutureFormLayout(widget.packId)
+                child: _buildFutureFormLayout(widget.packId, locale)
             )
         );
     }
 
     bool get _isNew => widget.packId == null;
 
-    Widget _buildFutureFormLayout(int packId) {
+    Widget _buildFutureFormLayout(int packId, AppLocalizations locale) {
         final futurePack = _isNew || _initialised ? 
             Future.value(new StoredPack('')): _storage.find(widget.packId);
         return new FutureBuilder(
@@ -67,35 +67,35 @@ class PackScreenState extends State<PackScreen> {
                     _cardsNumber = foundPack.cardsNumber;
                 }
 
-                return _buildFormLayout();
+                return _buildFormLayout(locale);
             }
         );
     }
 
-    Widget _buildFormLayout() {
+    Widget _buildFormLayout(AppLocalizations locale) {
         final children = <Widget>[
-            new StyledTextField('Pack Name', 
+            new StyledTextField(locale.packScreenPackNameTextFieldLabel,
                 isRequired: true, 
                 onChanged: (value, _) => setState(() => _name = value), 
                 initialValue: this._name),
             new StyledDropdown(_languages.keys, 
                 isRequired: true,
-                label: 'Translate From',
+                label: locale.packScreenTranslationFromDropdownLabel,
                 initialValue: this._fromLang,
                 onChanged: (value) => setState(() => this._fromLang = value),
-                onValidate: _validateLanguages),
+                onValidate: (_) => _validateLanguages(locale)),
             new StyledDropdown(_languages.keys, 
                 isRequired: true,
-                label: 'Translate To',
+                label: locale.packScreenTranslationToDropdownLabel,
                 initialValue: this._toLang,
                 onChanged: (value) => setState(() => this._toLang = value),
-                onValidate: _validateLanguages)
+                onValidate: (_) => _validateLanguages(locale))
         ];
 
         if (!_isNew && _foundPack != null)
             children.add(new FlatButton.icon(
                 icon: new Icon(Consts.cardListIcon),
-                label: new Text('Show $_cardsNumber Cards'),
+                label: new Text(locale.packScreenShowingCardsButtonLabel(_cardsNumber)),
                 onPressed: () => Router.goToCardList(context, pack: _foundPack)
             ));
         
@@ -103,8 +103,9 @@ class PackScreenState extends State<PackScreen> {
             _foundPack.name != _name || _foundPack.to != _languages[_toLang] ||
             _foundPack.from != _languages[_fromLang]));
         children.addAll([
-            _buildSaveBtn('Save', (_) => Router.goToPackList(context), isDisabled: !isStateDirty),
-            _buildSaveBtn('Save and Add Cards', 
+            _buildSaveBtn(locale.constsSavingItemButtonLabel, 
+				(_) => Router.goToPackList(context), isDisabled: !isStateDirty),
+            _buildSaveBtn(locale.packScreenSavingAndAddingCardsButtonLabel, 
                 (savedPack) => Router.goToCardList(context, pack: savedPack), 
                 isDisabled: !isStateDirty)
         ]);
@@ -112,8 +113,8 @@ class PackScreenState extends State<PackScreen> {
         return new Column(children: children);
     }
 
-    String _validateLanguages(_) => _fromLang == _toLang ? 
-        'Translation languages must differ': null;
+    String _validateLanguages(AppLocalizations locale) => _fromLang == _toLang ? 
+        locale.packScreenSameTranslationDirectionsValidationError: null;
 
     StoredPack _buildPack() => new StoredPack(this._name, 
         id: widget.packId,

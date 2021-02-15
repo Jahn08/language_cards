@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../router.dart';
 import '../widgets/bar_scaffold.dart';
@@ -15,15 +16,25 @@ class MainScreen extends StatelessWidget {
     }
 
     Widget _buildMenu(BuildContext context) {
+		final locale = AppLocalizations.of(context);
         return new Column(
             children: [
                 _buildRow(flex: 2),
-                _buildRow(child: _buildMenuItem('Study Mode', Icons.school, 
-                  () => Router.goToStudyPreparation(context))),
-                _buildRow(child: _buildMenuItem('Word Packs', Icons.library_books, 
-                  () => Router.goToPackList(context))),
-                _buildRow(child: _buildMenuItem('Word Cards', Consts.cardListIcon, 
-                  () => Router.goToCardList(context)))
+                _buildRow(child: _buildMenuItem(
+					locale.mainScreenStudyModeMenuItemLabel,
+					Icons.school, 
+					() => Router.goToStudyPreparation(context)
+				)),
+                _buildRow(child: _buildMenuItem(
+					locale.mainScreenWordPacksMenuItemLabel,
+					Icons.library_books, 
+                  	() => Router.goToPackList(context)
+				)),
+                _buildRow(child: _buildMenuItem(
+					locale.mainScreenWordCardsMenuItemLabel,
+					Consts.cardListIcon, 
+                  	() => Router.goToCardList(context)
+				))
             ]
         );
     }

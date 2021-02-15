@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import './selector_dialog.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'selector_dialog.dart';
 import '../utilities/styler.dart';
 
 class _CheckboxListState extends State<_CheckboxList> {
@@ -72,23 +73,25 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
 
     @override
     Future<String> show(List<String> items) {
+		final locale = AppLocalizations.of(_context);
         items = items ?? <String>[];
         return items.length > 0 ? showDialog(
             context: _context,
             builder: (dialogContext) {
-                return new _CheckboxList('Select translations', items, 
+                return new _CheckboxList(
+					locale.translationSelectorDialogTitle, items, 
                     onChange: (chosenItems) => _chosenTranslations = chosenItems,
                     buttons: <Widget>[
                         buildCancelBtn(_context), 
-                        _buildDoneBtn(_context)
+                        _buildDoneBtn(locale)
                     ]
                 );
             }
         ) : Future.value(items.firstWhere((_) => true, orElse: () => null));
     }
 
-    Widget _buildDoneBtn(BuildContext context) => new RaisedButton(
-        onPressed: () => returnResult(context, _chosenTranslations?.join('; ')),
-        child: new Text('Done')
+    Widget _buildDoneBtn(AppLocalizations locale) => new RaisedButton(
+        onPressed: () => returnResult(_context, _chosenTranslations?.join('; ')),
+        child: new Text(locale.translationSelectorDoneButtonLabel)
     );
 }

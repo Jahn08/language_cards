@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'single_selector_dialog.dart';
 import '../models/stored_pack.dart';
-import './single_selector_dialog.dart';
 import '../widgets/card_number_indicator.dart';
 
 class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
     int chosenPackId;
 
     PackSelectorDialog(BuildContext context, this.chosenPackId): 
-        super(context, 'Choose a card pack');
+        super(context, AppLocalizations.of(context).packSelectorDialogTitle);
 
     @override
     Widget getItemSubtitle(StoredPack item) => 

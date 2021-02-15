@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/dialogs/cancellable_dialog.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -10,6 +9,7 @@ import '../mocks/word_storage_mock.dart';
 import '../testers/dialog_tester.dart';
 import '../testers/list_screen_tester.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/localizator.dart';
 import '../utilities/widget_assistant.dart';
 
 void main() {
@@ -164,7 +164,8 @@ Future<void> _operateResettingProgressDialog(WidgetAssistant assistant,
         await assistant.tapWidget(restoreBtnFinder);
 
         final actionBtnFinder = _findBtnByLabel(
-			shouldConfirm ? 'Yes': CancellableDialog.cancellationLabel, 
+			shouldConfirm ? 
+				'Yes': Localizator.defaultLocalization.cancellableDialogCancellationButtonLabel,
             shouldFind: !assureNoDialog
 		);
         if (!assureNoDialog)

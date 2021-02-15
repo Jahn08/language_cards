@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import './styled_input_decoration.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'styled_input_decoration.dart';
 
 class _StyledTextFieldState extends State<StyledTextField> {
     FocusNode _focusNode;
@@ -35,6 +36,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
     
     @override
     Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
         String tempValue = widget.initialValue;
         return new TextFormField(
             focusNode: _focusNode,
@@ -54,7 +56,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
             onSaved: _emitOnChanged,
             validator: (String text) {
                 if (widget.isRequired && (text == null || text.isEmpty))
-                    return 'The field cannot be empty';
+                    return locale.constsEmptyValueValidationError;
 
                 return null;
             },

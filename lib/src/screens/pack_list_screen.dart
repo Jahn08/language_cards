@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import './list_screen.dart';
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
@@ -50,18 +51,21 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		if (filledPackNames.isEmpty)
 			return true;
 
+		final locale = AppLocalizations.of(context);
 		final jointNames = filledPackNames.join(', ');
+		final content = locale.packListScreenRemovingNonEmptyPacksDialogConfirmationContent(
+			jointNames, StoredPack.noneName);
 		final outcome = await new ConfirmDialog(
-			title: 'Removing Packs with Cards', 
-			content: 'All the cards from $jointNames will be moved to the ${StoredPack.noneName} pack. Continue?', 
-			confirmationLabel: 'Remove'
+			title: locale.packListScreenRemovingNonEmptyPacksDialogConfirmationTitle, 
+			content: content, 
+			confirmationLabel: locale.constsRemovingItemButtonLabel
 		).show(context);
 		
 		return outcome != null && outcome;
 	}
 
     @override
-    String get title => 'Card Packs';
+    String get title => AppLocalizations.of(context).packListScreenTitle;
 
     @override
     bool get canGoBack => true;
