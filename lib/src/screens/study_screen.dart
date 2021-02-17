@@ -41,8 +41,9 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 		this.client, this.defaultSpeaker }): 
 		super();
 
-	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) =>
-        showDialog(
+	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) {
+		final locale = AppLocalizations.of(context);
+		return showDialog(
             context: context, 
             builder: (buildContext) => new SimpleDialog(
 				children: [
@@ -55,9 +56,10 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 						}), 
 					new Center(child: buildCancelBtn(context))
 				],
-                title: new Text('Change Card'),
+                title: new Text(locale.studyScreenEditingCardDialogTitle)
             )
         );
+	}
 }
 
 class _StudyScreenState extends State<StudyScreen> {
