@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_screen.dart';
-import 'package:language_cards/src/utilities/enum.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
@@ -42,9 +42,10 @@ void main() {
 
 		await _pumpScreen(tester, new PackStorageMock());
 		
+		final locale = Localizator.defaultLocalization;
 		final studyParams = expectedParams.studyParams;
-		expect(_findButtonEndingWithText(Enum.stringifyValue(studyParams.direction)), findsOneWidget);
-		expect(_findButtonEndingWithText(Enum.stringifyValue(studyParams.cardSide)), findsOneWidget);
+		expect(_findButtonEndingWithText(studyParams.direction.present(locale)), findsOneWidget);
+		expect(_findButtonEndingWithText(studyParams.cardSide.present(locale)), findsOneWidget);
 	});
 
     testWidgets('Renders a name for a chosen sorting mode when clicking on the button', 
@@ -364,12 +365,13 @@ void _assureCardsNumberRendering(WidgetTester tester, int cardsNumber, int curCa
         .singleWhere((t) => t.data.contains('${curCardIndex + 1} of $cardsNumber'));
 }
 
-Future<void> _testChangingStudyModes(WidgetTester tester, List<dynamic> modeValues) async {
+Future<void> _testChangingStudyModes(WidgetTester tester, List<PresentableEnum> modeValues) async {
     final assistant = new WidgetAssistant(tester);
-
+	
     int i = 0;
     do {
-        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(modeValues[i]));
+        await _pressButtonEndingWithText(assistant, 
+			modeValues[i].present(Localizator.defaultLocalization));
     } while (++i < modeValues.length);
 }
 
@@ -408,7 +410,7 @@ Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) asy
 
     final assistant = new WidgetAssistant(tester);
     await _pressButtonEndingWithText(assistant, 
-        Enum.stringifyValue(StudyDirection.forward));
+        StudyDirection.forward.present(Localizator.defaultLocalization));
 
     await _goToNextCard(assistant, shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
@@ -426,7 +428,8 @@ Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async
     final assistant = new WidgetAssistant(tester);
 
     for (final sortMode in [StudyDirection.forward, StudyDirection.backward])
-        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(sortMode));
+        await _pressButtonEndingWithText(assistant, 
+			sortMode.present(Localizator.defaultLocalization));
 
     final firstCard = _getShownCard(tester, cards);
 
@@ -522,7 +525,8 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
         await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
     final assistant = new WidgetAssistant(tester);
-    await _pressButtonEndingWithText(assistant, Enum.stringifyValue(CardSide.front));
+    await _pressButtonEndingWithText(assistant, 
+		CardSide.front.present(Localizator.defaultLocalization));
 	
     const firstIndex = 0;
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
@@ -549,7 +553,8 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
     final assistant = new WidgetAssistant(tester);
 
     for (final sideMode in [CardSide.front, CardSide.back])
-        await _pressButtonEndingWithText(assistant, Enum.stringifyValue(sideMode));
+        await _pressButtonEndingWithText(assistant, 
+			sideMode.present(Localizator.defaultLocalization));
 
     int curIndex = 0;
     do {

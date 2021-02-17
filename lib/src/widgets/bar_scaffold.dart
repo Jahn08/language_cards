@@ -4,8 +4,8 @@ import './asset_icon.dart';
 import './icon_option.dart';
 import '../blocs/settings_bloc.dart';
 import '../models/language.dart';
+import '../models/presentable_enum.dart';
 import '../models/user_params.dart';
-import '../utilities/enum.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
 import '../widgets/styled_dropdown.dart';
@@ -134,8 +134,9 @@ class _SettingsPanelState extends State<_SettingsPanel> {
     }
 
 	List<Widget> _buildStudySection(AppLocalizations locale) {
-		final directionDic = Enum.mapStringValues(StudyDirection.values);
-		final sideDic = Enum.mapStringValues(CardSide.values);
+		final directionDic = PresentableEnum.mapStringValues(
+			StudyDirection.values, locale);
+		final sideDic = PresentableEnum.mapStringValues(CardSide.values, locale);
 
 		return <Widget>[
             _buildSubsectionHeader(locale.barScaffoldSettingsPanelStudySectionLabel),
@@ -143,7 +144,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 				_wrapWithExpandableContainer(
 					new StyledDropdown(directionDic.keys, 
 						label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
-						initialValue: Enum.stringifyValue(_params.studyParams.direction),
+						initialValue: _params.studyParams.direction.present(locale),
 						onChanged: (newValue) {
 							setState(() => _params.studyParams.direction = directionDic[newValue]);
 						}
@@ -154,7 +155,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 				_wrapWithExpandableContainer(
 					new StyledDropdown(sideDic.keys, 
 						label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
-						initialValue: Enum.stringifyValue(_params.studyParams.cardSide),
+						initialValue: _params.studyParams.cardSide.present(locale),
 						onChanged: (newValue) {
 							setState(() => _params.studyParams.cardSide = sideDic[newValue]);
 						}

@@ -12,7 +12,6 @@ import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
-import '../utilities/enum.dart';
 import '../utilities/speaker.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/card_editor.dart';
@@ -185,19 +184,16 @@ class _StudyScreenState extends State<StudyScreen> {
         if (listToOrder.length <= 1)
             return;
 
-        switch (_studyDirection) {
-            case StudyDirection.forward:
-                listToOrder.sort((a, b) => a.packId.compareTo(b.packId));
-                listToOrder.sort((a, b) => a.text.compareTo(b.text));
-                break;
-            case StudyDirection.backward:
-                listToOrder.sort((a, b) => b.packId.compareTo(a.packId));
-                listToOrder.sort((a, b) => b.text.compareTo(a.text));
-                break;
-            default:
-                listToOrder.shuffle(new Random());
-                break;
-        }
+		if (_studyDirection == StudyDirection.forward) {
+			listToOrder.sort((a, b) => a.packId.compareTo(b.packId));
+			listToOrder.sort((a, b) => a.text.compareTo(b.text));
+		}
+		else if (_studyDirection == StudyDirection.backward) {
+			listToOrder.sort((a, b) => b.packId.compareTo(a.packId));
+			listToOrder.sort((a, b) => b.text.compareTo(a.text));
+		}
+		else
+			listToOrder.shuffle(new Random());
 
         if (!shouldTakeAllCards)
             _cards.replaceRange(startIndex, _cards.length, listToOrder);
@@ -325,7 +321,7 @@ class _StudyScreenState extends State<StudyScreen> {
                 ),
                 new RaisedButton(
                     child: _buildCenteredBigText(locale.studyScreenSortingCardButtonLabel(
-						Enum.stringifyValue(_studyDirection)
+						_studyDirection.present(locale)
 					)),
                     onPressed: () =>
                         setState(() {
@@ -335,7 +331,7 @@ class _StudyScreenState extends State<StudyScreen> {
                 ),
                 new RaisedButton(
                     child: _buildCenteredBigText(locale.studyScreenCardSideButtonLabel(
-						Enum.stringifyValue(_cardSide)
+						_cardSide.present(locale)
 					)),
                     onPressed: () =>
                         setState(() {

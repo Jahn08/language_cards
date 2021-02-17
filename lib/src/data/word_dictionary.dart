@@ -18,14 +18,8 @@ class WordDictionary {
         return 'https://dictionary.yandex.net/api/v1/dicservice.json/lookup?key=$key&lang=$_from-$_to';
     }
 
-    static String _representLanguage(Language lang) {
-        switch (lang) {
-            case Language.russian:
-                return 'ru';
-            default:
-                return 'en';
-        }
-    }
+    static String _representLanguage(Language lang) =>
+        lang == Language.russian ? 'ru': 'en';
 
     Future<Article> lookUp(String word) async {
         final response = await _client.post(_uri + '&text=$word');

@@ -1,5 +1,7 @@
 import 'dart:convert';
-import './language.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'language.dart';
+import 'presentable_enum.dart';
 
 enum AppTheme {
     light, 
@@ -7,25 +9,46 @@ enum AppTheme {
     dark
 }
 
-enum CardSide {
-    front,
+class CardSide extends PresentableEnum {
 
-    back,
+	static final CardSide front = new CardSide._(0);
 
-    random
+    static final CardSide back = new CardSide._(1);
+
+    static final CardSide random = new CardSide._(2);
+
+	static List<CardSide> get values => [front, back, random];
+
+	CardSide._(int index): super(index);
+
+	@override
+	String present(AppLocalizations locale) =>
+		this == front ? locale.cardSideFrontName: 
+			(this == back ? locale.cardSideBackName: locale.cardSideRandomName);
 }
 
-enum StudyDirection {
-    forward,
+class StudyDirection extends PresentableEnum {
+	
+	static final StudyDirection forward = new StudyDirection._(0);
 
-    backward,
+    static final StudyDirection backward = new StudyDirection._(1);
 
-    random
+    static final StudyDirection random = new StudyDirection._(2);
+
+	static List<StudyDirection> get values => [forward, backward, random];
+
+	StudyDirection._(int index): super(index);
+
+	@override
+	String present(AppLocalizations locale) =>
+		this == forward ? locale.cardStudyDirectionForwardName: 
+			(this == backward ? locale.cardStudyDirectionBackwardName: 
+				locale.cardStudyDirectionRandomName);
 }
 
 class StudyParams {
-    static const _defaultCardSide = CardSide.front;
-    static const _defaultDirection = StudyDirection.forward;
+    static final _defaultCardSide = CardSide.front;
+    static final _defaultDirection = StudyDirection.forward;
 
     static const _directionParam = 'direction';
     static const _cardSideParam = 'cardSide';
@@ -57,7 +80,7 @@ class StudyParams {
 }
 
 class UserParams {
-    static const _defaultLanguage = Language.english;
+    static final _defaultLanguage = Language.english;
     static const _defaultTheme = AppTheme.light;
 
     static const _interfaceLangParam = 'interfaceLang';

@@ -18,13 +18,9 @@ class AssetIcon extends Image {
     );
 
     static AssetIcon getByLanguage(Language lang) {
-        switch (lang) {
-            case Language.english:
-                return britishFlag;
-            case Language.russian:
-                return russianFlag;
-            default:
-                return null;
-        }
+        if (lang == Language.english)
+			return britishFlag;
+		
+		return lang == Language.russian ? russianFlag: null;
     }
 }

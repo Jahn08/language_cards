@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/language.dart';
+import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/models/user_params.dart';
-import 'package:language_cards/src/utilities/enum.dart';
 import 'package:language_cards/src/widgets/asset_icon.dart';
 import 'package:language_cards/src/widgets/bar_scaffold.dart';
 import 'package:language_cards/src/widgets/icon_option.dart';
@@ -13,6 +13,7 @@ import 'package:language_cards/src/widgets/styled_dropdown.dart';
 import '../mocks/root_widget_mock.dart';
 import '../testers/preferences_tester.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -134,10 +135,12 @@ void main() {
 			AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
 		expect(dropdowns.length, 2);
 
-		final cardSides = Enum.mapStringValues(CardSide.values).keys;
+		final locale = Localizator.defaultLocalization;
+		final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys;
 		dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
 		
-		final studyDirections = Enum.mapStringValues(StudyDirection.values).keys;
+		final studyDirections = PresentableEnum.mapStringValues(
+			StudyDirection.values, locale).keys;
 		dropdowns.singleWhere((d) => d.options.every((op) => studyDirections.contains(op)));
 
 		final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
@@ -146,7 +149,7 @@ void main() {
 		expect(dropdownBtns.length, 2);
 
 		final studyParams = userParams.studyParams;
-		[Enum.stringifyValue(studyParams.cardSide), Enum.stringifyValue(studyParams.direction)]
+		[studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
 			.every((p) => dropdownBtns.contains((d) => d.value == p));
     });
 
@@ -174,10 +177,10 @@ void main() {
 
 			final defStudyParams = defaultUserParams.studyParams;
 			final expectedCardSide = CardSide.back;
-			await _chooseDropdownItem<CardSide>(tester, defStudyParams.cardSide, expectedCardSide);
+			await _chooseDropdownItem(tester, defStudyParams.cardSide, expectedCardSide);
 			
 			final expectedDirection = StudyDirection.random;
-			await _chooseDropdownItem<StudyDirection>(tester, defStudyParams.direction, 
+			await _chooseDropdownItem(tester, defStudyParams.direction, 
 				expectedDirection);
 
             await _applySettings(assistant);
@@ -247,14 +250,18 @@ Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async =>
 Future<void> _applySettings(WidgetAssistant assistant) async => 
     await assistant.pressButtonDirectlyByLabel('Apply');
 
-Future<void> _chooseDropdownItem<T>(WidgetTester tester, T curValue, T valueToChoose) async {
+Future<void> _chooseDropdownItem(
+	WidgetTester tester, PresentableEnum curValue, PresentableEnum valueToChoose
+) async {
+	final locale = Localizator.defaultLocalization;
+
 	final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
 	final cardSideDropdownFinder = find.widgetWithText(dropDownBtnType, 
-		Enum.stringifyValue(curValue));
+		curValue.present(locale));
 	
 	final widgetAssistant = new WidgetAssistant(tester);
 	await widgetAssistant.tapWidget(cardSideDropdownFinder);
 	
 	await widgetAssistant.tapWidget(
-		find.text(Enum.stringifyValue(valueToChoose)).hitTestable());
+		find.text(valueToChoose.present(locale)).hitTestable());
 }

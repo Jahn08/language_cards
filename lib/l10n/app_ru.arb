@@ -105,6 +105,20 @@
     "cardScreenHeadBarChangingCardTitle": "Изменить карточку",
     "@cardScreenHeadBarChangingCardTitle": {},
 
+    "cardSideFrontName": "передняя",
+    "@cardSideFrontName": {},
+    "cardSideBackName": "задняя",
+    "@cardSideBackName": {},
+    "cardSideRandomName": "случайная",
+    "@cardSideRandomName": {},
+
+    "cardStudyDirectionForwardName": "вперёд",
+    "@cardStudyDirectionForwardName": {},
+    "cardStudyDirectionBackwardName": "назад",
+    "@cardStudyDirectionBackwardName": {},
+    "cardStudyDirectionRandomName": "случайно",
+    "@cardStudyDirectionRandomName": {},
+
     "confirmDialogOkButtonLabel": "OK",
     "@confirmDialogOkButtonLabel": {
         "description": "Label for a button accepting an action clarified by a dialog"
@@ -120,6 +134,11 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
+    
+    "languageEnglishName": "английский",
+    "@languageEnglishName": {},
+    "languageRussianName": "русский",
+    "@languageRussianName": {},
 
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} записей было удалено",
     "@listScreenBottomSnackBarRemovedItemsInfo": {

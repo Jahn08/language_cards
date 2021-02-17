@@ -31,14 +31,10 @@ class Speaker implements ISpeaker {
 	}
 
 	String _stringifyLanguage(Language lang) {
-		switch (lang) {
-            case Language.english:
-                return 'en-US';
-            case Language.russian:
-                return 'ru-RU';
-            default:
-                return null;
-        }
+		if (lang == Language.english)
+			return 'en-US';
+
+        return lang == Language.russian ? 'ru-RU': null;
 	}
 
 	Future<void> speak(String text) async {

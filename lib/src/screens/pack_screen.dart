@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../models/presentable_enum.dart';
 import '../consts.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../models/language.dart';
 import '../router.dart';
-import '../utilities/enum.dart';
 import '../widgets/loader.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
@@ -25,14 +25,18 @@ class PackScreenState extends State<PackScreen> {
     StoredPack _foundPack;
     bool _initialised = false;
 
-    final _languages = Enum.mapStringValues(Language.values);
+    Map<String, PresentableEnum> _languages;
 
     BaseStorage<StoredPack> get _storage => widget._storage;
 
     @override
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
-        return new BarScaffold(
+    	
+		if (_languages == null)
+			_languages = PresentableEnum.mapStringValues(Language.values, locale);
+        
+		return new BarScaffold(
             (_isNew ? locale.packScreenHeadBarAddingPackTitle:
 				locale.packScreenHeadBarChangingPackTitle(_isNew ? _name: widget.packName)),
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
@@ -62,8 +66,8 @@ class PackScreenState extends State<PackScreen> {
 
                     _name = foundPack.name;
                     
-                    _toLang = Enum.stringifyValue(foundPack.to);
-                    _fromLang = Enum.stringifyValue(foundPack.from);
+                    _toLang = foundPack.to.present(locale);
+                    _fromLang = foundPack.from.present(locale);
                     _cardsNumber = foundPack.cardsNumber;
                 }
 
