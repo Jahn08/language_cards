@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/app.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/language.dart';
@@ -225,6 +226,30 @@ void main() {
 	    expect(curStudyParams.cardSide, defStudyParams.cardSide);
 		expect(curStudyParams.direction, defStudyParams.direction);
     });
+
+	testWidgets('Changes the interface language immediately after applying the setting', 
+        (tester) async {
+            PreferencesTester.resetSharedPreferences();
+            await tester.pumpWidget(new App());
+            await tester.pump();
+			
+            final settingsBtnFinder = _assureSettingsBtn(true);
+            final assistant = new WidgetAssistant(tester);
+            await assistant.tapWidget(settingsBtnFinder);
+
+            final iconOptionFinder = find.byWidgetPredicate((w) => w == AssetIcon.russianFlag);
+			expect(iconOptionFinder, findsOneWidget);
+            
+            await assistant.tapWidget(iconOptionFinder);
+
+			await _applySettings(assistant);
+
+			await assistant.tapWidget(settingsBtnFinder);
+
+            final allTexts = tester.widgetList<Text>(
+				AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
+			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 1);
+        });
 }
 
 Future<void> _buildInsideApp(WidgetTester tester, Widget child) => 
