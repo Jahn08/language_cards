@@ -259,8 +259,8 @@ class _StudyScreenState extends State<StudyScreen> {
 
     Widget _buildCardSide(StoredWord card, AppLocalizations locale, { bool isFront }) {
         String subtext = (card.transcription ?? '').isEmpty ? '': '[${card.transcription}]\n';
-        if ((card.partOfSpeech ?? '').isNotEmpty)
-            subtext += '${card.partOfSpeech}';
+        if (card.partOfSpeech != null)
+            subtext += '${card.partOfSpeech.present(locale)}';
 
         return new Card(
             elevation: 25,

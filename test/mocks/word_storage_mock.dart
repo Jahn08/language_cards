@@ -1,6 +1,6 @@
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
-import 'package:language_cards/src/models/word.dart';
+import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'pack_storage_mock.dart';
@@ -70,7 +70,7 @@ class WordStorageMock extends WordStorage {
         const studyStages = WordStudyStage.values;
         return new StoredWord(Randomiser.nextString(), 
             id: id, 
-            partOfSpeech: Word.parts_of_speech[Randomiser.nextInt(Word.parts_of_speech.length)],
+            partOfSpeech: Randomiser.nextElement(PartOfSpeech.values),
             translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(5) + 5, 

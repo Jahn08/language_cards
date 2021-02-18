@@ -1,6 +1,7 @@
-import './stored_entity.dart';
-import './stored_pack.dart';
-import './word_study_stage.dart';
+import 'part_of_speech.dart';
+import 'stored_entity.dart';
+import 'stored_pack.dart';
+import 'word_study_stage.dart';
 
 class StoredWord extends StoredEntity {
     static const String entityName = 'Cards';
@@ -18,7 +19,7 @@ class StoredWord extends StoredEntity {
 
     final String transcription;
 
-    final String partOfSpeech;
+    final PartOfSpeech partOfSpeech;
 
     final String translation;
 
@@ -37,7 +38,7 @@ class StoredWord extends StoredEntity {
             packId: values[packIdFieldName],
             transcription: values[transcriptionFieldName],
             studyProgress: values[studyProgressFieldName],
-            partOfSpeech: values[partOfSpeechFieldName],
+            partOfSpeech: PartOfSpeech.retrieve(values[partOfSpeechFieldName]),
             translation: values[translationFieldName]);
 
     int get packId => _packId;
@@ -72,7 +73,7 @@ class StoredWord extends StoredEntity {
         map.addAll({
             textFieldName: text,
             transcriptionFieldName: transcription,
-            partOfSpeechFieldName: partOfSpeech,
+            partOfSpeechFieldName: partOfSpeech?.value,
             translationFieldName: translation,
             studyProgressFieldName: studyProgress,
             packIdFieldName: packId

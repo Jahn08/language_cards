@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/dialogs/word_selector_dialog.dart';
 import '../testers/dialog_tester.dart';
@@ -24,7 +25,7 @@ void main() {
 
         final dialogTester = new SelectorDialogTester<Word>(tester, _buildDialog);
         await dialogTester.testRenderingOptions(availableWords, (finder, word) {
-            expect(find.descendant(of: finder, matching: find.text(word.partOfSpeech)), 
+            expect(find.descendant(of: finder, matching: find.text(word.partOfSpeech.value)), 
                 findsOneWidget);
             expect(find.descendant(of: finder, 
                 matching: find.text(word.translations.join('; '))), findsOneWidget);
@@ -50,7 +51,7 @@ void main() {
 }
 
 Word _buildRandomWord() => new Word(Randomiser.nextString(), 
-    partOfSpeech: Randomiser.nextElement(Word.parts_of_speech), 
+    partOfSpeech: Randomiser.nextElement(PartOfSpeech.values).value, 
     transcription: Randomiser.nextString(), 
     translations: Randomiser.nextStringList(maxLength: 3));
 

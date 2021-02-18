@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/models/language.dart';
-import 'package:language_cards/src/models/word.dart';
+import 'package:language_cards/src/models/part_of_speech.dart';
 import '../utilities/http_responder.dart';
 import '../utilities/randomiser.dart';
 
@@ -100,7 +100,7 @@ void main() {
 
             final defaultPartOfSpeech = words?.first?.partOfSpeech;
             expect(defaultPartOfSpeech == null, false);
-            expect(Word.parts_of_speech.contains(defaultPartOfSpeech), true);
+            expect(PartOfSpeech.retrieve(defaultPartOfSpeech.value) != null, true);
 
             expect(words?.every((w) => w.partOfSpeech == defaultPartOfSpeech), true);
         });

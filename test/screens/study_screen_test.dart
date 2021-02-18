@@ -334,7 +334,7 @@ void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
 
     final cardOtherTexts = tester.widgetList<Text>(
         find.descendant(of: cardFinder, matching: find.byType(Text))).toList();
-    cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.partOfSpeech));
+    cardOtherTexts.singleWhere((w) => w.data.contains(expectedCard.partOfSpeech.value));
     expect(cardOtherTexts.where((w) => w.data.contains(expectedCard.transcription)).length, 1, 
 		reason: 'There should be one widget with transcription: ${expectedCard.transcription}');
     

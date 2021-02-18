@@ -10,10 +10,11 @@ class StyledDropdown extends StatelessWidget {
 
     final Function(String) onChanged;
     final Function(String) onValidate;
-    final Iterable<String> options;
+    final List<String> options;
 
-    StyledDropdown(this.options, { Key key, bool isRequired, this.onChanged, 
+    StyledDropdown(Iterable<String> options, { Key key, bool isRequired, this.onChanged, 
         this.onValidate, this.initialValue, this.label }):
+		options = options.toList()..sort(),
         isRequired = isRequired ?? false,
         super(key: key);
 
@@ -21,8 +22,8 @@ class StyledDropdown extends StatelessWidget {
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
         return new DropdownButtonFormField<String>(
-            items: options.map((pos) => 
-                new DropdownMenuItem(child: new Text(pos), value: pos)).toList(), 
+            items: options.map((v) => 
+                new DropdownMenuItem(child: new Text(v), value: v)).toList(), 
             onChanged: onChanged,
             decoration: new StyledInputDecoration(label),
             value: initialValue,

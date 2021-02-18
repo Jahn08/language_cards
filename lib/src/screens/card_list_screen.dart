@@ -19,7 +19,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     
     @override
     Widget getItemTrailing(StoredWord item) => new Column(children: <Widget>[
-        new OneLineText(item.partOfSpeech),
+        new OneLineText(item.partOfSpeech.present(AppLocalizations.of(context))),
         new OneLineText('${item.studyProgress}%')
     ]);
 

@@ -9,8 +9,9 @@ import '../dialogs/pack_selector_dialog.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
+import '../models/part_of_speech.dart';
+import '../models/presentable_enum.dart';
 import '../models/word_study_stage.dart';
-import '../models/word.dart';
 import '../utilities/speaker.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 import '../widgets/keyboarded_field.dart';
@@ -39,6 +40,8 @@ class CardEditorState extends State<CardEditor> {
     int _studyProgress;
 
     bool _initialised = false;
+
+	Map<String, PresentableEnum> _partOfSpeechDic;
 
     Future<StoredWord> futureWord;
 
@@ -104,7 +107,7 @@ class CardEditorState extends State<CardEditor> {
 
 			_text = foundWord.text;
 			_transcription = foundWord.transcription;
-			_partOfSpeech = foundWord.partOfSpeech;
+			_partOfSpeech = foundWord.partOfSpeech.present(locale);
 			_translation = foundWord.translation;
 			_studyProgress = foundWord.studyProgress;
 		}
@@ -126,6 +129,9 @@ class CardEditorState extends State<CardEditor> {
     }
 
     Widget _buildFormLayout(AppLocalizations locale) {
+		if (_partOfSpeechDic == null)
+			_partOfSpeechDic = PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
+
         return new Column(
             children: <Widget>[
 				_isNonePack || _text == null || _text.isEmpty ? _buildCardTextField(locale): 
@@ -139,7 +145,7 @@ class CardEditorState extends State<CardEditor> {
 					locale.cardEditorTranscriptionTextFieldLabel,
                     initialValue: this._transcription,
                     onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledDropdown(Word.parts_of_speech, 
+                new StyledDropdown(_partOfSpeechDic.keys, 
 					label: locale.cardEditorPartOfSpeechDropdownLabel,
                     initialValue: this._partOfSpeech,
                     onChanged: (value) => setState(() => this._partOfSpeech = value)),
@@ -187,7 +193,7 @@ class CardEditorState extends State<CardEditor> {
                         final wordToSave = new StoredWord(this._text, 
                             id: widget.wordId,
                             packId: _pack.id,
-                            partOfSpeech: this._partOfSpeech, 
+                            partOfSpeech: _partOfSpeechDic[this._partOfSpeech], 
                             transcription: this._transcription,
                             translation: this._translation,
                             studyProgress: this._studyProgress
@@ -230,7 +236,7 @@ class CardEditorState extends State<CardEditor> {
 					}
 
 					_text = chosenWord.text;
-					_partOfSpeech = chosenWord.partOfSpeech;
+					_partOfSpeech = chosenWord.partOfSpeech.present(locale);
 					_transcription = chosenWord.transcription;
 					_studyProgress = WordStudyStage.unknown;
 
