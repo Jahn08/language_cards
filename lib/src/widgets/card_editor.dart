@@ -107,7 +107,7 @@ class CardEditorState extends State<CardEditor> {
 
 			_text = foundWord.text;
 			_transcription = foundWord.transcription;
-			_partOfSpeech = foundWord.partOfSpeech.present(locale);
+			_partOfSpeech = foundWord.partOfSpeech?.present(locale);
 			_translation = foundWord.translation;
 			_studyProgress = foundWord.studyProgress;
 		}
