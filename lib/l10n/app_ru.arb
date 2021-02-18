@@ -205,7 +205,7 @@
     "@packScreenTranslationFromDropdownLabel": {},
     "packScreenTranslationToDropdownLabel": "Перевод на",
     "@packScreenTranslationToDropdownLabel": {},
-    "packScreenShowingCardsButtonLabel": "Показать {cardsNumber} карточек",
+    "packScreenShowingCardsButtonLabel": "Показать карточки: {cardsNumber}",
     "@packScreenShowingCardsButtonLabel": {
         "placeholders": {
             "cardsNumber": {
@@ -273,7 +273,7 @@
     "@studyScreenStudyEndDialogTitle": {},
     "studyScreenStudyEndDialogContent": "Так держать! Обучение успешно завершено.\n\nВы можете пройти его повторно, чтобы отточить знания до совершенства",
     "@studyScreenStudyEndDialogContent": {},
-    "studyScreenTitle": "{curCardIndex} из {cardsNumber} карточек",
+    "studyScreenTitle": "Карточка {curCardIndex} из {cardsNumber}",
     "@studyScreenTitle": {
         "placeholders": {
             "curCardIndex": {
