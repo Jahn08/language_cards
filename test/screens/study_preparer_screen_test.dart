@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -40,18 +39,16 @@ main() {
             final studyPacks = await _fetchStudyPacks(tester, storage);
 
             final widgetAssistant = new WidgetAssistant(tester);
-            await widgetAssistant.tapWidget(AssuredFinder.findOne(
-				label: Consts.getSelectorLabel(true, Localizator.defaultLocalization), 
+			final selectorBtnFinder = AssuredFinder.findOne(
+				icon: Icons.select_all, 
 				shouldFind: true
-			));
+			);
+            await widgetAssistant.tapWidget(selectorBtnFinder);
 
             _assureCheckedTiles(tester);
             _assureCardNumbersForStudyLevels(studyPacks, []);
 
-            await widgetAssistant.tapWidget(AssuredFinder.findOne(
-				label: Consts.getSelectorLabel(false, Localizator.defaultLocalization), 
-				shouldFind: true
-			));
+            await widgetAssistant.tapWidget(selectorBtnFinder);
             
             _assureCheckedTiles(tester, packs);
             _assureCardNumbersForStudyLevels(studyPacks);
@@ -141,7 +138,7 @@ void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> in
         stPacks = stPacks.where((p) => includedPackIds.contains(p.pack.id));
 
     stPacks.expand((e) => e.cardsByStage.entries).forEach((en) =>
-        levels[en.key] += en.value);
+            levels[en.key] += en.value);
 
     levels[Localizator.defaultLocalization.studyPreparerScreenAllCardsCategoryName] = 
         levels.values.reduce((res, el) => res + el);

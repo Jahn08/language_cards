@@ -231,20 +231,24 @@ class BarScaffold extends Scaffold {
         void Function() onNavGoingBack
     }): super(
         drawer: (showSettings ?? false) ? new _SettingsPanel(): null, 
-        appBar: _buildAppBar(title, actions: barActions, onGoingBack: onNavGoingBack, 
-            showSettings: showSettings),
+        appBar: _buildAppBar(
+			new Text(title, textScaleFactor: 0.85, 
+				softWrap: true, overflow: TextOverflow.visible),
+			actions: barActions, onGoingBack: onNavGoingBack, 
+			showSettings: showSettings
+		),
         body: body,
         bottomNavigationBar: bottomNavigationBar,
         floatingActionButton: floatingActionButton
     );
 
-    static Widget _buildAppBar(String title, 
+    static Widget _buildAppBar(Widget title, 
         { List<Widget> actions,  void Function() onGoingBack, bool showSettings }) {
 
         final openerBtn = (showSettings ?? false) ? new _SettingsOpenerButton(): null;
         return onGoingBack == null ? 
-            new AppBar(actions: actions, leading: openerBtn, title: new Text(title)):
-            new NavigationBar(new Text(title), actions: actions, onGoingBack: onGoingBack, 
+            new AppBar(actions: actions, leading: openerBtn, title: title):
+            new NavigationBar(title, actions: actions, onGoingBack: onGoingBack, 
                 leading: openerBtn);
     }
 }

@@ -169,13 +169,13 @@ class ListScreenTester<TEntity extends StoredEntity> {
     	assistant.tapWidget(_tryFindingEditorButton(shouldFind: true));
 
     Finder _tryFindingEditorButton({ bool shouldFind }) => 
-        AssuredFinder.findOne(label: 'Edit', shouldFind: shouldFind);
+        AssuredFinder.findOne(icon: Icons.edit, shouldFind: shouldFind);
 
     Finder tryFindingListItems({ bool shouldFind }) => 
         AssuredFinder.findSeveral(type: Dismissible, shouldFind: shouldFind);
     
     Finder _tryFindingEditorDoneButton({ bool shouldFind }) => 
-        AssuredFinder.findOne(label: 'Done', shouldFind: shouldFind);
+        AssuredFinder.findOne(icon: Icons.edit_off, shouldFind: shouldFind);
 
     Finder _tryFindingEditorRemoveButton({ bool shouldFind }) => 
         AssuredFinder.findOne(label: 'Remove', shouldFind: shouldFind);

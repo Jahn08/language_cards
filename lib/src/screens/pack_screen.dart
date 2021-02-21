@@ -38,7 +38,7 @@ class PackScreenState extends State<PackScreen> {
         
 		return new BarScaffold(
             (_isNew ? locale.packScreenHeadBarAddingPackTitle:
-				locale.packScreenHeadBarChangingPackTitle(_isNew ? _name: widget.packName)),
+				locale.packScreenHeadBarChangingPackTitle),
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context),
             body: new Form(

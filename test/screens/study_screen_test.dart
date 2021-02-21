@@ -593,4 +593,4 @@ Future<void> _goThroughCardList(WidgetTester tester, int listLength) async {
 }
 
 Future<void> _openEditorMode(WidgetTester tester) => 
-	new WidgetAssistant(tester).tapWidget(find.widgetWithText(TextButton, 'Edit'));
+	new WidgetAssistant(tester).tapWidget(find.byIcon(Icons.edit));

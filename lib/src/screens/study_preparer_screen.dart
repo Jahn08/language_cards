@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import '../consts.dart';
 import '../data/study_storage.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
@@ -31,15 +30,15 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
         return new FutureLoader<List<StudyPack>>(_futurePacks, 
             (stPacks) => new BarScaffold(locale.studyPreparerScreenTitle,
-                barActions: <Widget>[_buildSelectorButton(stPacks, locale)],
-                onNavGoingBack: () => Router.goHome(context),
-                body: _buildLayout(stPacks, locale)
-            ));
+					barActions: <Widget>[_buildSelectorButton(stPacks, locale)],
+					onNavGoingBack: () => Router.goHome(context),
+					body: _buildLayout(stPacks, locale)
+            	));
     }
 
     Widget _buildSelectorButton(List<StudyPack> stPacks, AppLocalizations locale) {
         final allSelected = _excludedPacks.isEmpty;
-        return new FlatButton(
+        return new IconButton(
             onPressed: () {
                 setState(() { 
                     _excludedPacks.clear();
@@ -48,7 +47,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                         _excludedPacks.addAll(stPacks.map((p) => p.pack.id));
                 });
             },
-            child: new Text(Consts.getSelectorLabel(allSelected, locale))
+            icon: new Icon(Icons.select_all)
         );
     }
 

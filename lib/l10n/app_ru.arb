@@ -25,7 +25,7 @@
         "description": "Label for a button cancelling an action clarified by a dialog"
     },
 
-    "cardEditorChoosingPackDialogTitle": "Выбрать набор",
+    "cardEditorChoosingPackDialogTitle": "Выберите набор",
     "@cardEditorChoosingPackDialogTitle": {},
     "cardEditorChoosingPackDialogContent": "Вам следует выбрать набор карточек, чтобы включить автоматический перевод",
     "@cardEditorChoosingPackDialogContent": {},
@@ -43,7 +43,7 @@
             }
         }
     },
-    "cardEditorResettingStudyProgressButtonLabel": "Сбросить {studyLevel}% прогресса",
+    "cardEditorResettingStudyProgressButtonLabel": "Сбросить {studyProgress}% прогресса",
     "@cardEditorResettingStudyProgressButtonLabel": {
         "placeholders": {
             "studyProgress": {
@@ -57,14 +57,6 @@
 
     "cardListScreenWithoutPackTitle": "Карточки",
     "@cardListScreenWithoutPackTitle": {},
-    "cardListScreenWithPackTitle": "Карточки набора {packName}",
-    "@cardListScreenWithPackTitle": {
-        "placeholders": {
-            "packName": {
-                "type": "String"
-            }
-        }
-    },
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Сбросить прогресс",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
     "cardListScreenResettingProgressDialogTitle": "Подтвердить сброс прогресса обучения",
@@ -159,10 +151,6 @@
             }
         }
     },
-    "listScreenEditorEditingButtonLabel": "Редактировать",
-    "@listScreenEditorEditingButtonLabel": {},
-    "listScreenEditorDoneButtonLabel": "Завершить",
-    "@listScreenEditorDoneButtonLabel": {},
     "listScreenAddingNewItemButtonTooltip": "Новая запись",
     "@listScreenAddingNewItemButtonTooltip": {},
 
@@ -191,14 +179,8 @@
 
     "packScreenHeadBarAddingPackTitle": "Добавить набор",
     "@packScreenHeadBarAddingPackTitle": {},
-    "packScreenHeadBarChangingPackTitle": "Изменить набор {packName}",
-    "@packScreenHeadBarChangingPackTitle": {
-        "placeholders": {
-            "packName": {
-                "type": "String"
-            }
-        }
-    },
+    "packScreenHeadBarChangingPackTitle": "Изменить набор",
+    "@packScreenHeadBarChangingPackTitle": {},
     "packScreenPackNameTextFieldLabel": "Имя набора",
     "@packScreenPackNameTextFieldLabel": {},
     "packScreenTranslationFromDropdownLabel": "Перевод с",
@@ -219,7 +201,7 @@
     "packScreenSameTranslationDirectionsValidationError": "Языки переводов должны отличаться",
     "@packScreenSameTranslationDirectionsValidationError": {},
 
-    "packSelectorDialogTitle": "Выбрать набор карточек",
+    "packSelectorDialogTitle": "Выберите набор карточек",
     "@packSelectorDialogTitle": {},
     
     "partOfSpeechAdjectiveName": "прилагательное",
@@ -262,7 +244,7 @@
     "storedPackNonePackName": "Без набора",
     "@storedPackNonePackName": {},
 
-    "studyPreparerScreenTitle": "Выберите, что учить",
+    "studyPreparerScreenTitle": "Категории карточек для учёбы",
     "@studyPreparerScreenTitle": {},
     "studyPreparerScreenAllCardsCategoryName": "Все",
     "@studyPreparerScreenAllCardsCategoryName": {},
@@ -286,8 +268,6 @@
             }
         }
     },
-    "studyScreenEditingCardButtonLabel": "Редактировать",
-    "@studyScreenEditingCardButtonLabel": {},
     "studyScreenLearningCardButtonLabel": "Выучить",
     "@studyScreenLearningCardButtonLabel": {},
     "studyScreenNextCardButtonLabel": "Следующая",
@@ -311,7 +291,7 @@
 
     "translationSelectorDialogTitle": "Выберите перевод",
     "@translationSelectorDialogTitle": {},
-    "translationSelectorDoneButtonLabel": "Завершить",
+    "translationSelectorDoneButtonLabel": "Принять",
     "@translationSelectorDoneButtonLabel": {},
 
     "wordSelectorDialogTitle": "Выберите определение слова",

@@ -102,7 +102,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		final locale = AppLocalizations.of(buildContext);
         return new BarScaffold(title,
             barActions: <Widget>[
-				_isEditorMode ? _buildEditorDoneButton(locale): _buildEditorButton(locale),
+				_isEditorMode ? _buildEditorDoneButton(): _buildEditorButton(),
 				
 				if (_isSearchMode || _isSearchModeAvailable)
 					(_isSearchMode ? _buildSearchDoneButton(): _buildSearchButton())
@@ -124,23 +124,23 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     String get title;
 
-    Widget _buildEditorButton(AppLocalizations locale) => 
-		new FlatButton(
+    Widget _buildEditorButton() => 
+		new IconButton(
 			onPressed: () {
 				setState(() => _isEditorMode = true);
 			}, 
-			child: new Text(locale.listScreenEditorEditingButtonLabel)
+			icon: new Icon(Icons.edit)
 		);
 
-    Widget _buildEditorDoneButton(AppLocalizations locale) => 
-		new FlatButton(
+    Widget _buildEditorDoneButton() => 
+		new IconButton(
 			onPressed: () {
 				setState(() { 
 					_itemsMarkedInEditor.clear();
 					_isEditorMode = false;
 				});
 			},
-			child: new Text(locale.listScreenEditorDoneButtonLabel)
+			icon: new Icon(Icons.edit_off)
 		);
 
 	Widget _buildSearchButton() => new IconButton(

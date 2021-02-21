@@ -57,14 +57,6 @@
 
     "cardListScreenWithoutPackTitle": "Cards",
     "@cardListScreenWithoutPackTitle": {},
-    "cardListScreenWithPackTitle": "Cards of Pack {packName}",
-    "@cardListScreenWithPackTitle": {
-        "placeholders": {
-            "packName": {
-                "type": "String"
-            }
-        }
-    },
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Reset Progress",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
     "cardListScreenResettingProgressDialogTitle": "Confirm Resetting Study Progress",
@@ -159,10 +151,6 @@
             }
         }
     },
-    "listScreenEditorEditingButtonLabel": "Edit",
-    "@listScreenEditorEditingButtonLabel": {},
-    "listScreenEditorDoneButtonLabel": "Done",
-    "@listScreenEditorDoneButtonLabel": {},
     "listScreenAddingNewItemButtonTooltip": "New Item",
     "@listScreenAddingNewItemButtonTooltip": {},
 
@@ -191,14 +179,8 @@
 
     "packScreenHeadBarAddingPackTitle": "Add Pack",
     "@packScreenHeadBarAddingPackTitle": {},
-    "packScreenHeadBarChangingPackTitle": "Change Pack {packName}",
-    "@packScreenHeadBarChangingPackTitle": {
-        "placeholders": {
-            "packName": {
-                "type": "String"
-            }
-        }
-    },
+    "packScreenHeadBarChangingPackTitle": "Change Pack",
+    "@packScreenHeadBarChangingPackTitle": {},
     "packScreenPackNameTextFieldLabel": "Pack Name",
     "@packScreenPackNameTextFieldLabel": {},
     "packScreenTranslationFromDropdownLabel": "Translate from",
@@ -262,7 +244,7 @@
     "storedPackNonePackName": "None",
     "@storedPackNonePackName": {},
 
-    "studyPreparerScreenTitle": "Choose What to Study",
+    "studyPreparerScreenTitle": "Card Categories for Study",
     "@studyPreparerScreenTitle": {},
     "studyPreparerScreenAllCardsCategoryName": "All",
     "@studyPreparerScreenAllCardsCategoryName": {},
@@ -286,8 +268,6 @@
             }
         }
     },
-    "studyScreenEditingCardButtonLabel": "Edit",
-    "@studyScreenEditingCardButtonLabel": {},
     "studyScreenLearningCardButtonLabel": "Learn",
     "@studyScreenLearningCardButtonLabel": {},
     "studyScreenNextCardButtonLabel": "Next",

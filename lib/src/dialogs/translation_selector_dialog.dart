@@ -19,7 +19,8 @@ class _CheckboxListState extends State<_CheckboxList> {
         return new Scrollbar(
             child: new SimpleDialog(
                 title: new CheckboxListTile(
-                    title: new Text(this.widget.title, style: new Styler(context).titleStyle),
+                    title: new Text(this.widget.title, textScaleFactor: 0.85, 
+						style: new Styler(context).titleStyle),
                     value: widget.items.length == _chosenItems.length,
                     onChanged: (value) => setState(() {
                         _chosenItems.clear();

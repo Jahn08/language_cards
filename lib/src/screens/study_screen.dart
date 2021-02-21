@@ -136,8 +136,8 @@ class _StudyScreenState extends State<StudyScreen> {
 				return new BarScaffold(
 					locale.studyScreenTitle(_curCardIndex + 1, cards.length),
 					barActions: [
-						new TextButton(
-							child: new Text(locale.studyScreenEditingCardButtonLabel),
+						new IconButton(
+							icon: new Icon(Icons.edit),
 							onPressed: () async {
 								final curCard = _cards[_curCardIndex];
 								final updatedPackedCard = await new _CardEditorDialog(
@@ -294,7 +294,7 @@ class _StudyScreenState extends State<StudyScreen> {
         ]);
 
     Widget _buildCenteredBigText(String data) => 
-        new Text(data, textAlign: TextAlign.center, textScaleFactor: 1.5);
+        new Text(data, textAlign: TextAlign.center, textScaleFactor: 1.2);
 
     Widget _buildButtonPanel(StoredWord card, AppLocalizations locale) {
 
