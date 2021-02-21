@@ -101,8 +101,7 @@ Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock s
         .where((p) => !p.isNone).toList();
 
 Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, PackStorageMock storage) =>
-    tester.runAsync<List<StudyPack>>(
-		() => storage.fetchStudyPacks(Localizator.defaultLocalization));
+    tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks());
 
 Finder _findCheckTiles() =>
     AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
@@ -130,17 +129,25 @@ Finder _findPackTile(String packName) {
 }
 
 void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> includedPackIds]) {
-    final levels = new Map<String, int>.fromIterable(WordStudyStage.values,
-        key: (k) => WordStudyStage.stringify(k, Localizator.defaultLocalization), 
-		value: (_) => 0);
+    final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
+        key: (k) => k, value: (_) => 0);
 
     if (includedPackIds != null)
         stPacks = stPacks.where((p) => includedPackIds.contains(p.pack.id));
 
     stPacks.expand((e) => e.cardsByStage.entries).forEach((en) =>
-            levels[en.key] += en.value);
+        studyStages[en.key] += en.value);
 
-    levels[Localizator.defaultLocalization.studyPreparerScreenAllCardsCategoryName] = 
+	final locale = Localizator.defaultLocalization;
+	final levels = <String, int>{};
+		studyStages.entries.forEach((en) {
+			final key = WordStudyStage.stringify(en.key, locale);
+			if (levels.containsKey(key))
+				levels[key] += en.value;
+			else
+				levels[key] = en.value;
+		});
+    levels[locale.studyPreparerScreenAllCardsCategoryName] = 
         levels.values.reduce((res, el) => res + el);
 
     levels.forEach((lvl, cardNumber) { 

@@ -26,7 +26,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
 		if (_futurePacks == null)
-        	_futurePacks = widget.storage.fetchStudyPacks(locale);
+        	_futurePacks = widget.storage.fetchStudyPacks();
 
         return new FutureLoader<List<StudyPack>>(_futurePacks, 
             (stPacks) => new BarScaffold(locale.studyPreparerScreenTitle,
@@ -62,11 +62,20 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         );
 
     Widget _buildStudyLevelList(List<StudyPack> stPacks, AppLocalizations locale) {
-        final levels = new Map<String, int>.fromIterable(WordStudyStage.values,
-            key: (k) => WordStudyStage.stringify(k, locale), value: (_) => 0);
+        final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
+            key: (st) => st, value: (_) => 0);
         final includedPacks = stPacks.where((p) => !_excludedPacks.contains(p.pack.id)).toList();
         includedPacks.expand((e) => e.cardsByStage.entries)
-            .forEach((en) => levels[en.key] += en.value);
+            .forEach((en) => studyStages[en.key] += en.value);
+
+		final levels = <String, int>{};
+		studyStages.entries.forEach((en) {
+			final key = WordStudyStage.stringify(en.key, locale);
+			if (levels.containsKey(key))
+				levels[key] += en.value;
+			else
+				levels[key] = en.value;
+		});
         levels[locale.studyPreparerScreenAllCardsCategoryName] = 
             levels.values.reduce((res, el) => res + el);
 
