@@ -3,9 +3,11 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import './asset_icon.dart';
 import './icon_option.dart';
 import '../blocs/settings_bloc.dart';
+import '../data/configuration.dart';
 import '../models/language.dart';
 import '../models/presentable_enum.dart';
 import '../models/user_params.dart';
+import '../utilities/link.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
 import '../widgets/styled_dropdown.dart';
@@ -175,9 +177,36 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 
     List<Widget> _buildContactsSection(AppLocalizations locale) {
         return <Widget>[
-            _buildSubsectionHeader(locale.barScaffoldSettingsPanelContactsSectionLabel)
+            _buildSubsectionHeader(locale.barScaffoldSettingsPanelContactsSectionLabel),
+			_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
+				() async => await new FBLink(widget.params.fbUserId).activate()),
+			_buildTextButtonedRow(
+				locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
+			 	() async => await new EmailLink(
+					email: widget.params.email, 
+					body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
+					subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
+				).activate()
+			),
+			_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
+				() async => await new EmailLink(
+					email: widget.params.email, 
+					body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
+					subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
+				).activate()),
+			_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
+				() async => await new AppStoreLink(widget.params.appStoreId).activate())
         ];
     }
+
+	Widget _buildTextButtonedRow(String label, Function() onPressed) {
+		return new Row(
+			children: <Widget>[new Flexible(child: new Container(
+				child: new TextButton(child: new Text(label), onPressed: onPressed),
+				height: 40.0
+			))]
+		);
+	}
 
     List<Widget> _buildHelpSection(AppLocalizations locale) {
         return <Widget>[
@@ -206,6 +235,10 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 
 class _SettingsPanel extends StatefulWidget {
     
+	final ContactsParams params;
+
+	_SettingsPanel(this.params);
+
     @override
     _SettingsPanelState createState() => new _SettingsPanelState();
 }
@@ -222,20 +255,51 @@ class _SettingsOpenerButton extends StatelessWidget {
 
 class BarScaffold extends Scaffold {
 
-    BarScaffold(String title, { 
+	BarScaffold(String title, { 
         @required Widget body,
-        bool showSettings,
+        BottomNavigationBar bottomNavigationBar,
+        FloatingActionButton floatingActionButton,
+        List<Widget> barActions,
+		ContactsParams contactsParams,
+        void Function() onNavGoingBack
+    }): this._(title,
+			body: body,
+			bottomNavigationBar: bottomNavigationBar,
+			floatingActionButton: floatingActionButton,
+			barActions: barActions,
+			onNavGoingBack: onNavGoingBack
+		);
+
+	BarScaffold.withSettings(String title, { 
+        @required Widget body,
+		@required ContactsParams contactsParams,
         BottomNavigationBar bottomNavigationBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
         void Function() onNavGoingBack
+    }): this._(title,
+			body: body,
+			contactsParams: contactsParams,
+			bottomNavigationBar: bottomNavigationBar,
+			floatingActionButton: floatingActionButton,
+			barActions: barActions,
+			onNavGoingBack: onNavGoingBack
+		);
+
+    BarScaffold._(String title, { 
+        @required Widget body,
+        BottomNavigationBar bottomNavigationBar,
+        FloatingActionButton floatingActionButton,
+        List<Widget> barActions,
+		ContactsParams contactsParams,
+        void Function() onNavGoingBack
     }): super(
-        drawer: (showSettings ?? false) ? new _SettingsPanel(): null, 
+        drawer: contactsParams == null ? null: new _SettingsPanel(contactsParams), 
         appBar: _buildAppBar(
 			new Text(title, textScaleFactor: 0.85, 
 				softWrap: true, overflow: TextOverflow.visible),
 			actions: barActions, onGoingBack: onNavGoingBack, 
-			showSettings: showSettings
+			showSettings: contactsParams != null
 		),
         body: body,
         bottomNavigationBar: bottomNavigationBar,

@@ -36,6 +36,7 @@ dependencies:
   shared_preferences: ^0.5.12+2
   flutter_tts: ^2.1.0
   intl: ^0.16.1
+  url_launcher: ^5.7.10
 
 dev_dependencies:
   flutter_test:

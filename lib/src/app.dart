@@ -52,7 +52,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                 initialRoute: Router.initialRouteName,
                 onGenerateRoute: (settings) => _buildPageRoute(settings, (context, route) {
                     if (route == null)
-                        return new MainScreen();
+                        return _buildMainScreen(context);
                     else if (route is WordCardRoute)
                         return _buildCardScreen(context, route);
                     else if (route is CardListRoute) {
@@ -89,17 +89,26 @@ class _ThemedAppState extends State<_ThemedApp> {
             );
         } 
 
-    Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
+    Widget _buildMainScreen(BuildContext context) =>
+		_wrapWithParamsGetter(context, (data) => new MainScreen(data.contacts));
+
+	Widget _wrapWithParamsGetter(BuildContext context, 
+		Widget Function(AppParams data) dataWidgetBuilder) {
+		return new FutureLoader(Configuration.getParams(context), 
+			dataWidgetBuilder);
+	}
+    
+	Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
         final params = route.params;
-        return new FutureLoader(Configuration.getParams(context), 
-            (data) => new CardScreen(data.dictionary.apiKey, 
+        return _wrapWithParamsGetter(context, 
+			(data) => new CardScreen(data.dictionary.apiKey, 
                 wordStorage: params.storage, packStorage: params.packStorage,
                 wordId: params.wordId, pack: params.pack));
     }
 
 	Widget _buildStudyScreen(BuildContext context, StudyModeRoute route) {
         final params = route.params;
-        return new FutureLoader(Configuration.getParams(context), 
+        return _wrapWithParamsGetter(context, 
             (data) => new StudyScreen(data.dictionary.apiKey, 
 				params.storage, packStorage: params.packStorage, packs: params.packs, 
 				studyStageIds: params.studyStageIds));

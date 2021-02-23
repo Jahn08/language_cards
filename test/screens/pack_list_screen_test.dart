@@ -6,6 +6,7 @@ import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
+import 'package:language_cards/src/models/app_params.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../mocks/word_storage_mock.dart';
@@ -142,7 +143,11 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
             if (route == null)
                 return new MaterialPageRoute(
                     settings: settings,
-                    builder: (context) => new RootWidgetMock(child: new MainScreen())
+                    builder: (context) => new RootWidgetMock(
+						child: new MainScreen(new ContactsParams(
+							fbUserId: Randomiser.nextString()
+						))
+					)
                 );
             if (route is CardListRoute)
                 return new MaterialPageRoute(

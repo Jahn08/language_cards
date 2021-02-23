@@ -2,15 +2,20 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../router.dart';
+import '../models/app_params.dart';
 import '../widgets/bar_scaffold.dart';
 
 class MainScreen extends StatelessWidget {
 
+	final ContactsParams params;
+
+	MainScreen(this.params);
+
     @override
     Widget build(BuildContext context) {
 
-        return new BarScaffold('Language Cards',
-            showSettings: true,
+        return new BarScaffold.withSettings('Language Cards',
+			contactsParams: params,
             body: _buildMenu(context),
         );
     }

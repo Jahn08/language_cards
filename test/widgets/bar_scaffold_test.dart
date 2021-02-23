@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/app.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
+import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
@@ -230,7 +231,8 @@ void main() {
 	testWidgets('Changes the interface language immediately after applying the setting', 
         (tester) async {
             PreferencesTester.resetSharedPreferences();
-            await tester.pumpWidget(new App());
+			await tester.pumpWidget(new App());
+            await tester.pump();
             await tester.pump();
 			
             final settingsBtnFinder = _assureSettingsBtn(true);
@@ -248,7 +250,7 @@ void main() {
 
             final allTexts = tester.widgetList<Text>(
 				AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
-			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 1);
+			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 2);
         });
 }
 
@@ -266,9 +268,13 @@ Finder _assureSettingsBtn(bool shouldFind) =>
 
 Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async => 
     await _buildInsideApp(tester, new SettingsBlocProvider(
-        child: new BarScaffold(Randomiser.nextString(), 
+        child: new BarScaffold.withSettings(Randomiser.nextString(), 
             body: new Text(Randomiser.nextString()),
-            showSettings: true
+			contactsParams: new ContactsParams(
+				appStoreId: Randomiser.nextString(),
+				email: Randomiser.nextString(),
+				fbUserId: Randomiser.nextString()
+			)
         )
     ));
 

@@ -1,24 +1,25 @@
-import 'package:flutter/services.dart';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:flutter/services.dart';
+import 'package:language_cards/src/models/app_params.dart';
 
 class TestAssetBundle extends CachingAssetBundle {
-    static const String _secret_param_asset_key = 'assets/cfg/secret_params.json';
-    static const String _param_asset_key = 'assets/cfg/params.json';
+    static const String _secretParamAssetKey = 'assets/cfg/secret_params.json';
+    static const String _paramAssetKey = 'assets/cfg/params.json';
 
-    final Object _params;
-    final Object _secretParams;
+    final AppParams _params;
+    final AppParams _secretParams;
 
-    TestAssetBundle.params(Object params, { Object secretParams }): 
+    TestAssetBundle.params(AppParams params, { AppParams secretParams }): 
         _params = params, _secretParams = secretParams;
 
     @override
     Future<ByteData> load(String key) async {
-        if (key == _secret_param_asset_key) 
+        if (key == _secretParamAssetKey) 
             return _convertToBytes(_secretParams);
-        else if (key == _param_asset_key)
+        else if (key == _paramAssetKey)
             return _convertToBytes(_params);
-
+			
         return null;
     }
 
