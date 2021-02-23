@@ -1,5 +1,10 @@
 {
     "dictionary": {
         "api_key": ""
+    },
+    "contacts": {
+        "facebook": "",
+        "email": "",
+        "app_store_id": ""
     }
 }

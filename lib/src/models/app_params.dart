@@ -1,36 +1,67 @@
+import '../utilities/string_ext.dart';
+
 class DictionaryParams {
-    static const String _api_key_prop_name = 'api_key';
+    static const String _apiKeyPropName = 'api_key';
 
     final String apiKey;
 
     DictionaryParams({ this.apiKey });
 
     DictionaryParams.fromJson(Map<String, dynamic> json): 
-        apiKey = json[_api_key_prop_name];
+        apiKey = json[_apiKeyPropName];
 
-    DictionaryParams merge(DictionaryParams params) {
-        if (params?.apiKey == null || params.apiKey.isEmpty)
-            return new DictionaryParams(apiKey: apiKey);
+    DictionaryParams merge(DictionaryParams params) => 
+		new DictionaryParams(apiKey: valueOrDefault(params?.apiKey, apiKey));
 
-        return new DictionaryParams(apiKey: params.apiKey);
-    }
+    Map<String, dynamic> toJson() => { _apiKeyPropName: apiKey };
+}
 
-    Map<String, dynamic> toJson() => { _api_key_prop_name: apiKey };
+class ContactsParams {
+    static const String _fbLinkPropName = 'facebook';
+    static const String _emailPropName = 'email';
+	static const String _appStoreIdPropName = 'app_store_id';
+
+    final String fbLink;
+
+    final String email;
+
+    final String appStoreId;
+
+    ContactsParams({ this.fbLink, this.email, this.appStoreId });
+
+    ContactsParams.fromJson(Map<String, dynamic> json): 
+        fbLink = json[_fbLinkPropName],
+        appStoreId = json[_appStoreIdPropName],
+        email = json[_emailPropName];
+
+    ContactsParams merge(ContactsParams params) =>
+		new ContactsParams(
+			fbLink: valueOrDefault(params?.fbLink, fbLink),
+			email: valueOrDefault(params?.email, email),
+			appStoreId: valueOrDefault(params?.appStoreId, appStoreId)
+		);
+
+    Map<String, dynamic> toJson() => { _fbLinkPropName: fbLink };
 }
 
 class AppParams {
-    static const String _dictionary_prop_name = 'dictionary';
+    static const String _dictionaryPropName = 'dictionary';
+    static const String _contactsPropName = 'contacts';
 
     final DictionaryParams dictionary;
 
-    AppParams({ this.dictionary });
+    final ContactsParams contacts;
+
+    AppParams({ this.dictionary, this.contacts});
 
     AppParams.fromJson(Map<String, dynamic> json): 
-        dictionary = new DictionaryParams.fromJson(json[_dictionary_prop_name]);
+        dictionary = new DictionaryParams.fromJson(json[_dictionaryPropName]),
+		contacts = new ContactsParams.fromJson(json[_contactsPropName]);
 
     AppParams merge(AppParams params) {
-        return new AppParams(dictionary: params?.dictionary ?? dictionary);
+        return new AppParams(dictionary: params?.dictionary ?? dictionary,
+			contacts: params?.contacts ?? contacts);
     }
 
-    Map<String, dynamic> toJson() => {_dictionary_prop_name: dictionary };
+    Map<String, dynamic> toJson() => {_dictionaryPropName: dictionary };
 }
