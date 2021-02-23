@@ -3,7 +3,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import './data_group.dart';
 import '../models/stored_entity.dart';
-import '../utilities/joiner.dart';
+import '../utilities/string_ext.dart';
 
 class DbProvider {
 

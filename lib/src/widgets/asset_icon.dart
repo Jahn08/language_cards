@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/language.dart';
-import '../utilities/joiner.dart';
+import '../utilities/string_ext.dart';
 
 class AssetIcon extends Image {
     static const double widthValue = 40;

@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'dart:convert'show jsonDecode;
 import '../models/app_params.dart';
-import '../utilities/joiner.dart';
+import '../utilities/string_ext.dart';
 
 export '../models/app_params.dart';
 
