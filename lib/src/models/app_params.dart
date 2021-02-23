@@ -11,7 +11,7 @@ class DictionaryParams {
         apiKey = json[_apiKeyPropName];
 
     DictionaryParams merge(DictionaryParams params) => 
-		new DictionaryParams(apiKey: valueOrDefault(params?.apiKey, apiKey));
+		new DictionaryParams(apiKey: getValueOrDefault(params?.apiKey, apiKey));
 
     Map<String, dynamic> toJson() => { _apiKeyPropName: apiKey };
 }
@@ -36,9 +36,9 @@ class ContactsParams {
 
     ContactsParams merge(ContactsParams params) =>
 		new ContactsParams(
-			fbLink: valueOrDefault(params?.fbLink, fbLink),
-			email: valueOrDefault(params?.email, email),
-			appStoreId: valueOrDefault(params?.appStoreId, appStoreId)
+			fbLink: getValueOrDefault(params?.fbLink, fbLink),
+			email: getValueOrDefault(params?.email, email),
+			appStoreId: getValueOrDefault(params?.appStoreId, appStoreId)
 		);
 
     Map<String, dynamic> toJson() => { _fbLinkPropName: fbLink };
