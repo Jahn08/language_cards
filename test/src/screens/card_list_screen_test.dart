@@ -4,13 +4,13 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
-import '../mocks/pack_storage_mock.dart';
-import '../mocks/word_storage_mock.dart';
-import '../testers/dialog_tester.dart';
-import '../testers/list_screen_tester.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/localizator.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/word_storage_mock.dart';
+import '../../testers/dialog_tester.dart';
+import '../../testers/list_screen_tester.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
     final screenTester = _buildScreenTester();

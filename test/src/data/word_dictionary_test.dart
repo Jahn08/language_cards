@@ -3,8 +3,8 @@ import 'package:http/testing.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
-import '../utilities/http_responder.dart';
-import '../utilities/randomiser.dart';
+import '../../utilities/http_responder.dart';
+import '../../utilities/randomiser.dart';
 
 void main() {
     test('Returns a word article describing word translations and properties', () async {

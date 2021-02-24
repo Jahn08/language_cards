@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/dialogs/word_selector_dialog.dart';
-import '../testers/dialog_tester.dart';
-import '../testers/selector_dialog_tester.dart';
-import '../utilities/randomiser.dart';
+import '../../testers/dialog_tester.dart';
+import '../../testers/selector_dialog_tester.dart';
+import '../../utilities/randomiser.dart';
 
 void main() {
 

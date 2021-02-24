@@ -8,17 +8,17 @@ import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_screen.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
-import '../mocks/pack_storage_mock.dart';
-import '../mocks/root_widget_mock.dart';
-import '../mocks/speaker_mock.dart';
-import '../mocks/word_storage_mock.dart';
-import '../testers/cancellable_dialog_tester.dart';
-import '../testers/card_editor_tester.dart';
-import '../testers/dialog_tester.dart';
-import '../testers/preferences_tester.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/localizator.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../mocks/speaker_mock.dart';
+import '../../mocks/word_storage_mock.dart';
+import '../../testers/cancellable_dialog_tester.dart';
+import '../../testers/card_editor_tester.dart';
+import '../../testers/dialog_tester.dart';
+import '../../testers/preferences_tester.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
 

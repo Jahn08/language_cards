@@ -6,16 +6,16 @@ import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
-import '../mocks/pack_storage_mock.dart';
-import '../mocks/root_widget_mock.dart';
-import '../mocks/speaker_mock.dart';
-import '../mocks/word_storage_mock.dart';
-import '../testers/card_editor_tester.dart';
-import '../testers/dialog_tester.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/http_responder.dart';
-import '../utilities/randomiser.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../mocks/speaker_mock.dart';
+import '../../mocks/word_storage_mock.dart';
+import '../../testers/card_editor_tester.dart';
+import '../../testers/dialog_tester.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/http_responder.dart';
+import '../../utilities/randomiser.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
 

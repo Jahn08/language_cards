@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
-import '../testers/preferences_tester.dart';
+import '../../testers/preferences_tester.dart';
 
 void main() {
 

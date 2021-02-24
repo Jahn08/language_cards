@@ -7,13 +7,13 @@ import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/models/app_params.dart';
-import '../mocks/pack_storage_mock.dart';
-import '../mocks/root_widget_mock.dart';
-import '../mocks/word_storage_mock.dart';
-import '../testers/list_screen_tester.dart';
-import '../utilities/localizator.dart';
-import '../utilities/randomiser.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../mocks/word_storage_mock.dart';
+import '../../testers/list_screen_tester.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/randomiser.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
     final screenTester = new ListScreenTester('Pack', () => _buildPackListScreen());

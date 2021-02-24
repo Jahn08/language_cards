@@ -3,9 +3,9 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
-import '../mocks/root_widget_mock.dart';
-import '../utilities/randomiser.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../utilities/randomiser.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
     

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/dialog_opener.dart';
-import '../utilities/localizator.dart';
-import '../utilities/randomiser.dart';
-import '../utilities/widget_assistant.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/dialog_opener.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/randomiser.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
 

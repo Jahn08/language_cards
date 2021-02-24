@@ -4,11 +4,11 @@ import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
-import '../mocks/pack_storage_mock.dart';
-import '../mocks/root_widget_mock.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/localizator.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/widget_assistant.dart';
 
 main() {
 

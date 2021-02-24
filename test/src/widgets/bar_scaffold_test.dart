@@ -12,12 +12,12 @@ import 'package:language_cards/src/widgets/bar_scaffold.dart';
 import 'package:language_cards/src/widgets/icon_option.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import 'package:language_cards/src/widgets/styled_dropdown.dart';
-import '../mocks/root_widget_mock.dart';
-import '../testers/preferences_tester.dart';
-import '../utilities/assured_finder.dart';
-import '../utilities/localizator.dart';
-import '../utilities/randomiser.dart';
-import '../utilities/widget_assistant.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../testers/preferences_tester.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/localizator.dart';
+import '../../utilities/randomiser.dart';
+import '../../utilities/widget_assistant.dart';
 
 void main() {
 

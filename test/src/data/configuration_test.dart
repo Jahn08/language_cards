@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/models/app_params.dart';
-import '../mocks/root_widget_mock.dart';
-import '../utilities/test_asset_bundle.dart';
-import '../utilities/randomiser.dart';
+import '../../mocks/root_widget_mock.dart';
+import '../../utilities/test_asset_bundle.dart';
+import '../../utilities/randomiser.dart';
 
 void main() {
 
