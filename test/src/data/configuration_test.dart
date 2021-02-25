@@ -39,15 +39,26 @@ void main() {
 
      testWidgets('Loads configuration without secret parameteres', (tester) async {
         final expectedApiKey = Randomiser.nextString();
+        final expectedEmail = Randomiser.nextString();
+        final expectedFbUserId = Randomiser.nextString();
+        final expectedAppStoreId = Randomiser.nextString();
         
         AppParams params;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle.params(_buildAppParams(expectedApiKey)),
+			bundle: new TestAssetBundle.params(_buildAppParams(
+				expectedApiKey, 
+				appStoreId: expectedAppStoreId,
+				email: expectedEmail, 
+				fbUserId: expectedFbUserId
+			)),
 			child: new RootWidgetMock(onBuilding: (context) async =>
 				params = await Configuration.getParams(context, reload: true)),
 		));
 
         expect(params.dictionary?.apiKey, expectedApiKey);
+        expect(params.contacts?.appStoreId, expectedAppStoreId);
+        expect(params.contacts?.email, expectedEmail);
+        expect(params.contacts?.fbUserId, expectedFbUserId);
     });
 
     testWidgets('Throws an error when there is no configuration found', (tester) async {
