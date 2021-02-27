@@ -134,7 +134,7 @@
 
     "constsSelectAll": "Выбрать все",
     "@constsSelectAll": {},
-    "constsUnselectAll": "Снять выделение",
+    "constsUnselectAll": "Убрать все",
     "@constsUnselectAll": {},
     "constsEmptyValueValidationError": "Поле не может быть пустым",
     "@constsEmptyValueValidationError": {},
