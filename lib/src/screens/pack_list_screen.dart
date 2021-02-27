@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:language_cards/src/data/word_storage.dart';
 import './list_screen.dart';
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../router.dart';
+import '../utilities/pack_exporter.dart';
 import '../widgets/card_number_indicator.dart';
 import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
@@ -53,10 +55,10 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
 		final locale = AppLocalizations.of(context);
 		final jointNames = filledPackNames.join(', ');
-		final content = locale.packListScreenRemovingNonEmptyPacksDialogConfirmationContent(
+		final content = locale.packListScreenRemovingNonEmptyPacksDialogContent(
 			jointNames, StoredPack.noneName);
 		final outcome = await new ConfirmDialog(
-			title: locale.packListScreenRemovingNonEmptyPacksDialogConfirmationTitle, 
+			title: locale.packListScreenRemovingNonEmptyPacksDialogTitle, 
 			content: content, 
 			confirmationLabel: locale.constsRemovingItemButtonLabel
 		).show(context);
@@ -78,12 +80,49 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
 	@override
 	Future<Map<String, int>> getFilterIndexes() => widget.storage.groupByTextIndex();
+
+	@override
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
+		{ bool anySelected }) {
+        final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
+        options.add(new BottomNavigationBarItem(
+            label: anySelected ? 
+				locale.packListScreenBottomNavBarExportingActionLabel:
+				locale.packListScreenBottomNavBarImportingActionLabel,
+            icon: new Icon(Icons.import_export)
+        ));
+
+        return options;
+    }
+
+	@override
+    Future<bool> handleNavBarOption(int tappedIndex, Iterable<StoredPack> markedItems,
+        BuildContext scaffoldContext) async { 
+		final locale = AppLocalizations.of(scaffoldContext);
+
+		if (markedItems.isEmpty) {
+			// TODO: Logic of importing
+		}
+		else {
+			final exportFilePath = await new PackExporter(widget.cardStorage)
+				.export(markedItems.toList(), 'packs');
+
+			await new ConfirmDialog.ok(
+				title: locale.packListScreenExportingDialogTitle,
+				content: locale.packListScreenExportingDialogContent(exportFilePath)
+			).show(scaffoldContext);
+		}
+		
+        return true;
+    }
 }
 
 class PackListScreen extends ListScreen<StoredPack> {
     final BaseStorage<StoredPack> storage;
 
-    PackListScreen(this.storage);
+    final BaseStorage<StoredWord> cardStorage;
+
+    PackListScreen(this.storage, this.cardStorage);
 
     @override
     _PackListScreenState createState() => new _PackListScreenState();

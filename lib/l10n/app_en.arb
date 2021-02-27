@@ -177,10 +177,10 @@
     "mainScreenWordPacksMenuItemLabel": "Word Packs",
     "@mainScreenWordPacksMenuItemLabel": {},
 
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": "Removing Packs with Cards",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": {},
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationContent": "All the cards from {packNames} will be moved to the {nonePackName} pack. Continue?",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationContent": {
+    "packListScreenRemovingNonEmptyPacksDialogTitle": "Removing Packs with Cards",
+    "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
+    "packListScreenRemovingNonEmptyPacksDialogContent": "All the cards from {packNames} will be moved to the {nonePackName} pack. Continue?",
+    "@packListScreenRemovingNonEmptyPacksDialogContent": {
         "placeholders": {
             "packNames": {
                 "type": "String"
@@ -192,7 +192,21 @@
     }, 
     "packListScreenTitle": "Card Packs",
     "@packListScreenTitle": {},
-
+    "packListScreenBottomNavBarExportingActionLabel": "Export",
+    "@packListScreenBottomNavBarExportingActionLabel": {},
+    "packListScreenBottomNavBarImportingActionLabel": "Import",
+    "@packListScreenBottomNavBarImportingActionLabel": {},
+    "packListScreenExportingDialogTitle": "Exporting Packs",
+    "@packListScreenExportingDialogTitle": {},
+    "packListScreenExportingDialogContent": "The selected packs have been saved to {filePath}",
+    "@packListScreenExportingDialogContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
+  
     "packScreenHeadBarAddingPackTitle": "Add Pack",
     "@packScreenHeadBarAddingPackTitle": {},
     "packScreenHeadBarChangingPackTitle": "Change Pack",

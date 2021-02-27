@@ -177,10 +177,10 @@
     "mainScreenWordPacksMenuItemLabel": "Наборы карточек",
     "@mainScreenWordPacksMenuItemLabel": {},
 
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": "Удаление непустых наборов карточек",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationTitle": {},
-    "packListScreenRemovingNonEmptyPacksDialogConfirmationContent": "Все карточки из наборов {packNames} будут перенесены в набор '{nonePackName}'. Продолжить?",
-    "@packListScreenRemovingNonEmptyPacksDialogConfirmationContent": {
+    "packListScreenRemovingNonEmptyPacksDialogTitle": "Удаление непустых наборов карточек",
+    "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
+    "packListScreenRemovingNonEmptyPacksDialogContent": "Все карточки из наборов {packNames} будут перенесены в набор '{nonePackName}'. Продолжить?",
+    "@packListScreenRemovingNonEmptyPacksDialogContent": {
         "placeholders": {
             "packNames": {
                 "type": "String"
@@ -192,6 +192,20 @@
     }, 
     "packListScreenTitle": "Наборы карточек",
     "@packListScreenTitle": {},
+    "packListScreenBottomNavBarExportingActionLabel": "Экспорт",
+    "@packListScreenBottomNavBarExportingActionLabel": {},
+    "packListScreenBottomNavBarImportingActionLabel": "Импорт",
+    "@packListScreenBottomNavBarImportingActionLabel": {},
+    "packListScreenExportingDialogTitle": "Экспорт наборов карточек",
+    "@packListScreenExportingDialogTitle": {},
+    "packListScreenExportingDialogContent": "Выбранные наборы сохранены в {filePath}",
+    "@packListScreenExportingDialogContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
 
     "packScreenHeadBarAddingPackTitle": "Добавить набор",
     "@packScreenHeadBarAddingPackTitle": {},

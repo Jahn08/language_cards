@@ -71,7 +71,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                     else if (route is StudyModeRoute)
                         return _buildStudyScreen(context, route);
                         
-                    return new PackListScreen((route as PackListRoute).params.storage);
+					final packListParams = (route as PackListRoute).params;
+                    return new PackListScreen(packListParams.storage, packListParams.cardStorage);
                 })
             );
         });

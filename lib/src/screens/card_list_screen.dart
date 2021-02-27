@@ -71,8 +71,9 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale) {
-        final options = super.getNavBarOptions(allSelected, locale);
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale, 
+		{ bool anySelected }) {
+        final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
         options.add(new BottomNavigationBarItem(
             label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
             icon: new Icon(Icons.restore)

@@ -167,7 +167,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildBottomBar(AppLocalizations locale) {
         bool allSelected = _itemsMarkedInEditor.length == _removableItems.length;
-        final options = getNavBarOptions(allSelected, locale);
+		final options = getNavBarOptions(allSelected, locale, 
+			anySelected: _itemsMarkedInEditor.isNotEmpty);
         
         return new BottomNavigationBar(
             items: options,
@@ -208,7 +209,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                     }
                 }
                 else if (await handleNavBarOption(tappedIndex, 
-                    _itemsMarkedInEditor.values.map((e) => e.item), _scaffoldContext)) {
+					_itemsMarkedInEditor.values.map((e) => e.item), _scaffoldContext)) {
                     _itemsMarkedInEditor.clear();
                 }
             }
@@ -218,7 +219,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	Iterable<TItem> get _removableItems => _items.where((w) => isRemovableItem(w));
 
     @protected
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale) {
+    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
+		{ bool anySelected }) {
         final options = new List<BottomNavigationBarItem>();
         options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
             icon: new Icon(Icons.delete),

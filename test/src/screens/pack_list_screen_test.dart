@@ -132,7 +132,8 @@ void main() {
 }
 
 PackListScreen _buildPackListScreen([PackStorageMock storage]) => 
-    new PackListScreen(storage ?? new PackStorageMock());
+    new PackListScreen(storage ?? new PackStorageMock(), 
+		storage?.wordStorage ?? new WordStorageMock());
     
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
     final storage = new PackStorageMock();

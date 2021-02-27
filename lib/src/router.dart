@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import './models/stored_entity.dart';
 import './data/base_storage.dart';
 import './data/pack_storage.dart';
 import './data/study_storage.dart';
 import './data/word_storage.dart';
 
-class _StorageRouteArgs<T extends StoredEntity> {
-    final BaseStorage<T> storage;
+WordStorage _getCardStorageOrDefault(BaseStorage<StoredWord> storage) => 
+	storage ?? new WordStorage();
 
-    _StorageRouteArgs(this.storage);
-}
+PackStorage _getPackStorageOrDefault(BaseStorage<StoredPack> storage) => 
+	storage ?? new PackStorage();
 
-class _CardStorageRouteArgs extends _StorageRouteArgs<StoredWord> {
-    _CardStorageRouteArgs([WordStorage storage]): super(storage ?? new WordStorage());
+class _CardStorageRouteArgs {
+    final BaseStorage<StoredWord> storage;
+
+    _CardStorageRouteArgs([WordStorage storage]): 
+		storage = _getCardStorageOrDefault(storage);
 }
 
 class _CardListRouteArgs extends _CardStorageRouteArgs {
@@ -32,17 +34,27 @@ class CardListRoute {
         params = arguments is _CardListRouteArgs ? arguments : new _CardListRouteArgs();
 }
 
-class _PackStorageRouteArgs extends _StorageRouteArgs<StoredPack> {
+class _PackStorageRouteArgs {
+    final BaseStorage<StoredPack> storage;
 
     _PackStorageRouteArgs([PackStorage storage]): 
-        super(storage ?? new PackStorage());
+        storage = _getPackStorageOrDefault(storage);
+}
+
+class _PackStorageWithCardsRouteArgs extends _PackStorageRouteArgs {
+    final WordStorage cardStorage;
+
+    _PackStorageWithCardsRouteArgs([PackStorage storage, WordStorage cardStorage]):
+		cardStorage = _getCardStorageOrDefault(cardStorage),
+		super(storage);
 }
 
 class PackListRoute { 
-    final _PackStorageRouteArgs params;
+    final _PackStorageWithCardsRouteArgs params;
 
     PackListRoute.fromArguments(Object arguments): 
-        params = arguments is _PackStorageRouteArgs ? arguments : new _PackStorageRouteArgs();
+        params = arguments is _PackStorageWithCardsRouteArgs ? arguments : 
+			new _PackStorageWithCardsRouteArgs();
 }
 
 class _WordCardRouteArgs extends _CardStorageRouteArgs {
