@@ -68,15 +68,16 @@ class StoredWord extends StoredEntity {
     String get foreignTableName => StoredPack.entityName;
 
     @override
-    Map<String, dynamic> toDbMap() {
-        final map = super.toDbMap();
+    Map<String, dynamic> toDbMap({ bool excludeIds }) {
+        final map = super.toDbMap(excludeIds: excludeIds);
         map.addAll({
             textFieldName: text,
             transcriptionFieldName: transcription,
             partOfSpeechFieldName: partOfSpeech?.value,
             translationFieldName: translation,
             studyProgressFieldName: studyProgress,
-            packIdFieldName: packId
+            if (!excludeIds)
+				packIdFieldName: packId
         });
 
         return map;

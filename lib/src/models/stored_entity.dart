@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 
 abstract class StoredEntity {
@@ -25,7 +26,8 @@ abstract class StoredEntity {
     String get foreignTableName => null;
 
     @mustCallSuper
-    Map<String, dynamic> toDbMap() => { idFieldName: isNew ? null: id };
+    Map<String, dynamic> toDbMap({ bool excludeIds }) => 
+		(excludeIds ?? false) ? {}: { idFieldName: isNew ? null: id };
 
     String get tableExpr {
         const keyClause = '$idFieldName INTEGER PRIMARY KEY AUTOINCREMENT';
@@ -39,4 +41,6 @@ abstract class StoredEntity {
     String get columnsExpr;
 
 	String get textData;
+
+	String toJson() => jsonEncode(toDbMap(excludeIds: true));
 }

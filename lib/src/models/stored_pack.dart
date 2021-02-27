@@ -1,5 +1,6 @@
-import './language.dart';
-import './stored_entity.dart';
+import 'language.dart';
+import 'stored_entity.dart';
+import 'stored_word.dart';
 
 class StoredPack extends StoredEntity {
     static const entityName = 'Packs';
@@ -8,6 +9,8 @@ class StoredPack extends StoredEntity {
     static const fromFieldName = 'from_lang';
     static const toFieldName = 'to_lang';
     static const cardsNumFieldName = 'cards_num';
+
+    static const cardsFieldName = 'cards';
 
     static const String noneName = 'None'; 
 
@@ -43,8 +46,8 @@ class StoredPack extends StoredEntity {
     bool get isNone => name == noneName && id == null;
 
     @override
-    Map<String, dynamic> toDbMap() {
-        final map = super.toDbMap();
+    Map<String, dynamic> toDbMap({ bool excludeIds }) {
+        final map = super.toDbMap(excludeIds: excludeIds);
         map.addAll({
             nameFieldName: name,
             fromFieldName: from.index,
@@ -65,4 +68,11 @@ class StoredPack extends StoredEntity {
 
 	@override
 	String get textData => this.name;
+
+	Map<String, dynamic> toJsonMap(List<StoredWord> cards) {
+		final packProps = toDbMap(excludeIds: true);
+		packProps[cardsFieldName] = cards;
+
+		return packProps;
+	}
 }
