@@ -8,7 +8,11 @@ class DialogTester {
 	Finder assureDialog({ bool shouldFind }) => 
 		AssuredFinder.findOne(type: SimpleDialog, shouldFind: shouldFind);
 
-	static Finder findConfirmationDialog([String expectedLabel]) => 
+	static Finder findConfirmationDialogBtn([String expectedLabel]) => 
 		find.widgetWithText(RaisedButton, 
 			expectedLabel ?? Localizator.defaultLocalization.confirmDialogOkButtonLabel);
+
+	static AlertDialog findConfirmationDialog(WidgetTester tester, [String expectedLabel]) => 
+		tester.widget<AlertDialog>(find.ancestor(matching: find.byType(AlertDialog), 
+			of: findConfirmationDialogBtn(expectedLabel)));
 }

@@ -224,7 +224,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	}) async {
 		final btnLabel = shouldCancel ? 
 			Localizator.defaultLocalization.cancellableDialogCancellationButtonLabel: 'Remove';
-		final dialogBtnFinder = DialogTester.findConfirmationDialog(btnLabel);
+		final dialogBtnFinder = DialogTester.findConfirmationDialogBtn(btnLabel);
 
 		if (shouldNotWarn)
 			expect(dialogBtnFinder, findsNothing);

@@ -456,7 +456,7 @@ String _getShownCardText(WidgetTester tester) {
 }
 
 Finder _assureDialogBtnExistence(bool shouldFind) {
-	final dialogBtnFinder = DialogTester.findConfirmationDialog();
+	final dialogBtnFinder = DialogTester.findConfirmationDialogBtn();
 	expect(dialogBtnFinder, AssuredFinder.matchOne(shouldFind: shouldFind)); 
 
 	return dialogBtnFinder;

@@ -152,7 +152,7 @@ Finder _findRestoreBtn({ bool shouldFind }) =>
     AssuredFinder.findOne(icon: Icons.restore, shouldFind: shouldFind);
 
 Finder _findBtnByLabel(String label, { bool shouldFind = true }) {
-	final finder = DialogTester.findConfirmationDialog(label);
+	final finder = DialogTester.findConfirmationDialogBtn(label);
 	expect(finder, AssuredFinder.matchOne(shouldFind : shouldFind));
 
 	return finder;
