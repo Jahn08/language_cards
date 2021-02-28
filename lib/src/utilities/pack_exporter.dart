@@ -30,7 +30,8 @@ class PackExporter {
 			file = new File(
 				_compileFullFileName(dir.path, '${fileName}_${++postfix}'));
 	
-		return (await file.writeAsString(contents, flush: true)).path;
+		file.writeAsStringSync(contents, flush: true);
+		return file.path;
 	}
 
 	_compileFullFileName(String dirPath, String fileName) => 

@@ -10,7 +10,11 @@ import 'package:language_cards/src/models/app_params.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
+import '../../testers/dialog_tester.dart';
+import '../../testers/exporter_tester.dart';
 import '../../testers/list_screen_tester.dart';
+import '../../utilities/assured_finder.dart';
+import '../../utilities/fake_path_provider_platform.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
@@ -129,11 +133,40 @@ void main() {
 
 			await screenTester.deleteSelectedItems(assistant, shouldNotWarn: true);
 		});
+
+	testWidgets("Exports selected packs into a JSON-file and shows its path thereafter", (tester) async {
+		final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+
+		final assistant = new WidgetAssistant(tester);
+		await screenTester.activateEditorMode(assistant);
+		final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
+
+		final packsToExport = (await _fetchPacks(storage, tester))
+			.where((p) => selectedPackDic.containsValue(p.name)).toList();
+
+		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+			final exportBtnFinder = AssuredFinder.findOne(
+				icon: Icons.import_export, 
+				label: Localizator.defaultLocalization.packListScreenBottomNavBarExportingActionLabel, 
+				shouldFind: true
+			);
+			await assistant.tapWidget(exportBtnFinder);
+
+			final dialog = DialogTester.findConfirmationDialog(tester);
+			final exportFilePath = (dialog.content as Text).data.split(' ').last;
+			
+			final exporterTester = new ExporterTester(exportFilePath);
+			exporterTester.assertExportFileName('packs');
+			
+			await tester.runAsync(() => exporterTester.assertExportedPacks(storage, packsToExport));
+		});
+	});
 }
 
-PackListScreen _buildPackListScreen([PackStorageMock storage]) => 
-    new PackListScreen(storage ?? new PackStorageMock(), 
-		storage?.wordStorage ?? new WordStorageMock());
+PackListScreen _buildPackListScreen([PackStorageMock storage]) {
+	storage = storage ?? new PackStorageMock();
+	return new PackListScreen(storage, storage.wordStorage);
+}
     
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
     final storage = new PackStorageMock();

@@ -8,9 +8,11 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 
 	FakePathProviderPlatform._();
 
-	static testWithinPathProviderContext(Future<void> Function() tester) async {
+	static Future<void> testWithinPathProviderContext(Future<void> Function() tester) async {
 		FakePathProviderPlatform instance;
 		try {
+			_cleanResources();
+
 			instance = new FakePathProviderPlatform._();
 			PathProviderPlatform.instance = instance;
 
@@ -19,6 +21,15 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 		finally {
 			instance?.dispose();
 		}
+	}
+
+	static void _cleanResources() {
+		final rootDir = Directory(_rootFolderPath);
+
+		if (!rootDir.existsSync())
+			return;
+
+		rootDir.deleteSync(recursive: true);
 	}
 
 	@override
@@ -32,12 +43,5 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 		return Future.value(dir.path);
 	} 
 
-	dispose() {
-		final rootDir = Directory(_rootFolderPath);
-
-		if (!rootDir.existsSync())
-			return;
-
-		rootDir.deleteSync(recursive: true);
-	}
+	dispose() => _cleanResources();
 }
