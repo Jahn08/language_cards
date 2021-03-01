@@ -39,18 +39,30 @@ abstract class BaseStorage<T extends StoredEntity> {
 
     Future<void> closeConnection() => DbProvider.close();
 
-    Future<T> upsert(T entity) async {
-        if (entity.isNew)
-            entity.id = await connection.add(entityName, entity.toDbMap());
-        else
-            await update([entity]);
-        
-        return entity;         
-    }
+    Future<List<T>> upsert(List<T> entities) async =>
+		new List<T>.from(await _insert(entities.where((e) => e.isNew).toList()))
+			..addAll(await _update(entities.where((e) => !e.isNew).toList()));
+	
+    Future<List<T>> _insert(List<T> entities) async {
+		if (entities.isEmpty)
+			return entities;
 
-    Future<void> update(List<T> entities) async {
+        final ids = await connection.add(entityName, 
+            entities.map((w) => w.toDbMap()).toList());
+		int index = 0;
+		for (final id in ids)
+			entities[index++].id = id;
+
+		return entities;
+	}
+
+    Future<List<T>> _update(List<T> entities) async {
+		if (entities.isEmpty)
+			return entities;
+
         await connection.update(entityName, 
             entities.map((w) => w.toDbMap()).toList());
+		return entities;
     }
 
     Future<T> find(int id) async {

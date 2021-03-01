@@ -103,7 +103,7 @@ void main() {
 
             final words = await _fetchWords(tester, storage);
             words.forEach((w) => w.resetStudyProgress());
-            await storage.update(words);
+            await storage.upsert(words);
 
             await inScreenTester.pumpScreen(tester);
 
@@ -117,7 +117,7 @@ void main() {
         });
 }
 
-ListScreenTester _buildScreenTester([WordStorageMock storage, StoredPack pack]) => 
+ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, StoredPack pack]) => 
     new ListScreenTester('Card', 
 		() => new CardListScreen(storage ?? new WordStorageMock(), pack: pack));
 

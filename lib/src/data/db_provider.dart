@@ -95,24 +95,26 @@ class DbProvider {
             return creationCmds;
         }
 
-    Future<void> update(String tableName, List<Map<String, dynamic>> entities) async {
-        await _perform<void>(tableName, () async {
-                final batch = _db.batch();
-                entities.forEach((values) { 
-                    batch.update(tableName, 
-                        values, 
-                        where: '${StoredEntity.idFieldName}=?',
-                        whereArgs: [values[StoredEntity.idFieldName]]);
-                });
+    Future<void> update(String tableName, List<Map<String, dynamic>> entities) =>
+        _perform<void>(tableName, () async {
+			final batch = _db.batch();
+			entities.forEach((values) { 
+				batch.update(tableName, 
+					values, 
+					where: '${StoredEntity.idFieldName}=?',
+					whereArgs: [values[StoredEntity.idFieldName]]);
+			});
 
-                await batch.commit(noResult: true, continueOnError: false);
-            });
-        }
+			await batch.commit(noResult: true, continueOnError: false);
+		});
 
-    Future<int> add(String tableName, Map<String, dynamic> values) {
-        return _perform<int>(tableName, () async => 
-            _db.insert(tableName, values, conflictAlgorithm: ConflictAlgorithm.fail));
-    }
+    Future<List<int>> add(String tableName, List<Map<String, dynamic>> entities) =>
+        _perform(tableName, () async {
+			final batch = _db.batch();
+			entities.forEach((values) => batch.insert(tableName, values));
+			
+			return (await batch.commit(noResult: false, continueOnError: false)).cast<int>();
+		});
 
     Future<int> delete(String tableName, List<dynamic> ids) {
         return _perform<int>(tableName, 

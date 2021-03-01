@@ -76,7 +76,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 			new StoredWord(c.text, id: c.id, packId: null, 
 				partOfSpeech: c.partOfSpeech, studyProgress: c.studyProgress, 
 				transcription: c.transcription, translation: c.translation)).toList();
-		await wordStorage.update(updatedCards);
+		await wordStorage.upsert(updatedCards);
 
         return Future.value();
     }
@@ -92,9 +92,6 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     @override
     String get entityName => '';
 
-    @override
-    Future<void> update(List<StoredPack> packs) => _save(packs);
-  
     Future<List<StoredPack>> _save(List<StoredPack> packs) async {
         packs.forEach((pack) {
             if (pack.id == null)
@@ -110,8 +107,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     }
 
     @override
-    Future<StoredPack> upsert(StoredPack pack) async => 
-        (await _save([pack])).first;
+    Future<List<StoredPack>> upsert(List<StoredPack> packs) => _save(packs);
 
     @override
     Future<List<StudyPack>> fetchStudyPacks() async {

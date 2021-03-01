@@ -310,7 +310,7 @@ class _StudyScreenState extends State<StudyScreen> {
                     child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
                     onPressed: () async {
                         if (card.incrementProgress())
-                            await widget.storage.update([card]);
+                            await widget.storage.upsert([card]);
 
                         _setNextCard();
                     }

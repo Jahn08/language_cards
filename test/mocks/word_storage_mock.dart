@@ -90,13 +90,10 @@ class WordStorageMock extends WordStorage {
     @override
     String get entityName => '';
   
-    @override
-    Future<void> update(List<StoredWord> words) => _save(words);
-
     Future<List<StoredWord>> _save(List<StoredWord> words) {
         words.forEach((word) { 
             if (word.id == null)
-                word.id = _words.length;
+                word.id = _words.length + 1;
             else
 				_words.removeWhere((w) => w.id == word.id);
 
@@ -113,19 +110,20 @@ class WordStorageMock extends WordStorage {
         if (wordToUpdate == null)
             return null;
 
-        return upsert(new StoredWord(wordToUpdate.text,
+        final cards = await upsert([new StoredWord(wordToUpdate.text,
             id:  wordToUpdate.id,
             packId:  wordToUpdate.packId,
             studyProgress: studyProgress,
             partOfSpeech: wordToUpdate.partOfSpeech,
             transcription: wordToUpdate.transcription,
             translation: wordToUpdate.translation
-        ));
+        )]);
+
+		return cards.first;
     }
 
     @override
-    Future<StoredWord> upsert(StoredWord word) async => 
-        (await _save([word])).first;
+    Future<List<StoredWord>> upsert(List<StoredWord> cards) => _save(cards);
 
     @override
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) {

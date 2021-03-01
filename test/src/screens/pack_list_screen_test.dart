@@ -123,7 +123,7 @@ void main() {
 			await screenTester.pumpScreen(tester, (st) async {
 				final storage = st as PackStorageMock;
 
-				await tester.runAsync(() => storage.upsert(packWithoutCards));
+				await tester.runAsync(() => storage.upsert([packWithoutCards]));
 			});
 			
 			final assistant = new WidgetAssistant(tester);
@@ -262,7 +262,7 @@ Future<void> _testIncreasingNumberOfCards(WidgetTester tester,
 
     await tester.runAsync(() async {
         final randomWord = WordStorageMock.generateWord(packId: pack.id, hasNoPack: pack.isNone);
-        await storage.wordStorage.update([randomWord]);
+        await storage.wordStorage.upsert([randomWord]);
     });
 
     await _goBackToPackList(assistant, pack.name);

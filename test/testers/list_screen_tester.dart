@@ -526,7 +526,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			
 			final properLength = searcherModeThreshold + 5;
 			while (curLength <= properLength) {
-				await tester.runAsync(() => st.upsert(newEntityGetter(curLength)));
+				await tester.runAsync(() => st.upsert([newEntityGetter(curLength)]));
 				++curLength;
 			}
 		});

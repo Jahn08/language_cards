@@ -99,7 +99,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
         setState(() {
             itemsToReset.forEach((w) => w.resetStudyProgress());
-            widget.storage.update(itemsToReset);
+            widget.storage.upsert(itemsToReset);
         });
 
         Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(

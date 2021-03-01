@@ -200,8 +200,9 @@ class CardEditorState extends State<CardEditor> {
                         );
                         final cardWasAdded = wordToSave.isNew || 
                             widget.pack?.id != _pack.id;
-                        widget.afterSave?.call(await widget._wordStorage.upsert(wordToSave), 
-							_pack, cardWasAdded);
+                        widget.afterSave?.call(
+							(await widget._wordStorage.upsert([wordToSave])).first, _pack, cardWasAdded
+						);
                     }
                 )
             ]

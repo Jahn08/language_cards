@@ -137,7 +137,7 @@ class PackScreenState extends State<PackScreen> {
 
                 state.save();
 
-                afterSaving(await _storage.upsert(_buildPack()));
+                afterSaving((await _storage.upsert([_buildPack()])).first);
             }
         );
 }
