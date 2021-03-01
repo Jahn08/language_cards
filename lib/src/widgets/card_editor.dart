@@ -16,6 +16,7 @@ import '../utilities/speaker.dart';
 import '../widgets/english_phonetic_keyboard.dart';
 import '../widgets/keyboarded_field.dart';
 import '../widgets/loader.dart';
+import '../widgets/one_line_text.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
 import '../widgets/speaker_button.dart';
@@ -94,14 +95,14 @@ class CardEditorState extends State<CardEditor> {
         return new Form(
 			key: _key,
 			child: widget.card == null ? 
-				new FutureLoader(futureWord, (card) => _buildLayout(card, locale)): 
-				_buildLayout(widget.card, locale)
+				new FutureLoader(futureWord, (card) => _buildLayout(card, locale, context)): 
+				_buildLayout(widget.card, locale, context)
 		);
     }
 
     bool get _isNew => widget.wordId == null;
 
-	Widget _buildLayout(StoredWord foundWord, AppLocalizations locale) {
+	Widget _buildLayout(StoredWord foundWord, AppLocalizations locale, BuildContext context) {
 		if (foundWord != null && !foundWord.isNew && !_initialised) {
 			_initialised = true;
 
@@ -112,7 +113,7 @@ class CardEditorState extends State<CardEditor> {
 			_studyProgress = foundWord.studyProgress;
 		}
 
-		return _buildFormLayout(locale);
+		return _buildFormLayout(locale, context);
 	}
 
     Future<StoredWord> _retrieveWord() async {
@@ -128,7 +129,7 @@ class CardEditorState extends State<CardEditor> {
         return word;
     }
 
-    Widget _buildFormLayout(AppLocalizations locale) {
+    Widget _buildFormLayout(AppLocalizations locale, BuildContext context) {
 		if (_partOfSpeechDic == null)
 			_partOfSpeechDic = PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
 
@@ -153,25 +154,28 @@ class CardEditorState extends State<CardEditor> {
 					isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
-                new FlatButton.icon(
-                    icon: new Icon(Icons.folder_open),
-                    label: new Text(locale.cardEditorChoosingPackButtonLabel(_pack.name)),
-                    onPressed: () async {
-                        if (_futurePacks == null) {
-                            _futurePacks = widget._packStorage.fetch();
+				new FlatButton.icon(
+					icon: new Icon(Icons.folder_open),
+					label: new Container(
+						width: MediaQuery.of(context).size.width * 0.75,
+						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
+					),
+					onPressed: () async {
+						if (_futurePacks == null) {
+							_futurePacks = widget._packStorage.fetch();
 
 							if (widget.hideNonePack ?? false)
 								_futurePacks = _futurePacks.then(
 									(ps) => ps.where((p) => !p.isNone).toList());
 						}
-                        
-                        final chosenPack = await new PackSelectorDialog(context, _pack.id)
-                            .showAsync(_futurePacks);
+						
+						final chosenPack = await new PackSelectorDialog(context, _pack.id)
+							.showAsync(_futurePacks);
 
-                        if (chosenPack != null && chosenPack.name != _pack.name)
-                            setState(() => _setPack(chosenPack));
-                    }
-                ),
+						if (chosenPack != null && chosenPack.name != _pack.name)
+							setState(() => _setPack(chosenPack));
+					}
+				),	
                 if (this._studyProgress != WordStudyStage.unknown)
                     new FlatButton.icon(
                         icon: new Icon(Icons.restore),
