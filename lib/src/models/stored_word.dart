@@ -76,7 +76,7 @@ class StoredWord extends StoredEntity {
             partOfSpeechFieldName: partOfSpeech?.value,
             translationFieldName: translation,
             studyProgressFieldName: studyProgress,
-            if (!excludeIds)
+            if (!(excludeIds ?? false))
 				packIdFieldName: packId
         });
 
