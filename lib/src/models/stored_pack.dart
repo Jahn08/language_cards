@@ -10,7 +10,7 @@ class StoredPack extends StoredEntity {
     static const toFieldName = 'to_lang';
     static const cardsNumFieldName = 'cards_num';
 
-    static const cardsFieldName = 'cards';
+    static const _cardsFieldName = 'cards';
 
     static const String noneName = 'None'; 
 
@@ -71,8 +71,11 @@ class StoredPack extends StoredEntity {
 
 	Map<String, dynamic> toJsonMap(List<StoredWord> cards) {
 		final packProps = toDbMap(excludeIds: true);
-		packProps[cardsFieldName] = cards;
+		packProps[_cardsFieldName] = cards;
 
 		return packProps;
 	}
+
+	static MapEntry<StoredPack, List<dynamic>> fromJsonMap(Map<String, dynamic> obj) =>
+		new MapEntry(StoredPack.fromDbMap(obj), obj[StoredPack._cardsFieldName] as List<dynamic>);
 }

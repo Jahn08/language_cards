@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import '../mocks/pack_storage_mock.dart';
+import '../utilities/randomiser.dart';
 
 class ExporterTester {
 
@@ -27,14 +28,14 @@ class ExporterTester {
 			parentIds: packsToExport.map((p) => p.id).toList());
 
 		for (final obj in packObjs) {
-			final exportedPack = StoredPack.fromDbMap(obj);
+			final exportedPackWithCards = StoredPack.fromJsonMap(obj);
+			final exportedPack = exportedPackWithCards.key;
 			expect(exportedPack.id, null);
-
+			
 			final originalPack = packsToExport.singleWhere((p) => p.name == exportedPack.name);
-			expect(exportedPack.from, originalPack.from);
-			expect(exportedPack.to, originalPack.to);
+			assertPacksAreEqual(exportedPack, originalPack);	
 
-			final exportedCards = obj[StoredPack.cardsFieldName] as List<dynamic>;
+			final exportedCards = exportedPackWithCards.value;
 			final originalCards = packedCards.where((c) => c.packId == originalPack.id).toList();
 			expect(exportedCards.length, originalCards.length);
 
@@ -42,12 +43,34 @@ class ExporterTester {
 				final exportedCard = StoredWord.fromDbMap(jsonDecode(cardDescr));
 				expect(exportedCard.id, null);
 				expect(exportedCard.packId, null);
-
+				
 				final card = originalCards.singleWhere((c) => c.text == exportedCard.text);
-				expect(exportedCard.transcription, card.transcription);
-				expect(exportedCard.translation, card.translation);
-				expect(exportedCard.partOfSpeech, card.partOfSpeech);
+				assertCardsAreEqual(exportedCard, card);
 			});
 		}
+	}
+
+	static void assertPacksAreEqual(StoredPack actual, StoredPack expected) {
+		expect(actual.from, expected.from);
+		expect(actual.to, expected.to);
+	}
+
+	static void assertCardsAreEqual(StoredWord actual, StoredWord expected) {
+		expect(actual.transcription, expected.transcription);
+		expect(actual.translation, expected.translation);
+		expect(actual.partOfSpeech, expected.partOfSpeech);
+		expect(actual.studyProgress, expected.studyProgress);
+	}
+
+	static List<StoredPack> getPacksForExport(PackStorageMock packStorage) {
+		final firstPack = packStorage.getRandom();
+
+		StoredPack secondPack;
+		do {
+			secondPack = packStorage.getRandom();
+		} while (secondPack.id == firstPack.id);
+		
+		final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(9) + 99);
+		return [firstPack, secondPack, emptyPack];
 	}
 }

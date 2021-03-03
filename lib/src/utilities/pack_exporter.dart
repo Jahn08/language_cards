@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'string_ext.dart';
 import '../data/word_storage.dart';
+import '../models/stored_pack.dart';
 
 class PackExporter {
 
