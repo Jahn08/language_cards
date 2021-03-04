@@ -17,51 +17,23 @@ main() {
 			final packStorage = new PackStorageMock();
 			final packsToExport = ExporterTester.getPacksForExport(packStorage);
 			
-			final filePostfix = Randomiser.nextString();
-			final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-				.export(packsToExport, filePostfix);
+			final filePath = await new PackExporter(packStorage.wordStorage)
+				.export(packsToExport, Randomiser.nextString());
+			await new ExporterTester(filePath)
+				.assertImportedPacks(packStorage, packsToExport);
+		});
+	});
+
+	test('Imports a pack with no cards from a JSON-file', () async {
+		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+			final packStorage = new PackStorageMock();
+			final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(99) + 11);
 			
-			final outcome = await new PackImporter(packStorage, packStorage.wordStorage)
-				.import(expectedFilePath);
-			expect(outcome == null, false);
-			expect(outcome.length, packsToExport.length);
-			
-			final packedCards = await packStorage.wordStorage.fetchFiltered(
-				parentIds: packsToExport.map((p) => p.id).toList());
-			for (final originalPack in packsToExport) {
-				final importedPackObj = outcome.entries
-					.singleWhere((e) => e.key.name == originalPack.name);
-				final importedPack = importedPackObj.key;
-				expect(importedPack.isNew, false);
-				expect(importedPack.id == originalPack.id, false);
-				
-				ExporterTester.assertPacksAreEqual(importedPack, originalPack);
+			final packProps = emptyPack.toJsonMap(null);
+			packProps.removeWhere((_, val) => val == null);
 
-				final storedPack = await packStorage.find(importedPack.id);
-				ExporterTester.assertPacksAreEqual(importedPack, storedPack);
-
-				final importedCards = importedPackObj.value;
-				final originalCards = packedCards.where((c) => c.packId == originalPack.id).toList();
-				expect(importedCards.length, originalCards.length);
-
-				originalCards.forEach((originalCard) {
-					final importedCard = importedCards.singleWhere((c) => c.text == originalCard.text);
-					expect(importedCard.isNew, false);
-					expect(importedCard.id == originalCard.id, false);
-					expect(importedCard.packId, importedPack.id);
-					
-					ExporterTester.assertCardsAreEqual(importedCard, originalCard);
-				});
-			}
-
-			final storedCards = await packStorage.wordStorage.fetchFiltered(
-				parentIds: outcome.keys.map((c) => c.id).toList());
-			final importedCards = outcome.values.expand((cards) => cards);
-			expect(importedCards.length, storedCards.length);
-
-			storedCards.forEach((storedCard) => 
-				ExporterTester.assertCardsAreEqual(
-					importedCards.singleWhere((c) => c.id == storedCard.id), storedCard));
+			final filePath = await _writeToJsonFile([packProps]);
+			await new ExporterTester(filePath).assertImportedPacks(packStorage, [emptyPack]);
 		});
 	});
 
@@ -74,20 +46,24 @@ main() {
 
 	test('Imports nothing from a JSON-file with a wrong format', () async { 
 		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-			final dir = (await getExternalStorageDirectory()).path;
-
-			final jsonFileName = Randomiser.nextString() + '.json';
-			final jsonFile = new File(joinPaths([dir, jsonFileName]));
-			jsonFile.createSync(recursive: true);
+			final filePath = await _writeToJsonFile([Randomiser.nextString(), 
+				Randomiser.nextInt(), Randomiser.nextString()]);
 			
-			final randomObj = [Randomiser.nextString(), Randomiser.nextInt(),
-				Randomiser.nextString()];
-			jsonFile.writeAsStringSync(jsonEncode(randomObj), flush: true);
-
 			final packStorage = new PackStorageMock();
 			final outcome = await new PackImporter(packStorage, packStorage.wordStorage)
-				.import(jsonFile.path);
+				.import(filePath);
 			expect(outcome, null);
 		});
 	});
 }
+
+Future<String> _writeToJsonFile(dynamic obj) async {
+	final dir = (await getExternalStorageDirectory()).path;
+
+	final jsonFileName = Randomiser.nextString() + '.json';
+	final jsonFile = new File(joinPaths([dir, jsonFileName]));
+	jsonFile.createSync(recursive: true);
+
+	jsonFile.writeAsStringSync(jsonEncode(obj), flush: true);
+	return jsonFile.path;
+} 

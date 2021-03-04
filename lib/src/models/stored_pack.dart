@@ -77,5 +77,6 @@ class StoredPack extends StoredEntity {
 	}
 
 	static MapEntry<StoredPack, List<dynamic>> fromJsonMap(Map<String, dynamic> obj) =>
-		new MapEntry(StoredPack.fromDbMap(obj), obj[StoredPack._cardsFieldName] as List<dynamic>);
+		new MapEntry(StoredPack.fromDbMap(obj), 
+			(obj[StoredPack._cardsFieldName] ?? []) as List<dynamic>);
 }

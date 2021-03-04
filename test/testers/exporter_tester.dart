@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
+import 'package:language_cards/src/utilities/pack_importer.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
@@ -72,5 +73,51 @@ class ExporterTester {
 		
 		final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(9) + 99);
 		return [firstPack, secondPack, emptyPack];
+	}
+
+	Future<void> assertImportedPacks(
+		PackStorageMock packStorage, List<StoredPack> originalPacks
+	) async {
+		final imports = await new PackImporter(packStorage, packStorage.wordStorage)
+			.import(exportFilePath);
+		expect(imports == null, false);
+		expect(imports.length, originalPacks.length);
+
+		final packedCards = await packStorage.wordStorage.fetchFiltered(
+			parentIds: originalPacks.map((p) => p.id).toList());
+		for (final originalPack in originalPacks) {
+			final importedPackObj = imports.entries.singleWhere((e) => 
+				e.key.name == originalPack.name);
+			final importedPack = importedPackObj.key;
+			expect(importedPack.isNew, false);
+			expect(importedPack.id == originalPack.id, false);
+			
+			ExporterTester.assertPacksAreEqual(importedPack, originalPack);
+
+			final storedPack = await packStorage.find(importedPack.id);
+			ExporterTester.assertPacksAreEqual(importedPack, storedPack);
+
+			final importedCards = importedPackObj.value;
+			final originalCards = packedCards.where((c) => c.packId == originalPack.id).toList();
+			expect(importedCards.length, originalCards.length);
+
+			originalCards.forEach((originalCard) {
+				final importedCard = importedCards.singleWhere((c) => c.text == originalCard.text);
+				expect(importedCard.isNew, false);
+				expect(importedCard.id == originalCard.id, false);
+				expect(importedCard.packId, importedPack.id);
+				
+				ExporterTester.assertCardsAreEqual(importedCard, originalCard);
+			});
+		}
+
+		final storedCards = await packStorage.wordStorage.fetchFiltered(
+			parentIds: imports.keys.map((c) => c.id).toList());
+		final importedCards = imports.values.expand((cards) => cards);
+		expect(importedCards.length, storedCards.length);
+
+		storedCards.forEach((storedCard) => 
+			ExporterTester.assertCardsAreEqual(
+				importedCards.singleWhere((c) => c.id == storedCard.id), storedCard));
 	}
 }

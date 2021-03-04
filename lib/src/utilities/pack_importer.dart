@@ -8,7 +8,7 @@ class PackImporter {
 
 	final BaseStorage<StoredPack> packStorage;
 	
-	final WordStorage cardStorage;
+	final BaseStorage<StoredWord> cardStorage;
 	
 	PackImporter(this.packStorage, this.cardStorage);
 
@@ -40,8 +40,9 @@ class PackImporter {
 
 			return importedPackedCards;
 		}
-		catch (ex) {
-			print('A failure while reading an import file "$importFilePath": ${ex.toString()}');
+		catch (ex, stackTrace) {
+			print('A failure while reading an import file "$importFilePath": ${ex.toString()}; ' +
+				'stack trace: ${stackTrace.toString()}');
 			return null;
 		}
 	}
