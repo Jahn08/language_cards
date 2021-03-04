@@ -143,6 +143,15 @@
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
     
+    "importDialogTitle": "Импорт наборов",
+    "@importDialogTitle": {},
+    "importDialogImportBtnLabel": "Импорт",
+    "@importDialogImportBtnLabel": {},
+    "importDialogFileNameTextFieldLabel": "Файл импорта",
+    "@importDialogFileNameTextFieldLabel": {},
+    "importDialogFileSelectorBtnLabel": "Выбрать файл",
+    "@importDialogFileSelectorBtnLabel": {},
+
     "languageEnglishName": "английский",
     "@languageEnglishName": {},
     "languageRussianName": "русский",
@@ -196,7 +205,7 @@
     "@packListScreenBottomNavBarExportingActionLabel": {},
     "packListScreenBottomNavBarImportingActionLabel": "Импорт",
     "@packListScreenBottomNavBarImportingActionLabel": {},
-    "packListScreenExportingDialogTitle": "Экспорт наборов карточек",
+    "packListScreenExportingDialogTitle": "Статус экспорта",
     "@packListScreenExportingDialogTitle": {},
     "packListScreenExportingDialogContent": "Выбранные наборы сохранены в {filePath}",
     "@packListScreenExportingDialogContent": {
@@ -206,6 +215,26 @@
             }
         }
     },
+    "packListScreenImportDialogTitle": "Статус импорта",
+    "@packListScreenImportDialogTitle": {}, 
+    "packListScreenImportDialogContent": "Импортировано из {filePath}: наборов - {packsNumber}, карточек - {cardsNumber}",
+    "@packListScreenImportDialogContent": {
+        "placeholders": {
+            "packsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "cardsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
+    "packListScreenImportDialogWrongFormatContent": "Не удалось произвести импорт: формат файла некорректный",
+    "@packListScreenImportDialogWrongFormatContent": {}, 
 
     "packScreenHeadBarAddingPackTitle": "Добавить набор",
     "@packScreenHeadBarAddingPackTitle": {},

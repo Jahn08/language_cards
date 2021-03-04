@@ -142,7 +142,16 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Remove",
     "@constsRemovingItemButtonLabel": {},
-    
+
+    "importDialogTitle": "Importing Packs",
+    "@importDialogTitle": {},
+    "importDialogImportBtnLabel": "Import",
+    "@importDialogImportBtnLabel": {},
+    "importDialogFileNameTextFieldLabel": "Import File",
+    "@importDialogFileNameTextFieldLabel": {},
+    "importDialogFileSelectorBtnLabel": "Choose File",
+    "@importDialogFileSelectorBtnLabel": {},
+
     "languageEnglishName": "English",
     "@languageEnglishName": {},
     "languageRussianName": "Russian",
@@ -196,7 +205,7 @@
     "@packListScreenBottomNavBarExportingActionLabel": {},
     "packListScreenBottomNavBarImportingActionLabel": "Import",
     "@packListScreenBottomNavBarImportingActionLabel": {},
-    "packListScreenExportingDialogTitle": "Exporting Packs",
+    "packListScreenExportingDialogTitle": "Export Status",
     "@packListScreenExportingDialogTitle": {},
     "packListScreenExportingDialogContent": "The selected packs have been saved to {filePath}",
     "@packListScreenExportingDialogContent": {
@@ -206,6 +215,26 @@
             }
         }
     },
+    "packListScreenImportDialogTitle": "Import Status",
+    "@packListScreenImportDialogTitle": {}, 
+    "packListScreenImportDialogContent": "{packsNumber} packs and {cardsNumber} cards have been imported from {filePath}",
+    "@packListScreenImportDialogContent": {
+        "placeholders": {
+            "packsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "cardsNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
+    "packListScreenImportDialogWrongFormatContent": "Nothing has been imported: the file is of an incorrect format",
+    "@packListScreenImportDialogWrongFormatContent": {}, 
   
     "packScreenHeadBarAddingPackTitle": "Add Pack",
     "@packScreenHeadBarAddingPackTitle": {},

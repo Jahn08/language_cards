@@ -152,7 +152,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	Widget _buildSearchDoneButton() => new IconButton(
         onPressed: () {
-			_refetchItems();
+			refetchItems();
 
             setState(() => _isSearchMode = false);
         },
@@ -279,7 +279,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildFilterIndex(BuildContext context, String index) {
 		final textBtn = new TextButton(
-			onPressed: () => _refetchItems(index), 
+			onPressed: () => refetchItems(text: index), 
 			child: new Text(index)
 		);
 
@@ -294,8 +294,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		return textBtn;
     }
 
-	void _refetchItems([String text]) {
-		if (_curFilterIndex == text)
+	@protected
+	void refetchItems({ String text, bool isForceful }) {
+		if (!(isForceful ?? false) && _curFilterIndex == text)
 			return;
 
 		_deleteEmptyFilterIndex();

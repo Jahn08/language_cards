@@ -5,6 +5,7 @@ import './list_screen.dart';
 import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../dialogs/confirm_dialog.dart';
+import '../dialogs/import_dialog.dart';
 import '../router.dart';
 import '../utilities/pack_exporter.dart';
 import '../widgets/card_number_indicator.dart';
@@ -101,7 +102,27 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		final locale = AppLocalizations.of(scaffoldContext);
 
 		if (markedItems.isEmpty) {
-			// TODO: Logic of importing
+			final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
+				.show(scaffoldContext);
+
+			if (outcome == null)
+				return true;
+			else if (outcome.packsWithCards == null) {
+				await new ConfirmDialog.ok(
+					title: locale.packListScreenImportDialogTitle,
+					content: locale.packListScreenImportDialogWrongFormatContent
+				).show(scaffoldContext);
+				return true;
+			}
+
+			final packsWithCards = outcome.packsWithCards;
+			await new ConfirmDialog.ok(
+				title: locale.packListScreenImportDialogTitle,
+				content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
+					packsWithCards.values.expand((c) => c).length, outcome.filePath)
+			).show(scaffoldContext);
+
+			super.refetchItems(isForceful: true);
 		}
 		else {
 			final exportFilePath = await new PackExporter(widget.cardStorage)
