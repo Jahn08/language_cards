@@ -470,8 +470,8 @@ Future<void> _activateImport(WidgetAssistant assistant, String importFilePath) a
 Finder _findImportExportAction({ bool isExport, bool shouldFind }) {
 	final locale = Localizator.defaultLocalization;
 	return AssuredFinder.findOne(icon: Icons.import_export, 
-		label: isExport ? locale.packListScreenBottomNavBarExportingActionLabel:
-			locale.packListScreenBottomNavBarImportingActionLabel, 
+		label: isExport ? locale.packListScreenBottomNavBarExportActionLabel:
+			locale.packListScreenBottomNavBarImportActionLabel, 
 		shouldFind:  shouldFind);
 }
 

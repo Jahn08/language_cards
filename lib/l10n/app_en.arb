@@ -203,14 +203,14 @@
     }, 
     "packListScreenTitle": "Card Packs",
     "@packListScreenTitle": {},
-    "packListScreenBottomNavBarExportingActionLabel": "Export",
-    "@packListScreenBottomNavBarExportingActionLabel": {},
-    "packListScreenBottomNavBarImportingActionLabel": "Import",
-    "@packListScreenBottomNavBarImportingActionLabel": {},
-    "packListScreenExportingDialogTitle": "Export Status",
-    "@packListScreenExportingDialogTitle": {},
-    "packListScreenExportingDialogContent": "The selected packs have been saved to {filePath}",
-    "@packListScreenExportingDialogContent": {
+    "packListScreenBottomNavBarExportActionLabel": "Export",
+    "@packListScreenBottomNavBarExportActionLabel": {},
+    "packListScreenBottomNavBarImportActionLabel": "Import",
+    "@packListScreenBottomNavBarImportActionLabel": {},
+    "packListScreenExportDialogTitle": "Export Status",
+    "@packListScreenExportDialogTitle": {},
+    "packListScreenExportDialogContent": "The selected packs have been saved to {filePath}",
+    "@packListScreenExportDialogContent": {
         "placeholders": {
             "filePath": {
                 "type": "String"

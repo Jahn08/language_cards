@@ -88,8 +88,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
         options.add(new BottomNavigationBarItem(
             label: anySelected ? 
-				locale.packListScreenBottomNavBarExportingActionLabel:
-				locale.packListScreenBottomNavBarImportingActionLabel,
+				locale.packListScreenBottomNavBarExportActionLabel:
+				locale.packListScreenBottomNavBarImportActionLabel,
             icon: new Icon(Icons.import_export)
         ));
 
@@ -129,8 +129,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 				.export(markedItems.toList(), 'packs');
 
 			await new ConfirmDialog.ok(
-				title: locale.packListScreenExportingDialogTitle,
-				content: locale.packListScreenExportingDialogContent(exportFilePath)
+				title: locale.packListScreenExportDialogTitle,
+				content: locale.packListScreenExportDialogContent(exportFilePath)
 			).show(scaffoldContext);
 		}
 		

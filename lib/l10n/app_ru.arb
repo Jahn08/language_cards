@@ -203,14 +203,14 @@
     }, 
     "packListScreenTitle": "Наборы карточек",
     "@packListScreenTitle": {},
-    "packListScreenBottomNavBarExportingActionLabel": "Экспорт",
-    "@packListScreenBottomNavBarExportingActionLabel": {},
-    "packListScreenBottomNavBarImportingActionLabel": "Импорт",
-    "@packListScreenBottomNavBarImportingActionLabel": {},
-    "packListScreenExportingDialogTitle": "Статус экспорта",
-    "@packListScreenExportingDialogTitle": {},
-    "packListScreenExportingDialogContent": "Выбранные наборы сохранены в {filePath}",
-    "@packListScreenExportingDialogContent": {
+    "packListScreenBottomNavBarExportActionLabel": "Экспорт",
+    "@packListScreenBottomNavBarExportActionLabel": {},
+    "packListScreenBottomNavBarImportActionLabel": "Импорт",
+    "@packListScreenBottomNavBarImportActionLabel": {},
+    "packListScreenExportDialogTitle": "Статус экспорта",
+    "@packListScreenExportDialogTitle": {},
+    "packListScreenExportDialogContent": "Выбранные наборы сохранены в {filePath}",
+    "@packListScreenExportDialogContent": {
         "placeholders": {
             "filePath": {
                 "type": "String"
