@@ -149,6 +149,8 @@
     "@importDialogImportBtnLabel": {},
     "importDialogFileNameTextFieldLabel": "Import File",
     "@importDialogFileNameTextFieldLabel": {},
+    "importDialogFileNameTextFieldValidationError": "The extension of an import file must be json",
+    "@importDialogFileNameTextFieldValidationError": {},
     "importDialogFileSelectorBtnLabel": "Choose File",
     "@importDialogFileSelectorBtnLabel": {},
 
@@ -233,8 +235,14 @@
             }
         }
     },
-    "packListScreenImportDialogWrongFormatContent": "Nothing has been imported: the file is of an incorrect format",
-    "@packListScreenImportDialogWrongFormatContent": {}, 
+    "packListScreenImportDialogWrongFormatContent": "Nothing has been imported: a file '{filePath}' is not found or of an incorrect format",
+    "@packListScreenImportDialogWrongFormatContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            }
+        }
+    }, 
   
     "packScreenHeadBarAddingPackTitle": "Add Pack",
     "@packScreenHeadBarAddingPackTitle": {},

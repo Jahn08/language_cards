@@ -110,7 +110,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 			else if (outcome.packsWithCards == null) {
 				await new ConfirmDialog.ok(
 					title: locale.packListScreenImportDialogTitle,
-					content: locale.packListScreenImportDialogWrongFormatContent
+					content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
 				).show(scaffoldContext);
 				return true;
 			}

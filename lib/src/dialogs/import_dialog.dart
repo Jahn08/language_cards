@@ -9,6 +9,8 @@ import '../widgets/styled_text_field.dart';
 import 'cancellable_dialog.dart';
 
 class _ImportFormDialogState extends State<_ImportFormDialog> {
+	static const String _jsonExtension = 'json';
+
     final _key = new GlobalKey<FormState>();
 
 	String _importFilePath;
@@ -50,13 +52,16 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 						onChanged: (value, _) => setState(() => this._importFilePath = value),
 						initialValue: this._importFilePath,
 						isRequired: true,
-						readonly: true
+						validator: (val) {
+							return val == null || val.toLowerCase().endsWith('.$_jsonExtension') ?
+								null: locale.importDialogFileNameTextFieldValidationError;
+						},
 					),
 					new RaisedButton(
 						child: new Text(locale.importDialogFileSelectorBtnLabel),
 						onPressed: () async {
 							final fileResult = await FilePicker.platform.pickFiles(
-								allowedExtensions: ['json'],
+								allowedExtensions: [_jsonExtension],
 								type: FileType.custom,
 								withData: true
 							);

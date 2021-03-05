@@ -149,6 +149,8 @@
     "@importDialogImportBtnLabel": {},
     "importDialogFileNameTextFieldLabel": "Файл импорта",
     "@importDialogFileNameTextFieldLabel": {},
+    "importDialogFileNameTextFieldValidationError": "Расширение файла импорта должно быть json",
+    "@importDialogFileNameTextFieldValidationError": {},
     "importDialogFileSelectorBtnLabel": "Выбрать файл",
     "@importDialogFileSelectorBtnLabel": {},
 
@@ -233,8 +235,14 @@
             }
         }
     },
-    "packListScreenImportDialogWrongFormatContent": "Не удалось произвести импорт: формат файла некорректный",
-    "@packListScreenImportDialogWrongFormatContent": {}, 
+    "packListScreenImportDialogWrongFormatContent": "Не удалось произвести импорт: файл '{filePath}' не найден или его формат некорректный",
+    "@packListScreenImportDialogWrongFormatContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
 
     "packScreenHeadBarAddingPackTitle": "Добавить набор",
     "@packScreenHeadBarAddingPackTitle": {},

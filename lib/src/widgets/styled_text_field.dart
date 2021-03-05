@@ -58,7 +58,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
                 if (widget.isRequired && (text == null || text.isEmpty))
                     return locale.constsEmptyValueValidationError;
 
-                return null;
+                return widget.validator?.call(text) ?? null;
             },
             controller: _controller
         );
@@ -90,8 +90,11 @@ class StyledTextField extends StatefulWidget {
 
     final String initialValue;
 
+	final String Function(String) validator;
+
     StyledTextField(this.label, { Key key, bool isRequired, 
-        Function(String value, bool submitted) onChanged, bool readonly, this.initialValue }): 
+        Function(String value, bool submitted) onChanged, bool readonly, 
+		this.initialValue, this.validator }): 
         isRequired = isRequired ?? false,
         readonly = readonly ?? false,
         _onChanged = onChanged,
