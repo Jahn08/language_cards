@@ -4,6 +4,20 @@ import 'string_ext.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 
+class ImportException {
+	
+	final String importFilePath;
+
+	final StackTrace trace;
+
+	final Error error;
+
+	ImportException(this.importFilePath, this.error, this.trace);
+
+	toString() => 'A failure while reading an import file "$importFilePath": ${error.toString()}; ' +
+		'stack trace: ${trace.toString()}';
+}
+
 class PackImporter {
 
 	final BaseStorage<StoredPack> packStorage;
@@ -41,9 +55,7 @@ class PackImporter {
 			return importedPackedCards;
 		}
 		catch (ex, stackTrace) {
-			print('A failure while reading an import file "$importFilePath": ${ex.toString()}; ' +
-				'stack trace: ${stackTrace.toString()}');
-			return null;
+			throw new ImportException(importFilePath, ex, stackTrace);
 		}
 	}
 }

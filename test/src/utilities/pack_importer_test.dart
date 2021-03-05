@@ -32,7 +32,7 @@ main() {
 		});
 	});
 
-	test('Imports nothing from a non-existent file', () async { 
+	test('Imports nothing from a non-existent file', () async {
 		final packStorage = new PackStorageMock();
 		final outcome = await new PackImporter(packStorage, packStorage.wordStorage)
 			.import(Randomiser.nextString());
@@ -43,11 +43,20 @@ main() {
 		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
 			final filePath = await ExporterTester.writeToJsonFile([Randomiser.nextString(), 
 				Randomiser.nextInt(), Randomiser.nextString()]);
+
+			ImportException err;
 			
-			final packStorage = new PackStorageMock();
-			final outcome = await new PackImporter(packStorage, packStorage.wordStorage)
-				.import(filePath);
-			expect(outcome, null);
+			try {
+				final packStorage = new PackStorageMock();
+				await new PackImporter(packStorage, packStorage.wordStorage)
+					.import(filePath);
+				fail('The $PackImporter should have failed');
+			}
+			on ImportException catch (ex) {
+				err = ex;
+			}
+		
+			expect(err == null, false);
 		});
 	});
 }

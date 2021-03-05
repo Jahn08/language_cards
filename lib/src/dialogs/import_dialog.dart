@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
@@ -111,7 +112,15 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
             builder: (buildContext) => new _ImportFormDialog(
 				buildCancelBtn(context, null),
 				(filePath) async {
-					final outcome = await new PackImporter(packStorage, cardStorage).import(filePath);
+					Map<StoredPack, List<StoredWord>> outcome;
+					try {
+						outcome = await new PackImporter(packStorage, cardStorage).import(filePath);
+					}
+					on ImportException catch (ex) {
+						if (!Platform.environment.containsKey('FLUTTER_TEST'))
+							print(ex.toString());
+					}
+
 					returnResult(context, new ImportDialogResult(filePath, outcome));
 				}
 			)
