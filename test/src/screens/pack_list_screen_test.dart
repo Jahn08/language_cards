@@ -7,6 +7,9 @@ import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/models/app_params.dart';
+import 'package:language_cards/src/utilities/pack_exporter.dart';
+import 'package:language_cards/src/widgets/card_number_indicator.dart';
+import 'package:language_cards/src/widgets/translation_indicator.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
@@ -27,21 +30,21 @@ void main() {
     testWidgets("Doesn't update a number of cards for a pack without changes in it", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
-        final packWithCards = await _getFirstPackWithCards(storage, tester);
+        final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
         await _testShowingCardsWithoutChanging(tester, storage, packWithCards);
     });
 
     testWidgets("Decreases a number of cards for a pack after deleting one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
-        final packWithCards = await _getFirstPackWithCards(storage, tester);
+        final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
         await _testDecreasingNumberOfCards(tester, storage, packWithCards);
     });
 
     testWidgets("Increases a number of cards for a pack after adding one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
 
-        final packWithCards = await _getFirstPackWithCards(storage, tester);
+        final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
         await _testIncreasingNumberOfCards(tester, storage, packWithCards);
     });
 
@@ -134,6 +137,22 @@ void main() {
 			await screenTester.deleteSelectedItems(assistant, shouldNotWarn: true);
 		});
 
+	testWidgets("Changes the export/import action when selecting/unselecting packs respectively", 
+		(tester) async {
+			await screenTester.pumpScreen(tester);
+	
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+	
+			_findImportExportAction(isExport: false, shouldFind: true);
+			_findImportExportAction(isExport: true, shouldFind: false);
+
+			await screenTester.selectSomeItemsInEditor(assistant);
+	
+			_findImportExportAction(isExport: true, shouldFind: true);
+			_findImportExportAction(isExport: false, shouldFind: false);
+		});
+
 	testWidgets("Exports selected packs into a JSON-file and shows its path thereafter", (tester) async {
 		final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
 
@@ -145,11 +164,7 @@ void main() {
 			.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
 		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-			final exportBtnFinder = AssuredFinder.findOne(
-				icon: Icons.import_export, 
-				label: Localizator.defaultLocalization.packListScreenBottomNavBarExportingActionLabel, 
-				shouldFind: true
-			);
+			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 			await assistant.tapWidget(exportBtnFinder);
 
 			final dialog = DialogTester.findConfirmationDialog(tester);
@@ -160,6 +175,66 @@ void main() {
 			
 			await tester.runAsync(() => exporterTester.assertExportedPacks(storage, packsToExport));
 		});
+	});
+
+	testWidgets("Warns about a non-existent file when trying to import packs from it", (tester) async {
+		await screenTester.pumpScreen(tester);
+		final assistant = new WidgetAssistant(tester);
+
+		await screenTester.activateEditorMode(assistant);
+		
+		final importFilePath = Randomiser.nextString() + '.json';
+		await _activateImport(assistant, importFilePath);
+
+		final importInfo = _findConfirmationDialogText(tester);
+		final locale = Localizator.defaultLocalization;
+		expect(importInfo, locale.packListScreenImportDialogWrongFormatContent(importFilePath));
+	});
+
+	testWidgets("Warns about a file of an incorrect format when trying to import packs from it", 
+		(tester) async {
+			await screenTester.pumpScreen(tester);
+
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			
+			await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+				final importFilePath = await ExporterTester.writeToJsonFile([
+					Randomiser.nextInt(), Randomiser.nextString(), Randomiser.nextInt()]);
+				await _activateImport(assistant, importFilePath);
+
+				final importInfo = _findConfirmationDialogText(tester);
+				final locale = Localizator.defaultLocalization;
+				expect(importInfo, locale.packListScreenImportDialogWrongFormatContent(importFilePath));
+			});
+		});
+
+	testWidgets("Imports packs from a JSON-file and shows the newly added packs with and the result of the operation", 
+		(tester) async {
+			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+			final assistant = new WidgetAssistant(tester);
+
+			await _testImportingPacks(assistant, storage, screenTester);
+
+			await screenTester.deactivateEditorMode(assistant);
+		});
+	
+	testWidgets("Imports packs and turns off an active search mode", (tester) async {
+		final storage = new PackStorageMock();
+	    final inScreenTester = new ListScreenTester('Pack', () => _buildPackListScreen(storage));
+
+		final indexes = await inScreenTester.testSwitchingToSearchMode(tester, 
+			newEntityGetter: PackStorageMock.generatePack, 
+			shouldKeepInSearchMode: true
+		);
+
+		final assistant = new WidgetAssistant(tester);
+		await _testImportingPacks(assistant, storage, inScreenTester);
+
+		inScreenTester.findSearcherEndButton(shouldFind: false);
+		inScreenTester.assureFilterIndexes(indexes, shouldFind: false);
+
+		await inScreenTester.deactivateEditorMode(assistant);
 	});
 }
 
@@ -213,14 +288,12 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
     return storage;
 }
 
-Future<StoredPack> _getFirstPackWithCards(PackStorageMock storage, WidgetTester tester) async =>
-	(await _fetchPacks(storage, tester)).firstWhere(_whereFirstPackWithCards);
+Future<StoredPack> _getFirstPackWithEnoughCards(PackStorageMock storage, WidgetTester tester) async =>
+	(await _fetchPacks(storage, tester))
+		.firstWhere((p) => p.cardsNumber > 0 && p.cardsNumber < 8 && p.name != StoredPack.noneName);
 
 Future<List<StoredPack>> _fetchPacks(PackStorageMock storage, WidgetTester tester) =>    
 	tester.runAsync<List<StoredPack>>(() => storage.fetch());
-
-bool _whereFirstPackWithCards(StoredPack p) => 
-	p.cardsNumber > 0 && p.name != StoredPack.noneName;
 
 Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
     PackStorageMock storage, StoredPack pack) async {
@@ -328,3 +401,81 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 
 Future<StoredPack> _getNonePack(PackStorageMock storage, WidgetTester tester) async => 
 	(await _fetchPacks(storage, tester)).firstWhere((p) => p.name == StoredPack.noneName);
+
+Future<void> _testImportingPacks(
+	WidgetAssistant assistant, PackStorageMock storage, ListScreenTester screenTester
+) async {
+	final tester = assistant.tester;
+	final packsToExport = ExporterTester.getPacksForExport(storage, onlyExistent: true);
+		
+	await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+		final importFilePath = await tester.runAsync(() =>
+			new PackExporter(storage.wordStorage).export(packsToExport, Randomiser.nextString()));
+
+		await screenTester.activateEditorMode(assistant);
+		
+		await _activateImport(assistant, importFilePath);
+
+		final importInfo = _findConfirmationDialogText(tester);
+		expect(importInfo.contains(packsToExport.length.toString()), true);
+		expect(importInfo.contains(importFilePath), true);
+
+		final storedCards = await tester.runAsync(() => storage.wordStorage.fetchFiltered(
+			parentIds: packsToExport.map((p) => p.id).toList()));
+		expect(importInfo.contains(storedCards.length.toString()), true);
+
+		await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
+
+		for (final importedPack in packsToExport..sort((a, b) => a.name.compareTo(b.name))) {
+			await assistant.scrollUntilVisible(find.text(importedPack.name), CheckboxListTile);
+
+			final matcher = findsNWidgets(2);
+			final packNameFinders =	find.text(importedPack.name, skipOffstage: false);
+			expect(packNameFinders, matcher);
+			
+			final packTileFinders = find.ancestor(of: packNameFinders, 
+				matching: find.byType(CheckboxListTile, skipOffstage: false));
+			expect(packTileFinders, matcher);
+			
+			final cardsNumberIndicators = tester.widgetList<CardNumberIndicator>(find.descendant(
+				of: packTileFinders, 
+				matching: find.byType(CardNumberIndicator, skipOffstage: false)
+			));
+			cardsNumberIndicators.forEach((i) => i.number == importedPack.cardsNumber);
+
+			final langIndicators = tester.widgetList<TranslationIndicator>(
+				find.descendant(of: packTileFinders, 
+				matching: find.byType(TranslationIndicator, skipOffstage: false)
+			));
+			langIndicators.forEach((i) {
+				expect(i.from, importedPack.from);
+				expect(i.to, importedPack.to);
+			});
+		}
+	});
+}
+
+Future<void> _activateImport(WidgetAssistant assistant, String importFilePath) async {			
+	final importBtnFinder = _findImportExportAction(isExport: false, shouldFind: true);
+	await assistant.tapWidget(importBtnFinder);
+
+	final filePathTxtFinder = AssuredFinder.findOne(type: TextField, shouldFind: true);
+	await assistant.tester.enterText(filePathTxtFinder, importFilePath);
+
+	final importConfirmationBtnFinder = find.widgetWithText(
+		RaisedButton, Localizator.defaultLocalization.importDialogImportBtnLabel);
+	await assistant.tapWidget(importConfirmationBtnFinder);
+}
+
+Finder _findImportExportAction({ bool isExport, bool shouldFind }) {
+	final locale = Localizator.defaultLocalization;
+	return AssuredFinder.findOne(icon: Icons.import_export, 
+		label: isExport ? locale.packListScreenBottomNavBarExportingActionLabel:
+			locale.packListScreenBottomNavBarImportingActionLabel, 
+		shouldFind:  shouldFind);
+}
+
+String _findConfirmationDialogText(WidgetTester tester) {
+	final dialog = DialogTester.findConfirmationDialog(tester);
+	return (dialog.content as Text).data;
+}

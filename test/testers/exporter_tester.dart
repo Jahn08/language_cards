@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
+import 'package:language_cards/src/utilities/string_ext.dart';
+import 'package:path_provider/path_provider.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
@@ -63,7 +65,7 @@ class ExporterTester {
 		expect(actual.studyProgress, expected.studyProgress);
 	}
 
-	static List<StoredPack> getPacksForExport(PackStorageMock packStorage) {
+	static List<StoredPack> getPacksForExport(PackStorageMock packStorage, { bool onlyExistent }) {
 		final firstPack = packStorage.getRandom();
 
 		StoredPack secondPack;
@@ -71,11 +73,12 @@ class ExporterTester {
 			secondPack = packStorage.getRandom();
 		} while (secondPack.id == firstPack.id);
 		
-		final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(9) + 99);
-		return [firstPack, secondPack, emptyPack];
+		return [firstPack, secondPack, 
+			if (!(onlyExistent ?? false)) 
+				PackStorageMock.generatePack(Randomiser.nextInt(9) + 99)];
 	}
 
-	Future<void> assertImportedPacks(
+	Future<void> assertImport(
 		PackStorageMock packStorage, List<StoredPack> originalPacks
 	) async {
 		final imports = await new PackImporter(packStorage, packStorage.wordStorage)
@@ -120,4 +123,15 @@ class ExporterTester {
 			ExporterTester.assertCardsAreEqual(
 				importedCards.singleWhere((c) => c.id == storedCard.id), storedCard));
 	}
+
+	static Future<String> writeToJsonFile(dynamic obj) async {
+		final dir = (await getExternalStorageDirectory()).path;
+
+		final jsonFileName = Randomiser.nextString() + '.json';
+		final jsonFile = new File(joinPaths([dir, jsonFileName]));
+		jsonFile.createSync(recursive: true);
+
+		jsonFile.writeAsStringSync(jsonEncode(obj), flush: true);
+		return jsonFile.path;
+	} 
 }

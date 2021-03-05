@@ -1,10 +1,6 @@
-import 'dart:convert';
-import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
-import 'package:language_cards/src/utilities/string_ext.dart';
-import 'package:path_provider/path_provider.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../testers/exporter_tester.dart';
 import '../../utilities/fake_path_provider_platform.dart';
@@ -19,8 +15,7 @@ main() {
 			
 			final filePath = await new PackExporter(packStorage.wordStorage)
 				.export(packsToExport, Randomiser.nextString());
-			await new ExporterTester(filePath)
-				.assertImportedPacks(packStorage, packsToExport);
+			await new ExporterTester(filePath).assertImport(packStorage, packsToExport);
 		});
 	});
 
@@ -32,8 +27,8 @@ main() {
 			final packProps = emptyPack.toJsonMap(null);
 			packProps.removeWhere((_, val) => val == null);
 
-			final filePath = await _writeToJsonFile([packProps]);
-			await new ExporterTester(filePath).assertImportedPacks(packStorage, [emptyPack]);
+			final filePath = await ExporterTester.writeToJsonFile([packProps]);
+			await new ExporterTester(filePath).assertImport(packStorage, [emptyPack]);
 		});
 	});
 
@@ -46,7 +41,7 @@ main() {
 
 	test('Imports nothing from a JSON-file with a wrong format', () async { 
 		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-			final filePath = await _writeToJsonFile([Randomiser.nextString(), 
+			final filePath = await ExporterTester.writeToJsonFile([Randomiser.nextString(), 
 				Randomiser.nextInt(), Randomiser.nextString()]);
 			
 			final packStorage = new PackStorageMock();
@@ -56,14 +51,3 @@ main() {
 		});
 	});
 }
-
-Future<String> _writeToJsonFile(dynamic obj) async {
-	final dir = (await getExternalStorageDirectory()).path;
-
-	final jsonFileName = Randomiser.nextString() + '.json';
-	final jsonFile = new File(joinPaths([dir, jsonFileName]));
-	jsonFile.createSync(recursive: true);
-
-	jsonFile.writeAsStringSync(jsonEncode(obj), flush: true);
-	return jsonFile.path;
-} 

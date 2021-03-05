@@ -67,4 +67,18 @@ class WidgetAssistant {
 
     Future<void> swipeWidgetRight(Finder widgetFinder) =>
         _swipeWidget(widgetFinder, toRight: true);
+
+	Future<Finder> scrollUntilVisible(Finder finder, Type scrollableChildType) async {
+		try {
+			if (findsNothing.matches(finder, {}))
+			await tester.scrollUntilVisible(finder, 100,
+				scrollable: find.ancestor(
+					of: find.byType(scrollableChildType),
+					matching: find.byType(Scrollable)
+				).first);
+		}
+		on StateError catch (_) { }
+
+		return finder;
+	}
 }
