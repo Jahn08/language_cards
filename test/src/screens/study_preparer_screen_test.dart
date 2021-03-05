@@ -19,7 +19,7 @@ main() {
             final packs = await _fetchNamedPacks(tester, storage);
             expect(_findCheckTiles(), findsNWidgets(packs.length));
             
-            _assureCheckedTiles(tester, packs, (p, packTileFinder) {
+            await _assureCheckedTiles(tester, packs, (p, packTileFinder) {
                 expect(find.descendant(
 					of: packTileFinder, 
                     matching: find.text(
@@ -45,12 +45,12 @@ main() {
 			);
             await widgetAssistant.tapWidget(selectorBtnFinder);
 
-            _assureCheckedTiles(tester);
+            await _assureCheckedTiles(tester);
             _assureCardNumbersForStudyLevels(studyPacks, []);
 
             await widgetAssistant.tapWidget(selectorBtnFinder);
             
-            _assureCheckedTiles(tester, packs);
+            await _assureCheckedTiles(tester, packs);
             _assureCardNumbersForStudyLevels(studyPacks);
         });
 
@@ -65,27 +65,30 @@ main() {
             
             final assistant = new WidgetAssistant(tester);
             
-            for (final p in packsToUncheck) {
-                final packTileFinder = _findPackTile(p.name);
+            for (final p in _sortPacksByName(packsToUncheck)) {
+                final packTileFinder = await _findPackTile(assistant, p.name);
                 await assistant.tapWidget(packTileFinder);
             }
 
             final uncheckedPackIds = packsToUncheck.map((p) => p.id).toList();
             final checkedPacks = packs.where((p) => !uncheckedPackIds.contains(p.id)).toList();
-            _assureCheckedTiles(tester, checkedPacks);
+            await _assureCheckedTiles(tester, checkedPacks);
             _assureCardNumbersForStudyLevels(studyPacks, 
                 checkedPacks.map((p) => p.id).toList());
 
-            final packToCheck = packsToUncheck.first;
-            final packTileFinder = _findPackTile(packToCheck.name);
+            final packToCheck = packsToUncheck.last;
+            final packTileFinder = await _findPackTile(assistant, packToCheck.name);
             await assistant.tapWidget(packTileFinder);
 
             checkedPacks.add(packToCheck);
-            _assureCheckedTiles(tester, checkedPacks);
+            await _assureCheckedTiles(tester, checkedPacks);
             _assureCardNumbersForStudyLevels(studyPacks, 
                 checkedPacks.map((p) => p.id).toList());
         });
 }
+
+List<StoredPack> _sortPacksByName(List<StoredPack> packs) => 
+	packs..sort((a, b) => a.name.compareTo(b.name));
 
 Future<StudyStorage> _pumpScreen(WidgetTester tester) async {
     final storage = new PackStorageMock();
@@ -106,26 +109,30 @@ Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, PackStorageMock st
 Finder _findCheckTiles() =>
     AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
 
-void _assureCheckedTiles(WidgetTester tester, 
-    [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) {
+Future<void> _assureCheckedTiles(WidgetTester tester, 
+    [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) async {
 
-    if (checkedPacks == null || checkedPacks.isEmpty)
-        expect(tester.widgetList<CheckboxListTile>(_findCheckTiles()).every((t) => t.value), 
+    if (checkedPacks == null || checkedPacks.isEmpty) {
+		expect(tester.widgetList<CheckboxListTile>(_findCheckTiles()).every((t) => t.value), 
             false);
-    else
-        checkedPacks.forEach((p) {
-            final packTileFinder = _findPackTile(p.name);
-            expect(tester.widget<CheckboxListTile>(packTileFinder).value, true);
+		return;
+	}
+        
+	final assistant = new WidgetAssistant(tester);
+	for (final p in _sortPacksByName(checkedPacks)) {
+		final packTileFinder = await _findPackTile(assistant, p.name);
+		expect(tester.widget<CheckboxListTile>(packTileFinder).value, true);
 
-            tileChecker?.call(p, packTileFinder);
-        });
+		tileChecker?.call(p, packTileFinder);
+	}
 }
 
-Finder _findPackTile(String packName) {
+Future<Finder> _findPackTile(WidgetAssistant assistant, String packName) async {
     final packTileFinder = find.ancestor(of: find.text(packName), 
-        matching: find.byType(CheckboxListTile, skipOffstage: false));
-    expect(packTileFinder, findsOneWidget);
-    return packTileFinder;
+        matching: find.byType(CheckboxListTile));
+	final visibleFinder = await assistant.scrollUntilVisible(packTileFinder, CheckboxListTile);
+    expect(visibleFinder, findsOneWidget);
+    return visibleFinder;
 }
 
 void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> includedPackIds]) {
