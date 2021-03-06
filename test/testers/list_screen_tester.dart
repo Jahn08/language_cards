@@ -98,15 +98,14 @@ class ListScreenTester<TEntity extends StoredEntity> {
             _assureSelectionForAllTilesInEditor(tester);
 
             for (final item in itemsToRemove.entries)
-                AssuredFinder.findOne(type: Text, label: item.value);
+                AssuredFinder.findOne(type: ListTile, label: item.value);
         });
 
         testWidgets(_buildDescription('recovers removed items in their previous order'), (tester) async {
             final itemsToRemove = await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
 
-            final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
             final assistnat = new WidgetAssistant(tester);
-			await assistnat.tapWidget(undoBtnFinder);
+			await _undoRemoval(assistnat);
             
 			await _assureRecoveredItems(assistnat, itemsToRemove);
         });
@@ -126,11 +125,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				return itemsToCheck;
 			});
 
-            final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
-            final assistnat = new WidgetAssistant(tester);
-			await assistnat.tapWidget(undoBtnFinder);
+            final assistant = new WidgetAssistant(tester);
+			await _undoRemoval(assistant);
             
-			await _assureRecoveredItems(assistnat, itemsToRemove);
+			await _assureRecoveredItems(assistant, itemsToRemove);
         });
 
         testWidgets(_buildDescription('resets selected items after quitting the editor mode'), 
@@ -251,6 +249,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			expect(_extractTitle(tester, listTile.title), item.value);
 		}
 	}
+	
+	Future<void> _undoRemoval(WidgetAssistant assistnat) async {
+		final undoBtnFinder = AssuredFinder.findOne(label: 'Undo', shouldFind: true);
+		await assistnat.tapWidget(undoBtnFinder);
+	}
 
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
@@ -280,6 +283,71 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
             return itemsToRemove;
         }
+
+	testDismissingItems() {
+
+		final forEachDismissible = (int itemsNumber, Future<void> Function(Finder) processor) async {
+			final dismissibleFinders = tryFindingListItems(shouldFind: true);
+			for (int i = 0; i < itemsNumber; ++i)
+				await processor(find.ancestor(of: find.byType(ListTile), 
+					matching: dismissibleFinders).last);
+		};
+
+        testWidgets(_buildDescription('removes items by dismissing'), (tester) async {
+			await pumpScreen(tester);
+
+			final assistant = new WidgetAssistant(tester);
+
+			final removedTitles = <String>[];
+			await forEachDismissible(2, (dismissible) async {
+				final title = await _removeByDismissing(assistant, dismissible);
+				removedTitles.add(title);
+			});
+
+			removedTitles.forEach((t) => AssuredFinder.findOne(type: ListTile, label: t));
+		});
+
+        testWidgets(_buildDescription('recovers an item from some of dismissed ones'), 
+			(tester) async { 
+				await pumpScreen(tester);
+
+				final assistant = new WidgetAssistant(tester);
+
+				final removedTitles = <String>[];
+				String recoveredTitle;
+				await forEachDismissible(3, (dismissible) async {
+					final title = await _removeByDismissing(assistant, dismissible);
+					
+					if (removedTitles.isEmpty || recoveredTitle != null) {
+						removedTitles.add(title);
+
+						await assistant.pumpAndAnimate(2000);
+					}
+					else {
+						recoveredTitle = title;
+						await _undoRemoval(new WidgetAssistant(tester));
+
+						AssuredFinder.findOne(type: ListTile, label: recoveredTitle, shouldFind: true);
+					}
+				});
+
+				await assistant.pumpAndAnimate();
+				removedTitles.forEach((t) => AssuredFinder.findOne(type: ListTile, label: t));
+			});
+	}
+
+	Future<String> _removeByDismissing(WidgetAssistant assistant, Finder dismissible) async {
+		final tester = assistant.tester;
+		final listTile = tester.widget<ListTile>(
+			find.descendant(of: dismissible, matching: find.byType(ListTile)));
+		final removedTitle = _extractTitle(tester, listTile.title);
+
+		await assistant.swipeWidgetLeft(dismissible);
+
+		await _confirmRemovalIfNecessary(assistant);
+
+		return removedTitle;
+	}
 
 	testSearchMode(TEntity Function(int) newEntityGetter) {
 

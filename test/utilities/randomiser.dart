@@ -1,8 +1,8 @@
 import 'dart:math';
 
 class Randomiser {
-    static int nextInt([int maxLength]) => 
-        new Random().nextInt((maxLength ?? 0) > 0 ? maxLength : 10);
+	/// [max] is exclusive
+    static int nextInt([int max]) => new Random().nextInt((max ?? 0) > 0 ? max : 10);
 
     static String nextString() => (new Random().nextDouble() * 1000000).toString();
     

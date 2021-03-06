@@ -373,21 +373,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	) {
         final item = _items[itemIndex];
 
-        bool shouldRemove = false;
         return isRemovableItem(item) ? new Dismissible(
             direction: DismissDirection.endToStart,
-            confirmDismiss: (direction) => Future.delayed(
-				new Duration(milliseconds: _removalTimeoutMs), () => shouldRemove),
-            background: new Container(
-                color: Colors.deepOrange[300], 
-                child: new FlatButton.icon(
-                    label: new Text(locale.constsRemovingItemButtonLabel),
-                    icon: new Icon(Icons.delete), 
-                    onPressed: () => shouldRemove = true
-                )
-            ),
             key: new Key(item.id.toString()),
-            onDismissed: (direction) async {
+            onDismissed: (_) async {
                 final itemToRemove = _items[itemIndex];
                 _itemsMarkedForRemoval[itemToRemove.id] = 
                     new _CachedItem(itemToRemove, itemIndex);

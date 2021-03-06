@@ -27,6 +27,8 @@ void main() {
     screenTester.testEditorMode();
     screenTester.testSearchMode(PackStorageMock.generatePack);
 
+	screenTester.testDismissingItems();
+
     testWidgets("Doesn't update a number of cards for a pack without changes in it", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
@@ -318,8 +320,7 @@ Future<void> _testDecreasingNumberOfCards(WidgetTester tester,
     final assistant = new WidgetAssistant(tester);
     await _goToCardList(assistant, pack.name);
 
-    tester.widget<Dismissible>(find.byType(Dismissible).first)
-        .onDismissed.call(DismissDirection.endToStart);
+	await assistant.swipeWidgetLeft(find.byType(Dismissible));
     
     await _goBackToPackList(assistant, pack.name);
 
