@@ -221,7 +221,7 @@ void main() {
 			await screenTester.deactivateEditorMode(assistant);
 		});
 	
-	testWidgets("Imports packs and turns off an active search mode", (tester) async {
+	testWidgets("Imports packs and switches the search index to its default value", (tester) async {
 		final storage = new PackStorageMock();
 	    final inScreenTester = new ListScreenTester('Pack', () => _buildPackListScreen(storage));
 
@@ -231,10 +231,16 @@ void main() {
 		);
 
 		final assistant = new WidgetAssistant(tester);
+		await inScreenTester.chooseFilterIndex(assistant, indexes.first);
+
 		await _testImportingPacks(assistant, storage, inScreenTester);
 
-		inScreenTester.findSearcherEndButton(shouldFind: false);
-		inScreenTester.assureFilterIndexes(indexes, shouldFind: false);
+		inScreenTester.findSearcherEndButton(shouldFind: true);
+		inScreenTester.assureFilterIndexes(indexes, shouldFind: true);
+
+		inScreenTester.assureFilterIndexActiveness(tester, indexes.first, isActive: false);
+
+		await inScreenTester.deactivateSearcherMode(assistant);
 
 		await inScreenTester.deactivateEditorMode(assistant);
 	});
