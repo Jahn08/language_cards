@@ -119,18 +119,26 @@ Future<void> _assureCheckedTiles(WidgetTester tester,
 	}
         
 	final assistant = new WidgetAssistant(tester);
-	for (final p in _sortPacksByName(checkedPacks)) {
-		final packTileFinder = await _findPackTile(assistant, p.name);
+	final sortedPacks = _sortPacksByName(checkedPacks);
+
+	Finder packTileFinder = await _findPackTile(assistant, sortedPacks.first.name, searchUpwards: true);
+	for (final p in sortedPacks) {
+		if (packTileFinder == null)
+			packTileFinder = await _findPackTile(assistant, p.name);
+		
 		expect(tester.widget<CheckboxListTile>(packTileFinder).value, true);
 
 		tileChecker?.call(p, packTileFinder);
+		
+		packTileFinder = null;
 	}
 }
 
-Future<Finder> _findPackTile(WidgetAssistant assistant, String packName) async {
+Future<Finder> _findPackTile(WidgetAssistant assistant, String packName, { bool searchUpwards }) async {
     final packTileFinder = find.ancestor(of: find.text(packName), 
         matching: find.byType(CheckboxListTile));
-	final visibleFinder = await assistant.scrollUntilVisible(packTileFinder, CheckboxListTile);
+	final visibleFinder = await assistant.scrollUntilVisible(
+		packTileFinder, CheckboxListTile, upwards: searchUpwards ?? false);
     expect(visibleFinder, findsOneWidget);
     return visibleFinder;
 }

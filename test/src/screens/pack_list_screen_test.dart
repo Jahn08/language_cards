@@ -320,7 +320,7 @@ Future<void> _testDecreasingNumberOfCards(WidgetTester tester,
     final assistant = new WidgetAssistant(tester);
     await _goToCardList(assistant, pack.name);
 
-	await assistant.swipeWidgetLeft(find.byType(Dismissible));
+	await assistant.swipeWidgetLeft(find.byType(Dismissible).first);
     
     await _goBackToPackList(assistant, pack.name);
 
