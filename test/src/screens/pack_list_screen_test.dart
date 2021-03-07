@@ -221,7 +221,7 @@ void main() {
 			await screenTester.deactivateEditorMode(assistant);
 		});
 	
-	testWidgets("Imports packs and switches the search index to its default value", (tester) async {
+	testWidgets("Imports packs, adds a new search index and goes to the default search index", (tester) async {
 		final storage = new PackStorageMock();
 	    final inScreenTester = new ListScreenTester('Pack', () => _buildPackListScreen(storage));
 
@@ -230,15 +230,21 @@ void main() {
 			shouldKeepInSearchMode: true
 		);
 
+		final activeIndex = indexes.first;
 		final assistant = new WidgetAssistant(tester);
-		await inScreenTester.chooseFilterIndex(assistant, indexes.first);
+		await inScreenTester.chooseFilterIndex(assistant, activeIndex);
 
-		await _testImportingPacks(assistant, storage, inScreenTester);
+		final exportedPacks = await _testImportingPacks(assistant, storage, inScreenTester);
+		await assistant.pumpAndAnimate(500);
 
 		inScreenTester.findSearcherEndButton(shouldFind: true);
-		inScreenTester.assureFilterIndexes(indexes, shouldFind: true);
 
-		inScreenTester.assureFilterIndexActiveness(tester, indexes.first, isActive: false);
+		final newIndexes = new Map<String, int>.fromIterable(
+			indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())), 
+			key: (i) => i, value: (_) => 0).keys.toList();
+		inScreenTester.assureFilterIndexes(newIndexes, shouldFind: true);
+
+		inScreenTester.assureFilterIndexActiveness(tester, activeIndex, isActive: false);
 
 		await inScreenTester.deactivateSearcherMode(assistant);
 
@@ -409,12 +415,13 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 Future<StoredPack> _getNonePack(PackStorageMock storage, WidgetTester tester) async => 
 	(await _fetchPacks(storage, tester)).firstWhere((p) => p.name == StoredPack.noneName);
 
-Future<void> _testImportingPacks(
+Future<List<StoredPack>> _testImportingPacks(
 	WidgetAssistant assistant, PackStorageMock storage, ListScreenTester screenTester
 ) async {
 	final tester = assistant.tester;
-	final packsToExport = ExporterTester.getPacksForExport(storage, onlyExistent: true);
-		
+	final packsToExport = ExporterTester.getPacksForExport(storage);
+	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toList();
+
 	await FakePathProviderPlatform.testWithinPathProviderContext(() async {
 		final importFilePath = await tester.runAsync(() =>
 			new PackExporter(storage.wordStorage).export(packsToExport, Randomiser.nextString()));
@@ -436,7 +443,8 @@ Future<void> _testImportingPacks(
 		for (final importedPack in packsToExport..sort((a, b) => a.name.compareTo(b.name))) {
 			await assistant.scrollUntilVisible(find.text(importedPack.name), CheckboxListTile);
 
-			final matcher = findsNWidgets(2);
+			final isDuplicatedPack = existentPackIds.contains(importedPack.id);
+			final matcher = findsNWidgets(isDuplicatedPack ? 2: 1);
 			final packNameFinders =	find.text(importedPack.name, skipOffstage: false);
 			expect(packNameFinders, matcher);
 			
@@ -460,6 +468,8 @@ Future<void> _testImportingPacks(
 			});
 		}
 	});
+
+	return packsToExport;
 }
 
 Future<void> _activateImport(WidgetAssistant assistant, String importFilePath) async {			

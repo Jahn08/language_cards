@@ -295,7 +295,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
 	@protected
-	void refetchItems({ String text, bool isForceful }) {
+	Future<void> refetchItems({ String text, bool isForceful, bool shouldInitIndices }) async {
 		if (!(isForceful ?? false) && _curFilterIndex == text)
 			return;
 
@@ -306,7 +306,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		_pageIndex = 0;
 		_items.clear();
 
-		_fetchItems(text);
+		await _fetchItems(text);
+	
+		if ((shouldInitIndices ?? false))
+			_initFilterIndexes();
 	}
 
 	void _deleteEmptyFilterIndex() {

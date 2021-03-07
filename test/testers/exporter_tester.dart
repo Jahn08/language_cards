@@ -65,7 +65,7 @@ class ExporterTester {
 		expect(actual.studyProgress, expected.studyProgress);
 	}
 
-	static List<StoredPack> getPacksForExport(PackStorageMock packStorage, { bool onlyExistent }) {
+	static List<StoredPack> getPacksForExport(PackStorageMock packStorage) {
 		final firstPack = packStorage.getRandom();
 
 		StoredPack secondPack;
@@ -73,9 +73,10 @@ class ExporterTester {
 			secondPack = packStorage.getRandom();
 		} while (secondPack.id == firstPack.id);
 		
-		return [firstPack, secondPack, 
-			if (!(onlyExistent ?? false)) 
-				PackStorageMock.generatePack(Randomiser.nextInt(9) + 99)];
+		final newPack = PackStorageMock.generatePack(Randomiser.nextInt(9) + 99);
+		return [firstPack, secondPack,
+			new StoredPack('A_${newPack.name}', cardsNumber: 0, 
+				from: newPack.from, to: newPack.to, id: newPack.id)];
 	}
 
 	Future<void> assertImport(

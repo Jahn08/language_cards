@@ -16,6 +16,8 @@ void main() {
     final screenTester = _buildScreenTester();
     screenTester.testEditorMode();
     screenTester.testSearchMode((id) => WordStorageMock.generateWord(id: id));
+	
+    screenTester.testDismissingItems();
 
 	testWidgets('Switches to the search mode for cards groupped by a pack', (tester) async {
 		final packStorage = new PackStorageMock();

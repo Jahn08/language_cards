@@ -122,7 +122,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 					packsWithCards.values.expand((c) => c).length, outcome.filePath)
 			).show(scaffoldContext);
 
-			super.refetchItems(isForceful: true);
+			super.refetchItems(isForceful: true, shouldInitIndices: true);
 		}
 		else {
 			final exportFilePath = await new PackExporter(widget.cardStorage)

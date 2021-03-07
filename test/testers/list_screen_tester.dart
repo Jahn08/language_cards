@@ -430,6 +430,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				assureFilterIndexActiveness(tester, newFilterIndex, isActive: true);
 				_findFilterIndex(filterIndex, shouldFind: false);
+			
+				assureFilterIndexes(indexGroups.map((g) => g.key).toList(), shouldFind: true);
 			});
 
 		testWidgets(_buildDescription('deletes an index filter when its items are deleted and the search mode is active'), 
