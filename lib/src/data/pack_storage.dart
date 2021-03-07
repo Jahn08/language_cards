@@ -25,7 +25,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
             final packs = await _fetchInternally(
 				textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
-            if (isFirstRequest)
+            if (textFilter == null && isFirstRequest)
                 packs.insert(0, StoredPack.none);
 			
             final lengths = await new WordStorage().groupByParent(

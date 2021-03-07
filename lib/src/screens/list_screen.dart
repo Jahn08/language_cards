@@ -454,7 +454,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 			final indexesToRemove = <String>[];
 			grouppedIndexes.forEach((ind, length) {
-				if (_filterIndexes[ind] == length)
+				final indexLength = _filterIndexes[ind];
+				if (indexLength == null)
+					return;
+				
+				if (indexLength == length)
 					indexesToRemove.add(ind);
 				else
 					_filterIndexes[ind] -= length;
@@ -471,7 +475,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			return;	
 		}
 
-		if (_items.length == 0)
+		if (_removableItems.length == 0)
 			_filterIndexToDelete = _curFilterIndex;
 	}
 
