@@ -106,8 +106,12 @@ Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock s
 Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, PackStorageMock storage) =>
     tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks());
 
-Finder _findCheckTiles() =>
-    AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
+Finder _findCheckTiles() {
+	final finder = find.byType(CheckboxListTile, skipOffstage: false);
+	expect(finder, findsWidgets);
+
+	return finder;
+}
 
 Future<void> _assureCheckedTiles(WidgetTester tester, 
     [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) async {

@@ -293,23 +293,38 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					matching: dismissibleFinders).last);
 		};
 
+		final assertItemsRemoval = 
+			(WidgetAssistant assistant, List<String> removedTitles, BaseStorage<TEntity> storage) async {
+				await assistant.pumpAndAnimate(500);
+
+				for (final title in removedTitles) {
+					AssuredFinder.findOne(type: ListTile, label: title);
+
+					final storedItems = await assistant.tester.runAsync(
+						() => storage.fetch(textFilter: title));
+					expect(storedItems.isEmpty, true);
+				}
+			};
+
         testWidgets(_buildDescription('removes items by dismissing'), (tester) async {
-			await pumpScreen(tester);
+			final storage = await pumpScreen(tester);
 
 			final assistant = new WidgetAssistant(tester);
 
 			final removedTitles = <String>[];
 			await forEachDismissible(2, (dismissible) async {
 				final title = await _removeByDismissing(assistant, dismissible);
-				removedTitles.add(title);
+			
+				await assistant.pumpAndAnimate(2000);
+				removedTitles.add(title);			
 			});
 
-			removedTitles.forEach((t) => AssuredFinder.findOne(type: ListTile, label: t));
+			await assertItemsRemoval(assistant, removedTitles, storage);
 		});
 
         testWidgets(_buildDescription('recovers an item from some of dismissed ones'), 
 			(tester) async { 
-				await pumpScreen(tester);
+				final storage = await pumpScreen(tester);
 
 				final assistant = new WidgetAssistant(tester);
 
@@ -331,8 +346,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					}
 				});
 
-				await assistant.pumpAndAnimate();
-				removedTitles.forEach((t) => AssuredFinder.findOne(type: ListTile, label: t));
+				await assertItemsRemoval(assistant, removedTitles, storage);
 			});
 	}
 
@@ -618,8 +632,12 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	void assureFilterIndexes(Iterable<String> indexes, { bool shouldFind }) =>
 		indexes.forEach((i) => _findFilterIndex(i, shouldFind: shouldFind));
 
-	Finder _findFilterIndex(String index, { bool shouldFind }) =>
-		AssuredFinder.findOne(type: TextButton, label: index, shouldFind: shouldFind);
+	Finder _findFilterIndex(String index, { bool shouldFind }) {
+		final finder = find.widgetWithText(TextButton, index, skipOffstage: false);
+		expect(finder, (shouldFind ?? false) ? findsOneWidget: findsNothing);
+
+		return finder;
+	}
 
     Future<void> deactivateSearcherMode(WidgetAssistant assistant) =>
         assistant.tapWidget(findSearcherEndButton(shouldFind: true));
