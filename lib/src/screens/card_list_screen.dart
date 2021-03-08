@@ -74,17 +74,16 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale, 
 		{ bool anySelected }) {
         final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
-        options.add(new BottomNavigationBarItem(
+        return options..add(new BottomNavigationBarItem(
             label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
             icon: new Icon(Icons.restore)
         ));
-
-        return options;
     }
 
     @override
-    Future<bool> handleNavBarOption(int tappedIndex, Iterable<StoredWord> markedItems,
-        BuildContext scaffoldContext) async { 
+    Future<bool> handleNavBarOption(
+		BottomNavigationBarItem _, Iterable<StoredWord> markedItems, BuildContext scaffoldContext
+	) async { 
 		final locale = AppLocalizations.of(scaffoldContext);
         final itemsToReset = markedItems.where(
             (card) => card.studyProgress != WordStudyStage.unknown).toList();
@@ -94,7 +93,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					locale.cardListScreenResettingProgressDialogContent(itemsToReset.length),
 				confirmationLabel: 
 					locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
-			.show(scaffoldContext)))
+			.show(scaffoldContext)) ?? false)
             return false;
 
         setState(() {

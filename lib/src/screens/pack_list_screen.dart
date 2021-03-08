@@ -86,19 +86,18 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
 		{ bool anySelected }) {
         final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
-        options.add(new BottomNavigationBarItem(
+        return options..add(new BottomNavigationBarItem(
             label: anySelected ? 
 				locale.packListScreenBottomNavBarExportActionLabel:
 				locale.packListScreenBottomNavBarImportActionLabel,
             icon: new Icon(Icons.import_export)
         ));
-
-        return options;
     }
 
 	@override
-    Future<bool> handleNavBarOption(int tappedIndex, Iterable<StoredPack> markedItems,
-        BuildContext scaffoldContext) async { 
+    Future<bool> handleNavBarOption(
+		BottomNavigationBarItem _, Iterable<StoredPack> markedItems, BuildContext scaffoldContext
+	) async { 
 		final locale = AppLocalizations.of(scaffoldContext);
 
 		if (markedItems.isEmpty) {

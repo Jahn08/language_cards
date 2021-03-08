@@ -20,8 +20,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     static const int _itemsPerPage = 30;
 
-    static const int _navBarRemovalOptionIndex = 0;
-    static const int _navBarSelectAllOptionIndex = 1;
+    final UniqueKey _navBarRemovalOptionKey = new UniqueKey();
+    final UniqueKey _navBarSelectAllOptionKey = new UniqueKey();
 
     bool _isEndOfData = false;
     bool _canFetch = false;
@@ -167,13 +167,18 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildBottomBar(AppLocalizations locale) {
         bool allSelected = _itemsMarkedInEditor.length == _removableItems.length;
-		final options = getNavBarOptions(allSelected, locale, 
-			anySelected: _itemsMarkedInEditor.isNotEmpty);
-        
+		final options = 
+			getNavBarOptions(allSelected, locale, anySelected: _itemsMarkedInEditor.isNotEmpty) ?? 
+			<BottomNavigationBarItem>[];
+		options.addAll(_buildNavBarOptions(allSelected, locale));
+		
         return new BottomNavigationBar(
             items: options,
             onTap: (tappedIndex) async {
-                if (tappedIndex == _navBarRemovalOptionIndex) {
+				final option = options[tappedIndex];
+				final optionKey = option.icon?.key;
+
+                if (optionKey == _navBarRemovalOptionKey) {
                     if (
 						_itemsMarkedInEditor.length == 0 || 
 						!(await shouldContinueRemoval(_itemsMarkedInEditor.values.map((v) => v.item).toList()))
@@ -195,7 +200,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         _itemsMarkedInEditor.clear();
                     });
                 }
-                else if (tappedIndex == _navBarSelectAllOptionIndex) {
+                else if (optionKey == _navBarSelectAllOptionKey) {
                     if (allSelected)
                         setState(() => _itemsMarkedInEditor.clear());
                     else {
@@ -208,7 +213,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         });
                     }
                 }
-                else if (await handleNavBarOption(tappedIndex, 
+                else if (await handleNavBarOption(option, 
 					_itemsMarkedInEditor.values.map((e) => e.item), _scaffoldContext)) {
                     _itemsMarkedInEditor.clear();
                 }
@@ -219,25 +224,26 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	Iterable<TItem> get _removableItems => _items.where((w) => isRemovableItem(w));
 
     @protected
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
-		{ bool anySelected }) {
-        final options = new List<BottomNavigationBarItem>();
-        options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
-            icon: _deleteIcon,
-            label: locale.constsRemovingItemButtonLabel
-        ));
-        options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
-            icon: new Icon(Icons.select_all),
-            label: Consts.getSelectorLabel(allSelected, locale)
-        ));
+	List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
+		{ bool anySelected }) => <BottomNavigationBarItem>[];
 
-        return options;
+    List<BottomNavigationBarItem> _buildNavBarOptions(bool allSelected, AppLocalizations locale) {
+        return [ 
+			new BottomNavigationBarItem(
+				icon: _getDeleteIcon(_navBarRemovalOptionKey),
+				label: locale.constsRemovingItemButtonLabel
+			),
+			new BottomNavigationBarItem(
+				icon: new Icon(Icons.select_all, key: _navBarSelectAllOptionKey),
+				label: Consts.getSelectorLabel(allSelected, locale)
+			)
+		];
     } 
         
-	Icon get _deleteIcon => new Icon(Icons.delete);
+	Icon _getDeleteIcon([Key key]) => new Icon(Icons.delete, key: key);
 	
     @protected
-    Future<bool> handleNavBarOption(int tappedIndex, Iterable<TItem> markedItems,
+    Future<bool> handleNavBarOption(BottomNavigationBarItem option, Iterable<TItem> markedItems,
         BuildContext scaffoldContext) async => Future.value(true);
 
     void _showItemRemovalInfoSnackBar({ 
@@ -383,7 +389,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             key: new Key(item.id.toString()),
             background: new Container(
                 color: Colors.deepOrange[300], 
-                child: _deleteIcon
+                child: _getDeleteIcon()
             ),
 			onDismissed: (_) async {
                 final itemToRemove = _items[itemIndex];
