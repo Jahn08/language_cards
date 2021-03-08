@@ -223,7 +223,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		{ bool anySelected }) {
         final options = new List<BottomNavigationBarItem>();
         options.insert(_navBarRemovalOptionIndex, new BottomNavigationBarItem(
-            icon: new Icon(Icons.delete),
+            icon: _deleteIcon,
             label: locale.constsRemovingItemButtonLabel
         ));
         options.insert(_navBarSelectAllOptionIndex, new BottomNavigationBarItem(
@@ -234,6 +234,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         return options;
     } 
         
+	Icon get _deleteIcon => new Icon(Icons.delete);
+	
     @protected
     Future<bool> handleNavBarOption(int tappedIndex, Iterable<TItem> markedItems,
         BuildContext scaffoldContext) async => Future.value(true);
@@ -379,7 +381,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         return isRemovableItem(item) ? new Dismissible(
             direction: DismissDirection.endToStart,
             key: new Key(item.id.toString()),
-            onDismissed: (_) async {
+            background: new Container(
+                color: Colors.deepOrange[300], 
+                child: _deleteIcon
+            ),
+			onDismissed: (_) async {
                 final itemToRemove = _items[itemIndex];
                 _itemsMarkedForRemoval[itemToRemove.id] = 
                     new _CachedItem(itemToRemove, itemIndex);
