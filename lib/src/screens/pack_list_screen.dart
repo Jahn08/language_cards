@@ -21,7 +21,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
             new TranslationIndicator(item.from, item.to);
 
     @override
-    Widget getItemSubtitle(StoredPack item) => 
+    Widget getItemSubtitle(StoredPack item, { bool forCheckbox }) => 
         new CardNumberIndicator(item.cardsNumber);
     
     @override

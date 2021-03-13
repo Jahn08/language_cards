@@ -348,7 +348,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildCheckListItem(BuildContext buildContext, int itemIndex) {
         final item = _items[itemIndex];
         
-        return isRemovableItem(item) ? new CheckboxListTile(
+        return _wrapWithBorder(isRemovableItem(item) ? new CheckboxListTile(
             value: _itemsMarkedInEditor.containsKey(item.id),
             onChanged: (isChecked) {
                 setState(() {
@@ -358,11 +358,24 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         _itemsMarkedInEditor.remove(item.id);
                 });
             },
-            secondary: getItemLeading(item),
             title: getItemTitle(item),
-            subtitle: getItemSubtitle(item)
-        ) : _buildListTile(buildContext, item, isReadonly: true);
+            subtitle: getItemSubtitle(item, forCheckbox: true)
+        ) : _buildListTile(buildContext, item, isReadonly: true));
     }
+
+	Widget _wrapWithBorder(Widget child) =>
+		new Container(
+			decoration: new BoxDecoration(
+				border: new Border(
+					bottom: new BorderSide(
+						style: BorderStyle.solid,
+						width: 1.0,
+						color: new Styler(context).dividerColor
+					)
+				)
+			),
+			child: child
+		);
 
     @protected
     bool isRemovableItem(TItem item) => true;
@@ -374,7 +387,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget getItemTitle(TItem item);
 
     @protected
-    Widget getItemSubtitle(TItem item);
+    Widget getItemSubtitle(TItem item, { bool forCheckbox });
 
     Widget _buildListTile(BuildContext buildContext, TItem item, 
         { bool isReadonly = false }) => new ListTile(
@@ -390,19 +403,19 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	) {
         final item = _items[itemIndex];
 
-        return isRemovableItem(item) ? new Dismissible(
-            direction: DismissDirection.endToStart,
-            key: new Key(item.id.toString()),
-            background: new Container(
-                color: Colors.deepOrange[300], 
-                child: _deleteIcon
-            ),
+        return _wrapWithBorder(isRemovableItem(item) ? new Dismissible(
+			direction: DismissDirection.endToStart,
+			key: new Key(item.id.toString()),
+			background: new Container(
+				color: Colors.deepOrange[300], 
+				child: _deleteIcon
+			),
 			onDismissed: (_) async {
-                final itemToRemove = _items[itemIndex];
-                _itemsMarkedForRemoval[itemToRemove.id] = 
-                    new _CachedItem(itemToRemove, itemIndex);
+				final itemToRemove = _items[itemIndex];
+				_itemsMarkedForRemoval[itemToRemove.id] = 
+					new _CachedItem(itemToRemove, itemIndex);
 
-                setState(() => _items.remove(itemToRemove));
+				setState(() => _items.remove(itemToRemove));
 
 				if (await shouldContinueRemoval([itemToRemove]))
 					_showItemRemovalInfoSnackBar(
@@ -414,9 +427,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 					);
 				else
 					_recoverMarkedForRemoval([itemToRemove.id]);
-            },
-            child: _buildListTile(buildContext, item)
-        ): _buildListTile(buildContext, item);
+			},
+			child: _buildListTile(buildContext, item)): _buildListTile(buildContext, item)
+		);
     }
 
     @protected

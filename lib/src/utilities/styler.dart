@@ -11,6 +11,8 @@ class Styler {
 
 	Color get primaryColor => theme.colorScheme.primary;
 
+	Color get dividerColor => theme.dividerColor;
+
 	Color get floatingActionButtonColor => 
 		(theme.floatingActionButtonTheme.backgroundColor ?? theme.colorScheme.secondary)
 			.withOpacity(0.4);

@@ -13,17 +13,30 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     bool _cardsWereRemoved = false;
 
     @override
-    Widget getItemSubtitle(StoredWord item) => new OneLineText(item.translation);
+    Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
+		final translationText = new OneLineText(item.translation);
+		return (forCheckbox ?? false) ? 
+			_buildCardAdditionalInfo(item, CrossAxisAlignment.start, translationText) : translationText;
+	}
     
     @override
     Widget getItemTitle(StoredWord item) => new OneLineText(item.text);
     
     @override
-    Widget getItemTrailing(StoredWord item) => new Column(children: <Widget>[
-        if (item.partOfSpeech != null)
-			new OneLineText(item.partOfSpeech.present(AppLocalizations.of(context))),
-        new OneLineText('${item.studyProgress}%')
-    ]);
+    Widget getItemTrailing(StoredWord item) => _buildCardAdditionalInfo(item, CrossAxisAlignment.end);
+
+	Widget _buildCardAdditionalInfo(StoredWord item, CrossAxisAlignment alignment, [Widget topItem]) {
+		return new Column(
+			crossAxisAlignment: alignment,
+			children: <Widget>[
+				if (topItem != null) 
+					topItem,
+				if (item.partOfSpeech != null)
+					new OneLineText(item.partOfSpeech.present(AppLocalizations.of(context))),
+				new OneLineText('${item.studyProgress}%')
+			]
+		);
+	}
 
     @override
     void onGoingToItem(BuildContext buildContext, [StoredWord item]) {
