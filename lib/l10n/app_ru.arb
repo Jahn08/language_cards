@@ -73,7 +73,7 @@
 
     "cardListScreenWithoutPackTitle": "Карточки",
     "@cardListScreenWithoutPackTitle": {},
-    "cardListScreenBottomNavBarResettingProgressActionLabel": "Сбросить прогресс",
+    "cardListScreenBottomNavBarResettingProgressActionLabel": "Разучить",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
     "cardListScreenResettingProgressDialogTitle": "Подтвердить сброс прогресса обучения",
     "@cardListScreenResettingProgressDialogTitle": {},

@@ -73,7 +73,7 @@
 
     "cardListScreenWithoutPackTitle": "Cards",
     "@cardListScreenWithoutPackTitle": {},
-    "cardListScreenBottomNavBarResettingProgressActionLabel": "Reset Progress",
+    "cardListScreenBottomNavBarResettingProgressActionLabel": "Unlearn",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
     "cardListScreenResettingProgressDialogTitle": "Confirm Resetting Study Progress",
     "@cardListScreenResettingProgressDialogTitle": {},
