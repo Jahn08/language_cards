@@ -37,10 +37,14 @@ class WidgetAssistant {
             await tester.pumpAndSettle(duration);
     }
 
-    Future<void> tapWidget(Finder widgetFinder) async {
+    Future<void> tapWidget(Finder widgetFinder, { bool atCenter }) async {
         expect(widgetFinder, findsOneWidget);
-        await tester.tap(widgetFinder);
-
+        
+		if ((atCenter ?? false))
+			await tester.tap(widgetFinder);
+		else
+			await tester.tapAt(tester.getTopLeft(widgetFinder));
+		
         await pumpAndAnimate();
     }
 

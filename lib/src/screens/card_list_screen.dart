@@ -6,6 +6,7 @@ import '../dialogs/confirm_dialog.dart';
 import './list_screen.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
+import '../widgets/iconed_button.dart';
 import '../widgets/one_line_text.dart';
 
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
@@ -71,43 +72,39 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale, 
-		{ bool anySelected }) {
-        final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
-        return options..add(new BottomNavigationBarItem(
+    List<Widget> getBottomBarOptions(
+		List<StoredWord> markedItems, AppLocalizations locale, BuildContext scaffoldContext
+	) {
+        final options = super.getBottomBarOptions(markedItems, locale, scaffoldContext);
+        return options..add(new IconedButton(
             label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
-            icon: new Icon(Icons.restore)
+            icon: new Icon(Icons.restore),
+			onPressed: () async {
+				final itemsToReset = markedItems.where(
+					(card) => card.studyProgress != WordStudyStage.unknown).toList();
+				if (itemsToReset.length == 0 || !(await new ConfirmDialog(
+						title: locale.cardListScreenResettingProgressDialogTitle,
+						content: 
+							locale.cardListScreenResettingProgressDialogContent(itemsToReset.length),
+						confirmationLabel: 
+							locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
+					.show(scaffoldContext)) ?? false)
+					return false;
+
+				setState(() {
+					itemsToReset.forEach((w) => w.resetStudyProgress());
+					widget.storage.upsert(itemsToReset);
+				});
+
+				Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(
+					content: new Text(
+						locale.cardListScreenBottomSnackBarResettingProgressInfo(itemsToReset.length)
+					)
+				));
+			
+				super.clearItemsMarkedIneditor();
+			}
         ));
-    }
-
-    @override
-    Future<bool> handleNavBarOption(
-		BottomNavigationBarItem _, Iterable<StoredWord> markedItems, BuildContext scaffoldContext
-	) async { 
-		final locale = AppLocalizations.of(scaffoldContext);
-        final itemsToReset = markedItems.where(
-            (card) => card.studyProgress != WordStudyStage.unknown).toList();
-        if (itemsToReset.length == 0 || !(await new ConfirmDialog(
-				title: locale.cardListScreenResettingProgressDialogTitle,
-				content: 
-					locale.cardListScreenResettingProgressDialogContent(itemsToReset.length),
-				confirmationLabel: 
-					locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
-			.show(scaffoldContext)) ?? false)
-            return false;
-
-        setState(() {
-            itemsToReset.forEach((w) => w.resetStudyProgress());
-            widget.storage.upsert(itemsToReset);
-        });
-
-        Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(
-            content: new Text(
-				locale.cardListScreenBottomSnackBarResettingProgressInfo(itemsToReset.length)
-			)
-		));
-  
-        return true;
     }
 
 	@override

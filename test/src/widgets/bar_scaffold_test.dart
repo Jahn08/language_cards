@@ -38,7 +38,7 @@ void main() {
             final navBarItemIcon = new Icon(Icons.ac_unit);
 
             await _buildInsideApp(tester, new BarScaffold(expectedTitle, 
-                bottomNavigationBar: new BottomNavigationBar(
+                bottomBar: new BottomNavigationBar(
                     key: bottomNavBarKey,
                     items: <BottomNavigationBarItem>[
                         new BottomNavigationBarItem(
@@ -174,8 +174,8 @@ void main() {
                 matching: find.byWidgetPredicate((w) => w is IconOption && !w.isSelected));
             expect(nonChosenOptionsFinder, findsWidgets);
             
-            await assistant.tapWidget(nonChosenOptionsFinder.first);
-            await assistant.tapWidget(nonChosenOptionsFinder.last);
+            await assistant.tapWidget(nonChosenOptionsFinder.first, atCenter: true);
+            await assistant.tapWidget(nonChosenOptionsFinder.last, atCenter: true);
 
 			final defStudyParams = defaultUserParams.studyParams;
 			final expectedCardSide = CardSide.back;
@@ -278,8 +278,10 @@ Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async =>
         )
     ));
 
-Future<void> _applySettings(WidgetAssistant assistant) async => 
-    await assistant.pressButtonDirectlyByLabel('Apply');
+Future<void> _applySettings(WidgetAssistant assistant) async =>
+	assistant.pressButtonDirectlyByLabel(
+		Localizator.defaultLocalization.barScaffoldSettingsPanelApplyingButtonLabel
+	);
 
 Future<void> _chooseDropdownItem(
 	WidgetTester tester, PresentableEnum curValue, PresentableEnum valueToChoose

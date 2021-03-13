@@ -257,14 +257,14 @@ class BarScaffold extends Scaffold {
 
 	BarScaffold(String title, { 
         @required Widget body,
-        BottomNavigationBar bottomNavigationBar,
+        Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
 		ContactsParams contactsParams,
         void Function() onNavGoingBack
     }): this._(title,
 			body: body,
-			bottomNavigationBar: bottomNavigationBar,
+			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
 			barActions: barActions,
 			onNavGoingBack: onNavGoingBack
@@ -273,14 +273,14 @@ class BarScaffold extends Scaffold {
 	BarScaffold.withSettings(String title, { 
         @required Widget body,
 		@required ContactsParams contactsParams,
-        BottomNavigationBar bottomNavigationBar,
+        Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
         void Function() onNavGoingBack
     }): this._(title,
 			body: body,
 			contactsParams: contactsParams,
-			bottomNavigationBar: bottomNavigationBar,
+			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
 			barActions: barActions,
 			onNavGoingBack: onNavGoingBack
@@ -288,7 +288,7 @@ class BarScaffold extends Scaffold {
 
     BarScaffold._(String title, { 
         @required Widget body,
-        BottomNavigationBar bottomNavigationBar,
+        Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
 		ContactsParams contactsParams,
@@ -302,7 +302,7 @@ class BarScaffold extends Scaffold {
 			showSettings: contactsParams != null
 		),
         body: body,
-        bottomNavigationBar: bottomNavigationBar,
+        bottomNavigationBar: bottomBar,
         floatingActionButton: floatingActionButton
     );
 

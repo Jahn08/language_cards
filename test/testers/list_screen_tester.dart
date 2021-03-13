@@ -176,7 +176,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
         AssuredFinder.findOne(icon: Icons.edit_off, shouldFind: shouldFind);
 
     Finder _tryFindingEditorRemoveButton({ bool shouldFind }) => 
-        AssuredFinder.findOne(label: 'Remove', shouldFind: shouldFind);
+        AssuredFinder.findOne(icon: Icons.delete, shouldFind: shouldFind);
 
     Finder _tryFindingEditorSelectButton({ bool shouldFind }) => 
         AssuredFinder.findOne(icon: Icons.select_all, shouldFind: shouldFind);
@@ -679,7 +679,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 	Future<void> selectItemsInEditor(WidgetAssistant assistant, List<String> itemTitles) async {
 
-		for (final title in itemTitles) {
+		for (final title in itemTitles..sort((a, b) => a.compareTo(b))) {
 			final tileFinder = await assistant.scrollUntilVisible(
 				find.widgetWithText(CheckboxListTile, title), CheckboxListTile);
 

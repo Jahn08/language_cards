@@ -9,6 +9,7 @@ import '../dialogs/import_dialog.dart';
 import '../router.dart';
 import '../utilities/pack_exporter.dart';
 import '../widgets/card_number_indicator.dart';
+import '../widgets/iconed_button.dart';
 import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 
@@ -83,57 +84,52 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 	Future<Map<String, int>> getFilterIndexes() => widget.storage.groupByTextIndex();
 
 	@override
-    List<BottomNavigationBarItem> getNavBarOptions(bool allSelected, AppLocalizations locale,
-		{ bool anySelected }) {
-        final options = super.getNavBarOptions(allSelected, locale, anySelected: anySelected);
-        return options..add(new BottomNavigationBarItem(
-            label: anySelected ? 
-				locale.packListScreenBottomNavBarExportActionLabel:
-				locale.packListScreenBottomNavBarImportActionLabel,
-            icon: new Icon(Icons.import_export)
-        ));
-    }
+    List<Widget> getBottomBarOptions(
+		List<StoredPack> markedItems, AppLocalizations locale, BuildContext scaffoldContext
+	) {
+        final options = super.getBottomBarOptions(markedItems, locale, scaffoldContext);
+        return options..add(new IconedButton(
+            label: markedItems.isEmpty ? 
+				locale.packListScreenBottomNavBarImportActionLabel:
+				locale.packListScreenBottomNavBarExportActionLabel,
+            icon: new Icon(Icons.import_export),
+			onPressed: () async {
+				if (markedItems.isEmpty) {
+					final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
+						.show(scaffoldContext);
 
-	@override
-    Future<bool> handleNavBarOption(
-		BottomNavigationBarItem _, Iterable<StoredPack> markedItems, BuildContext scaffoldContext
-	) async { 
-		final locale = AppLocalizations.of(scaffoldContext);
+					if (outcome == null)
+						return true;
+					else if (outcome.packsWithCards == null) {
+						await new ConfirmDialog.ok(
+							title: locale.packListScreenImportDialogTitle,
+							content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
+						).show(scaffoldContext);
+						return true;
+					}
 
-		if (markedItems.isEmpty) {
-			final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
-				.show(scaffoldContext);
+					final packsWithCards = outcome.packsWithCards;
+					await new ConfirmDialog.ok(
+						title: locale.packListScreenImportDialogTitle,
+						content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
+							packsWithCards.values.expand((c) => c).length, outcome.filePath)
+					).show(scaffoldContext);
 
-			if (outcome == null)
-				return true;
-			else if (outcome.packsWithCards == null) {
-				await new ConfirmDialog.ok(
-					title: locale.packListScreenImportDialogTitle,
-					content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
-				).show(scaffoldContext);
-				return true;
+					super.refetchItems(isForceful: true, shouldInitIndices: true);
+				}
+				else {
+					final exportFilePath = await new PackExporter(widget.cardStorage)
+						.export(markedItems.toList(), 'packs');
+
+					await new ConfirmDialog.ok(
+						title: locale.packListScreenExportDialogTitle,
+						content: locale.packListScreenExportDialogContent(exportFilePath)
+					).show(scaffoldContext);
+				}
+
+				super.clearItemsMarkedIneditor();
 			}
-
-			final packsWithCards = outcome.packsWithCards;
-			await new ConfirmDialog.ok(
-				title: locale.packListScreenImportDialogTitle,
-				content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
-					packsWithCards.values.expand((c) => c).length, outcome.filePath)
-			).show(scaffoldContext);
-
-			super.refetchItems(isForceful: true, shouldInitIndices: true);
-		}
-		else {
-			final exportFilePath = await new PackExporter(widget.cardStorage)
-				.export(markedItems.toList(), 'packs');
-
-			await new ConfirmDialog.ok(
-				title: locale.packListScreenExportDialogTitle,
-				content: locale.packListScreenExportDialogContent(exportFilePath)
-			).show(scaffoldContext);
-		}
-		
-        return true;
+        ));
     }
 }
 

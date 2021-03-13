@@ -40,10 +40,10 @@ void main() {
         final optionFinders = find.byType(SimpleDialogOption);
 
         final assistant = new WidgetAssistant(tester);
-        await assistant.tapWidget(optionFinders.at(chosenOptionIndex));
+        await assistant.tapWidget(optionFinders.at(chosenOptionIndex), atCenter: true);
 
         const int anotherChosenOptionIndex = 3;
-        await assistant.tapWidget(optionFinders.at(anotherChosenOptionIndex));
+        await assistant.tapWidget(optionFinders.at(anotherChosenOptionIndex), atCenter: true);
 
         await _pressDoneButton(tester);
 
