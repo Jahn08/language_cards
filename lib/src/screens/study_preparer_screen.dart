@@ -8,6 +8,7 @@ import '../widgets/card_number_indicator.dart';
 import '../widgets/loader.dart';
 import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
+import '../widgets/underlined_container.dart';
 
 class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
@@ -96,14 +97,14 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     Widget _buildList(List<StudyPack> packs) => 
         new Scrollbar(
             child: new ListView(
-                children: packs.map((p) =>_buildCheckListItem(p)).toList(),
+                children: packs.map((p) => _buildCheckListItem(p)).toList(),
                 controller: _scrollController
             )
         );
 
     Widget _buildCheckListItem(StudyPack stPack) {
         final pack = stPack.pack;
-        return new CheckboxListTile(
+        return new UnderlinedContainer(new CheckboxListTile(
             value: !_excludedPacks.contains(pack.id),
             onChanged: (isChecked) {
                 setState(() {
@@ -116,7 +117,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
             secondary: new TranslationIndicator(pack.from, pack.to),
             title: new OneLineText(pack.name),
             subtitle: new CardNumberIndicator(stPack.cardsOverall)
-        );
+        ));
     }
 }
 

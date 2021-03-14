@@ -5,6 +5,7 @@ import '../consts.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/iconed_button.dart';
+import '../widgets/underlined_container.dart';
 import '../utilities/styler.dart';
 
 class _CachedItem<TItem> {
@@ -348,7 +349,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildCheckListItem(BuildContext buildContext, int itemIndex) {
         final item = _items[itemIndex];
         
-        return _wrapWithBorder(isRemovableItem(item) ? new CheckboxListTile(
+        return new UnderlinedContainer(isRemovableItem(item) ? new CheckboxListTile(
             value: _itemsMarkedInEditor.containsKey(item.id),
             onChanged: (isChecked) {
                 setState(() {
@@ -362,21 +363,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
             subtitle: getItemSubtitle(item, forCheckbox: true)
         ) : _buildListTile(buildContext, item, isReadonly: true));
     }
-
-	Widget _wrapWithBorder(Widget child) =>
-		new Container(
-			decoration: new BoxDecoration(
-				border: new Border(
-					bottom: new BorderSide(
-						style: BorderStyle.solid,
-						width: 1.0,
-						color: new Styler(context).dividerColor
-					)
-				)
-			),
-			child: child
-		);
-
+	
     @protected
     bool isRemovableItem(TItem item) => true;
 
@@ -403,7 +390,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	) {
         final item = _items[itemIndex];
 
-        return _wrapWithBorder(isRemovableItem(item) ? new Dismissible(
+        return new UnderlinedContainer(isRemovableItem(item) ? new Dismissible(
 			direction: DismissDirection.endToStart,
 			key: new Key(item.id.toString()),
 			background: new Container(
