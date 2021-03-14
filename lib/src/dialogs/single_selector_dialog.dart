@@ -47,7 +47,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     Widget _buildDialogOption(T item) => new SimpleDialogOption(
         onPressed: () => returnResult(_context, item),
         child: new ListTile(
-            title: new Text(getItemTitle(item)),
+            title: getItemTitle(item),
             subtitle: getItemSubtitle(item),
             trailing: getItemTrailing(item)
         )
@@ -63,7 +63,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     } 
 
     @protected
-    String getItemTitle(T item);
+    Widget getItemTitle(T item);
 
     @protected
     Widget getItemSubtitle(T item);

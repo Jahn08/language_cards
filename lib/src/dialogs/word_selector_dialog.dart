@@ -15,7 +15,7 @@ class WordSelectorDialog extends SingleSelectorDialog<Word> {
 		new Text(item.partOfSpeech.present(AppLocalizations.of(context)));
   
     @override
-    String getItemTitle(Word item) => item.translations.join('; ');
+    Widget getItemTitle(Word item) => new Text(item.translations.join('; '));
 
     @override
     Widget getItemTrailing(Word item) => null;

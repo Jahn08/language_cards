@@ -19,7 +19,7 @@ void main() {
                 final option = tester.widget<SimpleDialogOption>(finder);
 
                 final optionTile = option.child as ListTile;
-                expect((optionTile.title as Text).data, pack.name);
+                expect((optionTile.title as Column).children.whereType<Text>().first.data, pack.name);
                 expect((optionTile.subtitle as CardNumberIndicator).number, pack.cardsNumber);
                 expect(optionTile.trailing != null, pack.id == chosenPack.id);
             }, ListTile);

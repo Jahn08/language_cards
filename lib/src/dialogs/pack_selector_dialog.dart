@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'single_selector_dialog.dart';
 import '../models/stored_pack.dart';
 import '../widgets/card_number_indicator.dart';
+import '../widgets/translation_indicator.dart';
 
 class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
     int chosenPackId;
@@ -15,7 +16,15 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
         new CardNumberIndicator(item.cardsNumber);
   
     @override
-    String getItemTitle(StoredPack item) => item.name;
+    Widget getItemTitle(StoredPack item) => 
+		new Column(
+			crossAxisAlignment: CrossAxisAlignment.start,
+			children: [
+				item.isNone ? new TranslationIndicator.empty(): 
+					new TranslationIndicator(item.from, item.to),
+				new Text(item.name)
+			]
+		);
 
     @override
     Widget getItemTrailing(StoredPack item) => item.id == chosenPackId ? 
