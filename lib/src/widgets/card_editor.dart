@@ -154,7 +154,7 @@ class CardEditorState extends State<CardEditor> {
 					isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
-				new FlatButton.icon(
+				new TextButton.icon(
 					icon: new Icon(Icons.folder_open),
 					label: new Container(
 						width: MediaQuery.of(context).size.width * 0.75,
@@ -177,7 +177,7 @@ class CardEditorState extends State<CardEditor> {
 					}
 				),	
                 if (this._studyProgress != WordStudyStage.unknown)
-                    new FlatButton.icon(
+                    new TextButton.icon(
                         icon: new Icon(Icons.restore),
                         label: new Text(
 							locale.cardEditorResettingStudyProgressButtonLabel(_studyProgress)
@@ -185,7 +185,7 @@ class CardEditorState extends State<CardEditor> {
                         onPressed: () =>  setState(
                             () => this._studyProgress = WordStudyStage.unknown)
                     ),
-                new RaisedButton(
+                new ElevatedButton(
                     child: new Text(locale.constsSavingItemButtonLabel),
                     onPressed: () async {
                         final state = _key.currentState;

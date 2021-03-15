@@ -29,7 +29,7 @@ void main() {
             final packStorage = new PackStorageMock();
             final packs = await _pumpScreen(tester, packStorage);
 			
-            expect(find.descendant(of: find.byType(RaisedButton, skipOffstage: false), 
+            expect(find.descendant(of: find.byType(ElevatedButton, skipOffstage: false), 
                 matching: find.byType(Text, skipOffstage: false)), findsNWidgets(4));
 
             final cards = _sortCards(
@@ -140,7 +140,7 @@ void main() {
 
 			await _pumpScreen(tester, packStorage, packs);
 
-			final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: RaisedButton, 
+			final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: ElevatedButton, 
 				shouldFind: true);
 			await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
 
@@ -383,7 +383,7 @@ Future<void> _pressButtonEndingWithText(WidgetAssistant assistant, String text) 
 Finder _findButtonEndingWithText(String text) => 
 	find.ancestor(of: find.byWidgetPredicate((w) => w is Text && 
 		w.data.endsWith(text), skipOffstage: false),
-        matching: find.byType(RaisedButton, skipOffstage: false));
+        matching: find.byType(ElevatedButton, skipOffstage: false));
 
 Future<void> _testForwardSorting(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();
@@ -477,7 +477,7 @@ Future<void> _goToNextCard(WidgetAssistant assistant, bool bySwiping) async {
     if (bySwiping)
         await assistant.swipeWidgetLeft(_findCardWidget());
     else
-        await assistant.tapWidget(find.widgetWithText(RaisedButton, 'Next'));
+        await assistant.tapWidget(find.widgetWithText(ElevatedButton, 'Next'));
 }
 
 void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,

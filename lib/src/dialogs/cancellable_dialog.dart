@@ -6,12 +6,12 @@ abstract class CancellableDialog<TResult> extends OutcomeDialog<TResult> {
 
     @protected
     Widget buildCancelBtn(BuildContext context, [TResult result]) {
-		return new RaisedButton(
+		return new ElevatedButton(
 			onPressed: () => returnResult(context, result),
 			child: new Text(
 				AppLocalizations.of(context).cancellableDialogCancellationButtonLabel
 			),
-			color: Colors.deepOrange[300]
+			style: ElevatedButton.styleFrom(primary: Colors.deepOrange[300])
 		);
 	} 
 }

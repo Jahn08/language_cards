@@ -257,7 +257,7 @@ void main() {
 Future<void> _buildInsideApp(WidgetTester tester, Widget child) => 
     tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: child));
 
-FlatButton _buildBarAction(String label) => new FlatButton(
+TextButton _buildBarAction(String label) => new TextButton(
     key: new Key(Randomiser.nextString()),
     child: new Text(label),
     onPressed: null

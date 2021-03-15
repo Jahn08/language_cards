@@ -35,7 +35,7 @@ class AssuredFinder {
 
 	static Finder findFlatButtonByIcon(IconData icon, { bool shouldFind }) {
 		final flatBtnFinder = find.ancestor(of: find.byIcon(icon), 
-			matching: find.byWidgetPredicate((widget) => widget is FlatButton));
+			matching: find.byWidgetPredicate((widget) => widget is TextButton));
 		expect(flatBtnFinder, matchOne(shouldFind: shouldFind));
 
 		return flatBtnFinder;

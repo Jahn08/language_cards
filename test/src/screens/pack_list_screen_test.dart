@@ -480,7 +480,7 @@ Future<void> _activateImport(WidgetAssistant assistant, String importFilePath) a
 	await assistant.tester.enterText(filePathTxtFinder, importFilePath);
 
 	final importConfirmationBtnFinder = find.widgetWithText(
-		RaisedButton, Localizator.defaultLocalization.importDialogImportBtnLabel);
+		ElevatedButton, Localizator.defaultLocalization.importDialogImportBtnLabel);
 	await assistant.tapWidget(importConfirmationBtnFinder);
 }
 

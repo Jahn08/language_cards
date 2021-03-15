@@ -50,7 +50,7 @@ class CardEditorTester {
 		AssuredFinder.findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
 
 	static Finder findSaveButton() => 
-		AssuredFinder.findOne(type: RaisedButton, label: 'Save', shouldFind: true);
+		AssuredFinder.findOne(type: ElevatedButton, label: 'Save', shouldFind: true);
 
 	Future<String> enterChangedText(String initialText) async {
 		final changedText = initialText.substring(1);

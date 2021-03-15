@@ -91,7 +91,7 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
         ) : Future.value(items.firstWhere((_) => true, orElse: () => null));
     }
 
-    Widget _buildDoneBtn(AppLocalizations locale) => new RaisedButton(
+    Widget _buildDoneBtn(AppLocalizations locale) => new ElevatedButton(
         onPressed: () => returnResult(_context, _chosenTranslations?.join('; ')),
         child: new Text(locale.translationSelectorDoneButtonLabel)
     );

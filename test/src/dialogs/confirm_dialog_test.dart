@@ -50,7 +50,7 @@ Future<void> _testDialogRendering<T>(WidgetTester tester,
     actions.values.forEach((label) => _assertTextVisibility(label, isVisible: true));
 
     await new WidgetAssistant(tester).tapWidget(
-        find.widgetWithText(RaisedButton, expectedAction.value));
+        find.widgetWithText(ElevatedButton, expectedAction.value));
 
     _assertDialogVisibility(false);
     expect(dialogOutcome, expectedAction.key);

@@ -27,7 +27,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 			title: new Text(locale.importDialogTitle),
 			actions: [
 				widget.cancelButton,
-				RaisedButton(
+				ElevatedButton(
 					child: new Text(locale.importDialogImportBtnLabel), 
 					onPressed: () async {
 						final state = _key.currentState;
@@ -58,7 +58,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 								null: locale.importDialogFileNameTextFieldValidationError;
 						},
 					),
-					new RaisedButton(
+					new ElevatedButton(
 						child: new Text(locale.importDialogFileSelectorBtnLabel),
 						onPressed: () async {
 							final fileResult = await FilePicker.platform.pickFiles(
@@ -79,7 +79,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
 class _ImportFormDialog extends StatefulWidget {
 
-	final RaisedButton cancelButton;
+	final ElevatedButton cancelButton;
 
 	final Function(String) fileProcessor;
 

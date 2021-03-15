@@ -36,7 +36,7 @@ class ConfirmDialog extends CancellableDialog<bool> {
                 actions: [
 					if (isCancellable)
 						buildCancelBtn(context, false),
-					RaisedButton(
+					ElevatedButton(
 						child: new Text(confirmationLabel ?? 
 							AppLocalizations.of(context).confirmDialogOkButtonLabel), 
 						onPressed: () => Navigator.pop(buildContext, true)

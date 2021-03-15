@@ -97,7 +97,7 @@ class PackScreenState extends State<PackScreen> {
         ];
 
         if (!_isNew && _foundPack != null)
-            children.add(new FlatButton.icon(
+            children.add(new TextButton.icon(
                 icon: new Icon(Consts.cardListIcon),
                 label: new Text(locale.packScreenShowingCardsButtonLabel(_cardsNumber)),
                 onPressed: () => Router.goToCardList(context, pack: _foundPack)
@@ -126,9 +126,9 @@ class PackScreenState extends State<PackScreen> {
         from: _languages[_fromLang]
     );
 
-    RaisedButton _buildSaveBtn(String title, void afterSaving(StoredPack pack), 
+    ElevatedButton _buildSaveBtn(String title, void afterSaving(StoredPack pack), 
         { bool isDisabled }) => 
-        new RaisedButton(
+        new ElevatedButton(
             child: new Text(title),
             onPressed: isDisabled ? null: () async {
                 final state = _key.currentState;

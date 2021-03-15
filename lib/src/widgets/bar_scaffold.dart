@@ -217,11 +217,11 @@ class _SettingsPanelState extends State<_SettingsPanel> {
     Widget _buildApplyButton(SettingsBloc bloc, AppLocalizations locale) {
         return new Column(
             children: [
-                new RaisedButton(
+                new ElevatedButton(
                     child: new Text(locale.barScaffoldSettingsPanelResettingButtonLabel),
                     onPressed: () => setState(() => _params = new UserParams())
                 ),
-                new RaisedButton(
+                new ElevatedButton(
                     child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
                     onPressed: _originalParams == _params.toJson() ? null: () async {
                         await bloc.save(_params);

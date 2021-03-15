@@ -258,7 +258,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		@required BuildContext scaffoldContext, @required String message, 
 		@required List<int> itemIdsToRemove, @required AppLocalizations locale 
 	}) {
-        final snackBar = Scaffold.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
+        final snackBar = ScaffoldMessenger.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
 			duration: new Duration(milliseconds: _removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(

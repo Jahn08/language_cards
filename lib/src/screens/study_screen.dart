@@ -306,7 +306,7 @@ class _StudyScreenState extends State<StudyScreen> {
             childAspectRatio: 2.6,
             padding: EdgeInsets.all(5),
             children: [
-                new RaisedButton(
+                new ElevatedButton(
                     child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
                     onPressed: () async {
                         if (card.incrementProgress())
@@ -315,11 +315,11 @@ class _StudyScreenState extends State<StudyScreen> {
                         _setNextCard();
                     }
                 ),
-                new RaisedButton(
+                new ElevatedButton(
                     child: _buildCenteredBigText(locale.studyScreenNextCardButtonLabel),
                     onPressed: _setNextCard
                 ),
-                new RaisedButton(
+                new ElevatedButton(
                     child: _buildCenteredBigText(locale.studyScreenSortingCardButtonLabel(
 						_studyDirection.present(locale)
 					)),
@@ -329,7 +329,7 @@ class _StudyScreenState extends State<StudyScreen> {
                             _studyDirection = _nextValue(StudyDirection.values, _studyDirection);
                         })
                 ),
-                new RaisedButton(
+                new ElevatedButton(
                     child: _buildCenteredBigText(locale.studyScreenCardSideButtonLabel(
 						_cardSide.present(locale)
 					)),

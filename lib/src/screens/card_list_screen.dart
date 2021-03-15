@@ -109,7 +109,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					widget.storage.upsert(itemsToReset);
 				});
 
-				Scaffold.of(scaffoldContext).showSnackBar(new SnackBar(
+				ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
 					content: new Text(
 						locale.cardListScreenBottomSnackBarResettingProgressInfo(itemsToReset.length)
 					)

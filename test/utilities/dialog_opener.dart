@@ -16,8 +16,9 @@ class DialogOpener {
         final dialogBtnKey = new Key(Randomiser.nextString());
         await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
             onBuilding: (inContext) => context = inContext,
-            child: new RaisedButton(
+            child: new ElevatedButton(
                 key: dialogBtnKey,
+				child: new Text(Randomiser.nextString()),
                 onPressed: () async {
                     final outcome = await dialogExposer(context);
                     onDialogClose?.call(outcome);
