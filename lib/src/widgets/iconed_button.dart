@@ -8,7 +8,7 @@ class IconedButton extends StatelessWidget {
 
 	final Function() onPressed;
 
-	IconedButton({ this.label, this.icon, this.onPressed });
+	IconedButton({ @required this.label, @required this.icon, @required this.onPressed });
 
 	@override
 	Widget build(BuildContext context) {
