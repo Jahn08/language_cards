@@ -294,9 +294,6 @@
     "partOfSpeechCollocationName": "collocation",
     "@partOfSpeechCollocationName": {},
 
-    "singleSelectorDialogTitle": "Choose an Item",
-    "@singleSelectorDialogTitle": {},
-
     "speakerButtonUnaivailableTTSDialogTitle": "Text to Speech Is Unavailable",
     "@speakerButtonUnaivailableTTSDialogTitle": {},
     "speakerButtonUnaivailableTTSDialogContent": "The language {language} is absent. Try installing it in the settings of your device",

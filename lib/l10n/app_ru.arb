@@ -294,9 +294,6 @@
     "partOfSpeechCollocationName": "выражение",
     "@partOfSpeechCollocationName": {},
 
-    "singleSelectorDialogTitle": "Выбрать запись",
-    "@singleSelectorDialogTitle": {},
-
     "speakerButtonUnaivailableTTSDialogTitle": "Озвучивание текста отсутствует",
     "@speakerButtonUnaivailableTTSDialogTitle": {},
     "speakerButtonUnaivailableTTSDialogContent": "Язык {language} отсутствует. Попробуйте установить его в настройках вашего устройства",
