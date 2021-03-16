@@ -62,7 +62,7 @@ class MainScreen extends StatelessWidget {
                     style: new ButtonStyle(
                         textStyle: MaterialStateProperty.resolveWith(
                             (states) => new TextStyle(
-                                fontSize: 20
+                                fontSize: Consts.largeFontSize
                             )) 
                     ),
                     onPressed: onClick, 

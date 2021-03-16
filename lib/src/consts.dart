@@ -9,4 +9,8 @@ class Consts {
 
     static String getSelectorLabel(bool allSelected, AppLocalizations locale) => 
 		allSelected ? locale.constsUnselectAll: locale.constsSelectAll;
+
+	static const double largeFontSize = 20;
+
+	static const FontWeight boldFontWeight = FontWeight.w800;
 }

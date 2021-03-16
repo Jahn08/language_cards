@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import './asset_icon.dart';
-import './icon_option.dart';
+import 'asset_icon.dart';
+import 'icon_option.dart';
+import '../consts.dart';
 import '../blocs/settings_bloc.dart';
 import '../data/configuration.dart';
 import '../models/language.dart';
@@ -13,8 +14,6 @@ import '../widgets/navigation_bar.dart';
 import '../widgets/styled_dropdown.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
-
-	static const double _bigFontSize = 20;
 
     UserParams _params;
 
@@ -58,8 +57,8 @@ class _SettingsPanelState extends State<_SettingsPanel> {
                 child: new Text(
 					locale.barScaffoldSettingsPanelTitle,
                     style: new TextStyle(
-						fontSize: _bigFontSize,
-						fontWeight: FontWeight.w800
+						fontSize: Consts.largeFontSize,
+						fontWeight: Consts.boldFontWeight
 					),
                     textAlign: TextAlign.center
                 )
@@ -83,7 +82,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
             padding: EdgeInsets.only(left: 5), 
             child: new Text(
                 title,
-                style: new TextStyle(fontSize: _bigFontSize)
+                style: new TextStyle(fontSize: Consts.largeFontSize)
             ));
     }
 

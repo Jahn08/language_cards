@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
+import '../consts.dart';
 
 abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMixin<String>
     implements PreferredSizeWidget {
@@ -54,7 +55,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
                 textAlign: TextAlign.center,
                 style: new TextStyle(
                     color: Colors.black,
-                    fontWeight: FontWeight.w800,
+                    fontWeight: Consts.boldFontWeight,
                     fontSize: _symbolSize
                 )
             )
