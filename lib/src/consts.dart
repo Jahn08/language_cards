@@ -12,5 +12,7 @@ class Consts {
 
 	static const double largeFontSize = 20;
 
+	static const double biggerFontSize = 18;
+
 	static const FontWeight boldFontWeight = FontWeight.w800;
 }

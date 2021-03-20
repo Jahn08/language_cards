@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../router.dart';
+import '../data/quote_provider.dart';
 import '../models/app_params.dart';
 import '../widgets/bar_scaffold.dart';
 
@@ -22,9 +23,33 @@ class MainScreen extends StatelessWidget {
 
     Widget _buildMenu(BuildContext context) {
 		final locale = AppLocalizations.of(context);
+		final quote = QuoteProvider.getNextQuote(locale);
         return new Column(
             children: [
-                _buildRow(flex: 2),
+                _buildRow(child: new Container(
+						width: MediaQuery.of(context).size.width * 0.97,
+						child: new Column(
+							mainAxisAlignment: MainAxisAlignment.center,
+							crossAxisAlignment: CrossAxisAlignment.stretch,
+							children: [
+								new Text(
+									quote.key,
+									softWrap: true, 
+									textAlign: TextAlign.justify,
+									style: TextStyle(fontSize: Consts.largeFontSize)
+								),
+								new Text(''),
+								new Text(
+									quote.value,
+									textAlign: TextAlign.left,
+									style: TextStyle(fontSize: Consts.biggerFontSize)
+								)
+							]
+						),
+						padding: EdgeInsets.all(10.0)
+					), 
+					flex: 2
+				),
                 _buildRow(child: _buildMenuItem(
 					locale.mainScreenStudyModeMenuItemLabel,
 					Icons.school, 
