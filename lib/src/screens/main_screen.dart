@@ -34,8 +34,7 @@ class MainScreen extends StatelessWidget {
 							children: [
 								new Text(
 									quote.key,
-									softWrap: true, 
-									textAlign: TextAlign.justify,
+									textAlign: TextAlign.start,
 									style: TextStyle(fontSize: Consts.largeFontSize)
 								),
 								new Text(''),
