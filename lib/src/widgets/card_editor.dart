@@ -157,7 +157,7 @@ class CardEditorState extends State<CardEditor> {
 				new TextButton.icon(
 					icon: new Icon(Icons.folder_open),
 					label: new Container(
-						width: MediaQuery.of(context).size.width * 0.75,
+						width: MediaQuery.of(context).size.width * 0.6,
 						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
 					),
 					onPressed: () async {
