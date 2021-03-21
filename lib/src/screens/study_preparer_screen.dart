@@ -81,16 +81,19 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
             levels.values.reduce((res, el) => res + el);
 
         return new ListView(
-            children: levels.entries.map((lvl) => 
-                new ListTile(
+            children: levels.entries.map((lvl) {
+				final isEnabled = lvl.value > 2;
+                return new ListTile(
                     title: new Text(lvl.key), 
                     trailing: new Text(lvl.value.toString()), 
-                    onTap: lvl.value < 2 ? null: () => Router.goToStudyMode(context, 
+                    onTap: isEnabled ? () => Router.goToStudyMode(context, 
                         packs: includedPacks.map((p) => p.pack).toList(), 
-                        studyStageIds: WordStudyStage.fromString(lvl.key, locale)),
-                    dense: true, 
+                        studyStageIds: WordStudyStage.fromString(lvl.key, locale)): null,
+                    dense: true,
+					enabled: isEnabled,
                     visualDensity: VisualDensity.comfortable
-                )).toList()
+                );
+			}).toList()
         );
     }
 
