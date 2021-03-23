@@ -133,6 +133,12 @@ class PackRoute {
         params = arguments is _PackStorageRouteArgs ? arguments : new _PackStorageRouteArgs();
 }
 
+class PackHelpRoute {}
+
+class CardHelpRoute {}
+
+class StudyHelpRoute {}
+
 class Router {
     static const String _cardRouteName = 'card';
 
@@ -147,6 +153,12 @@ class Router {
     static const String _studyModeRouteName = 'studyMode';
 
     static const String _mainMenuRouteName = 'mainMenu';
+
+    static const String _cardHelpRouteName = 'cardHelp';
+	
+    static const String _packHelpRouteName = 'packHelp';
+
+    static const String _studyHelpRouteName = 'studyHelp';
 
     static String get initialRouteName => _mainMenuRouteName;
 
@@ -177,6 +189,12 @@ class Router {
                 return new StudyPreparerRoute.fromArguments(settings.arguments);
             case _studyModeRouteName:
                 return new StudyModeRoute.fromArguments(settings.arguments);
+            case _packHelpRouteName:
+                return new PackHelpRoute();
+            case _cardHelpRouteName:
+                return new CardHelpRoute();
+            case _studyHelpRouteName:
+                return new StudyHelpRoute();
             default:
                 return null;
         }
@@ -207,4 +225,13 @@ class Router {
     static goToPackList(BuildContext context) => Navigator.pushNamed(context, _packListRouteName);
 
     static goBackToPackList(BuildContext context) => _goBackUntil(context, _packListRouteName);
+	
+	static goToCardHelp(BuildContext context) => 
+		Navigator.pushNamed(context, _cardHelpRouteName);
+
+	static goToPackHelp(BuildContext context) => 
+		Navigator.pushNamed(context, _packHelpRouteName);
+
+	static goToStudyHelp(BuildContext context) => 
+		Navigator.pushNamed(context, _studyHelpRouteName);
 }
