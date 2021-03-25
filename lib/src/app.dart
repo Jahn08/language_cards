@@ -11,6 +11,7 @@ import './screens/card_screen.dart';
 import './screens/main_screen.dart';
 import './screens/pack_list_screen.dart';
 import './screens/pack_screen.dart';
+import './screens/slider_screen.dart';
 import './screens/study_screen.dart';
 import './screens/study_preparer_screen.dart';
 import './widgets/loader.dart';
@@ -70,6 +71,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                         return new StudyPreparerScreen(route.params.storage);
                     else if (route is StudyModeRoute)
                         return _buildStudyScreen(context, route);
+					else if (route is CardHelpRoute)
+						return new HelpCardScreen();
                         
 					final packListParams = (route as PackListRoute).params;
                     return new PackListScreen(packListParams.storage, packListParams.cardStorage);

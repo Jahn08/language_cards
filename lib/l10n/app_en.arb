@@ -143,6 +143,13 @@
     "constsRemovingItemButtonLabel": "Remove",
     "@constsRemovingItemButtonLabel": {},
 
+    "helpCardScreenOverviewSlideDescription": "The screen lists all word cards of a pack with its name in the title@Word Card Screen",
+    "@helpCardScreenOverviewSlideDescription": {},
+    "helpCardScreenEditorModeBtnSlideDescription": "Clicking on the pencil icon starts the editor mode for the list@Entering Editor Mode",
+    "@helpCardScreenEditorModeBtnSlideDescription": {},
+    "helpCardScreenEditorModeExitBtnSlideDescription": "Clicking on the crossed pencil icon exits the editor mode for the list@Exiting Editor Mode",
+    "@helpCardScreenEditorModeExitBtnSlideDescription": {},
+
     "importDialogTitle": "Importing Packs",
     "@importDialogTitle": {},
     "importDialogImportBtnLabel": "Import",

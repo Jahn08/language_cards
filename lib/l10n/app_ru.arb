@@ -142,7 +142,14 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
-    
+
+    "helpCardScreenOverviewSlideDescription": "Здесь перечислены все словарные карточки для набора, имя которого указано в заголовке@Экран словарных карточек",
+    "@helpCardScreenOverviewSlideDescription": {},
+    "helpCardScreenEditorModeBtnSlideDescription": "Клик по иконке карандаша откроет режим редактирования списка@Переход в режим редактирования",
+    "@helpCardScreenEditorModeBtnSlideDescription": {},
+    "helpCardScreenEditorModeExitBtnSlideDescription": "Клие по иконке зачёркнутого карандаша закроет режим редактирования списка@Выход из режима редактирования",
+    "@helpCardScreenEditorModeExitBtnSlideDescription": {},
+
     "importDialogTitle": "Импорт наборов",
     "@importDialogTitle": {},
     "importDialogImportBtnLabel": "Импорт",
