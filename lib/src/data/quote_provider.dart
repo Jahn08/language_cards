@@ -1,5 +1,6 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'dart:math';
+import '../utilities/string_ext.dart';
 
 class QuoteProvider {
 
@@ -31,7 +32,7 @@ class QuoteProvider {
 	}
 
 	static MapEntry<String, String> _separateTextFromSource(String quote) {
-		final parts = quote.split('@');
+		final parts = splitLocalizedText(quote);
 		return new MapEntry(parts.first, parts.last);
 	}
 }
