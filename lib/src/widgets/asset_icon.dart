@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/language.dart';
-import '../utilities/string_ext.dart';
+import '../utilities/local_asset_image.dart';
 
 class AssetIcon extends Image {
     static const double widthValue = 40;
@@ -10,7 +10,7 @@ class AssetIcon extends Image {
     static final AssetIcon britishFlag = new AssetIcon('flag_uk');
 
     AssetIcon(String name): super(
-        image: new AssetImage(joinPaths(['assets', 'images', '$name.jpg'])), 
+        image: new LocalAssetImage(name), 
         color: null,
         fit: BoxFit.fill,
         width: widthValue,
