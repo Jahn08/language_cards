@@ -3,6 +3,7 @@ import 'string_ext.dart';
 
 class LocalAssetImage extends AssetImage {
 
-  	LocalAssetImage(String fileName, [String fileExt]) : 
-		super(joinPaths(['assets', 'images', '$fileName.${fileExt ?? 'jpg'}']));
+  	LocalAssetImage(String fileName, { String fileExtension, String localeName }) : 
+		super(joinPaths(['assets', 'images', 
+			if (localeName != null) localeName, '$fileName.${fileExtension ?? 'jpg'}']));
 }

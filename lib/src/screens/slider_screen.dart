@@ -18,7 +18,6 @@ class _SliderScreenState extends State<_SliderScreen> {
 	initState() {
 		super.initState();
 
-		_slides = widget.slideNames.map((n) => new Image(image: new LocalAssetImage(n))).toList();
 		_ctrl = new PageController();
 	}
 
@@ -31,6 +30,10 @@ class _SliderScreenState extends State<_SliderScreen> {
 	@override
 	Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
+
+		if (_slides == null)
+			_slides = widget.slideNames.map((n) => 
+				new Image(image: new LocalAssetImage(n, localeName: locale.localeName))).toList();
 
 		final scaffold = new BarScaffold(
 			'${widget.title}\nPage ${_curPageIndex + 1} of ${_slides.length}', 
