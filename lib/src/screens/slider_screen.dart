@@ -125,7 +125,9 @@ class _SliderScreen extends StatefulWidget {
 class HelpCardScreen extends _SliderScreen {
 
 	HelpCardScreen(): super('About Word Cards', [
-		'help_card_screen', 'help_card_editor_mode_btn', 'help_card_editor_mode_exit_btn'
+		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
+		'help_card_removal', 'help_card_adding', 'help_card_word_dictionary', 
+		'help_card_word_translation', 'help_card_saving'
 	], _descriptor);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
@@ -133,9 +135,19 @@ class HelpCardScreen extends _SliderScreen {
 			case 0:
 				return locale.helpCardScreenOverviewSlideDescription;
 			case 1:
-				return locale.helpCardScreenEditorModeBtnSlideDescription;
+				return locale.helpCardScreenEditorSlideDescription;
 			case 2:
-				return locale.helpCardScreenEditorModeExitBtnSlideDescription;
+				return locale.helpCardScreenUnlearningSlideDescription;
+			case 3:
+				return locale.helpCardScreenRemovingSlideDescription;
+			case 4:
+				return locale.helpCardScreenAddingSlideDescription;
+			case 5:
+				return locale.helpCardScreenWordDictionarySlideDescription;
+			case 6:
+				return locale.helpCardScreenWordTranslationSlideDescription;
+			case 7:
+				return locale.helpCardScreenSavingSlideDescription;
 			default:
 				return '';
 		}
