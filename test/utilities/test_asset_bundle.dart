@@ -10,20 +10,28 @@ class TestAssetBundle extends CachingAssetBundle {
     final AppParams _params;
     final AppParams _secretParams;
 
-    TestAssetBundle.params(AppParams params, { AppParams secretParams }): 
+	final void Function(String key, ByteData data) onAssetLoaded;
+
+    TestAssetBundle({ AppParams params, AppParams secretParams, this.onAssetLoaded }): 
         _params = params, _secretParams = secretParams;
 
     @override
     Future<ByteData> load(String key) async {
-        if (key == _secretParamAssetKey) 
+		if (key == _secretParamAssetKey) 
             return _convertToBytes(_secretParams);
         else if (key == _paramAssetKey)
             return _convertToBytes(_params);
-			
-        return null;
+		
+		final data = await rootBundle.load(key);
+		onAssetLoaded?.call(key, data);
+
+		return data;
     }
 
     ByteData _convertToBytes(Object obj) {
+		if (obj == null)
+			return null;
+
         final bytes = new Utf8Codec().encode(jsonEncode(obj));
         return new ByteData.sublistView(Int8List.fromList(bytes));
     }

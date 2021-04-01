@@ -16,8 +16,8 @@ void main() {
         
         AppParams params;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle.params(
-				_buildAppParams(
+			bundle: new TestAssetBundle(
+				params: _buildAppParams(
 					Randomiser.nextString(), 
 					appStoreId: expectedAppStoreId,
 					email: expectedEmail, 
@@ -45,7 +45,7 @@ void main() {
         
         AppParams params;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle.params(_buildAppParams(
+			bundle: new TestAssetBundle(params: _buildAppParams(
 				expectedApiKey, 
 				appStoreId: expectedAppStoreId,
 				email: expectedEmail, 
@@ -64,7 +64,7 @@ void main() {
     testWidgets('Throws an error when there is no configuration found', (tester) async {
         Error expectedError;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle.params(null),
+			bundle: new TestAssetBundle(params: null),
 			child: new RootWidgetMock(onBuilding: (context) async {
 				try {
 					await Configuration.getParams(context, reload: true);

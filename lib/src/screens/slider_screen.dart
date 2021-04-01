@@ -104,7 +104,7 @@ class _SliderScreenState extends State<_SliderScreen> {
 		final description = widget.descriptor(_curPageIndex, locale);
 
 		final parts = splitLocalizedText(description);
-		new ConfirmDialog.ok(title: parts.last, content: parts.first).show(context);
+		await new ConfirmDialog.ok(title: parts.last, content: parts.first).show(context);
 	}
 }
 
