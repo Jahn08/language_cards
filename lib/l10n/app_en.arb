@@ -143,6 +143,21 @@
     "constsRemovingItemButtonLabel": "Remove",
     "@constsRemovingItemButtonLabel": {},
 
+    "helpCardScreenTitle": "About Word Cards",
+    "@helpCardScreenTitle": {},
+    "helpCardScreenPageIndicator": "Page {pageNumber} of {pagesOverall}",
+    "@helpCardScreenPageIndicator": {
+        "placeholders": {
+            "pageNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "pagesOverall": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
     "helpCardScreenOverviewSlideDescription": "The screen lists word cards across all packs or of a particular pack with its name in the title when entering here through the pack@Word Card Screen",
     "@helpCardScreenOverviewSlideDescription": {},
     "helpCardScreenEditorSlideDescription": "Clicking on the pencil icon opens the editor mode for the list. Clicking there again exits the mode@Entering Editor Mode",

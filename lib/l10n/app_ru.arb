@@ -142,7 +142,22 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
-
+    
+    "helpCardScreenTitle": "О словарных карточках",
+    "@helpCardScreenTitle": {},
+    "helpCardScreenPageIndicator": "Страница {pageNumber} из {pagesOverall}",
+    "@helpCardScreenPageIndicator": {
+        "placeholders": {
+            "pageNumber": {
+                "type": "int",
+                "format": "compactLong"
+            },
+            "pagesOverall": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
     "helpCardScreenOverviewSlideDescription": "Здесь перечислены словарные карточки всех наборов либо определённого набора - его имя указано в заголовке, - если переход был выполнен из набора@Экран словарных карточек",
     "@helpCardScreenOverviewSlideDescription": {},
     "helpCardScreenEditorSlideDescription": "Клик по иконке карандаша откроет режим редактирования списка. Повторный клик закроет его@Режим редактирования",

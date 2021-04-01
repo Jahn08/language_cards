@@ -35,8 +35,8 @@ class _SliderScreenState extends State<_SliderScreen> {
 			_slides = widget.slideNames.map((n) => 
 				new Image(image: new LocalAssetImage(n, localeName: locale.localeName))).toList();
 
-		final scaffold = new BarScaffold(
-			'${widget.title}\nPage ${_curPageIndex + 1} of ${_slides.length}', 
+		final scaffold = new BarScaffold('${widget.titleGetter(locale)}\n' + 
+				locale.helpCardScreenPageIndicator(_curPageIndex + 1, _slides.length), 
 			body: new Container(
 				child: new PageView(
 					controller: _ctrl,
@@ -112,11 +112,11 @@ class _SliderScreen extends StatefulWidget {
 
 	final List<String> slideNames;
 
-	final String title;
+	final String Function(AppLocalizations locale) titleGetter;
 
 	final String Function(int slideIndex, AppLocalizations locale) descriptor;
 
-	_SliderScreen(this.title, this.slideNames, this.descriptor);
+	_SliderScreen(this.titleGetter, this.slideNames, this.descriptor);
 
 	@override
 	State<StatefulWidget> createState() => new _SliderScreenState();
@@ -124,7 +124,7 @@ class _SliderScreen extends StatefulWidget {
 
 class HelpCardScreen extends _SliderScreen {
 
-	HelpCardScreen(): super('About Word Cards', [
+	HelpCardScreen(): super((locale) => locale.helpCardScreenTitle, [
 		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
 		'help_card_removal', 'help_card_adding', 'help_card_word_dictionary', 
 		'help_card_word_translation', 'help_card_saving'
