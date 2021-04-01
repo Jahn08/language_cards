@@ -174,7 +174,8 @@
     "@helpCardScreenWordTranslationSlideDescription": {},    
     "helpCardScreenSavingSlideDescription": "Клик по кнопке Принять заполнит поля карточки выбранными значениями. Теперь возможно послушать текст карточки, нажав на кнопку в верхнем правом углу. Кнопка Сохранить сохранит карточку в наборе@Сохранение карточки",
     "@helpCardScreenSavingSlideDescription": {},
-
+    "helpCardScreenSearchSlideDescription": "Когда на экране достаточно много карточек, становится доступен режим поиска - иконка лупы в верхнем правом углу. В этом режиме можно фильтровать карточки по их первым буквам@Поиск карточки",
+    "@helpCardScreenSearchSlideDescription": {},
 
     "importDialogTitle": "Импорт наборов",
     "@importDialogTitle": {},

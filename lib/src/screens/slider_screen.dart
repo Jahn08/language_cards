@@ -127,7 +127,7 @@ class HelpCardScreen extends _SliderScreen {
 	HelpCardScreen(): super((locale) => locale.helpCardScreenTitle, [
 		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
 		'help_card_removal', 'help_card_adding', 'help_card_word_dictionary', 
-		'help_card_word_translation', 'help_card_saving'
+		'help_card_word_translation', 'help_card_saving', 'help_card_search'
 	], _descriptor);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
@@ -148,6 +148,8 @@ class HelpCardScreen extends _SliderScreen {
 				return locale.helpCardScreenWordTranslationSlideDescription;
 			case 7:
 				return locale.helpCardScreenSavingSlideDescription;
+			case 8:
+				return locale.helpCardScreenSearchSlideDescription;
 			default:
 				return '';
 		}
