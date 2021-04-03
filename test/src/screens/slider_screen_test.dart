@@ -10,11 +10,17 @@ import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
 main() {
+	_runTestsForScreen('Card Help Screen', () => new CardHelpScreen());
+	
+	_runTestsForScreen('Pack Help Screen', () => new PackHelpScreen());
+}
 
-	testWidgets('Goes forward through all the available slides and then backward again', 
+void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {
+
+	testWidgets('$screenName: goes forward through all the available slides and then backward again', 
 		(tester) async {
 			final loadedSlides = <String>[];
-			await _pumpScreen(tester, 
+			await _pumpScreen(tester, screenBuilder,
 				(key, data) {
 					if (data != null && key.endsWith('jpg'))
 						loadedSlides.add(key);
@@ -49,8 +55,8 @@ main() {
 			expect(pageIndex, 1);
 		});
 		
-	testWidgets('Displays a helping dialog by clicking on the information icon', (tester) async {
-		await _pumpScreen(tester);
+	testWidgets('$screenName: displays a helping dialog by clicking on the information icon', (tester) async {
+		await _pumpScreen(tester, screenBuilder);
 
 		final firstSlideInitialInfo = _extractDialogData(tester);
 
@@ -76,13 +82,14 @@ main() {
 	});
 }
 
-Future<void> _pumpScreen(WidgetTester tester, [Function(String, ByteData) onAssetLoaded]) async {
+Future<void> _pumpScreen(WidgetTester tester, Widget Function() screenBuilder,
+	[Function(String, ByteData) onAssetLoaded]) async {
 	await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		child: new DefaultAssetBundle(
 			bundle: new AssetBundleMock(
 				onAssetLoaded: onAssetLoaded
 			), 
-			child: new CardHelpScreen()
+			child: screenBuilder()
 		)
 	));
 	await tester.pump();
