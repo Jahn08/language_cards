@@ -3,10 +3,10 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/screens/slider_screen.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../mocks/asset_bundle_mock.dart';
 import '../../testers/dialog_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/randomiser.dart';
-import '../../utilities/test_asset_bundle.dart';
 import '../../utilities/widget_assistant.dart';
 
 main() {
@@ -79,7 +79,7 @@ main() {
 Future<void> _pumpScreen(WidgetTester tester, [Function(String, ByteData) onAssetLoaded]) async {
 	await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		child: new DefaultAssetBundle(
-			bundle: new TestAssetBundle(
+			bundle: new AssetBundleMock(
 				onAssetLoaded: onAssetLoaded
 			), 
 			child: new CardHelpScreen()

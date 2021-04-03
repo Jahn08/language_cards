@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/services.dart';
 import 'package:language_cards/src/models/app_params.dart';
 
-class TestAssetBundle extends CachingAssetBundle {
+class AssetBundleMock extends CachingAssetBundle {
     static const String _secretParamAssetKey = 'assets/cfg/secret_params.json';
     static const String _paramAssetKey = 'assets/cfg/params.json';
 
@@ -12,7 +12,7 @@ class TestAssetBundle extends CachingAssetBundle {
 
 	final void Function(String key, ByteData data) onAssetLoaded;
 
-    TestAssetBundle({ AppParams params, AppParams secretParams, this.onAssetLoaded }): 
+    AssetBundleMock({ AppParams params, AppParams secretParams, this.onAssetLoaded }): 
         _params = params, _secretParams = secretParams;
 
     @override

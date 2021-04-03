@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/models/app_params.dart';
 import '../../mocks/root_widget_mock.dart';
-import '../../utilities/test_asset_bundle.dart';
+import '../../mocks/asset_bundle_mock.dart';
 import '../../utilities/randomiser.dart';
 
 void main() {
@@ -16,7 +16,7 @@ void main() {
         
         AppParams params;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle(
+			bundle: new AssetBundleMock(
 				params: _buildAppParams(
 					Randomiser.nextString(), 
 					appStoreId: expectedAppStoreId,
@@ -45,7 +45,7 @@ void main() {
         
         AppParams params;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle(params: _buildAppParams(
+			bundle: new AssetBundleMock(params: _buildAppParams(
 				expectedApiKey, 
 				appStoreId: expectedAppStoreId,
 				email: expectedEmail, 
@@ -64,7 +64,7 @@ void main() {
     testWidgets('Throws an error when there is no configuration found', (tester) async {
         Error expectedError;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new TestAssetBundle(params: null),
+			bundle: new AssetBundleMock(params: null),
 			child: new RootWidgetMock(onBuilding: (context) async {
 				try {
 					await Configuration.getParams(context, reload: true);
