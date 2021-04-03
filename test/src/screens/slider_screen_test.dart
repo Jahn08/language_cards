@@ -82,7 +82,7 @@ Future<void> _pumpScreen(WidgetTester tester, [Function(String, ByteData) onAsse
 			bundle: new TestAssetBundle(
 				onAssetLoaded: onAssetLoaded
 			), 
-			child: new HelpCardScreen()
+			child: new CardHelpScreen()
 		)
 	));
 	await tester.pump();

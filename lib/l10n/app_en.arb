@@ -143,10 +143,16 @@
     "constsRemovingItemButtonLabel": "Remove",
     "@constsRemovingItemButtonLabel": {},
 
-    "helpCardScreenTitle": "About Word Cards",
-    "@helpCardScreenTitle": {},
-    "helpCardScreenPageIndicator": "Page {pageNumber} of {pagesOverall}",
-    "@helpCardScreenPageIndicator": {
+    "helpScreenTitle": "About {mainMenuItemLabel}",
+    "@helpScreenTitle": {
+        "placeholders": {
+            "mainMenuItemLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpScreenPageIndicator": "Page {pageNumber} of {pagesOverall}",
+    "@helpScreenPageIndicator": {
         "placeholders": {
             "pageNumber": {
                 "type": "int",
@@ -158,24 +164,96 @@
             }
         }
     },
+    "helpListScreenEditorSlideDescription": "Clicking on the pencil icon opens the editor mode for the list. Clicking there again exits the mode@Entering Editor Mode",
+    "@helpListScreenEditorSlideDescription": {},
+    
     "helpCardScreenOverviewSlideDescription": "The screen lists word cards across all packs or of a particular pack with its name in the title when entering here through the pack@Word Card Screen",
     "@helpCardScreenOverviewSlideDescription": {},
-    "helpCardScreenEditorSlideDescription": "Clicking on the pencil icon opens the editor mode for the list. Clicking there again exits the mode@Entering Editor Mode",
-    "@helpCardScreenEditorSlideDescription": {},
-    "helpCardScreenUnlearningSlideDescription": "Unlearn zeroes the progress percentage achieved for selected cards in the study mode@Unlearning Cards",
-    "@helpCardScreenUnlearningSlideDescription": {},
-    "helpCardScreenRemovingSlideDescription": "Remove discards selected cards. For a short period of time it is possible to recover them by clicking Undo@Removing Cards",
-    "@helpCardScreenRemovingSlideDescription": {},
-    "helpCardScreenAddingSlideDescription": "The circular button in the bottom right corner leads to a screen to add a new card. It is automatically added to a current pack or to the None pack if there is no pack. The pack can be changed by clicking on its name@Adding Card",
+    "helpCardScreenUnlearningSlideDescription": "{unlearningBtnLabel} zeroes the progress percentage achieved for selected cards in the study mode@Unlearning Cards",
+    "@helpCardScreenUnlearningSlideDescription": {
+        "placeholders": {
+            "unlearningBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpCardScreenRemovingSlideDescription": "{removingBtnLabel} discards selected cards. For a short period of time it is possible to recover them by clicking {undoingBtnLabel}@Removing Cards",
+    "@helpCardScreenRemovingSlideDescription": {
+        "placeholders": {
+            "removingBtnLabel": {
+                "type": "String"
+            },
+            "undoingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpCardScreenAddingSlideDescription": "The circular button in the bottom right corner leads to a screen for adding a new card. It is automatically added to a current pack or to the None pack if there is no pack. The pack can be changed by clicking on its name@Adding Card",
     "@helpCardScreenAddingSlideDescription": {},
     "helpCardScreenWordDictionarySlideDescription": "If there is a non-empty pack chosen for a new card, after entering its text and accepting it by the tick button on a keyboard if the text is found in a web dictionary then its possible definitions are presented to choose from@Choosing Definition",
     "@helpCardScreenWordDictionarySlideDescription": {},
     "helpCardScreenWordTranslationSlideDescription": "After clicking on a chosen definition all proper translations should be opted. If there are too many items in the dialog then scrolling gets available@Card Translation",
     "@helpCardScreenWordTranslationSlideDescription": {},
-    "helpCardScreenSavingSlideDescription": "Clicking the Done button fills up the card fields with chosen values. It is now possible to listen to the text by clicking on the button in the upper right corner. The Save button saves the card into its pack@Saving Card",
-    "@helpCardScreenSavingSlideDescription": {},
-    "helpCardScreenSearchSlideDescription": "When there are enough cards on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter cards by their first letters@Searching for Card",
+    "helpCardScreenSavingSlideDescription": "Clicking the {doneBtnLabel} button fills up the card fields with chosen values. It is now possible to listen to the text by clicking on the button in the upper right corner. The {savingBtnLabel} button saves the card into its pack@Saving Card",
+    "@helpCardScreenSavingSlideDescription": {
+        "placeholders": {
+            "doneBtnLabel": {
+                "type": "String"
+            },
+            "savingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpCardScreenSearchSlideDescription": "When there are enough cards on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter cards by the first letter of their text@Searching for Cards",
     "@helpCardScreenSearchSlideDescription": {},
+    
+    "helpPackScreenOverviewSlideDescription": "The screen lists packs of cards showing their name, a number of their cards and translation languages@Pack Card Screen",
+    "@helpPackScreenOverviewSlideDescription": {},
+    "helpPackExportSlideDescription": "{exportingBtnLabel} gets available when there is at least one pack selected. It saves all selected packs with their cards into a JSON-file so that the data could later be imported@Exporting Packs",
+    "@helpPackExportSlideDescription": {
+        "placeholders": {
+            "exportingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackImportSlideDescription": "{importingBtnLabel} is available when there are no selected packs. It requires a particularly formatted JSON-file previously saved through {exportingBtnLabel}@Importing Packs",
+    "@helpPackImportSlideDescription": {
+        "placeholders": {
+            "importingBtnLabel": {
+                "type": "String"
+            },
+            "exportingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenRemovingSlideDescription": "{removingBtnLabel} discards selected packs. For a short period of time it is possible to recover them by clicking {undoingBtnLabel}@Removing Packs",
+    "@helpPackScreenRemovingSlideDescription": {
+        "placeholders": {
+            "removingBtnLabel": {
+                "type": "String"
+            },
+            "undoingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenCardRelocationSlideDescription": "Accepted removal of a non-empty pack triggers the relocation of its cards into the None pack where cards without packs are stored@Removing Non-Empty Pack",
+    "@helpPackScreenCardRelocationSlideDescription": {},
+    "helpPackScreenAddingSlideDescription": "The circular button in the bottom right corner leads to a screen for adding a new pack. All the fields must be filled up before saving. {savingAndAddingCardsBtnLabel} opens an empty list of cards where it is possible to add new records to the created pack@Adding Pack",
+    "@helpPackScreenAddingSlideDescription": {
+        "placeholders": {
+            "savingAndAddingCardsBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenAmendingSlideDescription": "Clicking on a pack opens a screen for changing its parameters. Here it is also possible to show all the pack cards by clicking on the respective icon@Amending Pack",
+    "@helpPackScreenAmendingSlideDescription": {},
+    "helpPackScreenSearchSlideDescription": "When there are enough packs on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter packs by the first letter of their name@Searching for Packs",
+    "@helpPackScreenSearchSlideDescription": {},
 
     "importDialogTitle": "Importing Packs",
     "@importDialogTitle": {},

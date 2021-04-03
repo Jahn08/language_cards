@@ -143,10 +143,16 @@
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
     
-    "helpCardScreenTitle": "О словарных карточках",
-    "@helpCardScreenTitle": {},
-    "helpCardScreenPageIndicator": "Страница {pageNumber} из {pagesOverall}",
-    "@helpCardScreenPageIndicator": {
+    "helpScreenTitle": "О '{mainMenuItemLabel}'",
+    "@helpScreenTitle": {
+        "placeholders": {
+            "mainMenuItemLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpScreenPageIndicator": "Страница {pageNumber} из {pagesOverall}",
+    "@helpScreenPageIndicator": {
         "placeholders": {
             "pageNumber": {
                 "type": "int",
@@ -158,24 +164,96 @@
             }
         }
     },
+    "helpListScreenEditorSlideDescription": "Клик по иконке карандаша откроет режим редактирования списка. Повторный клик закроет его@Режим редактирования",
+    "@helpListScreenEditorSlideDescription": {},
+    
     "helpCardScreenOverviewSlideDescription": "Здесь перечислены словарные карточки всех наборов либо определённого набора - его имя указано в заголовке, - если переход был выполнен из набора@Экран словарных карточек",
     "@helpCardScreenOverviewSlideDescription": {},
-    "helpCardScreenEditorSlideDescription": "Клик по иконке карандаша откроет режим редактирования списка. Повторный клик закроет его@Режим редактирования",
-    "@helpCardScreenEditorSlideDescription": {},
-    "helpCardScreenUnlearningSlideDescription": "Разучить обнуляет процент достигнутого прогресса обучения у выбранных карточек@Разучивание карточек",
-    "@helpCardScreenUnlearningSlideDescription": {},
-    "helpCardScreenRemovingSlideDescription": "Удалить избавляется от выбранных карточек. В течение краткого времени возможно восстановить удалённые карточки, нажав на кнопку Восстановить@Удаление карточек",
-    "@helpCardScreenRemovingSlideDescription": {},
+    "helpCardScreenUnlearningSlideDescription": "{unlearningBtnLabel} обнуляет процент достигнутого прогресса обучения у выбранных карточек@Разучивание карточек",
+    "@helpCardScreenUnlearningSlideDescription": {
+        "placeholders": {
+            "unlearningBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpCardScreenRemovingSlideDescription": "{removingBtnLabel} избавляется от выбранных карточек. В течение краткого времени возможно восстановить удалённые карточки, нажав на {undoingBtnLabel}@Удаление карточек",
+    "@helpCardScreenRemovingSlideDescription": {
+        "placeholders": {
+            "removingBtnLabel": {
+                "type": "String"
+            },
+            "undoingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
     "helpCardScreenAddingSlideDescription": "Круглая кнопка в нижнем правом углу ведёт к экрану добавления новой карточки. Карточка автоматически добавляется к текущему набору либо к пустому, если его нет. Набор можно изменить, кликнув по его имени@Добавление карточки",
     "@helpCardScreenAddingSlideDescription": {},
     "helpCardScreenWordDictionarySlideDescription": "Если у новой карточки выбран непустой набор, то после ввода текста и его подтверждения кнопкой с галочкой на клавиатуре, если текст найден в веб-словаре, то его определения будут представлены для выбора@Выбор определения",
     "@helpCardScreenWordDictionarySlideDescription": {},
     "helpCardScreenWordTranslationSlideDescription": "После клика по выбранному определению следует отметить все подходящие переводы слова. Если в диалоге слишком много записей, то его можно скроллить@Перевод карточки",
     "@helpCardScreenWordTranslationSlideDescription": {},    
-    "helpCardScreenSavingSlideDescription": "Клик по кнопке Принять заполнит поля карточки выбранными значениями. Теперь возможно послушать текст карточки, нажав на кнопку в верхнем правом углу. Кнопка Сохранить сохранит карточку в наборе@Сохранение карточки",
-    "@helpCardScreenSavingSlideDescription": {},
-    "helpCardScreenSearchSlideDescription": "Когда на экране достаточно много карточек, становится доступен режим поиска - иконка лупы в верхнем правом углу. В этом режиме можно фильтровать карточки по их первым буквам@Поиск карточки",
+    "helpCardScreenSavingSlideDescription": "Клик по кнопке {doneBtnLabel} заполнит поля карточки выбранными значениями. Теперь возможно послушать текст карточки, нажав на кнопку в верхнем правом углу. Кнопка {savingBtnLabel} сохранит карточку в наборе@Сохранение карточки",
+    "@helpCardScreenSavingSlideDescription": {
+        "placeholders": {
+            "doneBtnLabel": {
+                "type": "String"
+            },
+            "savingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpCardScreenSearchSlideDescription": "Когда на экране достаточно много карточек, становится доступен режим поиска - иконка лупы в верхнем правом углу. В этом режиме можно фильтровать карточки по первой букве в их тексте@Поиск карточек",
     "@helpCardScreenSearchSlideDescription": {},
+    
+    "helpPackScreenOverviewSlideDescription": "Здесь перечислены наборы словарных карточек с их именем, количеством карточек и языками перевода@Экран наборов словарных карточек",
+    "@helpPackScreenOverviewSlideDescription": {},
+    "helpPackExportSlideDescription": "{exportingBtnLabel} становится доступным, если выделен хотя бы один набор. Он позволяет сохранять все выделенные наборы с их карточками в JSON-файл, из которого они могут быть позднее импортированы@Экспорт наборов",
+    "@helpPackExportSlideDescription": {
+        "placeholders": {
+            "exportingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackImportSlideDescription": "{importingBtnLabel} доступен, когда ни один набор не выделен. В диалоге следует выбрать специально форматированный JSON-файл, ранее созданный через {exportingBtnLabel}@Импорт наборов",
+    "@helpPackImportSlideDescription": {
+        "placeholders": {
+            "importingBtnLabel": {
+                "type": "String"
+            },
+            "exportingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenRemovingSlideDescription": "{removingBtnLabel} избавляется от выбранных наборов. В течение краткого времени возможно восстановить удалённые наборы, нажав на кнопку {undoingBtnLabel}@Удаление наборов",
+    "@helpPackScreenRemovingSlideDescription": {
+        "placeholders": {
+            "removingBtnLabel": {
+                "type": "String"
+            },
+            "undoingBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenCardRelocationSlideDescription": "Подтверждённое удаление непустого набора вызовет перенос его карточек в набор None, где хранятся карточки без наборов@Удаление непустого набора",
+    "@helpPackScreenCardRelocationSlideDescription": {},
+    "helpPackScreenAddingSlideDescription": "Круглая кнопка в нижнем правом углу ведёт к экрану добавления нового набора. Все поля на форме обязательны для заполнения перед сохранением. {savingAndAddingCardsBtnLabel} открывает пустой список карточек, где возможно добавить новые записи для созданного набора@Добавление набора",
+    "@helpPackScreenAddingSlideDescription": {
+        "placeholders": {
+            "savingAndAddingCardsBtnLabel": {
+                "type": "String"
+            }
+        }
+    },
+    "helpPackScreenAmendingSlideDescription": "Клик на наборе откроет экран для изменения его параметров. Здесь также можно отобразить все карточки в наборе, кликнув по соответствующей иконке@Изменение набора",
+    "@helpPackScreenAmendingSlideDescription": {},
+    "helpPackScreenSearchSlideDescription": "Когда на экране достаточно много наборов, становится доступен режим поиска - иконка лупы в верхнем правом углу. В этом режиме можно фильтровать наборы по первой букве в их имени@Поиск наборов",
+    "@helpPackScreenSearchSlideDescription": {},
 
     "importDialogTitle": "Импорт наборов",
     "@importDialogTitle": {},

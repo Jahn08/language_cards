@@ -36,7 +36,7 @@ class _SliderScreenState extends State<_SliderScreen> {
 				new Image(image: new LocalAssetImage(n, localeName: locale.localeName))).toList();
 
 		final scaffold = new BarScaffold('${widget.titleGetter(locale)}\n' + 
-				locale.helpCardScreenPageIndicator(_curPageIndex + 1, _slides.length), 
+				locale.helpScreenPageIndicator(_curPageIndex + 1, _slides.length), 
 			body: new Container(
 				child: new PageView(
 					controller: _ctrl,
@@ -122,24 +122,29 @@ class _SliderScreen extends StatefulWidget {
 	State<StatefulWidget> createState() => new _SliderScreenState();
 }
 
-class HelpCardScreen extends _SliderScreen {
+class CardHelpScreen extends _SliderScreen {
 
-	HelpCardScreen(): super((locale) => locale.helpCardScreenTitle, [
-		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
-		'help_card_removal', 'help_card_adding', 'help_card_word_dictionary', 
-		'help_card_word_translation', 'help_card_saving', 'help_card_search'
-	], _descriptor);
+	CardHelpScreen(): super(
+		(locale) => locale.helpScreenTitle(locale.mainScreenWordCardsMenuItemLabel), [
+			'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
+			'help_card_removal', 'help_card_adding', 'help_card_word_dictionary', 
+			'help_card_word_translation', 'help_card_saving', 'help_card_search'
+		], _descriptor);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
 		switch (slideIndex) {
 			case 0:
 				return locale.helpCardScreenOverviewSlideDescription;
 			case 1:
-				return locale.helpCardScreenEditorSlideDescription;
+				return locale.helpListScreenEditorSlideDescription;
 			case 2:
-				return locale.helpCardScreenUnlearningSlideDescription;
+				return locale.helpCardScreenUnlearningSlideDescription(
+					locale.cardListScreenBottomNavBarResettingProgressActionLabel);
 			case 3:
-				return locale.helpCardScreenRemovingSlideDescription;
+				return locale.helpCardScreenRemovingSlideDescription(
+					locale.constsRemovingItemButtonLabel, 
+					locale.listScreenBottomSnackBarUndoingActionLabel
+				);
 			case 4:
 				return locale.helpCardScreenAddingSlideDescription;
 			case 5:
@@ -147,9 +152,55 @@ class HelpCardScreen extends _SliderScreen {
 			case 6:
 				return locale.helpCardScreenWordTranslationSlideDescription;
 			case 7:
-				return locale.helpCardScreenSavingSlideDescription;
+				return locale.helpCardScreenSavingSlideDescription(
+					locale.translationSelectorDoneButtonLabel, 
+					locale.constsSavingItemButtonLabel
+				);
 			case 8:
 				return locale.helpCardScreenSearchSlideDescription;
+			default:
+				return '';
+		}
+	}
+}
+
+class PackHelpScreen extends _SliderScreen {
+
+	PackHelpScreen(): super(
+		(locale) => locale.helpScreenTitle(locale.mainScreenWordPacksMenuItemLabel), [
+			'help_pack_screen', 'help_pack_editor', 'help_pack_export',
+			'help_pack_import', 'help_pack_removal', 'help_pack_card_relocation',
+			'help_pack_adding', 'help_pack_amending', 'help_pack_search'
+		], _descriptor);
+
+	static String _descriptor(int slideIndex, AppLocalizations locale) {
+		switch (slideIndex) {
+			case 0:
+				return locale.helpPackScreenOverviewSlideDescription;
+			case 1:
+				return locale.helpListScreenEditorSlideDescription;
+			case 2:
+				return locale.helpPackExportSlideDescription(
+					locale.packListScreenBottomNavBarExportActionLabel);
+			case 3:
+				return locale.helpPackImportSlideDescription(
+					locale.packListScreenBottomNavBarImportActionLabel,
+					locale.packListScreenBottomNavBarExportActionLabel
+				);
+			case 4:
+				return locale.helpPackScreenRemovingSlideDescription(
+					locale.constsRemovingItemButtonLabel, 
+					locale.listScreenBottomSnackBarUndoingActionLabel
+				);
+			case 5:
+				return locale.helpPackScreenCardRelocationSlideDescription;
+			case 6:
+				return locale.helpPackScreenAddingSlideDescription(
+					locale.packScreenSavingAndAddingCardsButtonLabel);
+			case 7:
+				return locale.helpPackScreenAmendingSlideDescription;
+			case 8:
+				return locale.helpPackScreenSearchSlideDescription;
 			default:
 				return '';
 		}
