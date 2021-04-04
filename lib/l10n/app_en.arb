@@ -255,7 +255,7 @@
     "helpPackScreenSearchSlideDescription": "When there are enough packs on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter packs by the first letter of their name@Searching for Packs",
     "@helpPackScreenSearchSlideDescription": {},
 
-    "helpStudyScreenPreparationSlideDescription": "Before studying it is necessary to choose what cards will participate in the process. It is possible to do so by selecting presented non-empty packs and then opting for a category of cards with enough number of items@Study Preparation",
+    "helpStudyScreenPreparationSlideDescription": "Before studying it is necessary to choose what cards will participate in the process. It is possible to do so by selecting presented non-empty packs and then opting for a category of cards with enough items@Study Preparation",
     "@helpStudyScreenPreparationSlideDescription": {},
     "helpStudyScreenOverviewSlideDescription": "The screen displays each of the selected cards: their text, pack, category of study progress. Clicking on a card shows its back side with its translation. Dragging the card left or clicking on {nextCadBtnLabel} leads to a next card. {learningBtnLabel} increases its category of study progress@Study Screen",
     "@helpStudyScreenOverviewSlideDescription": {
@@ -268,7 +268,7 @@
             }
         }
     },
-    "helpStudyEditorSlideDescription": "Clicking on the pencil icon opens the editor dialog for a card, where it is possible to change its fields and pack. The icon with 3 dots makes possible to listening to the text. The {savingBtnLabel} button saves all the changes and closes the dialog@Amending Card",
+    "helpStudyEditorSlideDescription": "Clicking on the pencil icon opens the editor dialog for a card, where it is possible to change its fields and pack. The icon with 3 dots makes possible listening to the text. The {savingBtnLabel} button saves all the changes and closes the dialog@Amending Card",
     "@helpStudyEditorSlideDescription": {
         "placeholders": {
             "savingBtnLabel": {

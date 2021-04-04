@@ -194,7 +194,7 @@
     "@helpCardScreenWordDictionarySlideDescription": {},
     "helpCardScreenWordTranslationSlideDescription": "После клика по выбранному определению следует отметить все подходящие переводы слова. Если в диалоге слишком много записей, то его можно скроллить@Перевод карточки",
     "@helpCardScreenWordTranslationSlideDescription": {},    
-    "helpCardScreenSavingSlideDescription": "Клик по кнопке {doneBtnLabel} заполнит поля карточки выбранными значениями. Иконка с 3-мя точками позволяет послушать текст карточки. Кнопка {savingBtnLabel} сохранит карточку в наборе@Сохранение карточки",
+    "helpCardScreenSavingSlideDescription": "Клик по кнопке {doneBtnLabel} заполнит поля карточки выбранными значениями. Иконка с 3-мя точками позволяет прослушать текст карточки. Кнопка {savingBtnLabel} сохранит карточку в наборе@Сохранение карточки",
     "@helpCardScreenSavingSlideDescription": {
         "placeholders": {
             "doneBtnLabel": {
@@ -257,7 +257,7 @@
 
     "helpStudyScreenPreparationSlideDescription": "Перед обучением необходимо выбрать какие словарные карточки будут участвовать в процессе. Это возможно сделать, отметив представленные непустые наборы и затем выбрав категорию карточек с достаточным количеством записей@Подготовка обучения",
     "@helpStudyScreenPreparationSlideDescription": {},
-    "helpStudyScreenOverviewSlideDescription": "Экран отображает каждую выбранную карточку: её текст, набор, категорию прогресса обучения. Клик по карточке покажет её обратную сторону с переводом. Потянув карточку влево или кликнув по {nextCadBtnLabel} отобразит следующая карточку. {learningBtnLabel} увеличивает прогресс обучения карточки@Экран обучения",
+    "helpStudyScreenOverviewSlideDescription": "Экран отображает каждую выбранную карточку: её текст, набор, категорию прогресса обучения. Клик по карточке покажет её обратную сторону с переводом. Потянув карточку влево или кликнув {nextCadBtnLabel} отобразит следующую карточку. {learningBtnLabel} увеличивает прогресс обучения карточки@Экран обучения",
     "@helpStudyScreenOverviewSlideDescription": {
         "placeholders": {
             "nextCadBtnLabel": {
@@ -268,7 +268,7 @@
             }
         }
     },
-    "helpStudyEditorSlideDescription": "Клик по иконке карандаша открывает диалог редактирования карточки, где возможно изменить её поля и набор. Иконка с 3-мя точками позволяет послушать текст карточки. Кнопка {savingBtnLabel} сохранит все изменения и закроет диалог@Редактирование карточки",
+    "helpStudyEditorSlideDescription": "Клик по иконке карандаша открывает диалог редактирования карточки, где возможно изменить её поля и набор. Иконка с 3-мя точками позволяет прослушать текст карточки. Кнопка {savingBtnLabel} сохранит все изменения и закроет диалог@Редактирование карточки",
     "@helpStudyEditorSlideDescription": {
         "placeholders": {
             "savingBtnLabel": {
