@@ -412,11 +412,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				findSearcherEndButton(shouldFind: false);
 				assureFilterIndexes(indexGroups.map((g) => g.key), shouldFind: false);
-			
-				final tiles = tester.widgetList<ListTile>(tilesFinder);
-				expect(tiles.length > filterLength, true);
-				expect(tiles.any((t) => 
-					!_extractTitle(tester, t.title).startsWith(filterIndex)), true);
+				_assureTilesDistinctFromFilterIndex(tester, filterIndex, filterLength);
 			});
 			
 		testWidgets(_buildDescription('deletes a previously acitve index filter after clicking on another when the search mode is active'), 
@@ -556,6 +552,29 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				await deactivateSearcherMode(assistant);
 				_findSearcherButton(shouldFind: false);
+			});
+
+		testWidgets(_buildDescription('deactivates an index filter when clicking it twice'), 
+			(tester) async {
+				final storage = await _pumpScreenWithEnoughItems(tester, 
+					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
+
+				final indexGroups = await _getIndexGroups(tester, storage);
+			
+				final assistant = new WidgetAssistant(tester);
+				await _activateSearchMode(assistant);
+
+				final filterGroup = indexGroups.first;
+				final filterIndex = filterGroup.key;
+				await chooseFilterIndex(assistant, filterIndex);
+				assureFilterIndexActiveness(tester, filterIndex, isActive: true);
+
+				await chooseFilterIndex(assistant, filterIndex);
+				assureFilterIndexActiveness(tester, filterIndex, isActive: false);
+				assureFilterIndexes(indexGroups.map((g) => g.key), shouldFind: true);
+				_assureTilesDistinctFromFilterIndex(tester, filterIndex, filterGroup.value);
+				
+				await deactivateSearcherMode(assistant);
 			});
 	}
 
@@ -710,5 +729,15 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		await activateEditorMode(assistant);
 		await selectItemsInEditor(assistant, entities.map((i) => i.textData).toList());
 		await deleteSelectedItems(assistant);
+	}
+
+	void _assureTilesDistinctFromFilterIndex(
+		WidgetTester tester, String filterIndex, int filterLength
+	) {
+		final tiles = tester.widgetList<ListTile>(
+			AssuredFinder.findSeveral(type: ListTile, shouldFind: true));
+		expect(tiles.length > filterLength, true);
+		expect(tiles.any((t) => 
+			!_extractTitle(tester, t.title).startsWith(filterIndex)), true);
 	}
 }
