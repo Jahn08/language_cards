@@ -13,6 +13,8 @@ main() {
 	_runTestsForScreen('Card Help Screen', () => new CardHelpScreen());
 	
 	_runTestsForScreen('Pack Help Screen', () => new PackHelpScreen());
+
+	_runTestsForScreen('Study Help Screen', () => new StudyHelpScreen());
 }
 
 void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {

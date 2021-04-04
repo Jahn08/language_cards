@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../dialogs/confirm_dialog.dart';
+import '../models/presentable_enum.dart';
+import '../models/user_params.dart';
 import '../utilities/local_asset_image.dart';
 import '../utilities/string_ext.dart';
 import '../utilities/styler.dart';
@@ -205,4 +207,38 @@ class PackHelpScreen extends _SliderScreen {
 				return '';
 		}
 	}
+}
+
+class StudyHelpScreen extends _SliderScreen {
+
+	StudyHelpScreen(): super(
+		(locale) => locale.helpScreenTitle(locale.mainScreenStudyModeMenuItemLabel), [
+			'help_study_preparation', 'help_study_screen', 'help_study_editor', 
+			'help_study_settings' 
+		], _descriptor);
+
+	static String _descriptor(int slideIndex, AppLocalizations locale) {
+		switch (slideIndex) {
+			case 0:
+				return locale.helpStudyScreenPreparationSlideDescription;
+			case 1:
+				return locale.helpStudyScreenOverviewSlideDescription(
+					locale.studyScreenNextCardButtonLabel,
+					locale.studyScreenLearningCardButtonLabel
+				);
+			case 2:
+				return locale.helpStudyEditorSlideDescription(
+					locale.constsSavingItemButtonLabel);
+			case 3:
+				return locale.helpStudySettingsSlideDescription(
+					_stringifyEnumValues(StudyDirection.values, locale),
+					_stringifyEnumValues(CardSide.values, locale)
+				);
+			default:
+				return '';
+		}
+	}
+
+	static String _stringifyEnumValues(Iterable<PresentableEnum> values, AppLocalizations locale) =>
+		values.map((d) => d.present(locale)).join(', ');
 }

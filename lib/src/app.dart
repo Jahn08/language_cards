@@ -75,6 +75,8 @@ class _ThemedAppState extends State<_ThemedApp> {
 						return new CardHelpScreen();
 					else if (route is PackHelpRoute)
 						return new PackHelpScreen();
+					else if (route is StudyHelpRoute)
+						return new StudyHelpScreen();
                         
 					final packListParams = (route as PackListRoute).params;
                     return new PackListScreen(packListParams.storage, packListParams.cardStorage);
