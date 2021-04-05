@@ -97,11 +97,14 @@ class PackScreenState extends State<PackScreen> {
         ];
 
         if (!_isNew && _foundPack != null)
-            children.add(new TextButton.icon(
-                icon: new Icon(Consts.cardListIcon),
-                label: new Text(locale.packScreenShowingCardsButtonLabel(_cardsNumber)),
-                onPressed: () => Router.goToCardList(context, pack: _foundPack)
-            ));
+            children.add(new Container(
+				alignment: Alignment.centerLeft,
+				child: new TextButton.icon(
+					icon: new Icon(Consts.cardListIcon),
+					label: new Text(locale.packScreenShowingCardsButtonLabel(_cardsNumber)),
+					onPressed: () => Router.goToCardList(context, pack: _foundPack)
+				)
+			));
         
         final isStateDirty = _isNew || (_foundPack != null && (
             _foundPack.name != _name || _foundPack.to != _languages[_toLang] ||

@@ -164,7 +164,7 @@ class _StudyScreenState extends State<StudyScreen> {
 							}
 						)
 					],
-					body: _buildLayout(locale),
+					body: _buildLayout(locale, MediaQuery.of(context).size),
 					onNavGoingBack: () => Router.goToStudyPreparation(context)
 				);
 			})
@@ -199,11 +199,11 @@ class _StudyScreenState extends State<StudyScreen> {
             _cards.replaceRange(startIndex, _cards.length, listToOrder);
     }
 
-    Widget _buildLayout(AppLocalizations locale) =>
+    Widget _buildLayout(AppLocalizations locale, Size screenSize) =>
 		new Column(
             children: [
                 _buildRow(child: _buildCardLayout(locale), flex: 3),
-                _buildRow(child: _buildButtonPanel(_cards[_curCardIndex], locale))
+                _buildRow(child: _buildButtonPanel(_cards[_curCardIndex], locale, screenSize))
             ]
         );
 
@@ -296,14 +296,14 @@ class _StudyScreenState extends State<StudyScreen> {
     Widget _buildCenteredBigText(String data) => 
         new Text(data, textAlign: TextAlign.center, textScaleFactor: 1.2);
 
-    Widget _buildButtonPanel(StoredWord card, AppLocalizations locale) {
-
-        return new GridView.count(
+    Widget _buildButtonPanel(StoredWord card, AppLocalizations locale, Size screenSize) {
+		
+		return new GridView.count(
             crossAxisCount: 2,
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
             shrinkWrap: true,
-            childAspectRatio: 2.6,
+            childAspectRatio: screenSize.width / (screenSize.height / 5),
             padding: EdgeInsets.all(5),
             children: [
                 new ElevatedButton(

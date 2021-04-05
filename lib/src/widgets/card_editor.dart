@@ -154,27 +154,30 @@ class CardEditorState extends State<CardEditor> {
 					isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
-				new TextButton.icon(
-					icon: new Icon(Icons.folder_open),
-					label: new Container(
-						width: MediaQuery.of(context).size.width * 0.6,
-						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
-					),
-					onPressed: () async {
-						if (_futurePacks == null) {
-							_futurePacks = widget._packStorage.fetch();
+				new Container(
+					alignment: Alignment.centerLeft,
+					child: new TextButton.icon(
+						icon: new Icon(Icons.folder_open),
+						label: new Container(
+							width: MediaQuery.of(context).size.width * 0.6,
+							child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
+						),
+						onPressed: () async {
+							if (_futurePacks == null) {
+								_futurePacks = widget._packStorage.fetch();
 
-							if (widget.hideNonePack ?? false)
-								_futurePacks = _futurePacks.then(
-									(ps) => ps.where((p) => !p.isNone).toList());
+								if (widget.hideNonePack ?? false)
+									_futurePacks = _futurePacks.then(
+										(ps) => ps.where((p) => !p.isNone).toList());
+							}
+							
+							final chosenPack = await new PackSelectorDialog(context, _pack.id)
+								.showAsync(_futurePacks);
+
+							if (chosenPack != null && chosenPack.name != _pack.name)
+								setState(() => _setPack(chosenPack));
 						}
-						
-						final chosenPack = await new PackSelectorDialog(context, _pack.id)
-							.showAsync(_futurePacks);
-
-						if (chosenPack != null && chosenPack.name != _pack.name)
-							setState(() => _setPack(chosenPack));
-					}
+					),
 				),	
                 if (this._studyProgress != WordStudyStage.unknown)
                     new TextButton.icon(
