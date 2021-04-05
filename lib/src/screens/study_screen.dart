@@ -17,6 +17,7 @@ import '../widgets/bar_scaffold.dart';
 import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
+import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 
 class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPack>> {
@@ -202,7 +203,7 @@ class _StudyScreenState extends State<StudyScreen> {
     Widget _buildLayout(AppLocalizations locale, Size screenSize) =>
 		new Column(
             children: [
-                _buildRow(child: _buildCardLayout(locale), flex: 3),
+                _buildRow(child: _buildCardLayout(locale, screenSize), flex: 3),
                 _buildRow(child: _buildButtonPanel(_cards[_curCardIndex], locale, screenSize))
             ]
         );
@@ -214,7 +215,7 @@ class _StudyScreenState extends State<StudyScreen> {
             child: child ?? Container()
         );
 
-    Widget _buildCardLayout(AppLocalizations locale) {
+    Widget _buildCardLayout(AppLocalizations locale, Size screenSize) {
         return new PageView.builder(
             controller: _controller,
             onPageChanged: (index) => _setIndexCard(_getIndexCard(index)),
@@ -222,7 +223,7 @@ class _StudyScreenState extends State<StudyScreen> {
                 final card = _cards[_getIndexCard(index)];
                 return new Column(
                     children: [
-                        _buildRow(child: _buildPackLabel(_packMap[card.packId])),
+                        _buildRow(child: _buildPackLabel(_packMap[card.packId], screenSize)),
                         _buildRow(child: _buildCard(card, locale), flex: 9)
                     ]
                 );
@@ -230,7 +231,7 @@ class _StudyScreenState extends State<StudyScreen> {
         );
     }
 
-    Widget _buildPackLabel(StoredPack pack) {
+    Widget _buildPackLabel(StoredPack pack, Size screenSize) {
 
         return new Row(
             crossAxisAlignment: CrossAxisAlignment.end,
@@ -240,7 +241,8 @@ class _StudyScreenState extends State<StudyScreen> {
                     margin: EdgeInsets.only(left: 5)
                 ),
                 new Container(
-                    child: new Text(pack.name),
+					width: screenSize.width * 0.8,
+                    child: new OneLineText(pack.name),
                     margin: EdgeInsets.all(5)
                 )
             ]
