@@ -4,9 +4,12 @@ class OneLineText extends StatelessWidget {
     
     final String content;
 
-    OneLineText(this.content);
+	final double textScaleFactor;
+
+    OneLineText(this.content, { this.textScaleFactor });
 
     @override
     Widget build(BuildContext context) => 
-        new Text(this.content, maxLines: 1, overflow: TextOverflow.ellipsis);
+        new Text(this.content, textScaleFactor: textScaleFactor, maxLines: 1, 
+			overflow: TextOverflow.ellipsis);
 }

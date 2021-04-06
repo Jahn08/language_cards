@@ -241,7 +241,7 @@ class _StudyScreenState extends State<StudyScreen> {
                     margin: EdgeInsets.only(left: 5)
                 ),
                 new Container(
-					width: screenSize.width * 0.8,
+					width: screenSize.width * 0.75,
                     child: new OneLineText(pack.name),
                     margin: EdgeInsets.all(5)
                 )
@@ -264,9 +264,10 @@ class _StudyScreenState extends State<StudyScreen> {
         if (card.partOfSpeech != null)
             subtext += '${card.partOfSpeech.present(locale)}';
 
+		const double spaceSize = 10;
         return new Card(
             elevation: 25,
-            margin: EdgeInsets.only(left: 10, right: 10),
+            margin: EdgeInsets.only(left: spaceSize, right: spaceSize, bottom: spaceSize),
             child: new InkWell(
                 child: new Container(
                     child: new Column(
@@ -305,7 +306,7 @@ class _StudyScreenState extends State<StudyScreen> {
             crossAxisSpacing: 10,
             mainAxisSpacing: 10,
             shrinkWrap: true,
-            childAspectRatio: screenSize.width / (screenSize.height / 5),
+            childAspectRatio: screenSize.width / (screenSize.height / 5.25),
             padding: EdgeInsets.all(5),
             children: [
                 new ElevatedButton(

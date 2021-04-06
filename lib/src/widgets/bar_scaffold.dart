@@ -12,6 +12,7 @@ import '../models/user_params.dart';
 import '../utilities/link.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
+import '../widgets/one_line_text.dart';
 import '../widgets/styled_dropdown.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
@@ -354,8 +355,7 @@ class BarScaffold extends Scaffold {
     }): super(
         drawer: contactsParams == null ? null: new _SettingsPanel(contactsParams), 
         appBar: _buildAppBar(
-			new Text(title, textScaleFactor: 0.85, 
-				softWrap: true, overflow: TextOverflow.visible),
+			new OneLineText(title, textScaleFactor: 0.85),
 			actions: barActions, onGoingBack: onNavGoingBack, 
 			showSettings: contactsParams != null
 		),

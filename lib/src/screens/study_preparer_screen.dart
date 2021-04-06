@@ -80,21 +80,24 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         levels[locale.studyPreparerScreenAllCardsCategoryName] = 
             levels.values.reduce((res, el) => res + el);
 
-        return new ListView(
-            children: levels.entries.map((lvl) {
-				final isEnabled = lvl.value > 2;
-                return new ListTile(
-                    title: new Text(lvl.key), 
-                    trailing: new Text(lvl.value.toString()), 
-                    onTap: isEnabled ? () => Router.goToStudyMode(context, 
-                        packs: includedPacks.map((p) => p.pack).toList(), 
-                        studyStageIds: WordStudyStage.fromString(lvl.key, locale)): null,
-                    dense: true,
-					enabled: isEnabled,
-                    visualDensity: VisualDensity.comfortable
-                );
-			}).toList()
-        );
+        return new Scrollbar(
+			isAlwaysShown: true,
+			child: new ListView(
+				children: levels.entries.map((lvl) {
+					final isEnabled = lvl.value > 2;
+					return new ListTile(
+						title: new Text(lvl.key), 
+						trailing: new Text(lvl.value.toString()), 
+						onTap: isEnabled ? () => Router.goToStudyMode(context, 
+							packs: includedPacks.map((p) => p.pack).toList(), 
+							studyStageIds: WordStudyStage.fromString(lvl.key, locale)): null,
+						dense: true,
+						enabled: isEnabled,
+						visualDensity: VisualDensity.comfortable
+					);
+				}).toList()
+        	)
+		);
     }
 
     Widget _buildList(List<StudyPack> packs) => 
