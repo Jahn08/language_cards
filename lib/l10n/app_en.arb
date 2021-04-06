@@ -15,7 +15,7 @@
     "@barScaffoldSettingsPanelContactsSectionLabel": {},
     "barScaffoldSettingsPanelContactsSectionFBLinkLabel": "Facebook",
     "@barScaffoldSettingsPanelContactsSectionFBLinkLabel": {},
-    "barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel": "Send Us Your Suggestion",
+    "barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel": "Share Your Suggestion",
     "@barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel": {},
     "barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject": "My Suggestion",
     "@barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject": {},
@@ -517,7 +517,7 @@
     "@studyScreenEditingCardDialogTitle": {},
     "studyScreenStudyEndDialogTitle": "The Study Cycle Is Over",
     "@studyScreenStudyEndDialogTitle": {},
-    "studyScreenStudyEndDialogContent": "Well Done! You have finished the study.\n\nYou can repeat the study to hone the cards to perfection",
+    "studyScreenStudyEndDialogContent": "Well Done! You have finished the study.\n\nYou can repeat the study to hone your knowledge to perfection",
     "@studyScreenStudyEndDialogContent": {},
     "studyScreenTitle": "{curCardIndex} of {cardsNumber} Cards",
     "@studyScreenTitle": {
