@@ -1,64 +1,42 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
+import 'package:language_cards/src/data/web_ditionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
+import 'package:language_cards/src/models/article.dart';
 import 'package:language_cards/src/models/language.dart';
-import 'package:language_cards/src/models/part_of_speech.dart';
+import 'package:language_cards/src/models/word.dart';
+import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/http_responder.dart';
 import '../../utilities/randomiser.dart';
 
 void main() {
+
     test('Returns a word article describing word translations and properties', () async {
-        const String wordToLookUp = 'flatter';
+		final articleJson = WordDictionaryTester.buildArticleJson();
+		final expectedArticle = new Article.fromJson(articleJson);
+		
+		final client = new MockClient((request) async =>
+			HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(request) ? 
+				articleJson: WordDictionaryTester.buildAcceptedLanguagesResponse()));
 
-        final client = new MockClient((request) async => HttpResponder.respondWithJson({
-            "def": [
-                {"text": wordToLookUp, "pos": "verb", "ts": "ˈflætə", "tr": [
-                    {"text": "льстить", "pos": "verb", "asp":" несов", "syn": [
-                        {"text": "тешить", "pos": "verb", "asp": "несов"},
-                        {"text": "обольщать","pos": "verb","asp": "несов"},
-                        {"text": "польстить","pos": "verb","asp": "сов"}], "mean":[
-                            {"text": "flattery"},
-                            {"text": "amuse"},
-                            {"text": "deceive"},
-                            {"text": "please"}
-                        ]
-                    },
-                    {"text": "захваливать", "pos": "verb","asp": "несов"}
-                ]},
-                {"text": wordToLookUp, "pos": "adjective", "ts": "ˈflætə", "tr":[
-                    {"text": "лестный","pos": "adjective","mean": [
-                        {"text":"flattering"}
-                    ]}
-                ]},
-                {"text": wordToLookUp, "pos": "noun","ts": "ˈflætə", "tr": [
-                    {"text": "лесть", "pos": "noun", "gen": "ж","mean": [
-                        {"text":"flattery"}]
-                    }
-                ]}
-            ]
-        }));
-
-        final article = await new WordDictionary(Randomiser.nextString(), 
-            from: Language.english, client: client).lookUp(wordToLookUp);
-        final words = article?.words;
-
-        const int expectedWordNumber = 3;
-        expect(words?.length, expectedWordNumber);
-        expect(words.map((word) => word.partOfSpeech).toSet().length, expectedWordNumber);
-        expect(words.map((word) => word.transcription).toSet().length, 1);
-
-        words.forEach((word) { 
-            expect(word.text, wordToLookUp);
-            expect(word.translations.isEmpty, false);
-        });
+        final article = await new WordDictionary(
+			new WebDictionaryProvider(Randomiser.nextString(), client: client),
+			from: Language.english
+		).lookUp(expectedArticle.words.first.text);
+		_assureWords(expectedArticle, article.words);
     });
 
     test('Returns an empty word article for an unknown word', () async {
-        final client = new MockClient((request) async => HttpResponder.respondWithJson(_emptyArticle));
+        final client = new MockClient((request) async => 
+			HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(request) ? 
+				WordDictionaryTester.buildEmptyArticleJson(): 
+				WordDictionaryTester.buildAcceptedLanguagesResponse()));
 
         final unknownWord = Randomiser.nextString();
-        final article = await new WordDictionary(Randomiser.nextString(), 
-            from: Language.english, client: client).lookUp(unknownWord);
+        final article = await new WordDictionary(
+			new WebDictionaryProvider(Randomiser.nextString(), client: client),
+			from: Language.english
+		).lookUp(unknownWord);
         expect(article?.words?.length, 0);
     });
 
@@ -67,13 +45,17 @@ void main() {
             Uri url;
             final client = new MockClient((request) async {
                 url = request.url;
-                return HttpResponder.respondWithJson(_emptyArticle);
+				return HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(request) ? 
+					WordDictionaryTester.buildEmptyArticleJson(): 
+					WordDictionaryTester.buildAcceptedLanguagesResponse());
             });
 
             final expectedWord = Randomiser.nextString();
             final expectedApiKey = Randomiser.nextString();
-            await new WordDictionary(expectedApiKey, 
-                client: client, from: Language.english).lookUp(expectedWord);
+            await new WordDictionary(
+				new WebDictionaryProvider(expectedApiKey, client: client),
+                from: Language.english
+			).lookUp(expectedWord);
             
             expect(url == null, false);
             expect(url.query?.isEmpty, false);
@@ -82,30 +64,49 @@ void main() {
             expect(url.queryParameters['text'], expectedWord);
         });
 
-        test('Gets a word article with a default part of speech when it is not recognisable', 
-            () async {
-            final wordToLookUp = Randomiser.nextString();
-            final client = new MockClient((request) async => HttpResponder.respondWithJson({
-                "def": List<dynamic>.generate(3, (index) => {
-                    "text": wordToLookUp,
-                    "pos": Randomiser.nextString(), 
-                    "ts": Randomiser.nextString(), 
-                    "tr": [{ "text": Randomiser.nextString() }]
-                })
-            }));
+	test('Returns a word article with an indirect translation', () async {
+		final fromItArticleJson = WordDictionaryTester.buildArticleJson();
+		final expectedFromItArticle = new Article.fromJson(fromItArticleJson);
 
-            final article = await new WordDictionary(Randomiser.nextString(), 
-                from: Language.english, client: client).lookUp(wordToLookUp);
-            final words = article?.words;
+		final toFrArticleJson = WordDictionaryTester.buildArticleJson();
+		final expectedFrArticle = new Article.fromJson(toFrArticleJson);
+		
+		final wordToLookUp = expectedFromItArticle.words.first.text;
+		
+		final params = <Map<String, String>>[];
+		final client = new MockClient((request) async {
+			if (!WordDictionaryTester.isLookUpRequest(request))
+				return HttpResponder.respondWithJson(WordDictionaryTester.buildAcceptedLanguagesResponse());
 
-            final defaultPartOfSpeech = words?.first?.partOfSpeech;
-            expect(defaultPartOfSpeech == null, false);
-            expect(PartOfSpeech.retrieve(defaultPartOfSpeech.value) != null, true);
+			params.add(request.url.queryParameters);
+			return HttpResponder.respondWithJson(
+				params.length == 1 ? fromItArticleJson: toFrArticleJson);
+		});
+			
+        final article = await new WordDictionary(
+			new WebDictionaryProvider(Randomiser.nextString(), client: client),
+			from: Language.italian, 
+			to: Language.french
+		).lookUp(wordToLookUp);
 
-            expect(words?.every((w) => w.partOfSpeech == defaultPartOfSpeech), true);
-        });
+		expect(params.length, expectedFromItArticle.words.expand((w) => w.translations).length + 1);
+		expect(params.first.containsValue(
+			WordDictionaryTester.buildLangPair(Language.italian, Language.english)), true);
+		expect(params.skip(1).every((p) => p.containsValue(
+			WordDictionaryTester.buildLangPair(Language.english, Language.french))), true);
+
+		_assureWords(expectedFrArticle.mergeWordTexts(expectedFromItArticle), article.words);
+	});
 }
 
-Object get _emptyArticle => ({
-    "def": []
-});
+void _assureWords(Article expectedArticle, List<Word> actualWords) {
+	final expectedWordNumber = expectedArticle.words.length;
+	expect(actualWords?.length, expectedWordNumber);
+	expect(actualWords.map((word) => word.partOfSpeech).toSet().length, expectedWordNumber);
+
+	final expectedWord = expectedArticle.words.first.text;
+	actualWords.forEach((word) { 
+		expect(word.text, expectedWord);
+		expect(word.translations.isEmpty, false);
+	});
+}	

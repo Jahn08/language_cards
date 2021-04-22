@@ -3,6 +3,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/pack_storage.dart';
+import '../data/web_ditionary_provider.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/pack_selector_dialog.dart';
@@ -68,8 +69,11 @@ class CardEditorState extends State<CardEditor> {
 
         _disposeDictionary();
         _dictionary = _isNonePack ? null: 
-            new WordDictionary(widget._apiKey, from: _pack.from, to: _pack.to, 
-                client: _client);
+            new WordDictionary(
+				new WebDictionaryProvider(widget._apiKey, client: _client),
+				from: _pack.from, 
+				to: _pack.to
+			);
 
         if (_dictionary == null)
             WidgetsBinding.instance.addPostFrameCallback(

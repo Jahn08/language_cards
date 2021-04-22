@@ -12,6 +12,7 @@ import '../../mocks/speaker_mock.dart';
 import '../../mocks/word_storage_mock.dart';
 import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
+import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/http_responder.dart';
 import '../../utilities/randomiser.dart';
@@ -346,7 +347,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
         bool dictionaryIsActive = false;
         final client = new MockClient((request) async {
             dictionaryIsActive = true;
-            return HttpResponder.respondWithJson({});
+			return _respondWithEmptyResponse(request);
         });
         
         final wordToShow = await _displayWord(tester, client: client,
@@ -360,6 +361,10 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
 
         expect(dictionaryIsActive, hasPack);
     }
+
+Response _respondWithEmptyResponse(Request req) => 
+	HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(req) ? 
+		{}: WordDictionaryTester.buildAcceptedLanguagesResponse());
 
 Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
     final warningBtnFinder = _findWarningDialogButton(shouldFind: shouldFind);
@@ -381,7 +386,7 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
         bool dictionaryIsActive = false;
         final client = new MockClient((request) async {
             dictionaryIsActive = true;
-            return HttpResponder.respondWithJson({});
+			return _respondWithEmptyResponse(request);
         });
         
         final storage = new PackStorageMock();

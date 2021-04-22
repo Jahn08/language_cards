@@ -1,42 +1,42 @@
-import 'dart:convert' show jsonDecode;
 import 'package:meta/meta.dart';
-import 'package:http/http.dart';
 import '../models/article.dart';
 import '../models/language.dart';
+import './dictionary_provider.dart';
 
 class WordDictionary {
-    final Uri _uri;
-    final Client _client;
+	final String _from;
+	
+	final String _to;
 
-    WordDictionary(String apiKey, { @required Language from, Language to, Client client }): 
-        _uri = _buildFullUri(apiKey, from, to),
-        _client = client ?? new Client();
-
-    static Uri _buildFullUri(String key, Language from, [Language to]) {
-        final _from = _representLanguage(from);
-        final _to = _representLanguage(to ?? from);
-        return new Uri(
-			host: 'dictionary.yandex.net', 
-			pathSegments: ['api', 'v1', 'dicservice.json', 'lookup'],
-			queryParameters: {
-				'key': key,
-				'lang': '$_from-$_to'
-			}
-		);
-    }
-
-    static String _representLanguage(Language lang) =>
-        lang == Language.russian ? 'ru': 'en';
+    final DictionaryProvider provider;
+	
+    WordDictionary(this.provider, { @required Language from, Language to }): 
+		_from = DictionaryProvider.representLanguage(from),
+		_to = DictionaryProvider.representLanguage(to ?? from);
 
     Future<Article> lookUp(String word) async {
-		final params = new Map<String, dynamic>.of(_uri.queryParameters);
-		params['text'] = word;
+		final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
+		if (await provider.isTranslationPossible(directLangPair))
+			return provider.lookUp(directLangPair, word);
+		
+		final enRepresentation = DictionaryProvider.representLanguage(Language.english);
+		final enArticle = await provider.lookUp(
+			DictionaryProvider.buildLangPair(_from, enRepresentation), word);
 
-        final response = await _client.post(Uri.https(_uri.authority, _uri.path, params));
-        return new Article.fromJson(jsonDecode(response.body));
+		final destLangPair = DictionaryProvider.buildLangPair(enRepresentation, _to);
+
+		Article article;
+		for (final enTranslation in enArticle.words.expand((w) => w.translations)) {
+			final foundArticle = await provider.lookUp(destLangPair, enTranslation);
+
+			if (article == null)
+				article = foundArticle;
+			else
+				article = article.mergeWords(foundArticle);
+		}
+
+		return article?.mergeWordTexts(enArticle) ?? new Article.fromJson({});
     }
 
-    dispose() {
-        _client?.close();
-    }
+	dispose() => provider?.dispose();
 }

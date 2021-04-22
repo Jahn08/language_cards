@@ -12,10 +12,11 @@ class Word {
 
     final List<String> translations;
 
-    Word(this.text, { int id, String transcription, String partOfSpeech, List<String> translations }):
+    Word(this.text, 
+		{ int id, String transcription, PartOfSpeech partOfSpeech, List<String> translations }):
         id = id,
         transcription = transcription ?? '',
-        partOfSpeech = _lookUpPartOfSpeech(partOfSpeech),
+        partOfSpeech = partOfSpeech,
         translations = translations ?? [];
 
     Word.fromJson(Map<String, dynamic> json):
@@ -32,4 +33,10 @@ class Word {
 
     static PartOfSpeech _lookUpPartOfSpeech(String givenPos) =>
         PartOfSpeech.retrieve(givenPos) ?? PartOfSpeech.collocation;
+
+	@override
+	bool operator ==(Object obj) => obj?.runtimeType == runtimeType && obj.hashCode == hashCode;
+
+	@override
+	int get hashCode => text.hashCode + partOfSpeech.hashCode;
 }
