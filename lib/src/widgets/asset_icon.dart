@@ -8,6 +8,10 @@ class AssetIcon extends Image {
 
     static final AssetIcon russianFlag = new AssetIcon('flag_ru');
     static final AssetIcon britishFlag = new AssetIcon('flag_uk');
+    static final AssetIcon frenchFlag = new AssetIcon('flag_fr');
+    static final AssetIcon germanFlag = new AssetIcon('flag_de');
+    static final AssetIcon spanishFlag = new AssetIcon('flag_es');
+    static final AssetIcon italianFlag = new AssetIcon('flag_it');
 
     AssetIcon(String name): super(
         image: new LocalAssetImage(name), 
@@ -20,7 +24,21 @@ class AssetIcon extends Image {
     static AssetIcon getByLanguage(Language lang) {
         if (lang == Language.english)
 			return britishFlag;
-		
-		return lang == Language.russian ? russianFlag: null;
+		switch (lang) {
+        	case Language.english:
+				return britishFlag;
+			case Language.spanish:
+				return spanishFlag;
+			case Language.russian:
+				return russianFlag;
+			case Language.german:
+				return germanFlag;
+			case Language.french:
+				return frenchFlag;
+        	case Language.italian:
+				return italianFlag;
+			default:
+				return null;
+		}
     }
 }

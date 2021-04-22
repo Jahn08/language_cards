@@ -299,10 +299,18 @@
     "importDialogFileSelectorBtnLabel": "Выбрать файл",
     "@importDialogFileSelectorBtnLabel": {},
 
-    "languageEnglishName": "английский",
+    "languageEnglishName": "Английский",
     "@languageEnglishName": {},
-    "languageRussianName": "русский",
+    "languageRussianName": "Русский",
     "@languageRussianName": {},
+    "languageGermanName": "Немецкий",
+    "@languageGermanName": {},
+    "languageSpanishName": "Испанский",
+    "@languageSpanishName": {},
+    "languageFrenchName": "Французский",
+    "@languageFrenchName": {},
+    "languageItalianName": "Итальянский",
+    "@languageItalianName": {},
 
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} записей было удалено",
     "@listScreenBottomSnackBarRemovedItemsInfo": {

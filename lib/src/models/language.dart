@@ -3,15 +3,39 @@ import 'presentable_enum.dart';
 
 class Language extends PresentableEnum {
 	
-	static final Language english = new Language._(0);
+	static const Language english = const Language._(0);
 
-    static final Language russian = new Language._(1);
+    static const Language russian = const Language._(1);
 
-	static List<Language> get values => [english, russian];
+    static const Language german = const Language._(2);
 
-	Language._(int index): super(index);
+    static const Language french = const Language._(3);
+
+    static const Language italian = const Language._(4);
+
+    static const Language spanish = const Language._(5);
+
+	static const values = [english, russian, german, french, italian, spanish];
+
+	const Language._(int index): super(index);
 
 	@override
-	String present(AppLocalizations locale) =>
-		this == russian ? locale.languageRussianName : locale.languageEnglishName; 
+	String present(AppLocalizations locale) {
+		switch (this) {
+			case Language.english:
+				return locale.languageEnglishName;
+			case Language.russian:
+				return locale.languageRussianName;
+			case Language.spanish:
+				return locale.languageSpanishName;
+			case Language.french:
+				return locale.languageFrenchName;
+			case Language.german:
+				return locale.languageGermanName;
+			case Language.italian:
+				return locale.languageItalianName;
+			default:
+				return '';
+		}
+	}
 }

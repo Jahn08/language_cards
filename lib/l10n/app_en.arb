@@ -303,6 +303,14 @@
     "@languageEnglishName": {},
     "languageRussianName": "Russian",
     "@languageRussianName": {},
+    "languageGermanName": "German",
+    "@languageGermanName": {},
+    "languageSpanishName": "Spanish",
+    "@languageSpanishName": {},
+    "languageFrenchName": "French",
+    "@languageFrenchName": {},
+    "languageItalianName": "Italian",
+    "@languageItalianName": {},
 
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} items have been removed",
     "@listScreenBottomSnackBarRemovedItemsInfo": {
