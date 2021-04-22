@@ -11,15 +11,15 @@ enum AppTheme {
 
 class CardSide extends PresentableEnum {
 
-	static final CardSide front = new CardSide._(0);
+	static const CardSide front = const CardSide._(0);
 
-    static final CardSide back = new CardSide._(1);
+    static const CardSide back = const CardSide._(1);
 
-    static final CardSide random = new CardSide._(2);
+    static const CardSide random = const CardSide._(2);
 
 	static List<CardSide> get values => [front, back, random];
 
-	CardSide._(int index): super(index);
+	const CardSide._(int index): super(index);
 
 	@override
 	String present(AppLocalizations locale) =>
@@ -29,15 +29,15 @@ class CardSide extends PresentableEnum {
 
 class StudyDirection extends PresentableEnum {
 	
-	static final StudyDirection forward = new StudyDirection._(0);
+	static const StudyDirection forward = const StudyDirection._(0);
 
-    static final StudyDirection backward = new StudyDirection._(1);
+    static const StudyDirection backward = const StudyDirection._(1);
 
-    static final StudyDirection random = new StudyDirection._(2);
+    static const StudyDirection random = const StudyDirection._(2);
 
 	static List<StudyDirection> get values => [forward, backward, random];
 
-	StudyDirection._(int index): super(index);
+	const StudyDirection._(int index): super(index);
 
 	@override
 	String present(AppLocalizations locale) =>
@@ -91,6 +91,8 @@ class UserParams {
     Language get interfaceLang => _interfaceLang;
     set interfaceLang(Language value) => _interfaceLang = value ?? _defaultLanguage;
 
+	static const interfaceLanguages = [Language.english, Language.russian];
+
     AppTheme _theme;
     AppTheme get theme => _theme;
     set theme(AppTheme value) => _theme = value ?? _defaultTheme;
@@ -103,7 +105,7 @@ class UserParams {
         final jsonMap = json == null ? {}: jsonDecode(json);
 
         final langIndex = jsonMap[_interfaceLangParam];
-        _interfaceLang = langIndex == null ? _defaultLanguage: Language.values[langIndex];
+        _interfaceLang = langIndex == null ? _defaultLanguage: interfaceLanguages[langIndex];
 
         final themeIndex = jsonMap[_themeParam];
         _theme = themeIndex == null ? _defaultTheme: AppTheme.values[themeIndex];

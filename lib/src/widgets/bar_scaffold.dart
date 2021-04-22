@@ -85,20 +85,17 @@ class _SettingsPanelState extends State<_SettingsPanel> {
     List<Widget> _buildLanguageSection(AppLocalizations locale) {
 		return <Widget>[
             _buildSubsectionHeader(locale.barScaffoldSettingsPanelLanguageSectionLabel),
-            new Row(children: <Widget>[
-                _buildLanguageOption(Language.english, _params),
-                _buildLanguageOption(Language.russian, _params)
-            ])
+            new Row(children: UserParams.interfaceLanguages
+				.map((ln) => _buildLanguageOption(ln, _params)).toList())
         ];
     }
-
 
     Widget _buildLanguageOption(Language lang, UserParams params) {
         final isSelected = lang == params.interfaceLang;
         
         return new GestureDetector(
             child: new IconOption(
-                icon: lang == Language.english ? AssetIcon.britishFlag : AssetIcon.russianFlag, 
+                icon: AssetIcon.getByLanguage(lang), 
                 isSelected: isSelected
             ),
             onTap: () {

@@ -1,6 +1,5 @@
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
-import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import '../utilities/randomiser.dart';
 
@@ -12,7 +11,7 @@ class PreferencesTester {
 
     static Future<UserParams> saveRandomUserParams() async {
         final params = new UserParams();
-		params.interfaceLang = Randomiser.nextElement(Language.values);
+		params.interfaceLang = Randomiser.nextElement(UserParams.interfaceLanguages);
 		params.theme = Randomiser.nextElement(AppTheme.values);
 		params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
 		params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
@@ -30,7 +29,7 @@ class PreferencesTester {
     static Future<UserParams> saveNonDefaultUserParams() async {
 		final params = new UserParams();
 		params.interfaceLang = _getFirstDistinctFrom(
-			params.interfaceLang, Language.values);
+			params.interfaceLang, UserParams.interfaceLanguages);
 		params.theme = _getFirstDistinctFrom(
 			params.theme, AppTheme.values);
 		params.studyParams.cardSide = _getFirstDistinctFrom(

@@ -4,7 +4,6 @@ import 'package:language_cards/src/app.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
-import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/widgets/asset_icon.dart';
@@ -110,9 +109,9 @@ void main() {
         final iconOptionsFinder = AssuredFinder.findSeveral(type: IconOption, 
             shouldFind: true);
         expect(tester.widgetList(iconOptionsFinder).length, 
-            Language.values.length + AppTheme.values.length);
+            UserParams.interfaceLanguages.length + AppTheme.values.length);
 
-        Language.values.forEach((lang) {
+        UserParams.interfaceLanguages.forEach((lang) {
             final optionFinder = find.descendant(of: iconOptionsFinder, matchRoot: true,
                 matching: find.byWidgetPredicate(
                     (w) => w is IconOption && w.isSelected == (expectedLang == lang)));
