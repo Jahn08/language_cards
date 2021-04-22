@@ -15,7 +15,6 @@ class IconOption extends StatelessWidget {
             width: AssetIcon.widthValue,
             height: AssetIcon.heightValue,
             child: _iconWidget,
-            margin: EdgeInsets.all(5),
             decoration: new BoxDecoration(
                 border: isSelected ? new Border.all(
                     color: Colors.blueGrey,

@@ -238,7 +238,7 @@ class _StudyScreenState extends State<StudyScreen> {
             children: [
                 new Container(
                     child: new TranslationIndicator(pack.from, pack.to), 
-                    margin: EdgeInsets.only(left: 5)
+                    margin: EdgeInsets.only(left: 10, bottom: 5)
                 ),
                 new Container(
 					width: screenSize.width * 0.75,
