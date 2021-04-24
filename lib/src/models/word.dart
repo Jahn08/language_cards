@@ -38,5 +38,5 @@ class Word {
 	bool operator ==(Object obj) => obj?.runtimeType == runtimeType && obj.hashCode == hashCode;
 
 	@override
-	int get hashCode => text.hashCode + partOfSpeech.hashCode;
+	int get hashCode => [text.hashCode, partOfSpeech.hashCode].join().hashCode;
 }

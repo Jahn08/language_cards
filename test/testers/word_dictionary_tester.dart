@@ -15,7 +15,7 @@ class WordDictionaryTester {
 		partOfSpeech = partOfSpeech ?? Randomiser.nextElement(PartOfSpeech.values);
 
 		final usedPos = <PartOfSpeech>[partOfSpeech];
-		return _buildArticle(List.generate(Randomiser.nextInt(3) + 1, (index) {
+		return _buildArticle(List.generate(Randomiser.nextInt(3) + 2, (index) {
 			if (index > 0) {
 				do {
 					partOfSpeech = Randomiser.nextElement(PartOfSpeech.values);
@@ -23,7 +23,7 @@ class WordDictionaryTester {
 				usedPos.add(partOfSpeech);
 			}
 
-			return _buildWordDefinition(text, partOfSpeech.value);
+			return _buildWordDefinition(text ?? Randomiser.nextString(), partOfSpeech.value);
 		}));
 	}
 
@@ -37,8 +37,7 @@ class WordDictionaryTester {
 
 	static Object _buildTranslation() => {"text": Randomiser.nextString()};
 
-	static List<String> buildAcceptedLanguagesResponse() {
-		final from = Language.english;
+	static List<String> buildAcceptedLanguagesResponse([Language from = Language.english]) {
 		return new Set.from(Language.values.map((to) => [buildLangPair(from, to), 
 			buildLangPair(to, from)]).expand((v) => v)).cast<String>().toList();
 	}

@@ -97,6 +97,28 @@ void main() {
 
 		_assureWords(expectedFrArticle.mergeWordTexts(expectedFromItArticle), article.words);
 	});
+
+	test('Returns an empty word article for an indirect translation', () async {
+		final params = <Map<String, String>>[];
+		final client = new MockClient((request) async {
+			if (!WordDictionaryTester.isLookUpRequest(request))
+				return HttpResponder.respondWithJson(WordDictionaryTester.buildAcceptedLanguagesResponse());
+
+			params.add(request.url.queryParameters);
+			return HttpResponder.respondWithJson({});
+		});
+			
+        final article = await new WordDictionary(
+			new WebDictionaryProvider(Randomiser.nextString(), client: client),
+			from: Language.italian, 
+			to: Language.french
+		).lookUp(Randomiser.nextString());
+		expect(article.words.isEmpty, true);
+
+		expect(params.length, 1);
+		expect(params.first.containsValue(
+			WordDictionaryTester.buildLangPair(Language.italian, Language.english)), true);
+	});
 }
 
 void _assureWords(Article expectedArticle, List<Word> actualWords) {
