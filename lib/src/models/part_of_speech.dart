@@ -2,25 +2,27 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'presentable_enum.dart';
 
 class PartOfSpeech extends PresentableEnum {
-    
-	static const adjective = const PartOfSpeech._(0, 'adjective');
-	static const adverb = const PartOfSpeech._(1, 'adverb');
-	static const collocation = const PartOfSpeech._(2, 'collocation');
-	static const conjunction = const PartOfSpeech._(3, 'conjunction');
-	static const idiom = const PartOfSpeech._(4, 'idiom');
-	static const interjection = const PartOfSpeech._(5, 'interjection');
-	static const noun = const PartOfSpeech._(6, 'noun');
-	static const participle = const PartOfSpeech._(7, 'participle');
-	static const preposition = const PartOfSpeech._(8, 'preposition');
-	static const pronoun = const PartOfSpeech._(9, 'pronoun');
-	static const verb = const PartOfSpeech._(10, 'verb');
 
-	final String value;
+	static const adjective = const PartOfSpeech._(0, ['adjective', 'adj']);
+	static const adverb = const PartOfSpeech._(1, ['adverb', 'adv']);
+	static const collocation = const PartOfSpeech._(2, ['collocation']);
+	static const conjunction = const PartOfSpeech._(3, ['conjunction', 'conj']);
+	static const idiom = const PartOfSpeech._(4, ['idiom']);
+	static const interjection = const PartOfSpeech._(5, ['interjection', 'excl']);
+	static const noun = const PartOfSpeech._(6, ['noun', 'n']);
+	static const participle = const PartOfSpeech._(7, ['participle']);
+	static const preposition = const PartOfSpeech._(8, ['preposition', 'prep']);
+	static const pronoun = const PartOfSpeech._(9, ['pronoun', 'pron']);
+	static const verb = const PartOfSpeech._(10, ['verb', 'v']);
+	static const numeral = const PartOfSpeech._(11, ['numeral', 'num']);
+	static const determiner = const PartOfSpeech._(12, ['determiner', 'det']);
 
-	const PartOfSpeech._(int index, this.value): super(index);
+	final List<String> valueList;
+
+	const PartOfSpeech._(int index, this.valueList): super(index);
 
 	static PartOfSpeech retrieve(String value) => 
-		values.firstWhere((p) => p.value == value, orElse: () => null);
+		values.firstWhere((p) => p.valueList.contains(value), orElse: () => null);
 
 	static List<PartOfSpeech> get values => [adjective, adverb, collocation,
 		conjunction, idiom, interjection, noun, participle, preposition, pronoun, verb]; 

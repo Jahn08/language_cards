@@ -73,7 +73,7 @@ class StoredWord extends StoredEntity {
         map.addAll({
             textFieldName: text,
             transcriptionFieldName: transcription,
-            partOfSpeechFieldName: partOfSpeech?.value,
+            partOfSpeechFieldName: partOfSpeech?.valueList?.first,
             translationFieldName: translation,
             studyProgressFieldName: studyProgress,
             if (!(excludeIds ?? false))

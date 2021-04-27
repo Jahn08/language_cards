@@ -25,7 +25,7 @@ void main() {
 
         final dialogTester = new SelectorDialogTester<Word>(tester, _buildDialog);
         await dialogTester.testRenderingOptions(availableWords, (finder, word) {
-            expect(find.descendant(of: finder, matching: find.text(word.partOfSpeech.value)), 
+            expect(find.descendant(of: finder, matching: find.text(word.partOfSpeech.valueList.first)), 
                 findsOneWidget);
             expect(find.descendant(of: finder, 
                 matching: find.text(word.translations.join('; '))), findsOneWidget);

@@ -23,7 +23,7 @@ class WordDictionaryTester {
 				usedPos.add(partOfSpeech);
 			}
 
-			return _buildWordDefinition(text ?? Randomiser.nextString(), partOfSpeech.value);
+			return _buildWordDefinition(text ?? Randomiser.nextString(), partOfSpeech.valueList.first);
 		}));
 	}
 

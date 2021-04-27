@@ -19,7 +19,7 @@ class CardEditorTester {
 
 		final posField = tester.widget<DropdownButton<String>>(
 			find.byType(AssuredFinder.typify<DropdownButton<String>>()));
-		expect(posField.value, card.partOfSpeech.value);
+		expect(posField.value, card.partOfSpeech.valueList.first);
 	}
 
 	void assureRenderingPack([StoredPack pack]) {
