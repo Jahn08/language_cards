@@ -5,11 +5,6 @@ import '../../utilities/randomiser.dart';
 
 void main() {
 
-	test('Joins an array of strings into a path string', () {
-		final paths = [Randomiser.nextString(), Randomiser.nextString(), Randomiser.nextString()];
-		expect(joinPaths(paths), paths.join('/'));
-	});
-
 	test('Returns true when a string is either empty or null', () {
 		expect(isNullOrEmpty(''), true);
 		expect(isNullOrEmpty(null), true);

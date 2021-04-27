@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
-import 'string_ext.dart';
 import '../data/word_storage.dart';
 import '../models/stored_pack.dart';
+import '../utilities/path.dart';
 
 class PackExporter {
 
@@ -35,5 +35,5 @@ class PackExporter {
 	}
 
 	_compileFullFileName(String dirPath, String fileName) => 
-		joinPaths([dirPath, fileName + '.json']);
+		Path.combine([dirPath, fileName + '.json']);
 }

@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
-import 'package:language_cards/src/utilities/string_ext.dart';
+import 'package:language_cards/src/utilities/path.dart';
 import 'package:path_provider/path_provider.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
@@ -129,7 +129,7 @@ class ExporterTester {
 		final dir = (await getExternalStorageDirectory()).path;
 
 		final jsonFileName = Randomiser.nextString() + '.json';
-		final jsonFile = new File(joinPaths([dir, jsonFileName]));
+		final jsonFile = new File(Path.combine([dir, jsonFileName]));
 		jsonFile.createSync(recursive: true);
 
 		jsonFile.writeAsStringSync(jsonEncode(obj), flush: true);

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'string_ext.dart';
+import 'path.dart';
+import '../data/asset_reader.dart';
 
 class LocalAssetImage extends AssetImage {
 
   	LocalAssetImage(String fileName, { String fileExtension, String localeName }) : 
-		super(joinPaths(['assets', 'images', 
+		super(Path.combine([AssetReader.rootPath, 'images', 
 			if (localeName != null) localeName, '$fileName.${fileExtension ?? 'jpg'}']));
 }

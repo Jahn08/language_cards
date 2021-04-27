@@ -1,7 +1,7 @@
 import 'package:flutter/widgets.dart';
 import 'dart:convert'show jsonDecode;
 import '../models/app_params.dart';
-import '../utilities/string_ext.dart';
+import '../data/asset_reader.dart';
 
 export '../models/app_params.dart';
 
@@ -16,12 +16,11 @@ class Configuration {
     }
 
     static _load(BuildContext context) async {
-        final cfgRootFolderPath = joinPaths(['assets', 'cfg']);
-
+        const cfgFolderName = 'cfg';
         final configs = await Future.wait([
-            _tryLoadParams(joinPaths([cfgRootFolderPath, 'secret_params.json']), 
+            _tryLoadParams([cfgFolderName, 'secret_params.json'], 
               context, isSecret: true), 
-            _tryLoadParams(joinPaths([cfgRootFolderPath, 'params.json']), context)]);
+            _tryLoadParams([cfgFolderName, 'params.json'], context)]);
 
         final secretConfig = _filterConfigs(configs, isSecret: true);
         final config = _filterConfigs(configs, isSecret: false);
@@ -33,12 +32,13 @@ class Configuration {
         _params = config.merge(secretConfig);
     }
 
-    static Future<Map<bool, AppParams>> _tryLoadParams(String path, BuildContext context, 
-        { bool isSecret }) async {
+    static Future<Map<bool, AppParams>> _tryLoadParams(
+		List<String> paths, BuildContext context, { bool isSecret }
+	) async {
         AppParams params;
 
         try {
-            final json = await DefaultAssetBundle.of(context).loadString(path);
+            final json = await new AssetReader(context).loadString(paths);
             params = new AppParams.fromJson(jsonDecode(json));
         }
         catch (ex) {

@@ -1,6 +1,6 @@
 import 'dart:io';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
-import 'package:language_cards/src/utilities/string_ext.dart';
+import 'package:language_cards/src/utilities/path.dart';
 
 class FakePathProviderPlatform extends PathProviderPlatform {
 
@@ -34,7 +34,7 @@ class FakePathProviderPlatform extends PathProviderPlatform {
 
 	@override
 	Future<String> getExternalStoragePath() {
-		final path = joinPaths([_rootFolderPath, 'external']);
+		final path = Path.combine([_rootFolderPath, 'external']);
 		final dir = new Directory(path);
 		
 		if (!dir.existsSync())
