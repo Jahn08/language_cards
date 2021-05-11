@@ -446,6 +446,10 @@
     "@partOfSpeechVerbName": {},
     "partOfSpeechCollocationName": "выражение",
     "@partOfSpeechCollocationName": {},
+    "partOfSpeechDeterminerName": "определяющее слово",
+    "@partOfSpeechDeterminerName": {},
+    "partOfSpeechNumeralName": "числительное",
+    "@partOfSpeechNumeralName": {},
 
     "quote1": "Границы моего языка - это границы моего мира.@Людвиг Витгенштейн",
     "@quote1": {},

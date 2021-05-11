@@ -446,6 +446,10 @@
     "@partOfSpeechVerbName": {},
     "partOfSpeechCollocationName": "collocation",
     "@partOfSpeechCollocationName": {},
+    "partOfSpeechDeterminerName": "determiner",
+    "@partOfSpeechDeterminerName": {},
+    "partOfSpeechNumeralName": "numeral",
+    "@partOfSpeechNumeralName": {},
 
     "quote1": "The limits of my language are the limits of my world.@Ludwig Wittgenstein",
     "@quote1": {},

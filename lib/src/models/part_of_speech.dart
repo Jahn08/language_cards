@@ -49,6 +49,10 @@ class PartOfSpeech extends PresentableEnum {
 			return locale.partOfSpeechPronounName;
 		else if (this == verb)
 			return locale.partOfSpeechVerbName;
+		else if (this == determiner)
+			return locale.partOfSpeechDeterminerName;
+		else if (this == numeral)
+			return locale.partOfSpeechNumeralName;
 	
 		return locale.partOfSpeechCollocationName;
 	}
