@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/testing.dart';
-import 'package:language_cards/src/data/web_ditionary_provider.dart';
+import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/models/article.dart';
 import 'package:language_cards/src/models/language.dart';

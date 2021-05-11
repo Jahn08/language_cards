@@ -3,7 +3,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/pack_storage.dart';
-import '../data/web_ditionary_provider.dart';
+import '../data/web_dictionary_provider.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/pack_selector_dialog.dart';
