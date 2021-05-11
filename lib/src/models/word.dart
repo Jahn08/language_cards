@@ -41,3 +41,19 @@ class Word {
 	@override
 	int get hashCode => [text.hashCode, partOfSpeech.hashCode].join().hashCode;
 }
+
+class AssetWord extends Word {
+
+    AssetWord(String text, 
+		{ int id, String transcription, PartOfSpeech partOfSpeech, List<String> translations }):
+		super(text, id: id, transcription: transcription, 
+			partOfSpeech: partOfSpeech, translations: translations);
+
+    AssetWord.fromJson(String text, Map<String, dynamic> json):
+		super(
+			text,
+			transcription: json['s'], 
+			partOfSpeech: Word._lookUpPartOfSpeech(json['p']),
+			translations: (json['r'] as List).cast<String>()
+		);
+}

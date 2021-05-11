@@ -3,9 +3,15 @@ import '../models/language.dart';
 
 abstract class DictionaryProvider {
 
-	Future<bool> isTranslationPossible(String langParam);
+	Future<List<String>> getAcceptedLanguages();
+
+	Future<bool> isTranslationPossible(String langParam) async {
+		return (await getAcceptedLanguages()).contains(langParam);
+	}
 	
-	Future<Article> lookUp(String langParam, String text);
+	BaseArticle get defaultArticle;
+
+	Future<BaseArticle> lookUp(String langParam, String text);
 
 	void dispose();
 	

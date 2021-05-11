@@ -121,7 +121,7 @@ void main() {
 	});
 }
 
-void _assureWords(Article expectedArticle, List<Word> actualWords) {
+void _assureWords(BaseArticle expectedArticle, List<Word> actualWords) {
 	final expectedWordNumber = expectedArticle.words.length;
 	expect(actualWords?.length, expectedWordNumber);
 	expect(actualWords.map((word) => word.partOfSpeech).toSet().length, expectedWordNumber);

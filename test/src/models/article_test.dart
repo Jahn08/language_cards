@@ -21,30 +21,22 @@ main() {
 		expect(secondArticle.words.every((w) => mergedArticle.words.contains(w)), true);
 	});
 
-	test('Merges article texts for eather each found part of speech or the first one', () {
+	test('Merges article texts for either each found part of speech or the first one', () {
 		final firstArticle = Article.fromJson(WordDictionaryTester.buildArticleJson());
-		final firstArticleSomeDefinition = firstArticle.words.last;
-		final secondArticle = Article.fromJson(
-			WordDictionaryTester.buildArticleJson(
-				partOfSpeech: firstArticleSomeDefinition.partOfSpeech
-			)
-		);
+		final secondArticle = Article.fromJson(WordDictionaryTester.buildArticleJson(
+			partOfSpeech: firstArticle.words.last.partOfSpeech
+		));
 
 		final mergedArticle = secondArticle.mergeWordTexts(firstArticle);
 		mergedArticle.words.forEach((w) { 
-			if (w.partOfSpeech == firstArticleSomeDefinition.partOfSpeech) {
-				expect(w.text, firstArticleSomeDefinition.text);
-				expect(w.transcription, firstArticleSomeDefinition.transcription);
-				expect(w.translations.every(
-					(mt) => !firstArticleSomeDefinition.translations.contains(mt)), true);
-			}
-			else {
-				final firstArticleFirstDefinition = firstArticle.words.first;
-				expect(w.text, firstArticleFirstDefinition.text);
-				expect(w.transcription, firstArticleFirstDefinition.transcription);
-				expect(w.translations.every(
-					(mt) => !firstArticleSomeDefinition.translations.contains(mt)), true);
-			}
+			final firstArticleFirstDefinition = firstArticle.words.firstWhere(
+				(sw) => sw.partOfSpeech == w.partOfSpeech, 
+				orElse: () => firstArticle.words.first
+			);
+			expect(w.text, firstArticleFirstDefinition.text);
+			expect(w.transcription, firstArticleFirstDefinition.transcription);
+			expect(w.translations.every(
+				(mt) => !firstArticleFirstDefinition.translations.contains(mt)), true);
 		});
 	});
 }

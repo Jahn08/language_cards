@@ -1,14 +1,14 @@
 import 'dart:convert' show jsonDecode;
 import 'package:http/http.dart';
-import './dictionary_provider.dart';
+import 'dictionary_provider.dart';
 import '../models/article.dart';
 
 class WebDictionaryProvider extends DictionaryProvider {
     final String _key;
 	
     final Client _client;
-	
-	List<String> _acceptedLanguages;
+
+	static List<String> _acceptedLangs;
 
     WebDictionaryProvider(String apiKey, { Client client }): 
 		_key = apiKey,
@@ -31,17 +31,17 @@ class WebDictionaryProvider extends DictionaryProvider {
 		return _sendLookUpRequest(_buildSearchUri(langParam), word);
     }
 
-  	@override
-	Future<bool> isTranslationPossible(String langParam) async {
-		if (_acceptedLanguages == null) {
+	@override
+	Future<List<String>> getAcceptedLanguages() async {
+		if (_acceptedLangs == null) {
 			final langListUri = _buildRootUri('getLangs');
 
 			final response = await _client.get(
 				Uri.https(langListUri.authority, langListUri.path, langListUri.queryParameters));
-			_acceptedLanguages = (jsonDecode(response.body) as List).cast<String>();
+			_acceptedLangs = (jsonDecode(response.body) as List).cast<String>();
 		}
 
-		return _acceptedLanguages.contains(langParam);
+		return _acceptedLangs;
 	}
 
 	Uri _buildSearchUri(String langPair) => _buildRootUri('lookup', { 'lang': langPair });
@@ -55,4 +55,7 @@ class WebDictionaryProvider extends DictionaryProvider {
 	}
 
     dispose() => _client?.close();
+
+	@override
+	Article get defaultArticle => new Article.fromJson({});
 }

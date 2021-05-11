@@ -14,7 +14,7 @@ class WordDictionary {
 		_from = DictionaryProvider.representLanguage(from),
 		_to = DictionaryProvider.representLanguage(to ?? from);
 
-    Future<Article> lookUp(String word) async {
+    Future<BaseArticle> lookUp(String word) async {
 		final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
 		if (await provider.isTranslationPossible(directLangPair))
 			return provider.lookUp(directLangPair, word);
@@ -25,7 +25,7 @@ class WordDictionary {
 
 		final destLangPair = DictionaryProvider.buildLangPair(enRepresentation, _to);
 
-		Article article;
+		BaseArticle article;
 		for (final enTranslation in enArticle.words.expand((w) => w.translations)) {
 			final foundArticle = await provider.lookUp(destLangPair, enTranslation);
 
@@ -35,7 +35,7 @@ class WordDictionary {
 				article = article.mergeWords(foundArticle);
 		}
 
-		return article?.mergeWordTexts(enArticle) ?? new Article.fromJson({});
+		return article?.mergeWordTexts(enArticle) ?? provider.defaultArticle;
     }
 
 	dispose() => provider?.dispose();
