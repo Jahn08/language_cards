@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
+import 'package:language_cards/src/data/asset_dictionary_provider.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/user_params.dart';
@@ -284,9 +285,11 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		noBar: true,
-        child: new SettingsBlocProvider(
-			child: new StudyScreen('', packStorage.wordStorage, 
-				packs: packs, packStorage: packStorage, defaultSpeaker: new SpeakerMock())
+        childBuilder: (context) => new SettingsBlocProvider(
+			child: new StudyScreen(packStorage.wordStorage, 
+				provider: new AssetDictionaryProvider(context),
+				packs: packs, packStorage: packStorage, 
+				defaultSpeaker: new SpeakerMock())
 		)
 	));
     await tester.pump();

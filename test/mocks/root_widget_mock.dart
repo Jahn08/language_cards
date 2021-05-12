@@ -34,6 +34,7 @@ class RootWidgetMock extends StatelessWidget {
 		Function(BuildContext) onBuilding, 
 		Route<dynamic> Function(RouteSettings) onGenerateRoute,
 		Widget child, 
+		Widget Function(BuildContext) childBuilder,
 		bool noBar 
 	}) => new MaterialApp(
 		localizationsDelegates: [
@@ -43,8 +44,11 @@ class RootWidgetMock extends StatelessWidget {
 		],
 		initialRoute: Router.initialRouteName,
 		onGenerateRoute: onGenerateRoute ?? (settings) => new MaterialPageRoute(
-			builder: (context) => 
-				new RootWidgetMock(onBuilding: onBuilding, child: child, noBar: noBar)
+			builder: (context) => new RootWidgetMock(
+				onBuilding: onBuilding, 
+				child: childBuilder?.call(context) ?? child, 
+				noBar: noBar
+			)
 		)
 	);
 }

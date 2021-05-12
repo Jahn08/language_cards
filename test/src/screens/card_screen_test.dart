@@ -2,6 +2,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -214,7 +215,7 @@ void main() {
             await _testChangingPack(new PackStorageMock(), tester, 
                 (word) => Future.value(StoredPack.none));
         });
-
+	
     testWidgets('Shows a warning for a card without a pack and turns off dictionaries', 
         (tester) => _testInitialDictionaryState(tester, hasPack: false));
 
@@ -228,7 +229,8 @@ void main() {
         (tester) => _testChangingDictionaryState(tester, nullifyPack: false));
 }
 
-Future<StoredWord> _displayWord(WidgetTester tester, { Client client, 
+Future<StoredWord> _displayWord(WidgetTester tester, { 
+		WebDictionaryProvider provider, 
         PackStorageMock storage, StoredPack pack, 
         StoredWord wordToShow, SpeakerMock speaker,
 		bool shouldHideWarningDialog = true }) async {
@@ -237,9 +239,12 @@ Future<StoredWord> _displayWord(WidgetTester tester, { Client client,
     wordToShow = wordToShow ?? wordStorage.getRandom();
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
-        child: new CardScreen('', wordStorage: wordStorage, packStorage: storage,
-        wordId: wordToShow.id, pack: pack, client: client, 
-		defaultSpeaker: speaker ?? new SpeakerMock())));
+        childBuilder: (context) => new CardScreen(
+			wordStorage: wordStorage, packStorage: storage,
+			wordId: wordToShow.id, pack: pack, 
+			provider: provider, 
+			defaultSpeaker: speaker ?? new SpeakerMock()
+		)));
     await tester.pump();
     await tester.pump(new Duration(milliseconds: 200));
 
@@ -343,24 +348,25 @@ void _assureTileIsTicked(Finder tileFinder) =>
         findsOneWidget);
 
 Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool hasPack }) 
-    async {
-        bool dictionaryIsActive = false;
-        final client = new MockClient((request) async {
-            dictionaryIsActive = true;
+	async {
+		bool dictionaryIsActive = false;
+		final client = new MockClient((request) async {
+			dictionaryIsActive = true;
 			return _respondWithEmptyResponse(request);
-        });
-        
-        final wordToShow = await _displayWord(tester, client: client,
-            shouldHideWarningDialog: false,
+		});
+
+		final wordToShow = await _displayWord(tester, 
+			provider: new WebDictionaryProvider('', client: client),
+			shouldHideWarningDialog: false,
 			pack: hasPack ? PackStorageMock.generatePack(
-                Randomiser.nextInt(PackStorageMock.namedPacksNumber)): StoredPack.none);
-        
-        await _assureWarningDialog(tester, !hasPack);
+				Randomiser.nextInt(PackStorageMock.namedPacksNumber)): StoredPack.none);
+		
+		await _assureWarningDialog(tester, !hasPack);
 
-        await _inputTextAndAccept(tester, wordToShow.text);
+		await _inputTextAndAccept(tester, wordToShow.text);
 
-        expect(dictionaryIsActive, hasPack);
-    }
+		expect(dictionaryIsActive, hasPack);
+	}
 
 Response _respondWithEmptyResponse(Request req) => 
 	HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(req) ? 
@@ -382,24 +388,25 @@ Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
 }
 
 Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool nullifyPack }) 
-    async {
-        bool dictionaryIsActive = false;
-        final client = new MockClient((request) async {
-            dictionaryIsActive = true;
+	async {
+		bool dictionaryIsActive = false;
+		final client = new MockClient((request) async {
+			dictionaryIsActive = true;
 			return _respondWithEmptyResponse(request);
-        });
-        
-        final storage = new PackStorageMock();
-        final wordToShow = await _displayWord(tester, storage: storage, 
-            client: client, pack: nullifyPack ? PackStorageMock.generatePack(
-                Randomiser.nextInt(PackStorageMock.namedPacksNumber)): null);
-        
-        await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
-                _fetchAnotherPack(storage, wordToShow.packId));
+		});
+		
+		final storage = new PackStorageMock();
+		final wordToShow = await _displayWord(tester, storage: storage,
+			provider: new WebDictionaryProvider('', client: client),
+			pack: nullifyPack ? PackStorageMock.generatePack(
+				Randomiser.nextInt(PackStorageMock.namedPacksNumber)): null);
+		
+		await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
+				_fetchAnotherPack(storage, wordToShow.packId));
 
-        await _assureWarningDialog(tester, nullifyPack);
+		await _assureWarningDialog(tester, nullifyPack);
 
-        await _inputTextAndAccept(tester, wordToShow.text);
+		await _inputTextAndAccept(tester, wordToShow.text);
 
-        expect(dictionaryIsActive, !nullifyPack);
-    }
+		expect(dictionaryIsActive, !nullifyPack);
+	}

@@ -1,8 +1,8 @@
-import 'package:http/http.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart' hide Router;
 import '../router.dart';
+import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../utilities/speaker.dart';
@@ -11,13 +11,11 @@ import '../widgets/bar_scaffold.dart';
 
 class CardScreen extends StatelessWidget {
 	
-	final String apiKey;
-
     final int wordId;
     
     final StoredPack pack;
 
-    final Client client;
+    final DictionaryProvider provider;
 
     final ISpeaker defaultSpeaker;
 
@@ -25,8 +23,8 @@ class CardScreen extends StatelessWidget {
 
     final BaseStorage<StoredPack> packStorage;
     
-    CardScreen(this.apiKey, { @required this.wordStorage, @required this.packStorage, 
-		this.client, this.defaultSpeaker, this.pack, this.wordId });
+    CardScreen({ @required this.wordStorage, @required this.packStorage,
+		@required this.provider, this.defaultSpeaker, this.pack, this.wordId });
 
     @override
     Widget build(BuildContext context) {
@@ -36,8 +34,8 @@ class CardScreen extends StatelessWidget {
 
         return new BarScaffold(
 			title,
-            body: new CardEditor(apiKey, wordStorage: wordStorage, packStorage: packStorage,
-				client: client, defaultSpeaker: defaultSpeaker,
+            body: new CardEditor(wordStorage: wordStorage, packStorage: packStorage,
+				provider: provider, defaultSpeaker: defaultSpeaker,
 				pack: pack, wordId: wordId, 
 				afterSave: (_, StoredPack pack, bool cardWasAdded) => 
 					Router.goToCardList(context, pack: pack, cardWasAdded: cardWasAdded))

@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:language_cards/src/models/language.dart';
 import './blocs/settings_bloc.dart';
+import './data/asset_dictionary_provider.dart';
 import './data/configuration.dart';
 import './models/user_params.dart';
 import './router.dart';
@@ -109,16 +110,19 @@ class _ThemedAppState extends State<_ThemedApp> {
 	Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
         final params = route.params;
         return _wrapWithParamsGetter(context, 
-			(data) => new CardScreen(data.dictionary.apiKey, 
+			(data) => new CardScreen(
+				provider: new AssetDictionaryProvider(context), 
                 wordStorage: params.storage, packStorage: params.packStorage,
-                wordId: params.wordId, pack: params.pack));
+                wordId: params.wordId, pack: params.pack
+			));
     }
 
 	Widget _buildStudyScreen(BuildContext context, StudyModeRoute route) {
         final params = route.params;
         return _wrapWithParamsGetter(context, 
-            (data) => new StudyScreen(data.dictionary.apiKey, 
-				params.storage, packStorage: params.packStorage, packs: params.packs, 
+            (data) => new StudyScreen(
+				params.storage, provider: new AssetDictionaryProvider(context),
+				packStorage: params.packStorage, packs: params.packs, 
 				studyStageIds: params.studyStageIds));
     }
 

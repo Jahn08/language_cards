@@ -1,9 +1,8 @@
-import 'package:http/http.dart';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
-import '../data/web_dictionary_provider.dart';
 import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/pack_selector_dialog.dart';
@@ -27,8 +26,6 @@ class CardEditorState extends State<CardEditor> {
 
     final FocusNode _transcriptionFocusNode = new FocusNode();
 
-    final Client _client;
-
     Future<List<StoredPack>> _futurePacks;
     StoredPack _pack;
 
@@ -46,10 +43,6 @@ class CardEditorState extends State<CardEditor> {
 	Map<String, PresentableEnum> _partOfSpeechDic;
 
     Future<StoredWord> futureWord;
-
-    CardEditorState([Client client]): 
-        this._client = client,
-        super();
 
     @override
     void initState() {
@@ -69,11 +62,7 @@ class CardEditorState extends State<CardEditor> {
 
         _disposeDictionary();
         _dictionary = _isNonePack ? null: 
-            new WordDictionary(
-				new WebDictionaryProvider(widget._apiKey, client: _client),
-				from: _pack.from, 
-				to: _pack.to
-			);
+            new WordDictionary(widget._provider, from: _pack.from, to: _pack.to);
 
         if (_dictionary == null)
             WidgetsBinding.instance.addPostFrameCallback(
@@ -261,15 +250,11 @@ class CardEditorState extends State<CardEditor> {
     dispose() {
         _disposeDictionary();
 
-        _client?.close();
-
         super.dispose();
     }
 }
 
 class CardEditor extends StatefulWidget {
-
-    final String _apiKey;
 
     final StoredWord card;
 
@@ -277,7 +262,7 @@ class CardEditor extends StatefulWidget {
     
     final StoredPack pack;
 
-    final Client _client;
+    final DictionaryProvider _provider;
 
     final ISpeaker _defaultSpeaker;
 
@@ -289,17 +274,16 @@ class CardEditor extends StatefulWidget {
 
 	final bool hideNonePack;
 
-    CardEditor(String apiKey, { @required BaseStorage<StoredWord> wordStorage, 
+    CardEditor({ @required BaseStorage<StoredWord> wordStorage, 
         @required BaseStorage<StoredPack> packStorage, @required this.afterSave,
-		Client client, ISpeaker defaultSpeaker, int wordId, 
+		@required DictionaryProvider provider, ISpeaker defaultSpeaker, int wordId, 
 		this.pack, this.card, this.hideNonePack }): 
-        _apiKey = apiKey,
-        _client = client,
+        _provider = provider,
         _defaultSpeaker = defaultSpeaker,
         _packStorage = packStorage,
         _wordStorage = wordStorage,
 		wordId = card?.id ?? wordId;
 
     @override
-    CardEditorState createState() => new CardEditorState(_client);
+    CardEditorState createState() => new CardEditorState();
 }

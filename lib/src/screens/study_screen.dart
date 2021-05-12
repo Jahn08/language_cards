@@ -1,7 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:http/http.dart';
+import 'package:language_cards/src/data/dictionary_provider.dart';
 import '../router.dart';
 import '../blocs/settings_bloc.dart';
 import '../data/pack_storage.dart';
@@ -22,13 +22,11 @@ import '../widgets/translation_indicator.dart';
 
 class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPack>> {
 
-	final String apiKey;
-
 	final StoredWord card;
     
     final StoredPack pack;
 
-    final Client client;
+    final DictionaryProvider provider;
 
     final ISpeaker defaultSpeaker;
 
@@ -36,9 +34,9 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 
     final BaseStorage<StoredPack> packStorage;
 
-	_CardEditorDialog({ @required this.apiKey, @required this.card, @required this.pack, 
+	_CardEditorDialog({ @required this.card, @required this.pack, 
 		@required this.wordStorage, @required this.packStorage,
-		this.client, this.defaultSpeaker }): 
+		this.provider, this.defaultSpeaker }): 
 		super();
 
 	Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) {
@@ -47,8 +45,8 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
             context: context, 
             builder: (buildContext) => new SimpleDialog(
 				children: [
-					new CardEditor(apiKey, card: card, pack: pack, 
-						client: client, defaultSpeaker: defaultSpeaker,
+					new CardEditor(card: card, pack: pack, 
+						provider: provider, defaultSpeaker: defaultSpeaker,
 						wordStorage: wordStorage, packStorage: packStorage,
 						hideNonePack: true, 
 						afterSave: (card, pack, _) {
@@ -142,10 +140,9 @@ class _StudyScreenState extends State<StudyScreen> {
 							onPressed: () async {
 								final curCard = _cards[_curCardIndex];
 								final updatedPackedCard = await new _CardEditorDialog(
-									apiKey: widget.apiKey,
 									card: curCard,
 									pack: _packMap[curCard.packId],
-									client: widget.client,
+									provider: widget.provider,
 									defaultSpeaker: widget.defaultSpeaker,
 									wordStorage: widget.storage,
 									packStorage: widget.packStorage
@@ -381,8 +378,6 @@ class _StudyScreenState extends State<StudyScreen> {
 
 class StudyScreen extends StatefulWidget {
     
-	final String apiKey;
-
     final WordStorage storage;
 
     final BaseStorage<StoredPack> packStorage;
@@ -391,13 +386,14 @@ class StudyScreen extends StatefulWidget {
 
     final List<int> studyStageIds;
 
-    final Client client;
+    final DictionaryProvider provider;
 
     final ISpeaker defaultSpeaker;
 
-    StudyScreen(this.apiKey, this.storage, 
-		{ @required this.packs, @required this.packStorage, this.studyStageIds, 
-		this.client, this.defaultSpeaker });
+    StudyScreen(this.storage, { 
+		@required this.packs, @required this.packStorage, @required this.provider,
+		this.studyStageIds, this.defaultSpeaker 
+	});
 
     @override
     _StudyScreenState createState() => new _StudyScreenState();
