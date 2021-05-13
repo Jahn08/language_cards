@@ -60,7 +60,8 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 		return new ExpansionPanelList(
 			children: [
 				_buildSettingPanel(locale, 0, bloc),
-				_buildContactsPanel(locale, 1),
+				if (widget.params != null) 
+					_buildContactsPanel(locale, 1),
 				_buildHelpPanel(locale, 2)
 			],
 			expansionCallback: (panelIndex, isExpanded) {
@@ -339,7 +340,8 @@ class BarScaffold extends Scaffold {
 			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
 			barActions: barActions,
-			onNavGoingBack: onNavGoingBack
+			onNavGoingBack: onNavGoingBack,
+			hasSettings: true
 		);
 
     BarScaffold._(String title, { 
@@ -348,13 +350,14 @@ class BarScaffold extends Scaffold {
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
 		ContactsParams contactsParams,
+		bool hasSettings = false,
         void Function() onNavGoingBack
     }): super(
-        drawer: contactsParams == null ? null: new _SettingsPanel(contactsParams), 
+        drawer: hasSettings ? new _SettingsPanel(contactsParams): null, 
         appBar: _buildAppBar(
 			new OneLineText(title, textScaleFactor: 0.85),
 			actions: barActions, onGoingBack: onNavGoingBack, 
-			showSettings: contactsParams != null
+			showSettings: hasSettings
 		),
         body: body,
         bottomNavigationBar: bottomBar,

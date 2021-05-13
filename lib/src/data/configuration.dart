@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:sentry/sentry.dart';
 import 'dart:convert'show jsonDecode;
 import '../models/app_params.dart';
 import '../data/asset_reader.dart';
@@ -9,10 +10,19 @@ class Configuration {
     static AppParams _params;
 
     static Future<AppParams> getParams(BuildContext context, { bool reload: true }) async {
-        if (_params == null || reload)
-            await _load(context);
+        try {
+			if (_params == null || reload)
+            	await _load(context);
 
-        return _params;
+        	return _params;
+		} catch (exception, stackTrace) {
+			await Sentry.captureException(
+				exception,
+				stackTrace: stackTrace,
+			);
+
+			return new AppParams();
+		}
     }
 
     static _load(BuildContext context) async {
@@ -25,7 +35,6 @@ class Configuration {
         final secretConfig = _filterConfigs(configs, isSecret: true);
         final config = _filterConfigs(configs, isSecret: false);
 
-        // TODO: Process the error further
         if (config == null)
             throw new StateError('No proper configuration has been found in the assets');
 

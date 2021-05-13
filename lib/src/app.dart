@@ -98,32 +98,25 @@ class _ThemedAppState extends State<_ThemedApp> {
             );
         } 
 
-    Widget _buildMainScreen(BuildContext context) =>
-		_wrapWithParamsGetter(context, (data) => new MainScreen(data.contacts));
-
-	Widget _wrapWithParamsGetter(BuildContext context, 
-		Widget Function(AppParams data) dataWidgetBuilder) {
+	Widget _buildMainScreen(BuildContext context) {
 		return new FutureLoader(Configuration.getParams(context), 
-			dataWidgetBuilder);
+			(data) => new MainScreen(data?.contacts));
 	}
     
 	Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
         final params = route.params;
-        return _wrapWithParamsGetter(context, 
-			(data) => new CardScreen(
-				provider: new AssetDictionaryProvider(context), 
-                wordStorage: params.storage, packStorage: params.packStorage,
-                wordId: params.wordId, pack: params.pack
-			));
+        return new CardScreen(
+			provider: new AssetDictionaryProvider(context), 
+			wordStorage: params.storage, packStorage: params.packStorage,
+			wordId: params.wordId, pack: params.pack);
     }
 
 	Widget _buildStudyScreen(BuildContext context, StudyModeRoute route) {
         final params = route.params;
-        return _wrapWithParamsGetter(context, 
-            (data) => new StudyScreen(
-				params.storage, provider: new AssetDictionaryProvider(context),
-				packStorage: params.packStorage, packs: params.packs, 
-				studyStageIds: params.studyStageIds));
+        return new StudyScreen(
+			params.storage, provider: new AssetDictionaryProvider(context),
+			packStorage: params.packStorage, packs: params.packs, 
+			studyStageIds: params.studyStageIds);
     }
 
     @override
