@@ -1,0 +1,17 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "language_cards",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--dart-define",
+                "SENTRY_DSN=https://2b7cd6e6aeee40b095a8fb51bc0c4d50@o658654.ingest.sentry.io/5763758"
+            ]
+        }
+    ]
+}
