@@ -28,21 +28,12 @@ class DbProvider {
     }
 
     Future<T> _perform<T>(String tableName, Future<T> Function() action) async {
-        try {
-            if (!_tableEntities.any((e) => e.tableName == tableName))
-                throw new Exception('The table "$tableName" is not in the list of entities');
+		if (!_tableEntities.any((e) => e.tableName == tableName))
+			throw new Exception('The table "$tableName" is not on the list of entities');
 
-            await _init();
-            return action();
-        }
-        catch (ex, stack) {
-            _printError('running a database script', ex, stack);
-            rethrow;
-        }
+		await _init();
+		return action();
     }
-
-    void _printError(String actionName, dynamic ex, StackTrace stack) => 
-        print('An error while $actionName: ${ex.toString()}\nStack: ${stack.toString()}');
 
     Future<void> _init() async {
         if (_db != null)
@@ -55,16 +46,10 @@ class DbProvider {
             version: 4,
 			onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
             onUpgrade: (newDb, _, __) async {
-                try {
-                    final creationClauses = _compileCreationClauses(_tableEntities);
-                    final creationClausesLength = creationClauses.length;
-                    for (int i = 0; i < creationClausesLength; ++i)
-                        await newDb.execute(creationClauses[i]);
-                }
-                catch (ex, stack) {
-                    _printError('creating a database', ex, stack);
-                    rethrow;
-                }
+				final creationClauses = _compileCreationClauses(_tableEntities);
+				final creationClausesLength = creationClauses.length;
+				for (int i = 0; i < creationClausesLength; ++i)
+					await newDb.execute(creationClauses[i]);
             });
     }
 

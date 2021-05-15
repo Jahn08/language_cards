@@ -8,7 +8,7 @@ abstract class Link {
 
 	Future<void> activate() async {
 		if (!(await canLaunch(url)))
-			throw new Exception();
+			throw new Exception('A link with the $url URL cannot be launched');
 
 		await launch(url);
 	}
