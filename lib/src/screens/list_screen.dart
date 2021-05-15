@@ -252,7 +252,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	Icon get _deleteIcon => new Icon(Icons.delete);
 
 	@protected
-	void clearItemsMarkedIneditor() => _itemsMarkedInEditor.clear();
+	void clearItemsMarkedInEditor() => _itemsMarkedInEditor.clear();
 
     void _showItemRemovalInfoSnackBar({ 
 		@required BuildContext scaffoldContext, @required String message, 

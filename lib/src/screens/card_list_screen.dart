@@ -115,7 +115,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					)
 				));
 			
-				super.clearItemsMarkedIneditor();
+				super.clearItemsMarkedInEditor();
 			}
         ));
     }
