@@ -66,7 +66,9 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 								type: FileType.custom,
 								withData: true
 							);
-
+							if (fileResult == null)
+								return;
+								
 							final filePath = fileResult.paths.firstWhere(
 								(_) => true, orElse: () => null);
 							setState(() => _importFilePath = filePath);
@@ -113,12 +115,15 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
 				buildCancelBtn(context, null),
 				(filePath) async {
 					Map<StoredPack, List<StoredWord>> outcome;
+					
+					final locale = AppLocalizations.of(context);
 					try {
-						outcome = await new PackImporter(packStorage, cardStorage).import(filePath);
+						outcome = await new PackImporter(packStorage, cardStorage, locale)
+							.import(filePath);
 					}
-					on ImportException catch (ex) {
+					catch (ex) {
 						if (!Platform.environment.containsKey('FLUTTER_TEST'))
-							print(ex.toString());
+							rethrow;
 					}
 
 					returnResult(context, new ImportDialogResult(filePath, outcome));

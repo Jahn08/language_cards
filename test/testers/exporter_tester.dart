@@ -7,6 +7,7 @@ import 'package:language_cards/src/utilities/pack_importer.dart';
 import 'package:language_cards/src/utilities/path.dart';
 import 'package:path_provider/path_provider.dart';
 import '../mocks/pack_storage_mock.dart';
+import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 
 class ExporterTester {
@@ -82,8 +83,8 @@ class ExporterTester {
 	Future<void> assertImport(
 		PackStorageMock packStorage, List<StoredPack> originalPacks
 	) async {
-		final imports = await new PackImporter(packStorage, packStorage.wordStorage)
-			.import(exportFilePath);
+		final imports = await new PackImporter(packStorage, packStorage.wordStorage, 
+			Localizator.defaultLocalization).import(exportFilePath);
 		expect(imports == null, false);
 		expect(imports.length, originalPacks.length);
 

@@ -299,6 +299,20 @@
     "importDialogFileSelectorBtnLabel": "Choose File",
     "@importDialogFileSelectorBtnLabel": {},
 
+    "importExportWarningDialogTitle": "Import/Export Failure",
+    "@importExportWarningDialogTitle": {},
+    "packImporterImportExceptionContent": "A failure while reading an import file '{filePath}': {error}",
+    "@packImporterImportExceptionContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+
     "languageEnglishName": "English",
     "@languageEnglishName": {},
     "languageRussianName": "Russian",

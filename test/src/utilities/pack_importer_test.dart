@@ -4,6 +4,7 @@ import 'package:language_cards/src/utilities/pack_importer.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../testers/exporter_tester.dart';
 import '../../utilities/fake_path_provider_platform.dart';
+import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
 main() {
@@ -34,8 +35,8 @@ main() {
 
 	test('Imports nothing from a non-existent file', () async {
 		final packStorage = new PackStorageMock();
-		final outcome = await new PackImporter(packStorage, packStorage.wordStorage)
-			.import(Randomiser.nextString());
+		final outcome = await new PackImporter(packStorage, packStorage.wordStorage, 
+			Localizator.defaultLocalization).import(Randomiser.nextString());
 		expect(outcome, null);
 	});
 
@@ -48,8 +49,8 @@ main() {
 			
 			try {
 				final packStorage = new PackStorageMock();
-				await new PackImporter(packStorage, packStorage.wordStorage)
-					.import(filePath);
+				await new PackImporter(packStorage, packStorage.wordStorage, 
+					Localizator.defaultLocalization).import(filePath);
 				fail('The $PackImporter should have failed');
 			}
 			on ImportException catch (ex) {

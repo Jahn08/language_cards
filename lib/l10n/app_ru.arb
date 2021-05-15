@@ -298,6 +298,21 @@
     "@importDialogFileNameTextFieldValidationError": {},
     "importDialogFileSelectorBtnLabel": "Выбрать файл",
     "@importDialogFileSelectorBtnLabel": {},
+    
+    "importExportWarningDialogTitle": "Ошибка импорта/экспорта",
+    "@importExportWarningDialogTitle": {},
+    "packImporterImportExceptionContent": "В процессе импорта файла '{filePath}' произошла ошибка: {error}",
+    "@packImporterImportExceptionContent": {
+        "placeholders": {
+            "filePath": {
+                "type": "String"
+            },
+            "error": {
+                "type": "String"
+            }
+        }
+    },
+
 
     "languageEnglishName": "Английский",
     "@languageEnglishName": {},

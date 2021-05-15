@@ -94,37 +94,47 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 				locale.packListScreenBottomNavBarExportActionLabel,
             icon: new Icon(Icons.import_export),
 			onPressed: () async {
-				if (markedItems.isEmpty) {
-					final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
-						.show(scaffoldContext);
+				try {
+					if (markedItems.isEmpty) {
+						final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
+							.show(scaffoldContext);
 
-					if (outcome == null)
-						return true;
-					else if (outcome.packsWithCards == null) {
+						if (outcome == null)
+							return true;
+						else if (outcome.packsWithCards == null) {
+							await new ConfirmDialog.ok(
+								title: locale.packListScreenImportDialogTitle,
+								content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
+							).show(scaffoldContext);
+							return true;
+						}
+
+						final packsWithCards = outcome.packsWithCards;
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenImportDialogTitle,
-							content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
+							content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
+								packsWithCards.values.expand((c) => c).length, outcome.filePath)
 						).show(scaffoldContext);
-						return true;
+
+						super.refetchItems(isForceful: true, shouldInitIndices: true);
 					}
+					else {
+						final exportFilePath = await new PackExporter(widget.cardStorage)
+							.export(markedItems.toList(), 'packs');
 
-					final packsWithCards = outcome.packsWithCards;
-					await new ConfirmDialog.ok(
-						title: locale.packListScreenImportDialogTitle,
-						content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
-							packsWithCards.values.expand((c) => c).length, outcome.filePath)
-					).show(scaffoldContext);
-
-					super.refetchItems(isForceful: true, shouldInitIndices: true);
+						await new ConfirmDialog.ok(
+							title: locale.packListScreenExportDialogTitle,
+							content: locale.packListScreenExportDialogContent(exportFilePath)
+						).show(scaffoldContext);
+					}
 				}
-				else {
-					final exportFilePath = await new PackExporter(widget.cardStorage)
-						.export(markedItems.toList(), 'packs');
-
+				catch (error) {
 					await new ConfirmDialog.ok(
-						title: locale.packListScreenExportDialogTitle,
-						content: locale.packListScreenExportDialogContent(exportFilePath)
-					).show(scaffoldContext);
+						title: locale.importExportWarningDialogTitle, 
+						content: error.toString()
+					).show(context);
+
+					rethrow;
 				}
 
 				super.clearItemsMarkedIneditor();

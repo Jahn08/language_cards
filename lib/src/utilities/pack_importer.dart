@@ -1,21 +1,26 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:flutter/widgets.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'string_ext.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 
-class ImportException {
+class ImportException implements Exception {
 	
 	final String importFilePath;
 
 	final StackTrace trace;
 
-	final Error error;
+	final Object error;
 
-	ImportException(this.importFilePath, this.error, this.trace);
+	final AppLocalizations locale;
 
-	toString() => 'A failure while reading an import file "$importFilePath": ${error.toString()}; ' +
-		'stack trace: ${trace.toString()}';
+	ImportException(this.error, this.trace, {
+		@required this.locale, @required this.importFilePath
+	});
+
+	toString() => locale.packImporterImportExceptionContent(importFilePath, error.toString());
 }
 
 class PackImporter {
@@ -23,8 +28,10 @@ class PackImporter {
 	final BaseStorage<StoredPack> packStorage;
 	
 	final BaseStorage<StoredWord> cardStorage;
+
+	final AppLocalizations locale;
 	
-	PackImporter(this.packStorage, this.cardStorage);
+	PackImporter(this.packStorage, this.cardStorage, this.locale);
 
 	Future<Map<StoredPack, List<StoredWord>>> import(String importFilePath) async {
 		try {
@@ -35,7 +42,7 @@ class PackImporter {
 
 			if (!file.existsSync())
 				return null;
-
+			
 			final packObjs = jsonDecode(file.readAsStringSync()) as List<dynamic>;
 			final importedPackedCards = <StoredPack, List<StoredWord>>{};
 			for (final pObj in packObjs) {
@@ -55,7 +62,8 @@ class PackImporter {
 			return importedPackedCards;
 		}
 		catch (ex, stackTrace) {
-			throw new ImportException(importFilePath, ex, stackTrace);
+			throw new ImportException(ex, stackTrace, 
+				importFilePath: importFilePath, locale: locale);
 		}
 	}
 }
