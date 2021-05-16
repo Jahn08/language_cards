@@ -136,8 +136,6 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
 					rethrow;
 				}
-
-				super.clearItemsMarkedInEditor();
 			}
         ));
     }
