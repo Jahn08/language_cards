@@ -187,7 +187,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
     Finder _assureSelectionForAllTilesInEditor(WidgetTester tester, [bool selected = false]) {
         final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
         final tiles = tester.widgetList<CheckboxListTile>(tilesFinder);
-        expect(tiles.every((w) => w.value), selected);
+        expect(tiles.where((w) => w.onChanged != null).every((w) => w.value), selected);
 
         return tilesFinder;
     }
@@ -257,8 +257,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
     Future<Map<int, String>> selectSomeItemsInEditor(WidgetAssistant assistant, [int chosenIndex]) 
         async {
-            final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
-            
+            final tilesFinder = find.byWidgetPredicate((w) => 
+				w is CheckboxListTile && w.onChanged != null);
+            expect(tilesFinder, findsWidgets);
+
 			final tester = assistant.tester;
 			final removableItemsLength = tester.widgetList(tilesFinder).length;
 			final lastTileIndex = removableItemsLength - 1;

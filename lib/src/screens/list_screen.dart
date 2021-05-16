@@ -348,20 +348,20 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildCheckListItem(BuildContext buildContext, int itemIndex) {
         final item = _items[itemIndex];
-        
-        return new UnderlinedContainer(isRemovableItem(item) ? new CheckboxListTile(
+        return new UnderlinedContainer(new CheckboxListTile(
             value: _itemsMarkedInEditor.containsKey(item.id),
-            onChanged: (isChecked) {
+            onChanged: isRemovableItem(item) ? (isChecked) {
                 setState(() {
                     if (isChecked)
                         _itemsMarkedInEditor[item.id] = new _CachedItem(item, itemIndex);
                     else
                         _itemsMarkedInEditor.remove(item.id);
                 });
-            },
+            }: null,
+			secondary: getItemLeading(item),
             title: getItemTitle(item),
             subtitle: getItemSubtitle(item, forCheckbox: true)
-        ) : _buildListTile(buildContext, item, isReadonly: true));
+        ));
     }
 	
     @protected
@@ -376,13 +376,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     Widget getItemSubtitle(TItem item, { bool forCheckbox });
 
-    Widget _buildListTile(BuildContext buildContext, TItem item, 
-        { bool isReadonly = false }) => new ListTile(
+    Widget _buildListTile(BuildContext buildContext, TItem item) => 
+		new ListTile(
             leading: getItemLeading(item),
             title: getItemTitle(item),
             trailing: getItemTrailing(item),
             subtitle: getItemSubtitle(item),
-            onTap: () => isReadonly ? null: onGoingToItem(buildContext, item)
+            onTap: () => onGoingToItem(buildContext, item)
         );
 
     Widget _buildDismissibleListItem(
