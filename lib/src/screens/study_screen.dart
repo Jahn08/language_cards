@@ -298,48 +298,51 @@ class _StudyScreenState extends State<StudyScreen> {
 
     Widget _buildButtonPanel(StoredWord card, AppLocalizations locale, Size screenSize) {
 		
-		return new GridView.count(
-            crossAxisCount: 2,
-            crossAxisSpacing: 10,
-            mainAxisSpacing: 10,
-            shrinkWrap: true,
-            childAspectRatio: screenSize.width / (screenSize.height / 5.25),
-            padding: EdgeInsets.all(5),
-            children: [
-                new ElevatedButton(
-                    child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
-                    onPressed: () async {
-                        if (card.incrementProgress())
-                            await widget.storage.upsert([card]);
+		return new OrientationBuilder(builder: (_, orientation) {
+			final ratio = orientation == Orientation.landscape ? 6.25: 5.25;
+			return new GridView.count(
+				crossAxisCount: 2,
+				crossAxisSpacing: 10,
+				mainAxisSpacing: 10,
+				shrinkWrap: true,
+				childAspectRatio: screenSize.width / (screenSize.height / ratio),
+				padding: EdgeInsets.all(5),
+				children: [
+					new ElevatedButton(
+						child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
+						onPressed: () async {
+							if (card.incrementProgress())
+								await widget.storage.upsert([card]);
 
-                        _setNextCard();
-                    }
-                ),
-                new ElevatedButton(
-                    child: _buildCenteredBigText(locale.studyScreenNextCardButtonLabel),
-                    onPressed: _setNextCard
-                ),
-                new ElevatedButton(
-                    child: _buildCenteredBigText(locale.studyScreenSortingCardButtonLabel(
-						_studyDirection.present(locale)
-					)),
-                    onPressed: () =>
-                        setState(() {
-                            _shouldReorderCards = true;
-                            _studyDirection = _nextValue(StudyDirection.values, _studyDirection);
-                        })
-                ),
-                new ElevatedButton(
-                    child: _buildCenteredBigText(locale.studyScreenCardSideButtonLabel(
-						_cardSide.present(locale)
-					)),
-                    onPressed: () =>
-                        setState(() {
-                            _cardSide = _nextValue(CardSide.values, _cardSide);
-                        })
-                )
-            ]
-        );
+							_setNextCard();
+						}
+					),
+					new ElevatedButton(
+						child: _buildCenteredBigText(locale.studyScreenNextCardButtonLabel),
+						onPressed: _setNextCard
+					),
+					new ElevatedButton(
+						child: _buildCenteredBigText(locale.studyScreenSortingCardButtonLabel(
+							_studyDirection.present(locale)
+						)),
+						onPressed: () =>
+							setState(() {
+								_shouldReorderCards = true;
+								_studyDirection = _nextValue(StudyDirection.values, _studyDirection);
+							})
+					),
+					new ElevatedButton(
+						child: _buildCenteredBigText(locale.studyScreenCardSideButtonLabel(
+							_cardSide.present(locale)
+						)),
+						onPressed: () =>
+							setState(() {
+								_cardSide = _nextValue(CardSide.values, _cardSide);
+							})
+					)
+				]
+			);
+		});
     }
 
     void _setNextCard() => _controller.nextPage(curve: Curves.linear, 
