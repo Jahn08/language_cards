@@ -77,13 +77,14 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 			else
 				levels[key] = en.value;
 		});
-        levels[locale.studyPreparerScreenAllCardsCategoryName] = 
-            levels.values.reduce((res, el) => res + el);
 
+		final lvlEntries = levels.entries.toList()
+			..insert(0, new MapEntry(locale.studyPreparerScreenAllCardsCategoryName, 
+				levels.values.reduce((res, el) => res + el)));
         return new Scrollbar(
 			isAlwaysShown: true,
 			child: new ListView(
-				children: levels.entries.map((lvl) {
+				children: lvlEntries.map((lvl) {
 					final isEnabled = lvl.value > 2;
 					return new ListTile(
 						title: new Text(lvl.key), 
