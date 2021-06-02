@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'popup_text_field.dart';
 import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
@@ -43,6 +44,9 @@ class CardEditorState extends State<CardEditor> {
 	Map<String, PresentableEnum> _partOfSpeechDic;
 
     Future<StoredWord> futureWord;
+
+	List<String> _foundLemmas = [];
+	int _prevSearchedLemmaLength = 0;
 
     @override
     void initState() {
@@ -209,9 +213,26 @@ class CardEditorState extends State<CardEditor> {
         );
     }
 
-	Widget _buildCardTextField(AppLocalizations locale) =>
-		new StyledTextField(locale.cardEditorCardTextTextFieldLabel, 
+	Widget _buildCardTextField(AppLocalizations locale) {
+		return new PopupTextField(locale.cardEditorCardTextTextFieldLabel, 
 			isRequired: true, 
+			popupItemsBuilder: (value) async {
+				if (_dictionary == null || (value ?? '').trim().isEmpty)
+					return [];
+
+				final tilesNumber = _foundLemmas.length;
+				if (tilesNumber == 1 && _foundLemmas.contains(value))
+					return [];
+
+				if (tilesNumber > 0 && tilesNumber < WordDictionary.searcheableLemmaMaxNumber && 
+					_prevSearchedLemmaLength <= value.length) {
+						final lemmas = _foundLemmas.where((el) => el.contains(value)).toList();
+						return lemmas.length == 1 && lemmas.contains(value) ? []: lemmas;
+					}
+
+				_prevSearchedLemmaLength = value.length;
+				return (_foundLemmas = await _dictionary.searchForLemmas(value));
+			},
 			onChanged: (value, submitted) async {
 				if (!submitted || _dictionary == null) {
 					setState(() => _text = value);
@@ -223,7 +244,7 @@ class CardEditorState extends State<CardEditor> {
 
 				final article = await _dictionary.lookUp(value);
 				final chosenWord = await new WordSelectorDialog(context)
-					.show(article.words);
+					.show(article?.words);
 
 				String translation;
 				if (chosenWord != null)
@@ -245,6 +266,7 @@ class CardEditorState extends State<CardEditor> {
 						_translation = translation;
 				});
 			}, initialValue: this._text);
+	}
 
     @override
     dispose() {

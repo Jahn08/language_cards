@@ -18,6 +18,8 @@ class _StyledTextFieldState extends State<StyledTextField> {
     }
 
     _emitOnChangedEvent() {
+		widget.onFocusChanged?.call(_focusNode.hasFocus);
+
         if (!_focusNode.hasFocus && _isChanged)
             _emitOnChanged(_controller.text);
     }
@@ -41,12 +43,15 @@ class _StyledTextFieldState extends State<StyledTextField> {
         return new TextFormField(
             focusNode: _focusNode,
             readOnly: widget.readonly,
-            keyboardType: TextInputType.text,
+            keyboardType: (widget.enableSuggestions ?? true) ? TextInputType.text: 
+				TextInputType.visiblePassword,
             decoration: new StyledInputDecoration(widget.label),
             autocorrect: true,
             onChanged: (val) {
                 _isChanged = true;
                 tempValue = val;
+
+				widget.onInput?.call(val);
             },
             onEditingComplete: () {
                 _emitOnChanged(tempValue, true);
@@ -88,13 +93,20 @@ class StyledTextField extends StatefulWidget {
 
     final Function(String, bool) _onChanged;
 
+    final Function(String) onInput;
+
+    final Function(bool) onFocusChanged;
+
     final String initialValue;
 
 	final String Function(String) validator;
 
+	final bool enableSuggestions;
+
     StyledTextField(this.label, { Key key, bool isRequired, 
         Function(String value, bool submitted) onChanged, bool readonly, 
-		this.initialValue, this.validator }): 
+		this.initialValue, this.validator, this.enableSuggestions, 
+		this.onInput, this.onFocusChanged }): 
         isRequired = isRequired ?? false,
         readonly = readonly ?? false,
         _onChanged = onChanged,

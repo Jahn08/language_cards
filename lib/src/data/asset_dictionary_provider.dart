@@ -22,17 +22,24 @@ class AssetDictionaryProvider extends DictionaryProvider {
 	@override
 	Future<AssetArticle> lookUp(String langParam, String text) async {
 		final key = text.toLowerCase();
-		var dic = _cache[langParam];
-		if (dic == null) {
-			dic = await _getDictionaryByLang(langParam);
-			if (dic == null)
-				return new AssetArticle(key, []);
-
-			_cache[langParam] = dic;
-		}
+		
+		var dic = await _getCachedDictionary(langParam);
+		if (dic == null)
+			return new AssetArticle(key, []);
 
 		final json = dic[key];
 		return new AssetArticle(key, json);
+	}
+
+	Future<Map<String, dynamic>> _getCachedDictionary(String langParam) async {
+		var dic = _cache[langParam];
+		if (dic == null) {
+			dic = await _getDictionaryByLang(langParam);
+			if (dic != null)
+				_cache[langParam] = dic;
+		}
+
+		return dic;
 	}
 
 	Future<Map<String, dynamic>> _getDictionaryByLang(String langParam) async {
@@ -54,6 +61,16 @@ class AssetDictionaryProvider extends DictionaryProvider {
 		}
 
 		return _dicNamesCache;
+	}
+	
+	@override
+	Future<Iterable<String>> searchForLemmas(String langParam, String text) async {
+		var dic = await _getCachedDictionary(langParam);
+		if (dic == null)
+			return [];
+
+		final key = text.toLowerCase();
+		return dic.keys.where((k) => k.startsWith(key));
 	}
 
   	@override

@@ -58,4 +58,7 @@ class WebDictionaryProvider extends DictionaryProvider {
 
 	@override
 	Article get defaultArticle => new Article.fromJson({});
+
+  	@override
+  	Future<Iterable<String>> searchForLemmas(String langParam, String text) => Future.value([]);
 }

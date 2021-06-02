@@ -12,6 +12,8 @@ abstract class DictionaryProvider {
 	BaseArticle get defaultArticle;
 
 	Future<BaseArticle> lookUp(String langParam, String text);
+	
+	Future<Iterable<String>> searchForLemmas(String langParam, String text);
 
 	void dispose();
 	
