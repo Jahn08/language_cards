@@ -35,26 +35,11 @@ class WordDictionary {
 			return null;
 
 		final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
-		if (await provider.isTranslationPossible(directLangPair))
-			return provider.lookUp(directLangPair, word);
 		
-		final enRepresentation = DictionaryProvider.representLanguage(Language.english);
-		final enArticle = await provider.lookUp(
-			DictionaryProvider.buildLangPair(_from, enRepresentation), word);
-
-		final destLangPair = DictionaryProvider.buildLangPair(enRepresentation, _to);
-
-		BaseArticle article;
-		for (final enTranslation in enArticle.words.expand((w) => w.translations)) {
-			final foundArticle = await provider.lookUp(destLangPair, enTranslation);
-
-			if (article == null)
-				article = foundArticle;
-			else
-				article = article.mergeWords(foundArticle);
-		}
-
-		return article?.mergeWordTexts(enArticle);
+		if (!await provider.isTranslationPossible(directLangPair))
+			return null;	
+			
+		return provider.lookUp(directLangPair, word);
     }
 
 	dispose() => provider?.dispose();

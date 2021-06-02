@@ -64,47 +64,11 @@ void main() {
             expect(url.queryParameters['text'], expectedWord);
         });
 
-	test('Returns a word article with an indirect translation', () async {
-		final fromItArticleJson = WordDictionaryTester.buildArticleJson();
-		final expectedFromItArticle = new Article.fromJson(fromItArticleJson);
-
-		final toFrArticleJson = WordDictionaryTester.buildArticleJson();
-		final expectedFrArticle = new Article.fromJson(toFrArticleJson);
-		
-		final wordToLookUp = expectedFromItArticle.words.first.text;
-		
-		final params = <Map<String, String>>[];
+	test('Returns null for a non-present language pair dictionary', () async {
 		final client = new MockClient((request) async {
 			if (!WordDictionaryTester.isLookUpRequest(request))
 				return HttpResponder.respondWithJson(WordDictionaryTester.buildAcceptedLanguagesResponse());
 
-			params.add(request.url.queryParameters);
-			return HttpResponder.respondWithJson(
-				params.length == 1 ? fromItArticleJson: toFrArticleJson);
-		});
-			
-        final article = await new WordDictionary(
-			new WebDictionaryProvider(Randomiser.nextString(), client: client),
-			from: Language.italian, 
-			to: Language.french
-		).lookUp(wordToLookUp);
-
-		expect(params.length, expectedFromItArticle.words.expand((w) => w.translations).length + 1);
-		expect(params.first.containsValue(
-			WordDictionaryTester.buildLangPair(Language.italian, Language.english)), true);
-		expect(params.skip(1).every((p) => p.containsValue(
-			WordDictionaryTester.buildLangPair(Language.english, Language.french))), true);
-
-		_assureWords(expectedFrArticle.mergeWordTexts(expectedFromItArticle), article.words);
-	});
-
-	test('Returns an empty word article for an indirect translation', () async {
-		final params = <Map<String, String>>[];
-		final client = new MockClient((request) async {
-			if (!WordDictionaryTester.isLookUpRequest(request))
-				return HttpResponder.respondWithJson(WordDictionaryTester.buildAcceptedLanguagesResponse());
-
-			params.add(request.url.queryParameters);
 			return HttpResponder.respondWithJson({});
 		});
 			
@@ -114,10 +78,6 @@ void main() {
 			to: Language.french
 		).lookUp(Randomiser.nextString());
 		expect(article, null);
-
-		expect(params.length, 1);
-		expect(params.first.containsValue(
-			WordDictionaryTester.buildLangPair(Language.italian, Language.english)), true);
 	});
 }
 
