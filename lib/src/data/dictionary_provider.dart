@@ -8,8 +8,6 @@ abstract class DictionaryProvider {
 	Future<bool> isTranslationPossible(String langParam) async {
 		return (await getAcceptedLanguages()).contains(langParam);
 	}
-	
-	BaseArticle get defaultArticle;
 
 	Future<BaseArticle> lookUp(String langParam, String text);
 	

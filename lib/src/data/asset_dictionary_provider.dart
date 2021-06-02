@@ -76,7 +76,4 @@ class AssetDictionaryProvider extends DictionaryProvider {
   	@override
   	Future<List<String>> getAcceptedLanguages() async => 
 		(await _getDicNames()).keys.toList();
-
-	@override
-	AssetArticle get defaultArticle => new AssetArticle('', []);
 }

@@ -54,7 +54,7 @@ class WordDictionary {
 				article = article.mergeWords(foundArticle);
 		}
 
-		return article?.mergeWordTexts(enArticle) ?? provider.defaultArticle;
+		return article?.mergeWordTexts(enArticle);
     }
 
 	dispose() => provider?.dispose();

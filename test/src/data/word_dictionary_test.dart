@@ -113,7 +113,7 @@ void main() {
 			from: Language.italian, 
 			to: Language.french
 		).lookUp(Randomiser.nextString());
-		expect(article.words.isEmpty, true);
+		expect(article, null);
 
 		expect(params.length, 1);
 		expect(params.first.containsValue(
