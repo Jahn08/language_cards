@@ -51,7 +51,7 @@ class AssetWord extends Word {
 
     AssetWord.fromJson(String text, Map<String, dynamic> json):
 		super(
-			text,
+			json['t'] ?? text,
 			transcription: json['s'], 
 			partOfSpeech: Word._lookUpPartOfSpeech(json['p']),
 			translations: (json['r'] as List).cast<String>()
