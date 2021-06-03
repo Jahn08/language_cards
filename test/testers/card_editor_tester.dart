@@ -52,8 +52,8 @@ class CardEditorTester {
 	static Finder findSaveButton() => 
 		AssuredFinder.findOne(type: ElevatedButton, label: 'Save', shouldFind: true);
 
-	Future<String> enterChangedText(String initialText) async {
-		final changedText = initialText.substring(1);
+	Future<String> enterChangedText(String initialText, { String changedText }) async {
+		changedText = changedText ?? initialText.substring(1);
 		await tester.enterText(find.widgetWithText(TextField, initialText), changedText);
 		
 		await new WidgetAssistant(tester).pumpAndAnimate();

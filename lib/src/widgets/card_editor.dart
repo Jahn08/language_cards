@@ -225,7 +225,7 @@ class CardEditorState extends State<CardEditor> {
 					return [];
 
 				if (tilesNumber > 0 && tilesNumber < WordDictionary.searcheableLemmaMaxNumber && 
-					_prevSearchedLemmaLength <= value.length) {
+					_prevSearchedLemmaLength > 0 && _prevSearchedLemmaLength <= value.length) {
 						final lemmas = _foundLemmas.where((el) => el.contains(value)).toList();
 						return lemmas.length == 1 && lemmas.contains(value) ? []: lemmas;
 					}

@@ -2,11 +2,14 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/web_dictionary_provider.dart';
+import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
+import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/speaker_mock.dart';
@@ -227,10 +230,99 @@ void main() {
     
     testWidgets('Turns on dictionaries and shows no warnings after choosing a pack',
         (tester) => _testChangingDictionaryState(tester, nullifyPack: false));
+		
+    testWidgets('Shows no popup initially when focusing on the word text field', (tester) async {
+		final dicProviderMock = new DictionaryProviderMock(
+			onSearchForLemmas: (text) => Randomiser.nextStringList());
+		final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+
+		await _focusTextField(new WidgetAssistant(tester), wordText);
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
+	
+	testWidgets('Shows no popup for a word without a pack', (tester) async {
+		final dicProviderMock = new DictionaryProviderMock(
+			onSearchForLemmas: (text) => Randomiser.nextStringList());
+		final wordText = (
+			await _displayWord(tester, provider: dicProviderMock, pack: StoredPack.none)
+		).text;
+		await new CardEditorTester(tester).enterChangedText(wordText);
+
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
+
+	testWidgets('Shows no popup when the text field is empty or made up of spaces', (tester) async {
+		final dicProviderMock = new DictionaryProviderMock(
+			onSearchForLemmas: (text) => Randomiser.nextStringList());
+		final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+		
+		final cardEditorTester = new CardEditorTester(tester);
+		final changedText = await cardEditorTester.enterChangedText(wordText, changedText: '   ');
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+		
+		await cardEditorTester.enterChangedText(changedText, changedText: '');
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
+
+	testWidgets('Shows no popup when there are no suggestions for a word', (tester) async {
+		final dicProviderMock = new DictionaryProviderMock(onSearchForLemmas: (text) => []);
+		final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+		await new CardEditorTester(tester).enterChangedText(wordText);
+
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
+
+	const lemmaLimit = WordDictionary.searcheableLemmaMaxNumber;
+    testWidgets('Suggests up to $lemmaLimit words to choose from a dictionary in a popup when editing the text field', 
+		(tester) async { 
+			final popupValues = Randomiser.nextStringList(
+				minLength: lemmaLimit + 2, 
+				maxLength: lemmaLimit + 5
+			);
+			final dicProviderMock = new DictionaryProviderMock(
+				onSearchForLemmas: (text) => popupValues);
+			
+			final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+			await new CardEditorTester(tester).enterChangedText(wordText);
+			
+			final foundTiles = tester.widgetList<ListTile>(
+				AssuredFinder.findSeveral(type: ListTile, shouldFind: true))
+				.map((t) => (t.title as Text).data).toList();
+			expect(foundTiles.length, lemmaLimit);
+			expect(popupValues.where((v) => foundTiles.contains(v)).length, lemmaLimit);
+		});
+
+	testWidgets('Closes the suggestion popup after opting for a word there and displays its chosen text', 
+		(tester) async { 
+			final dicProviderMock = new DictionaryProviderMock(
+				onSearchForLemmas: (text) => Randomiser.nextStringList());
+			final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+			await new CardEditorTester(tester).enterChangedText(wordText);
+			
+			final tileFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true).first;
+			final expectedText = (tester.widget<ListTile>(tileFinder).title as Text).data;
+
+			await new WidgetAssistant(tester).tapWidget(tileFinder.first);
+		
+			AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+			AssuredFinder.findOne(type: TextField, label: expectedText, shouldFind: true);
+		});
+
+	testWidgets('Closes the suggestion popup after the field gets unfocused', (tester) async { 
+		final dicProviderMock = new DictionaryProviderMock(
+			onSearchForLemmas: (text) => Randomiser.nextStringList());
+		final shownWord = (await _displayWordWithPack(tester, provider: dicProviderMock));
+		
+		await new CardEditorTester(tester).enterChangedText(shownWord.text);
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
+
+		await _focusTextField(new WidgetAssistant(tester), shownWord.translation);
+		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
 }
 
 Future<StoredWord> _displayWord(WidgetTester tester, { 
-		WebDictionaryProvider provider, 
+		DictionaryProvider provider, 
         PackStorageMock storage, StoredPack pack, 
         StoredWord wordToShow, SpeakerMock speaker,
 		bool shouldHideWarningDialog = true }) async {
@@ -271,8 +363,8 @@ Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValue
         final expectedChangedText = 
 			await new CardEditorTester(tester).enterChangedText(fieldValueToChange);
 
-        final refocusedFieldFinder = find.widgetWithText(TextField, fieldValueToRefocus);
-        await new WidgetAssistant(tester).tapWidget(refocusedFieldFinder);
+        final refocusedFieldFinder = await _focusTextField(
+			new WidgetAssistant(tester), fieldValueToRefocus);
 
         final initiallyFocusedFieldFinder = find.widgetWithText(TextField, expectedChangedText);
         expect(initiallyFocusedFieldFinder, findsOneWidget);
@@ -280,6 +372,12 @@ Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValue
         final refocusedField = tester.widget<TextField>(refocusedFieldFinder);
         expect(refocusedField.focusNode.hasFocus, true);
     }
+
+Future<Finder> _focusTextField(WidgetAssistant assistant, String textToFocus) async {
+	final refocusedFieldFinder = find.widgetWithText(TextField, textToFocus);
+	await assistant.tapWidget(refocusedFieldFinder);
+	return refocusedFieldFinder;
+}
 
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
@@ -402,7 +500,7 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
 				Randomiser.nextInt(PackStorageMock.namedPacksNumber)): null);
 		
 		await _changePack(tester, () => nullifyPack ? Future.value(StoredPack.none): 
-				_fetchAnotherPack(storage, wordToShow.packId));
+			_fetchAnotherPack(storage, wordToShow.packId));
 
 		await _assureWarningDialog(tester, nullifyPack);
 
@@ -410,3 +508,15 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
 
 		expect(dictionaryIsActive, !nullifyPack);
 	}
+
+Future<StoredWord> _displayWordWithPack(WidgetTester tester, { 
+	DictionaryProvider provider, PackStorageMock storage, StoredWord wordToShow, 
+	SpeakerMock speaker, bool shouldHideWarningDialog = true 
+}) {
+	storage = storage ?? new PackStorageMock();
+
+	return _displayWord(tester, provider: provider, storage: storage, 
+		pack: storage.getRandom(), 
+		wordToShow: wordToShow, speaker: speaker, 
+		shouldHideWarningDialog: shouldHideWarningDialog);
+}
