@@ -42,5 +42,9 @@ class WordDictionary {
 		return provider.lookUp(directLangPair, word);
     }
 
+	Future<bool> isTranslationPossible() =>
+		provider == null ? Future.value(false): 
+			provider.isTranslationPossible(DictionaryProvider.buildLangPair(_from, _to));
+
 	dispose() => provider?.dispose();
 }

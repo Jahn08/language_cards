@@ -489,7 +489,9 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
 	async {
 		bool dictionaryIsActive = false;
 		final client = new MockClient((request) async {
-			dictionaryIsActive = true;
+			if (WordDictionaryTester.isLookUpRequest(request))
+				dictionaryIsActive = true;
+			
 			return _respondWithEmptyResponse(request);
 		});
 		

@@ -3,11 +3,14 @@ import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../models/presentable_enum.dart';
 import '../consts.dart';
+import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
+import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../models/language.dart';
 import '../router.dart';
 import '../widgets/loader.dart';
+import '../widgets/no_translation_snack_bar.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/styled_dropdown.dart';
 import '../widgets/styled_text_field.dart';
@@ -71,12 +74,12 @@ class PackScreenState extends State<PackScreen> {
                     _cardsNumber = foundPack.cardsNumber;
                 }
 
-                return _buildFormLayout(locale);
+                return _buildFormLayout(context, locale);
             }
         );
     }
 
-    Widget _buildFormLayout(AppLocalizations locale) {
+    Widget _buildFormLayout(BuildContext buildContext, AppLocalizations locale) {
         final children = <Widget>[
             new StyledTextField(locale.packScreenPackNameTextFieldLabel,
                 isRequired: true, 
@@ -86,13 +89,19 @@ class PackScreenState extends State<PackScreen> {
                 isRequired: true,
                 label: locale.packScreenTranslationFromDropdownLabel,
                 initialValue: this._fromLang,
-                onChanged: (value) => setState(() => this._fromLang = value),
+                onChanged: (value) => setState(() {
+					this._fromLang = value;
+					_checkTranslationPossibility(buildContext, locale);	
+				}),
                 onValidate: (_) => _validateLanguages(locale)),
             new StyledDropdown(_languages.keys, 
                 isRequired: true,
                 label: locale.packScreenTranslationToDropdownLabel,
                 initialValue: this._toLang,
-                onChanged: (value) => setState(() => this._toLang = value),
+                onChanged: (value) => setState(() {
+					this._toLang = value;
+					_checkTranslationPossibility(buildContext, locale);	
+				}),
                 onValidate: (_) => _validateLanguages(locale))
         ];
 
@@ -122,6 +131,18 @@ class PackScreenState extends State<PackScreen> {
 
     String _validateLanguages(AppLocalizations locale) => _fromLang == _toLang ? 
         locale.packScreenSameTranslationDirectionsValidationError: null;
+
+	void _checkTranslationPossibility(BuildContext buildContext, AppLocalizations locale) {
+		if (_validateLanguages(locale) != null || 
+			(_fromLang?.isEmpty ?? true) || (_toLang?.isEmpty ?? true))
+			return;
+
+		new WordDictionary(widget._provider, from: _languages[_fromLang], 
+			to: _languages[_toLang]).isTranslationPossible().then((resp) {
+				if (!resp)
+					NoTranslationSnackBar.show(buildContext, locale);
+			});
+	}
 
     StoredPack _buildPack() => new StoredPack(this._name, 
         id: widget.packId,
@@ -154,9 +175,12 @@ class PackScreen extends StatefulWidget {
     
     final BaseStorage<StoredPack> _storage;
     
-    PackScreen(BaseStorage<StoredPack> storage, 
+    final DictionaryProvider _provider;
+
+    PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
         { this.packName, this.packId, this.refreshed = false }): 
-        _storage = storage;
+        _storage = storage,
+		_provider = provider;
 
     @override
     PackScreenState createState() {

@@ -10,6 +10,7 @@ import 'package:language_cards/src/models/app_params.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
+import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
@@ -283,8 +284,8 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
                 return new MaterialPageRoute(
                     settings: settings,
                     builder: (context) => new RootWidgetMock(
-                        child: new PackScreen(storage, packId: route.params.packId, 
-                            refreshed: route.params.refreshed))
+                        child: new PackScreen(storage, new DictionaryProviderMock(), 
+							packId: route.params.packId, refreshed: route.params.refreshed))
                 );
 
             return new MaterialPageRoute(

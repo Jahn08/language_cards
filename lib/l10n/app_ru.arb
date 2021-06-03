@@ -356,6 +356,9 @@
     "mainScreenWordPacksMenuItemLabel": "Наборы карточек",
     "@mainScreenWordPacksMenuItemLabel": {},
 
+    "noTranslationSnackBarInfo": "Автоматический перевод недоступен для выбранной пары языков",
+    "@noTranslationSnackBarInfo": {},
+
     "packListScreenRemovingNonEmptyPacksDialogTitle": "Удаление непустых наборов карточек",
     "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
     "packListScreenRemovingNonEmptyPacksDialogContent": "Все карточки из наборов {packNames} будут перенесены в набор '{nonePackName}'. Продолжить?",

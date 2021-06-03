@@ -355,6 +355,9 @@
     "mainScreenWordPacksMenuItemLabel": "Word Packs",
     "@mainScreenWordPacksMenuItemLabel": {},
 
+    "noTranslationSnackBarInfo": "No automatic translation is possible for the chosen language pair",
+    "@noTranslationSnackBarInfo": {},
+
     "packListScreenRemovingNonEmptyPacksDialogTitle": "Removing Packs with Cards",
     "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
     "packListScreenRemovingNonEmptyPacksDialogContent": "All the cards from {packNames} will be moved to the {nonePackName} pack. Continue?",

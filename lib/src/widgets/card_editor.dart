@@ -2,6 +2,14 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'popup_text_field.dart';
+import './english_phonetic_keyboard.dart';
+import './keyboarded_field.dart';
+import './loader.dart';
+import './no_translation_snack_bar.dart';
+import './one_line_text.dart';
+import './styled_dropdown.dart';
+import './styled_text_field.dart';
+import './speaker_button.dart';
 import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
 import '../data/word_dictionary.dart';
@@ -14,13 +22,6 @@ import '../models/part_of_speech.dart';
 import '../models/presentable_enum.dart';
 import '../models/word_study_stage.dart';
 import '../utilities/speaker.dart';
-import '../widgets/english_phonetic_keyboard.dart';
-import '../widgets/keyboarded_field.dart';
-import '../widgets/loader.dart';
-import '../widgets/one_line_text.dart';
-import '../widgets/styled_dropdown.dart';
-import '../widgets/styled_text_field.dart';
-import '../widgets/speaker_button.dart';
 
 class CardEditorState extends State<CardEditor> {
     final _key = new GlobalKey<FormState>();
@@ -69,8 +70,12 @@ class CardEditorState extends State<CardEditor> {
             new WordDictionary(widget._provider, from: _pack.from, to: _pack.to);
 
         if (_dictionary == null)
-            WidgetsBinding.instance.addPostFrameCallback(
-                (_) => _warnWhenEmptyDictionary(context));
+            WidgetsBinding.instance.addPostFrameCallback((_) => _warnWhenEmptyDictionary(context));
+		else
+			_dictionary.isTranslationPossible().then((resp) {
+				if (!resp)
+					NoTranslationSnackBar.show(context);
+			});
     }
 
     _disposeDictionary() => _dictionary?.dispose();

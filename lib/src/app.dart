@@ -65,6 +65,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                     else if (route is PackRoute) {
                         final params = route.params;
                         return new PackScreen(params.storage, 
+							new AssetDictionaryProvider(context),
                             packId: params.packId, packName: params.packName, 
                             refreshed: params.refreshed);
                     }
