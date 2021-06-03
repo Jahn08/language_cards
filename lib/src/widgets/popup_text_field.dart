@@ -35,7 +35,6 @@ class _PopupTextFieldState extends State<PopupTextField> {
 			link: this._layerLink,
 			child: StyledTextField(widget.label, 
 				isRequired: true, 
-				enableSuggestions: false,
 				onChanged: widget.onChanged,
 				onFocusChanged: (bool hasFocus) => _toggleOverlay(hasFocus),
 				onInput: (value) async {
