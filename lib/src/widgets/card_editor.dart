@@ -156,40 +156,37 @@ class CardEditorState extends State<CardEditor> {
 					isRequired: true, 
                     initialValue: this._translation, 
                     onChanged: (value, _) => setState(() => this._translation = value)),
-				new Container(
-					alignment: Alignment.centerLeft,
-					child: new TextButton.icon(
-						icon: new Icon(Icons.folder_open),
-						label: new Container(
-							width: MediaQuery.of(context).size.width * 0.6,
-							child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
-						),
-						onPressed: () async {
-							if (_futurePacks == null) {
-								_futurePacks = widget._packStorage.fetch();
-
-								if (widget.hideNonePack ?? false)
-									_futurePacks = _futurePacks.then(
-										(ps) => ps.where((p) => !p.isNone).toList());
-							}
-							
-							final chosenPack = await new PackSelectorDialog(context, _pack.id)
-								.showAsync(_futurePacks);
-
-							if (chosenPack != null && chosenPack.name != _pack.name)
-								setState(() => _setPack(chosenPack));
-						}
+				_buildBtnLink(new TextButton.icon(
+					icon: new Icon(Icons.folder_open),
+					label: new Container(
+						width: MediaQuery.of(context).size.width * 0.6,
+						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
 					),
-				),	
+					onPressed: () async {
+						if (_futurePacks == null) {
+							_futurePacks = widget._packStorage.fetch();
+
+							if (widget.hideNonePack ?? false)
+								_futurePacks = _futurePacks.then(
+									(ps) => ps.where((p) => !p.isNone).toList());
+						}
+						
+						final chosenPack = await new PackSelectorDialog(context, _pack.id)
+							.showAsync(_futurePacks);
+
+						if (chosenPack != null && chosenPack.name != _pack.name)
+							setState(() => _setPack(chosenPack));
+					}
+				)),	
                 if (this._studyProgress != WordStudyStage.unknown)
-                    new TextButton.icon(
-                        icon: new Icon(Icons.restore),
-                        label: new Text(
+					_buildBtnLink(new TextButton.icon(
+						icon: new Icon(Icons.restore),
+						label: new Text(
 							locale.cardEditorResettingStudyProgressButtonLabel(_studyProgress)
 						),
-                        onPressed: () =>  setState(
-                            () => this._studyProgress = WordStudyStage.unknown)
-                    ),
+						onPressed: () =>  setState(
+							() => this._studyProgress = WordStudyStage.unknown)
+					)),
                 new ElevatedButton(
                     child: new Text(locale.constsSavingItemButtonLabel),
                     onPressed: () async {
@@ -272,6 +269,9 @@ class CardEditorState extends State<CardEditor> {
 				});
 			}, initialValue: this._text);
 	}
+
+	Widget _buildBtnLink(Widget child) => 
+		new Container(alignment: Alignment.centerLeft, child: child);
 
     @override
     dispose() {
