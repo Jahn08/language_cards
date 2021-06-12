@@ -35,7 +35,8 @@ class _SliderScreenState extends State<_SliderScreen> {
 
 		if (_slides == null)
 			_slides = widget.slideNames.map((n) => 
-				new Image(image: new LocalAssetImage(n, localeName: locale.localeName))).toList();
+				new Image(image: new LocalAssetImage(n, 
+					localeName: locale.localeName, fileExtension: 'png'))).toList();
 
 		final scaffold = new BarScaffold('${widget.titleGetter(locale)}\n' + 
 				locale.helpScreenPageIndicator(_curPageIndex + 1, _slides.length), 

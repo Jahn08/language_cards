@@ -24,7 +24,7 @@ void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {
 			final loadedSlides = <String>[];
 			await _pumpScreen(tester, screenBuilder,
 				(key, data) {
-					if (data != null && key.endsWith('jpg'))
+					if (data != null && key.endsWith('png'))
 						loadedSlides.add(key);
 				});
 			
