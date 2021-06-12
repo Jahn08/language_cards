@@ -196,7 +196,7 @@
     "@helpCardScreenWordDictionarySlideDescription": {},
     "helpCardScreenWordTranslationSlideDescription": "After clicking on a chosen definition all proper translations should be opted. If there are too many items in the dialog then scrolling gets available@Card Translation",
     "@helpCardScreenWordTranslationSlideDescription": {},
-    "helpCardScreenSavingSlideDescription": "Clicking the {doneBtnLabel} button fills up the card fields with chosen values. The icon with 3 dots makes possible listening to the text. The {savingBtnLabel} button saves the card into its pack@Saving Card",
+    "helpCardScreenSavingSlideDescription": "Clicking the {doneBtnLabel} button fills up the card fields with chosen values. The icon with 3 dots makes it possible to listen to the text. The {savingBtnLabel} button saves the card into its pack@Saving Card",
     "@helpCardScreenSavingSlideDescription": {
         "placeholders": {
             "doneBtnLabel": {
@@ -270,7 +270,7 @@
             }
         }
     },
-    "helpStudyEditorSlideDescription": "Clicking on the pencil icon opens the editor dialog for a card, where it is possible to change its fields and pack. The icon with 3 dots makes possible listening to the text. The {savingBtnLabel} button saves all the changes and closes the dialog@Amending Card",
+    "helpStudyEditorSlideDescription": "Clicking on the pencil icon opens the editor dialog for a card, where it is possible to change its fields and pack or reset its study progress. The icon with 3 dots makes it possible to listen to the text. The {savingBtnLabel} button saves all the changes and closes the dialog@Amending Card",
     "@helpStudyEditorSlideDescription": {
         "placeholders": {
             "savingBtnLabel": {
