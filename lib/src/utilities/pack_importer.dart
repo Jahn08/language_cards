@@ -43,23 +43,23 @@ class PackImporter {
 			if (!file.existsSync())
 				return null;
 			
-			final packObjs = jsonDecode(file.readAsStringSync()) as List<dynamic>;
-			final importedPackedCards = <StoredPack, List<StoredWord>>{};
-			for (final pObj in packObjs) {
-				final packWithCardObjs = StoredPack.fromJsonMap(pObj);
-				final newPack = (await packStorage.upsert([packWithCardObjs.key])).first;
+			final packDic = new Map.fromEntries((jsonDecode(file.readAsStringSync()) as List<dynamic>)
+				.map<MapEntry<StoredPack, List<StoredWord>>>((pObj) {
+					final packWithCardObjs = StoredPack.fromJsonMap(pObj);
+					return new MapEntry(packWithCardObjs.key, 
+						packWithCardObjs.value.map((cObj) => StoredWord.fromDbMap(jsonDecode(cObj))).toList());
+				}));
 
-				final cards = packWithCardObjs.value.map((cObj) { 
-					final card = StoredWord.fromDbMap(jsonDecode(cObj));
-					card.packId = newPack.id;
-					return card;
-				}).toList();
+			final newPackDic = new Map.fromEntries(
+				(await packStorage.upsert(packDic.keys.toList())).map((p) => new MapEntry(p.name, p.id)));
+			await cardStorage.upsert(packDic.entries.map((e) {
+				e.value.forEach((c) { 
+					c.packId = newPackDic[e.key.name];
+				});
+				return e.value;
+			}).expand((cards) => cards).toList());
 
-				await cardStorage.upsert(cards);
-				importedPackedCards[newPack] = cards;
-			}
-
-			return importedPackedCards;
+			return packDic;
 		}
 		catch (ex, stackTrace) {
 			throw new ImportException(ex, stackTrace, 
