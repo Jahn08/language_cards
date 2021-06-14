@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import '../data/base_storage.dart';
+import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../utilities/pack_importer.dart';
@@ -122,6 +123,11 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
 							.import(filePath);
 					}
 					catch (ex) {
+						await new ConfirmDialog.ok(
+							title: locale.importExportWarningDialogTitle, 
+							content: locale.packListScreenImportDialogWrongFormatContent(filePath)
+						).show(context);
+
 						if (!Platform.environment.containsKey('FLUTTER_TEST'))
 							rethrow;
 					}
