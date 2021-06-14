@@ -19,7 +19,7 @@ main() {
             final packs = await _fetchNamedPacks(tester, storage);
             expect(_findCheckTiles(), findsNWidgets(packs.length));
             
-            await _assureCheckedTiles(tester, packs, (p, packTileFinder) {
+            await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
                 expect(find.descendant(
 					of: packTileFinder, 
                     matching: find.text(
@@ -45,12 +45,12 @@ main() {
 			);
             await widgetAssistant.tapWidget(selectorBtnFinder);
 
-            await _assureCheckedTiles(tester);
+            await _assureConsecutivelyCheckedTiles(tester);
             _assureCardNumbersForStudyLevels(studyPacks, []);
 
             await widgetAssistant.tapWidget(selectorBtnFinder);
             
-            await _assureCheckedTiles(tester, packs);
+            await _assureConsecutivelyCheckedTiles(tester, packs);
             _assureCardNumbersForStudyLevels(studyPacks);
         });
 
@@ -72,7 +72,7 @@ main() {
 
             final uncheckedPackIds = packsToUncheck.map((p) => p.id).toList();
             final checkedPacks = packs.where((p) => !uncheckedPackIds.contains(p.id)).toList();
-            await _assureCheckedTiles(tester, checkedPacks);
+            await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
             _assureCardNumbersForStudyLevels(studyPacks, 
                 checkedPacks.map((p) => p.id).toList());
 
@@ -81,7 +81,7 @@ main() {
             await assistant.tapWidget(packTileFinder);
 
             checkedPacks.add(packToCheck);
-            await _assureCheckedTiles(tester, checkedPacks);
+            await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
             _assureCardNumbersForStudyLevels(studyPacks, 
                 checkedPacks.map((p) => p.id).toList());
         });
@@ -113,7 +113,28 @@ Finder _findCheckTiles() {
 	return finder;
 }
 
-Future<void> _assureCheckedTiles(WidgetTester tester, 
+Future<void> _assureConsecutivelyCheckedTiles(WidgetTester tester, 
+    [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) async {
+
+    if (checkedPacks == null || checkedPacks.isEmpty) {
+		expect(tester.widgetList<CheckboxListTile>(_findCheckTiles()).every((t) => t.value), 
+            false);
+		return;
+	}
+        
+	final sortedPacks = _sortPacksByName(checkedPacks);
+
+	final checkTiles = _findCheckTiles();
+	int index = 0;
+	sortedPacks.forEach((p) { 
+		final packTileFinder = checkTiles.at(index++);
+		expect(tester.widget<CheckboxListTile>(packTileFinder).value, true);
+
+		tileChecker?.call(p, packTileFinder);
+	});
+}
+
+Future<void> _assureNonConsecutivelyCheckedTiles(WidgetTester tester, 
     [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) async {
 
     if (checkedPacks == null || checkedPacks.isEmpty) {

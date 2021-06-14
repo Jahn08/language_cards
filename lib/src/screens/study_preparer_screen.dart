@@ -12,7 +12,7 @@ import '../widgets/underlined_container.dart';
 
 class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
-    Future<List<StudyPack>> _futurePacks;
+	List<StudyPack> _packs;
 
     final List<int> _excludedPacks = [];
 
@@ -26,15 +26,19 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     @override
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
-		if (_futurePacks == null)
-        	_futurePacks = widget.storage.fetchStudyPacks();
 
-        return new FutureLoader<List<StudyPack>>(_futurePacks, 
-            (stPacks) => new BarScaffold(locale.studyPreparerScreenTitle,
-					barActions: <Widget>[_buildSelectorButton(stPacks, locale)],
+        return new FutureLoader<List<StudyPack>>(
+			_packs == null ? widget.storage.fetchStudyPacks(): Future.value(_packs), 
+            (stPacks) {
+				if (_packs == null)
+					_packs = stPacks..sort((a, b) => a.pack.name.compareTo(b.pack.name));
+
+				return new BarScaffold(locale.studyPreparerScreenTitle,
+					barActions: <Widget>[_buildSelectorButton(_packs, locale)],
 					onNavGoingBack: () => Router.goHome(context),
-					body: _buildLayout(stPacks, locale)
-            	));
+					body: _buildLayout(_packs, locale)
+				);
+			} );
     }
 
     Widget _buildSelectorButton(List<StudyPack> stPacks, AppLocalizations locale) {
