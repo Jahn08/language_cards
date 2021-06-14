@@ -47,7 +47,8 @@ class PackImporter {
 				.map<MapEntry<StoredPack, List<StoredWord>>>((pObj) {
 					final packWithCardObjs = StoredPack.fromJsonMap(pObj);
 					return new MapEntry(packWithCardObjs.key, 
-						packWithCardObjs.value.map((cObj) => StoredWord.fromDbMap(jsonDecode(cObj))).toList());
+						packWithCardObjs.value.map((cObj) => 
+							StoredWord.fromDbMap(cObj is String ? jsonDecode(cObj): cObj)).toList());
 				}));
 
 			final newPackDic = new Map.fromEntries(
