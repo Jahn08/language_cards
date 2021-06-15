@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/study_storage.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
+import '../utilities/styler.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/card_number_indicator.dart';
 import '../widgets/loader.dart';
@@ -14,14 +15,19 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
 	List<StudyPack> _packs;
 
+	bool _hasScrollNavigator = false;
+	bool _shouldScrollUpwards = false;
+
     final List<int> _excludedPacks = [];
 
     final ScrollController _scrollController = new ScrollController();
 
-    @override
-    void initState() {
-        super.initState();
-    }
+	@override
+	void dispose() {
+		_scrollController.dispose();
+
+		super.dispose();
+	}
 
     @override
     Widget build(BuildContext context) {
@@ -30,16 +36,49 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         return new FutureLoader<List<StudyPack>>(
 			_packs == null ? widget.storage.fetchStudyPacks(): Future.value(_packs), 
             (stPacks) {
-				if (_packs == null)
-					_packs = stPacks..sort((a, b) => a.pack.name.compareTo(b.pack.name));
+				_initPacks(stPacks);
 
 				return new BarScaffold(locale.studyPreparerScreenTitle,
 					barActions: <Widget>[_buildSelectorButton(_packs, locale)],
 					onNavGoingBack: () => Router.goHome(context),
-					body: _buildLayout(_packs, locale)
+					body: _buildLayout(_packs, locale),
+					floatingActionButton: _hasScrollNavigator ? new FloatingActionButton(
+						onPressed: () async {
+							final pos = _scrollController.position;
+							await _scrollController.animateTo(
+								_shouldScrollUpwards ? pos.minScrollExtent : pos.maxScrollExtent, 
+								duration: new Duration(milliseconds: 500),
+								curve: Curves.easeOut
+							);
+						},
+						child: new Icon(_shouldScrollUpwards ? Icons.arrow_upward_rounded: 
+							Icons.arrow_downward_rounded), 
+						mini: true,
+						tooltip: locale.listScreenAddingNewItemButtonTooltip,
+						backgroundColor: new Styler(context).floatingActionButtonColor
+					): null
 				);
 			} );
     }
+
+	void _initPacks(List<StudyPack> stPacks) {
+		if (_packs != null)
+			return;
+
+		_packs = stPacks..sort((a, b) => a.pack.name.compareTo(b.pack.name));
+		_hasScrollNavigator = _packs.length > 10;
+
+		if (_hasScrollNavigator)
+			_scrollController.addListener(() {
+				if (_shouldScrollUpwards == 
+					_scrollController.offset > (_scrollController.position.maxScrollExtent / 2))
+					return;
+				
+				WidgetsBinding.instance.addPostFrameCallback((_) { 
+					setState(() => _shouldScrollUpwards = !_shouldScrollUpwards);
+				});
+			});
+	}
 
     Widget _buildSelectorButton(List<StudyPack> stPacks, AppLocalizations locale) {
         final allSelected = _excludedPacks.isEmpty;
