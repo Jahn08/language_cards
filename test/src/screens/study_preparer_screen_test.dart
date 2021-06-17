@@ -4,6 +4,7 @@ import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
+import 'package:language_cards/src/widgets/one_line_text.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../utilities/assured_finder.dart';
@@ -29,6 +30,8 @@ main() {
 
             final studyPacks = await _fetchStudyPacks(tester, storage);
             _assureCardNumbersForStudyLevels(studyPacks);
+
+			_findDownwardScrollBtn(shouldFind: false);
         });
 
     testWidgets('Unselects/selects all card packs changing the summary of their study levels', 
@@ -85,19 +88,62 @@ main() {
             _assureCardNumbersForStudyLevels(studyPacks, 
                 checkedPacks.map((p) => p.id).toList());
         });
+
+		testWidgets('Scrolls down to the end of the list of study packs and back up by clicking the floating button', 
+			(tester) async {
+				final storage = await _pumpScreen(tester, packsNumber: 15, cardsNumber: 50);
+				final downwardScrollBtnFinder = _findDownwardScrollBtn(shouldFind: true);
+
+				final assistant = new WidgetAssistant(tester);
+				await assistant.tapWidget(downwardScrollBtnFinder); 
+				const int animationTimeoutMs = 700;
+				await assistant.pumpAndAnimate(animationTimeoutMs);
+
+	            final storedPacks = _sortPacksByName(await _fetchNamedPacks(tester, storage));
+
+				final checkTileFinder = _findCheckTiles();
+				List<CheckboxListTile> checkTiles = 
+					tester.widgetList<CheckboxListTile>(checkTileFinder).toList();
+				final checkTilesLength = checkTiles.length;
+
+				const itemsToTake = 3;
+				int index = itemsToTake;
+				storedPacks.skip(storedPacks.length - itemsToTake).forEach((p) { 
+					final checkTile = checkTiles.elementAt(checkTilesLength - (index--));
+					expect((checkTile.title as OneLineText).content, p.name);
+				});
+
+				expect(downwardScrollBtnFinder, findsNothing);
+				
+				final upwardScrollBtnFinder = AssuredFinder.findOne(
+					icon: Icons.arrow_upward_rounded, shouldFind: true);
+				await assistant.tapWidget(upwardScrollBtnFinder);
+				await assistant.pumpAndAnimate(animationTimeoutMs);
+				
+				index = 0;
+				checkTiles = tester.widgetList<CheckboxListTile>(checkTileFinder).toList();
+				storedPacks.take(itemsToTake).forEach((p) { 
+					final checkTile = checkTiles.elementAt(index++);
+					expect((checkTile.title as OneLineText).content, p.name);
+				});
+
+				expect(upwardScrollBtnFinder, findsNothing);
+				expect(downwardScrollBtnFinder, findsOneWidget);
+			});
 }
 
 List<StoredPack> _sortPacksByName(List<StoredPack> packs) => 
 	packs..sort((a, b) => a.name.compareTo(b.name));
 
-Future<StudyStorage> _pumpScreen(WidgetTester tester) async {
-    final storage = new PackStorageMock();
-    await tester.pumpWidget(
-        RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage), noBar: true));
-    await tester.pump(new Duration(milliseconds: 700));
+Future<StudyStorage> _pumpScreen(WidgetTester tester, { int packsNumber, int cardsNumber }) 
+	async {
+		final storage = new PackStorageMock(packsNumber: packsNumber, cardsNumber: cardsNumber);
+		await tester.pumpWidget(
+			RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage), noBar: true));
+		await tester.pump(new Duration(milliseconds: 700));
 
-    return storage;
-}
+		return storage;
+	}
 
 Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock storage) async =>
     (await tester.runAsync<List<StoredPack>>(() => storage.fetch()))
@@ -198,3 +244,6 @@ void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> in
             matching: find.text(cardNumber.toString(), skipOffstage: false)), findsOneWidget);
     });
 }
+
+Finder _findDownwardScrollBtn({ bool shouldFind }) => 
+	AssuredFinder.findOne(icon: Icons.arrow_downward_rounded, shouldFind: shouldFind ?? false);

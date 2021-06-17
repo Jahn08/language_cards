@@ -7,11 +7,12 @@ import 'pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
 class WordStorageMock extends WordStorage {
-    final List<StoredWord> _words = _generateWords(18);
+	final List<StoredWord> _words;
 
-    WordStorageMock() {
-        _sortWords();
-    }
+    WordStorageMock({ int cardsNumber, int parentsOverall }): 
+		_words = _generateWords(cardsNumber ?? 18, parentsOverall) {
+			_sortWords();
+		}
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
@@ -53,18 +54,22 @@ class WordStorageMock extends WordStorage {
     Future<StoredWord> find(int id) =>
         Future.value(id == null ? null: _words.firstWhere((w) => w.id == id, orElse: () => null));
 
-    static List<StoredWord> _generateWords(int length) {
-        final cardsWithoutPackNumber = Randomiser.nextInt(3) + 1;
+    static List<StoredWord> _generateWords(int length, int parentsOverall) {
+        final cardsWithoutPackNumber = Randomiser.nextInt(4) + 1;
         final cardsWithPackNumber = length - cardsWithoutPackNumber;
         final words = new List<StoredWord>.generate(cardsWithPackNumber, 
-            (index) => generateWord(id: index + 1));
+            (index) => generateWord(
+				id: index + 1, 
+				packId: parentsOverall == null ? null: 
+					(index < parentsOverall ? index: index % parentsOverall) + 1)
+			);
         words.addAll(new List<StoredWord>.generate(cardsWithoutPackNumber,
             (index) => generateWord(id: cardsWithPackNumber + index + 1, hasNoPack: true)));
 
         return words;
     }
 
-    static StoredWord generateWord({ int id, int packId, bool hasNoPack = false }) {
+    static StoredWord generateWord({ int id, int packId, int parentsOverall, bool hasNoPack = false }) {
         const phoneticSymbols = EnglishPhoneticKeyboard.phonetic_symbols;
 
         const studyStages = WordStudyStage.values;
@@ -75,7 +80,8 @@ class WordStorageMock extends WordStorage {
                 (index) => Randomiser.nextString()).join('; '),
             transcription: new List<String>.generate(Randomiser.nextInt(5) + 5, 
                 (_) => Randomiser.nextElement(phoneticSymbols)).join(),
-            packId: hasNoPack ? null: packId ?? Randomiser.nextInt(PackStorageMock.namedPacksNumber) + 1,
+            packId: hasNoPack ? null: packId ?? 
+				Randomiser.nextInt(parentsOverall ?? PackStorageMock.namedPacksNumber) + 1,
             studyProgress: Randomiser.nextElement(studyStages)
         );
     }

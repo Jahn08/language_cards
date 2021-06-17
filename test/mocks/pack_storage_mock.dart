@@ -9,11 +9,14 @@ import '../utilities/randomiser.dart';
 class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     static const int namedPacksNumber = 4;
 
-    final List<StoredPack> _packs = _generatePacks();
+    final List<StoredPack> _packs;
 
-    final WordStorageMock wordStorage = new WordStorageMock();
+    final WordStorageMock wordStorage;
 
-    PackStorageMock();
+    PackStorageMock({ int packsNumber, int cardsNumber }): 
+		_packs = _generatePacks(packsNumber ?? namedPacksNumber),
+		wordStorage = new WordStorageMock(cardsNumber: cardsNumber, 
+			parentsOverall: packsNumber ?? namedPacksNumber);
 
     static void _sort(List<StoredPack> packs) => 
         packs.sort((a, b) => a.isNone ? -1: a.name.compareTo(b.name));
@@ -23,7 +26,7 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         _fetchInternally(nameFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
     Future<List<StoredPack>> _fetchInternally({ String nameFilter, int skipCount, int takeCount }) {
-        return Future.delayed(new Duration(milliseconds: 50),
+        return Future.delayed(new Duration(milliseconds: 25),
             () async {
                 var futurePacks = _packs.skip(skipCount ?? 0);
                 
@@ -51,9 +54,9 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
         return pack;
     }
 
-    static List<StoredPack> _generatePacks() {
+    static List<StoredPack> _generatePacks(int packsNumber) {
         final packs = <StoredPack>[StoredPack.none];
-        packs.addAll(new List<StoredPack>.generate(namedPacksNumber, 
+        packs.addAll(new List<StoredPack>.generate(packsNumber, 
             (index) => generatePack(index + 1)));
         _sort(packs);
 
