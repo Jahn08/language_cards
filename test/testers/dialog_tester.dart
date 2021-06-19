@@ -6,7 +6,7 @@ import '../utilities/localizator.dart';
 class DialogTester {
 
 	Finder assureDialog({ bool shouldFind }) => 
-		AssuredFinder.findOne(type: SimpleDialog, shouldFind: shouldFind);
+		AssuredFinder.findOne(type: AlertDialog, shouldFind: shouldFind);
 
 	static Finder findConfirmationDialogBtn([String expectedLabel]) => 
 		find.widgetWithText(ElevatedButton, 

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'selector_dialog.dart';
+import '../widgets/dialog_list_view.dart';
 import '../widgets/loader.dart';
 
 abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
@@ -20,7 +21,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
                     future: futureItems,
                     builder: (builderContext, AsyncSnapshot<List<T>> snapshot) {
                         if (!snapshot.hasData)
-                            return _createSimpleDialog([new Loader()]);
+                            return _createDialogView([new Loader()]);
                         
                         return _buildDialog(snapshot.data);
                     }
@@ -29,18 +30,14 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
         );
     }
 
-    Widget _createSimpleDialog(List<Widget> children) => new Scrollbar(
-        child: new SimpleDialog(
-            title: new Text(_title),
-            children: children
-        )
-    );
+    Widget _createDialogView(List<Widget> children) => 
+		new DialogListView(title: new Text(_title), children: children);
 
     Widget _buildDialog(List<T> items) {
         final children = items.map((w) => _buildDialogOption(w)).toList();
         children.add(new Center(child: buildCancelBtn(_context)));
 
-        return _createSimpleDialog(children);
+        return _createDialogView(children);
     }
 
     Widget _buildDialogOption(T item) => new SimpleDialogOption(

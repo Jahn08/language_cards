@@ -33,14 +33,14 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
         await showDialog(items, (item) => dialogResult = item);
 
         final optionFinders = find.byType(SimpleDialogOption);
-        final chosenOptionIndex = Randomiser.nextInt(
-            tester.widgetList(optionFinders).length);
-        final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
+        final itemIndex = Randomiser.nextInt(items.length);
+        final chosenOptionIndex = itemIndex + 1;
+		final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
         expect(chosenOptionFinder, findsOneWidget);
 
         await new WidgetAssistant(tester).tapWidget(chosenOptionFinder);
 
-        expect(dialogResult, items[chosenOptionIndex]);
+        expect(dialogResult, items[itemIndex]);
 		assureDialog(shouldFind: false);
     }
 
@@ -48,13 +48,16 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
         Function(Finder, T) optionChecker, Type optionTileType) async {
         await showDialog(items);
 
+		final initialOptionIndex = findsNothing.matches(
+			find.descendant(of: find.byType(SimpleDialogOption).first, 
+			matching: find.byType(optionTileType)), {}) ? 0: 1;
         final optionFinders = find.ancestor(of: find.byType(optionTileType), 
             matching: find.byType(SimpleDialogOption));
         final foundOptions = tester.widgetList(optionFinders);
-        expect(foundOptions.length, items.length);
+        expect(foundOptions.length - initialOptionIndex, items.length);
 
         final optionsNumber = items.length;
-        for (int i = 0; i < optionsNumber; ++i)
-            optionChecker(optionFinders.at(i), items[i]);
+        for (int i = initialOptionIndex; i < optionsNumber; ++i)
+            optionChecker(optionFinders.at(i), items[i - initialOptionIndex]);
     }
 }

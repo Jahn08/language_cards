@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'selector_dialog.dart';
 import '../utilities/styler.dart';
+import '../widgets/dialog_list_view.dart';
 
 class _CheckboxListState extends State<_CheckboxList> {
     final _chosenItems = <String>[];
@@ -10,30 +11,27 @@ class _CheckboxListState extends State<_CheckboxList> {
     Widget build(BuildContext context) {
         final children = widget.items.map((w) => _buildDialogOption(w)).toList();
         children.add(new SimpleDialogOption(
-            child: new Wrap(
-                alignment: WrapAlignment.spaceBetween,
-                children: this.widget.buttons
-            )
+            child: new Row(
+				mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+				children: this.widget.buttons
+			)
         ));
 
-        return new Scrollbar(
-            child: new SimpleDialog(
-                title: new CheckboxListTile(
-                    title: new Text(this.widget.title, textScaleFactor: 0.85, 
-						style: new Styler(context).titleStyle),
-                    value: widget.items.length == _chosenItems.length,
-                    onChanged: (value) => setState(() {
-                        _chosenItems.clear();
+        return new DialogListView(
+			title: new CheckboxListTile(
+				title: new Text(this.widget.title, style: new Styler(context).titleStyle),
+				value: widget.items.length == _chosenItems.length,
+				onChanged: (value) => setState(() {
+					_chosenItems.clear();
 
-                        if (value)
-                            _chosenItems.addAll(this.widget.items);
+					if (value)
+						_chosenItems.addAll(this.widget.items);
 
-                        widget.onChange?.call(_chosenItems);
-                    })
-                ),
-                children: children
-            )
-        );
+					widget.onChange?.call(_chosenItems);
+				})
+			),
+			children: children
+		);
     }
 
     Widget _buildDialogOption(String item) => new SimpleDialogOption(
