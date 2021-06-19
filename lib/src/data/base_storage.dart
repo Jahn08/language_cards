@@ -5,7 +5,6 @@ import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 
 abstract class BaseStorage<T extends StoredEntity> {
-    static const int itemsPerPageByDefault = 10;
     
     static final _entities = <StoredEntity>[new StoredWord(''), new StoredPack('')];
 

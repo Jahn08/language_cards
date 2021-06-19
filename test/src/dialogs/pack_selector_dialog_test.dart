@@ -8,8 +8,8 @@ import '../../testers/selector_dialog_tester.dart';
 
 void main() {
 
-    testWidgets('Shows the pack dialog according to items passed as arguments', (tester) async {
-        final storage = new PackStorageMock();
+    testWidgets('Shows all named packs to choose from in the dialog', (tester) async {
+        final storage = new PackStorageMock(packsNumber: 20);
         final chosenPack = storage.getRandom();
 
         final dialogTester = new SelectorDialogTester(tester, 

@@ -18,13 +18,10 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     @override
     Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) 
         async {
-            final isFirstRequest = skipCount == null || skipCount == 0;
-            if (isFirstRequest)
-                takeCount = (takeCount ?? BaseStorage.itemsPerPageByDefault) - 1;
-
             final packs = await _fetchInternally(
 				textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
+            final isFirstRequest = skipCount == null || skipCount == 0;
             if (textFilter == null && isFirstRequest)
                 packs.insert(0, StoredPack.none);
 			

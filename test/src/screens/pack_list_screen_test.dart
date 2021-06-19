@@ -437,7 +437,8 @@ Future<List<StoredPack>> _testImportingPacks(
 
 		final storedCards = await tester.runAsync(() => storage.wordStorage.fetchFiltered(
 			parentIds: packsToExport.map((p) => p.id).toList()));
-		expect(importInfo.contains(storedCards.length.toString()), true);
+		expect(importInfo.contains(storedCards.length.toString()), true, 
+			reason: 'A message "$importInfo" does not contain the number of imported packs=${storedCards.length}');
 
 		await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
 

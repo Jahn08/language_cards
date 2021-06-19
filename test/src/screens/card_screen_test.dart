@@ -112,6 +112,23 @@ void main() {
             _assureTileIsTicked(anotherPackTileFinder);
         });
 
+	testWidgets('Displays all named packs in the pack selector dialog', (tester) async {
+		final storage = new PackStorageMock(packsNumber: 30);
+		await _displayWord(tester, storage: storage, pack: storage.getRandom());
+		
+		final assistant = new WidgetAssistant(tester);
+		final packBtnFinder = CardEditorTester.findPackButton();
+		await assistant.tapWidget(packBtnFinder);
+
+		final packs = await tester.runAsync(() => storage.fetch());
+		packs.forEach((p) {
+			if (p.isNone)
+				return;
+
+			CardEditorTester.findListTileByTitle(p.name);
+		});
+	});
+
 	testWidgets('Displays no button to pronounce card text if there is no pack', 
         (tester) async {
             await _displayWord(tester, pack: StoredPack.none);
