@@ -60,7 +60,21 @@ class CardEditorState extends State<CardEditor> {
             Future.value(new StoredWord('')): _retrieveWord();
         
         _studyProgress = WordStudyStage.unknown;
+
+		_getFuturePacks();
     }
+
+	Future<List<StoredPack>> _getFuturePacks() async {
+		if (_futurePacks == null) {
+			_futurePacks = widget._packStorage.fetch();
+
+			if (widget.hideNonePack ?? false)
+				_futurePacks = _futurePacks.then(
+					(ps) => ps.where((p) => !p.isNone).toList());
+		}
+
+		return _futurePacks;
+	}
 
     void _setPack(StoredPack newPack) {
         _pack = newPack;
@@ -163,16 +177,8 @@ class CardEditorState extends State<CardEditor> {
 						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(_pack.name))
 					),
 					onPressed: () async {
-						if (_futurePacks == null) {
-							_futurePacks = widget._packStorage.fetch();
-
-							if (widget.hideNonePack ?? false)
-								_futurePacks = _futurePacks.then(
-									(ps) => ps.where((p) => !p.isNone).toList());
-						}
-						
 						final chosenPack = await new PackSelectorDialog(context, _pack.id)
-							.showAsync(_futurePacks);
+							.showAsync(_getFuturePacks());
 
 						if (chosenPack != null && chosenPack.name != _pack.name)
 							setState(() => _setPack(chosenPack));
