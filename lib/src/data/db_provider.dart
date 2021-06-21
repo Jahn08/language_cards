@@ -1,34 +1,27 @@
 import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
+import 'data_provider.dart';
 import './data_group.dart';
 import '../models/stored_entity.dart';
 import '../utilities/path.dart';
 
-class DbProvider {
-
-    static DbProvider _provider;
-
-    final List<StoredEntity> _tableEntities;
+class DbProvider extends DataProvider {
 
     Database _db;
 
-    DbProvider._(List<StoredEntity> tableEntities): 
-        _tableEntities = tableEntities;
+	final List<StoredEntity> tableEntities;
+	
+    DbProvider(this.tableEntities); 
 
-    static DbProvider getInstance(List<StoredEntity> tableEntities) {
-        if (_provider == null)
-            _provider = new DbProvider._(tableEntities);
+    Future<void> close() async {
+		await _db?.close();
 
-        return _provider;
-    }
-
-    static Future<void> close() async {
-        await _provider?._close();
+        _db = null;
     }
 
     Future<T> _perform<T>(String tableName, Future<T> Function() action) async {
-		if (!_tableEntities.any((e) => e.tableName == tableName))
+		if (!tableEntities.any((e) => e.tableName == tableName))
 			throw new Exception('The table "$tableName" is not on the list of entities');
 
 		await _init();
@@ -46,7 +39,7 @@ class DbProvider {
             version: 4,
 			onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
             onUpgrade: (newDb, _, __) async {
-				final creationClauses = _compileCreationClauses(_tableEntities);
+				final creationClauses = _compileCreationClauses(tableEntities);
 				final creationClausesLength = creationClauses.length;
 				for (int i = 0; i < creationClausesLength; ++i)
 					await newDb.execute(creationClauses[i]);
@@ -199,13 +192,7 @@ class DbProvider {
             whereArgs: [id]
         ))).firstWhere((el) => true, orElse: null);
     }
-
-    Future<void> _close() async {
-        await _db?.close();
-
-        _db = null;
-    }
-
-	String composeSubstrFunc(String fieldName, int length) => 
+	
+	static String composeSubstrFunc(String fieldName, int length) => 
 		'SUBSTR(UPPER($fieldName), 1, $length)'; 
 }

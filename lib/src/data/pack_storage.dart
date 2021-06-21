@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'study_storage.dart';
 import '../data/base_storage.dart';
 import '../data/word_storage.dart';
@@ -25,12 +26,15 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
             if (textFilter == null && isFirstRequest)
                 packs.insert(0, StoredPack.none);
 			
-            final lengths = await new WordStorage().groupByParent(
+            final lengths = await buildWordStorage().groupByParent(
                 packs.map((p) => p.id).toList());
             packs.forEach((p) => p.cardsNumber = lengths[p.id]);
 
             return packs;
         }
+
+	@protected
+	WordStorage buildWordStorage() => new WordStorage();
 
     Future<List<StoredPack>> _fetchInternally({ String textFilter, int takeCount, int skipCount }) =>
         super.fetchInternally(textFilter: textFilter, skipCount: skipCount, 
@@ -44,7 +48,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         final pack = await super.find(id);
 
         if (pack != null) {
-            final cardsNumber = await new WordStorage().groupByParent([pack.id]);
+            final cardsNumber = await buildWordStorage().groupByParent([pack.id]);
             pack.cardsNumber = cardsNumber[pack.id];
         }
         
@@ -57,7 +61,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         final packMap = new Map<int, StoredPack>.fromIterable(packs, 
             key: (p) => p.id, value: (p) => p);
         
-        return (await new WordStorage().groupByStudyLevels())
+        return (await buildWordStorage().groupByStudyLevels())
             .entries.where((e) => e.key != null)
             .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
     }

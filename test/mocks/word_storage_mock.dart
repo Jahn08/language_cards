@@ -3,8 +3,25 @@ import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
+import 'data_provider_mock.dart';
 import 'pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
+
+class _WordDataProvider extends DataProviderMock<StoredWord> {
+
+	_WordDataProvider(List<StoredWord> cards): super(cards);
+
+	@override
+	StoredWord buildFromDbMap(Map<String, dynamic> map) => 
+		new StoredWord.fromDbMap(map);
+		
+	@override
+	String get indexFieldName => StoredWord.textFieldName;
+	
+	@override
+	List<String> get intFieldNames => 
+		super.intFieldNames..addAll([StoredWord.packIdFieldName, StoredWord.studyProgressFieldName]);
+}
 
 class WordStorageMock extends WordStorage {
 	final List<StoredWord> _words;
@@ -16,43 +33,8 @@ class WordStorageMock extends WordStorage {
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
-    @override
-    Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
-        String text, int skipCount, int takeCount }) {
-        return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(parentIds: parentIds, text: text, 
-				skipCount: skipCount, takeCount: takeCount));
-    }
-
-    @override
-    Future<List<StoredWord>> fetch({ String textFilter, int skipCount, int takeCount }) {
-        return Future.delayed(new Duration(milliseconds: 25),
-            () => _fetch(skipCount: skipCount, text: textFilter, takeCount: takeCount));
-    }
-
-    List<StoredWord> _fetch({ List<int> parentIds, String text, int skipCount, int takeCount }) {
-        var values = (parentIds == null ? _words : 
-            _words.where((w) => parentIds.contains(w.packId)));
-
-		if (text != null && text.isNotEmpty)
-			values = values.where((w) => w.text.startsWith(text));
-		
-		values = values.skip(skipCount ?? 0);
-        return ((takeCount ?? 0) == 0 ? values: values.take(takeCount)).toList();
-    }
-
-    @override
-    Future<Map<int, int>> groupByParent(List<int> parentIds) {
-        return Future.delayed(new Duration(milliseconds: 50), 
-            () {
-                final cards = _fetch(parentIds: parentIds);
-                return new Map<int, int>.fromIterable(parentIds, key: (id) => id,
-                    value: (id) => cards.where((c) => c.packId == id).length);
-            });
-    }
-
-    Future<StoredWord> find(int id) =>
-        Future.value(id == null ? null: _words.firstWhere((w) => w.id == id, orElse: () => null));
+	@override
+	get connection => new _WordDataProvider(_words);
 
     static List<StoredWord> _generateWords(int length, int parentsOverall) {
         final cardsWithoutPackNumber = Randomiser.nextInt(4) + 1;
@@ -86,29 +68,7 @@ class WordStorageMock extends WordStorage {
         );
     }
 
-    Future<void> delete(List<int> ids) {
-        _words.removeWhere((w) => ids.contains(w.id));
-        return Future.value();
-    }
-
     StoredWord getRandom() => Randomiser.nextElement(_words);
-
-    @override
-    String get entityName => '';
-  
-    Future<List<StoredWord>> _save(List<StoredWord> words) {
-        words.forEach((word) { 
-            if (word.id == null)
-                word.id = _words.length + 1;
-            else
-				_words.removeWhere((w) => w.id == word.id);
-
-            _words.add(word);
-        });
-
-        _sortWords();
-        return Future.value(words);
-    }
 
     Future<StoredWord> updateWordProgress(int id, int studyProgress) async {
         final wordToUpdate = _words.firstWhere((w) => w.id == id, orElse: null);
@@ -128,40 +88,14 @@ class WordStorageMock extends WordStorage {
 		return cards.first;
     }
 
-    @override
-    Future<List<StoredWord>> upsert(List<StoredWord> cards) => _save(cards);
+	Future<void> removeFromPacks(List<int> packIds) async {
+		final cards = await fetchFiltered(parentIds: packIds);
+		final untiedCards = cards.map((c) {
+			final values = c.toDbMap();
+			values[StoredWord.packIdFieldName] = null;
 
-    @override
-    List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) {
-        throw UnimplementedError();
-    }
-
-    Future<Map<int, Map<int, int>>> groupByStudyLevels() {
-        return Future.value(_words.fold<Map<int, Map<int, int>>>({},
-            (res, w) {
-                final packId = w.packId;
-                if (!res.containsKey(packId))
-                    res[packId] = new Map<int, int>();
-
-                if (res[packId].containsKey(w.studyProgress))
-                    res[packId][w.studyProgress] += 1;
-                else
-                    res[packId][w.studyProgress] = 1;
-
-                return res;
-            }));
-    }
-
-	@override
-	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
-		groupByTextIndexAndParent();
-
-	@override
-	Future<Map<String, int>> groupByTextIndexAndParent([List<int> parentIds]) => 
-		Future.value(_fetch(parentIds: parentIds).fold<Map<String, int>>({}, (res, c) {
-			final index = c.text[0].toUpperCase();
-			res[index] = (res[index] ?? 0) + 1;
-
-			return res;
-		}));
+			return new StoredWord.fromDbMap(values);
+		}).toList();
+		await upsert(untiedCards);
+	}
 }

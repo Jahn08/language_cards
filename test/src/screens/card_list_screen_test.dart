@@ -125,7 +125,7 @@ ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, Stored
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
     ListScreenTester screenTester, WordStorageMock storage) async {
-    final words = await tester.runAsync(() => storage.fetch());
+    final words = await _fetchWords(tester, storage);
 
     final assuredWords = <StoredWord>[];
     final listItemFinders = find.descendant(
@@ -143,12 +143,8 @@ Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester,
     return assuredWords;
 }
 
-Future<List<StoredWord>> _fetchWords(WidgetTester tester, WordStorageMock storage) async {
-    List<StoredWord> words;
-    await tester.runAsync(() async => words = (await storage.fetch()));
-
-    return words;
-}
+Future<List<StoredWord>> _fetchWords(WidgetTester tester, WordStorageMock storage) => 
+	tester.runAsync(() => storage.fetchFiltered());
 
 Finder _findRestoreBtn({ bool shouldFind }) => 
     AssuredFinder.findOne(icon: Icons.restore, shouldFind: shouldFind);

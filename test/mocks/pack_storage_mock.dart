@@ -1,17 +1,47 @@
-import 'package:language_cards/src/data/base_storage.dart';
+import 'package:language_cards/src/data/data_provider.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/language.dart';
+import 'data_provider_mock.dart';
 import 'word_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
-class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
+class _PackDataProvider extends DataProviderMock<StoredPack> {
+
+	final WordStorageMock wordStorage;
+
+	_PackDataProvider(List<StoredPack> packs, this.wordStorage): super(packs);
+
+	@override
+	StoredPack buildFromDbMap(Map<String, dynamic> map) => 
+		new StoredPack.fromDbMap(map);
+
+	@override
+	String get indexFieldName => StoredPack.nameFieldName;
+
+	@override
+	Future<int> delete(String tableName, List<dynamic> ids) async {
+		final deletedCount = await super.delete(tableName, ids);
+
+		await wordStorage.removeFromPacks(ids);
+		return deletedCount;
+	}
+}
+
+class PackStorageMock extends PackStorage with StudyStorage {
     static const int namedPacksNumber = 4;
 
     final List<StoredPack> _packs;
 
     final WordStorageMock wordStorage;
+
+	@override
+	WordStorage buildWordStorage() => wordStorage;
+
+	@override
+	DataProvider get connection => new _PackDataProvider(_packs, wordStorage);
 
     PackStorageMock({ int packsNumber, int cardsNumber }): 
 		_packs = _generatePacks(packsNumber ?? namedPacksNumber),
@@ -21,43 +51,9 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
     static void _sort(List<StoredPack> packs) => 
         packs.sort((a, b) => a.isNone ? -1: a.name.compareTo(b.name));
 
-    @override
-    Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) =>
-        _fetchInternally(nameFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
-
-    Future<List<StoredPack>> _fetchInternally({ String nameFilter, int skipCount, int takeCount }) {
-        return Future.delayed(new Duration(milliseconds: 25),
-            () async {
-                var futurePacks = _packs.skip(skipCount ?? 0);
-                
-                if (takeCount != null && takeCount > 0)
-                    futurePacks = futurePacks.take(takeCount);
-						
-				if (nameFilter != null && nameFilter.isNotEmpty)
-					futurePacks = futurePacks.where((p) => p.name.startsWith(nameFilter));
-
-                return Future.wait<StoredPack>(futurePacks.map((p) async {
-                    p.cardsNumber = (await this.wordStorage.groupByParent([p.id]))[p.id];
-                    return p;
-                }));
-            });
-    }
-
-    Future<StoredPack> find(int id) async {
-        if (id == null)
-            return StoredPack.none;
-
-        final pack = _packs.firstWhere((w) => w.id == id, orElse: () => null);
-        final cardNumberGroups = await this.wordStorage.groupByParent([pack.id]);
-        pack.cardsNumber = cardNumberGroups[pack.id];
-
-        return pack;
-    }
-
     static List<StoredPack> _generatePacks(int packsNumber) {
-        final packs = <StoredPack>[StoredPack.none];
-        packs.addAll(new List<StoredPack>.generate(packsNumber, 
-            (index) => generatePack(index + 1)));
+        final packs = new List<StoredPack>.generate(packsNumber, 
+            (index) => generatePack(index + 1));
         _sort(packs);
 
         return packs;
@@ -71,69 +67,6 @@ class PackStorageMock extends BaseStorage<StoredPack> with StudyStorage {
 			cardsNumber: 0
         );
 
-    @override
-    Future<void> delete(List<int> ids) async {
-        _packs.removeWhere((w) => ids.contains(w.id));
-
-		final updatedCards = (await wordStorage.fetchFiltered(parentIds: ids)).map((c) => 
-			new StoredWord(c.text, id: c.id, packId: null, 
-				partOfSpeech: c.partOfSpeech, studyProgress: c.studyProgress, 
-				transcription: c.transcription, translation: c.translation)).toList();
-		await wordStorage.upsert(updatedCards);
-
-        return Future.value();
-    }
-
     StoredPack getRandom() => 
 		Randomiser.nextElement(_packs.where((p) => !p.isNone).toList());
-
-    @override
-    List<StoredPack> convertToEntity(List<Map<String, dynamic>> values) {
-        throw UnimplementedError();
-    }
-
-    @override
-    String get entityName => '';
-
-    Future<List<StoredPack>> _save(List<StoredPack> packs) async {
-        packs.forEach((pack) {
-            if (pack.id == null)
-                pack.id = _packs.length + 1;
-			else
-			    _packs.removeWhere((w) => w.id == pack.id);
-
-            _packs.add(pack);
-        });
-
-        _sort(_packs);
-        return packs;
-    }
-
-    @override
-    Future<List<StoredPack>> upsert(List<StoredPack> packs) => _save(packs);
-
-    @override
-    Future<List<StudyPack>> fetchStudyPacks() async {
-        final packs = await _fetchInternally();
-        final packMap = new Map<int, StoredPack>.fromIterable(packs, 
-            key: (p) => p.id, value: (p) => p);
-        
-        return (await wordStorage.groupByStudyLevels())
-            .entries.where((e) => e.key != null)
-            .map((e) => new StudyPack(packMap[e.key], e.value)).toList();
-    }
-
-	@override
-	String get textFilterFieldName => throw UnimplementedError();
-
-	@override
-	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
-		Future.value(_packs.fold<Map<String, int>>({}, (res, p) {
-			if (!p.isNone) {
-				final index = p.name[0].toUpperCase();
-				res[index] = (res[index] ?? 0) + 1;
-			}
-			
-			return res;
-		}));
 }

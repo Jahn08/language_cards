@@ -141,11 +141,16 @@ void main() {
 
 			await _pumpScreen(tester, packStorage, packs);
 
-			final learnBtnFinder = AssuredFinder.findOne(label: 'Learn', type: ElevatedButton, 
-				shouldFind: true);
+			final learnBtnFinder = AssuredFinder.findOne(
+				label: Localizator.defaultLocalization.studyScreenLearningCardButtonLabel,
+				 type: ElevatedButton, 
+				shouldFind: true
+			);
 			await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
 
 			_assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+
+			cardToLearn = await tester.runAsync(() => packStorage.wordStorage.find(cardToLearn.id));
 			expect(cardToLearn.studyProgress - curStudyProgress, 25);
       });
 

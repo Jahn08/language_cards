@@ -95,7 +95,7 @@ class ExporterTester {
 				e.key.name == originalPack.name);
 			final importedPack = importedPackObj.key;
 			expect(importedPack.isNew, false);
-			expect(importedPack.id == originalPack.id, false);
+			expect(importedPack.id == originalPack.id, false); 
 			
 			ExporterTester.assertPacksAreEqual(importedPack, originalPack);
 
@@ -117,7 +117,7 @@ class ExporterTester {
 		}
 
 		final storedCards = await packStorage.wordStorage.fetchFiltered(
-			parentIds: imports.keys.map((c) => c.id).toList());
+			parentIds: imports.keys.map((p) => p.id).toList());
 		final importedCards = imports.values.expand((cards) => cards);
 		expect(importedCards.length, storedCards.length);
 

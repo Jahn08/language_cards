@@ -50,8 +50,8 @@ class StoredPack extends StoredEntity {
         final map = super.toDbMap(excludeIds: excludeIds);
         map.addAll({
             nameFieldName: name,
-            fromFieldName: from.index,
-            toFieldName: to.index
+            fromFieldName: from?.index,
+            toFieldName: to?.index
         });
 
         return map;        

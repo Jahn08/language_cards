@@ -1,5 +1,6 @@
 import 'package:meta/meta.dart';
-import './db_provider.dart';
+import 'db_provider.dart';
+import 'data_provider.dart';
 import '../models/stored_entity.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
@@ -8,11 +9,13 @@ abstract class BaseStorage<T extends StoredEntity> {
     
     static final _entities = <StoredEntity>[new StoredWord(''), new StoredPack('')];
 
+	static DataProvider _provider;
+
     @protected
     String get entityName;
 
     @protected
-    DbProvider get connection => DbProvider.getInstance(_entities);
+    DataProvider get connection => _provider ?? (_provider = new DbProvider(_entities));
 
     Future<List<T>> fetch({ String textFilter, int skipCount, int takeCount }) => 
         fetchInternally(textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
@@ -36,7 +39,7 @@ abstract class BaseStorage<T extends StoredEntity> {
 	@protected
 	String get textFilterFieldName;
 
-    Future<void> closeConnection() => DbProvider.close();
+    Future<void> closeConnection() => _provider?.close();
 
     Future<List<T>> upsert(List<T> entities) async =>
 		new List<T>.from(await _insert(entities.where((e) => e.isNew).toList()))
@@ -80,7 +83,7 @@ abstract class BaseStorage<T extends StoredEntity> {
     List<T> convertToEntity(List<Map<String, dynamic>> values);
 
 	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) async {
-		final mainGroupFieldKey = connection.composeSubstrFunc(textFilterFieldName, 1);
+		final mainGroupFieldKey = DbProvider.composeSubstrFunc(textFilterFieldName, 1);
 		final groupFields = [mainGroupFieldKey];
 
 		if (groupValues != null && groupValues.isNotEmpty)

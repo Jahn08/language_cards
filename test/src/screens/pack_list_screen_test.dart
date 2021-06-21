@@ -408,7 +408,8 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 	), findsOneWidget);
 
     await tester.runAsync(() async {
-        final actualPackWithCards = await storage.find(pack.id);
+		final actualPackWithCards = (pack.id == null ? (await storage.fetch()).first: 
+			await storage.find(pack.id));
         expect(actualPackWithCards?.cardsNumber, expectedNumber);
     });
 }

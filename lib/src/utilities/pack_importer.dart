@@ -53,12 +53,14 @@ class PackImporter {
 
 			final newPackDic = new Map.fromEntries(
 				(await packStorage.upsert(packDic.keys.toList())).map((p) => new MapEntry(p.name, p.id)));
-			await cardStorage.upsert(packDic.entries.map((e) {
+			
+			final newCards = packDic.entries.map((e) {
 				e.value.forEach((c) { 
 					c.packId = newPackDic[e.key.name];
 				});
 				return e.value;
-			}).expand((cards) => cards).toList());
+			}).expand((cards) => cards).toList();
+			await cardStorage.upsert(newCards);
 
 			return packDic;
 		}
