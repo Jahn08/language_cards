@@ -67,5 +67,5 @@ class WordStorage extends BaseStorage<StoredWord> {
 	@protected
 	@override
 	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) =>
-		super.groupByTextIndex();
+		super.groupByTextIndex(groupValues);
 }

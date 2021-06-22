@@ -20,18 +20,29 @@ void main() {
     screenTester.testDismissingItems();
 
 	testWidgets('Switches to the search mode for cards groupped by a pack', (tester) async {
-		final packStorage = new PackStorageMock();
+		final packStorage = new PackStorageMock(cardsNumber: 70);
 		final pack = (await tester.runAsync(() => packStorage.fetch()))
 			.firstWhere((p) => !p.isNone && p.cardsNumber > 0);
 		final wordStorage = packStorage.wordStorage;
 
 		final grouppedScreenTester = _buildScreenTester(wordStorage, pack);
+		final childCards = await tester.runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]));
+		
+		int index = 0;
+		await tester.runAsync(() => wordStorage.upsert(
+			childCards.map((e) => new StoredWord((index++ % 2).toString() + e.text, 
+			id: e.id, packId: e.packId, partOfSpeech: e.partOfSpeech, studyProgress: e.studyProgress, 
+			transcription: e.transcription, translation: e.translation)).toList()));
+
 		await grouppedScreenTester.testSwitchingToSearchMode(tester, 
 			newEntityGetter: (index) => WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
-			itemsLengthGetter: () async => 
-				(await tester.runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]))).length,
-			indexGroupsGetter: (_) => 
-				tester.runAsync(() => wordStorage.groupByTextIndexAndParent([pack.id])));
+			itemsLengthGetter: () => Future.value(childCards.length),
+			indexGroupsGetter: (_) async {
+				final indexGroups = await tester.runAsync(() => 
+					wordStorage.groupByTextIndexAndParent([pack.id]));
+				expect(indexGroups.length, 2);
+				return indexGroups;
+			});
 	});
 
     testWidgets('Renders study progress for each card', (tester) async {
