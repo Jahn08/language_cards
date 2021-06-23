@@ -590,6 +590,33 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				
 				await deactivateSearcherMode(assistant);
 			});
+
+		testWidgets(_buildDescription('resets scrolling when changing an index filter'), 
+			(tester) async {
+				final storage = await _pumpScreenWithEnoughItems(tester, 
+					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
+
+				final indexGroups = await _getIndexGroups(tester, storage);
+			
+				final assistant = new WidgetAssistant(tester);
+				await _activateSearchMode(assistant);
+
+				await chooseFilterIndex(assistant, indexGroups.first.key);
+
+				final tilesFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
+				await _scrollDownListView(assistant, tilesFinder);
+				
+				await chooseFilterIndex(assistant, indexGroups.last.key);
+
+				ScrollController scroller = _retrieveListViewScroller(tester, tilesFinder);
+				expect(scroller.offset, scroller.position.minScrollExtent);
+				
+				await _scrollDownListView(assistant, tilesFinder);
+				await deactivateSearcherMode(assistant);
+
+				scroller = _retrieveListViewScroller(tester, tilesFinder);
+				expect(scroller.offset, scroller.position.minScrollExtent);
+			});
 	}
 
 	Future<List<MapEntry<String, int>>> _getIndexGroups(
@@ -763,10 +790,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			iterations = iterations ?? 5;
 			int tries = 0;
 			while (++tries < iterations) {
-				final listView = assistant.tester.widget<ListView>(
-				find.ancestor(of: childFinder.first, matching: find.byType(ListView)));
-
-				final ctrl = listView.controller;
+				final ctrl = _retrieveListViewScroller(assistant.tester, childFinder);
 				final position = ctrl.position;
 				final newPosition = position.pixels + 300;
 				ctrl.jumpTo(newPosition > position.maxScrollExtent ? 
@@ -775,4 +799,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await assistant.pumpAndAnimate(1500);
 			}
 		}
+
+	ScrollController _retrieveListViewScroller(WidgetTester tester, Finder childFinder) {
+		final listView = tester.widget<ListView>(
+			find.ancestor(of: childFinder.first, matching: find.byType(ListView)));
+		return listView.controller;
+	}
 }

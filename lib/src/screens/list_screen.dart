@@ -339,6 +339,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget _buildList(AppLocalizations locale) => 
 		new Scrollbar(
 			child: new ListView.builder(
+				key: new ObjectKey(_curFilterIndex),
 				itemCount: _items.length,
 				itemBuilder: _isEditorMode ? _buildCheckListItem: 
 					(context, index) => _buildDismissibleListItem(context, index, locale),
