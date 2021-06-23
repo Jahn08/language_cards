@@ -12,7 +12,6 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	DataProviderMock(this.items) {
 		assert(items != null);
-		assert(items.isNotEmpty);
 	}
 
 	@override

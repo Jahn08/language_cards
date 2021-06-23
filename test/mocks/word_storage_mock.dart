@@ -26,36 +26,44 @@ class _WordDataProvider extends DataProviderMock<StoredWord> {
 class WordStorageMock extends WordStorage {
 	final List<StoredWord> _words;
 
-    WordStorageMock({ int cardsNumber, int parentsOverall }): 
-		_words = _generateWords(cardsNumber ?? 18, parentsOverall) {
-			_sortWords();
-		}
+    WordStorageMock({ 
+		int cardsNumber, int parentsOverall, String Function(String, int) textGetter 
+	}): _words = _generateWords(cardsNumber ?? 18, parentsOverall, textGetter: textGetter) { 
+		_sortWords(); 
+	}
 
     _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
 	@override
 	get connection => new _WordDataProvider(_words);
 
-    static List<StoredWord> _generateWords(int length, int parentsOverall) {
+    static List<StoredWord> _generateWords(int length, int parentsOverall, 
+		{ String Function(String, int) textGetter }) {
         final cardsWithoutPackNumber = Randomiser.nextInt(4) + 1;
         final cardsWithPackNumber = length - cardsWithoutPackNumber;
         final words = new List<StoredWord>.generate(cardsWithPackNumber, 
             (index) => generateWord(
 				id: index + 1, 
 				packId: parentsOverall == null ? null: 
-					(index < parentsOverall ? index: index % parentsOverall) + 1)
-			);
+					(index < parentsOverall ? index: index % parentsOverall) + 1,
+				textGetter: textGetter
+			));
         words.addAll(new List<StoredWord>.generate(cardsWithoutPackNumber,
-            (index) => generateWord(id: cardsWithPackNumber + index + 1, hasNoPack: true)));
+            (index) => generateWord(id: cardsWithPackNumber + index + 1, hasNoPack: true,
+				textGetter: textGetter)));
 
         return words;
     }
 
-    static StoredWord generateWord({ int id, int packId, int parentsOverall, bool hasNoPack = false }) {
+    static StoredWord generateWord({ 
+		int id, int packId, int parentsOverall, bool hasNoPack = false,
+		String Function(String, int) textGetter 
+	}) {
         const phoneticSymbols = EnglishPhoneticKeyboard.phonetic_symbols;
 
         const studyStages = WordStudyStage.values;
-        return new StoredWord(Randomiser.nextString(), 
+		final text = Randomiser.nextString();
+        return new StoredWord(textGetter?.call(text, id) ?? text, 
             id: id, 
             partOfSpeech: Randomiser.nextElement(PartOfSpeech.values),
             translation: new List<String>.generate(Randomiser.nextInt(5) + 1, 

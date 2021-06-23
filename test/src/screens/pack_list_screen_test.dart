@@ -24,7 +24,8 @@ import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
-    final screenTester = new ListScreenTester('Pack', () => _buildPackListScreen());
+    final screenTester = new ListScreenTester('Pack', 
+		([packsNumber]) => _buildPackListScreen(packsNumber: packsNumber));
     screenTester.testEditorMode();
     screenTester.testSearchMode(PackStorageMock.generatePack);
 
@@ -82,7 +83,7 @@ void main() {
 
 	testWidgets("Deletes packs with cards and increases the number of cards without a pack", 
 		(tester) async {
-			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+			final storage = await screenTester.pumpScreen(tester, null, 5) as PackStorageMock;
 
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
@@ -224,7 +225,8 @@ void main() {
 	
 	testWidgets("Imports packs, adds a new search index and goes to the default search index", (tester) async {
 		final storage = new PackStorageMock();
-	    final inScreenTester = new ListScreenTester('Pack', () => _buildPackListScreen(storage));
+	    final inScreenTester = new ListScreenTester('Pack', 
+			([_]) => _buildPackListScreen(storage: storage));
 
 		final indexes = await inScreenTester.testSwitchingToSearchMode(tester, 
 			newEntityGetter: PackStorageMock.generatePack, 
@@ -253,8 +255,9 @@ void main() {
 	});
 }
 
-PackListScreen _buildPackListScreen([PackStorageMock storage]) {
-	storage = storage ?? new PackStorageMock();
+PackListScreen _buildPackListScreen({ PackStorageMock storage, int packsNumber }) {
+	storage = storage ?? new PackStorageMock(packsNumber: packsNumber ?? 40, 
+		textGetter: (text, id) => (id % 2).toString() + text);
 	return new PackListScreen(storage, storage.wordStorage);
 }
     
@@ -290,7 +293,7 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
 
             return new MaterialPageRoute(
                 settings: settings,
-                builder: (context) => new RootWidgetMock(child: _buildPackListScreen(storage))
+                builder: (context) => new RootWidgetMock(child: _buildPackListScreen(storage: storage))
             );
         })
 	);

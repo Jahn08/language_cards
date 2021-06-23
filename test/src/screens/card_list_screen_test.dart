@@ -130,10 +130,14 @@ void main() {
         });
 }
 
-ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, StoredPack pack]) => 
-    new ListScreenTester('Card', 
-		() => new CardListScreen(storage ?? new WordStorageMock(), pack: pack));
-
+ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, StoredPack pack]) {
+	return new ListScreenTester('Card', ([cardsNumber]) =>
+		new CardListScreen(storage ?? new WordStorageMock(
+			cardsNumber: cardsNumber ?? 40, 
+			textGetter: (text, id) => (id % 2).toString() + text
+		), pack: pack));
+}
+    
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester, 
     ListScreenTester screenTester, WordStorageMock storage) async {
     final words = await _fetchWords(tester, storage);

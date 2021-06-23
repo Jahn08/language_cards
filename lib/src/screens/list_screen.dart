@@ -95,7 +95,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     _expandListOnScroll() {
         if (_scrollController.position.extentAfter < 500 && !_isEndOfData && _canFetch)
-            _fetchItems();
+            _fetchItems(_curFilterIndex);
     }
 
     Future<List<TItem>> _fetchNextItems([String text]) => 
