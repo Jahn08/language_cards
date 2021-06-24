@@ -9,15 +9,10 @@ class _CheckboxListState extends State<_CheckboxList> {
 
     @override
     Widget build(BuildContext context) {
-        final children = widget.items.map((w) => _buildDialogOption(w)).toList();
-        children.add(new SimpleDialogOption(
-            child: new Row(
-				mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-				children: this.widget.buttons
-			)
-        ));
 
         return new DialogListView(
+			isShrunk: true,
+			buttons: this.widget.buttons,
 			title: new CheckboxListTile(
 				title: new Text(this.widget.title, style: new Styler(context).titleStyle),
 				value: widget.items.length == _chosenItems.length,
@@ -30,20 +25,22 @@ class _CheckboxListState extends State<_CheckboxList> {
 					widget.onChange?.call(_chosenItems);
 				})
 			),
-			children: children
+			children: widget.items.map((w) => _buildDialogOption(w)).toList()
 		);
     }
 
-    Widget _buildDialogOption(String item) => new SimpleDialogOption(
-        child: new CheckboxListTile(
-            title: new Text(item),
-            onChanged: (value) => setState(() {
-                value ? _chosenItems.add(item) : _chosenItems.remove(item);
-                widget.onChange?.call(_chosenItems);
-            }),
-            value: _chosenItems.contains(item)
-        )
-    );
+    Widget _buildDialogOption(String item) => 
+		new ShrinkableSimpleDialogOption(
+			new CheckboxListTile(
+				title: new Text(item),
+				onChanged: (value) => setState(() {
+					value ? _chosenItems.add(item) : _chosenItems.remove(item);
+					widget.onChange?.call(_chosenItems);
+				}),
+				value: _chosenItems.contains(item)
+			),
+			isShrunk: true
+		);
 }
 
 class _CheckboxList extends StatefulWidget {

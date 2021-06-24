@@ -8,7 +8,7 @@ class WordSelectorDialog extends SingleSelectorDialog<Word> {
 	final BuildContext context;
 
     WordSelectorDialog(this.context):
-        super(context, AppLocalizations.of(context).wordSelectorDialogTitle);
+        super(context, AppLocalizations.of(context).wordSelectorDialogTitle, isShrunk: true);
    
     @override
     Widget getItemSubtitle(Word item) => 

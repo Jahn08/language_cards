@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/translation_selector_dialog.dart';
+import 'package:language_cards/src/widgets/dialog_list_view.dart';
 import '../../testers/dialog_tester.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
@@ -37,7 +38,7 @@ void main() {
         await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
         const int chosenOptionIndex = 1;
-        final optionFinders = find.byType(SimpleDialogOption);
+        final optionFinders = find.byType(ShrinkableSimpleDialogOption);
 
         final assistant = new WidgetAssistant(tester);
         await assistant.tapWidget(optionFinders.at(chosenOptionIndex + 1), atCenter: true);
@@ -62,7 +63,7 @@ void main() {
         await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
         final assistant = new WidgetAssistant(tester);
-        await assistant.tapWidget(find.byType(CheckboxListTile).first);
+        await assistant.tapWidget(find.byType(CheckboxListTile).first, atCenter: true);
 
         expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
             .every((checkbox) => checkbox.value), true);
@@ -82,9 +83,9 @@ void main() {
 
             final titleOptionFinder = find.byType(CheckboxListTile);
             final assistant = new WidgetAssistant(tester);
-            await assistant.tapWidget(titleOptionFinder.first);
+            await assistant.tapWidget(titleOptionFinder.first, atCenter: true);
 
-            await assistant.tapWidget(titleOptionFinder.first);
+            await assistant.tapWidget(titleOptionFinder.first, atCenter: true);
 
             expect(tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
                 .every((checkbox) => !checkbox.value), true);

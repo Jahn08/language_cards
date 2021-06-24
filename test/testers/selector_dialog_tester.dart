@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:language_cards/src/dialogs/selector_dialog.dart';
+import 'package:language_cards/src/widgets/dialog_list_view.dart';
 import '../utilities/dialog_opener.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
@@ -32,7 +33,7 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
         T dialogResult;
         await showDialog(items, (item) => dialogResult = item);
 
-        final optionFinders = find.byType(SimpleDialogOption);
+        final optionFinders = find.byType(ShrinkableSimpleDialogOption);
         final itemIndex = Randomiser.nextInt(items.length);
         final chosenOptionIndex = itemIndex + 1;
 		final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
@@ -49,10 +50,10 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
         await showDialog(items);
 
 		final initialOptionIndex = findsNothing.matches(
-			find.descendant(of: find.byType(SimpleDialogOption).first, 
+			find.descendant(of: find.byType(ShrinkableSimpleDialogOption).first, 
 			matching: find.byType(optionTileType)), {}) ? 0: 1;
         final optionFinders = find.ancestor(of: find.byType(optionTileType), 
-            matching: find.byType(SimpleDialogOption));
+            matching: find.byType(ShrinkableSimpleDialogOption));
         final foundOptions = tester.widgetList(optionFinders);
         expect(foundOptions.length - initialOptionIndex, items.length);
 
