@@ -82,10 +82,14 @@ class _StudyScreenState extends State<StudyScreen> {
 
 	Future<UserParams> _futureParams;
 
+	Map<int, Widget> _pageCache;
+
     @override
     initState() {
         super.initState();
         
+		_pageCache = new Map<int, Widget>();
+
         _shouldReorderCards = true;
         _isStudyOver = false;
         
@@ -128,6 +132,7 @@ class _StudyScreenState extends State<StudyScreen> {
 						).show(context));
 				
 					shouldTakeAllCards = true;
+					_pageCache.clear();
 				}
 
 				_orderCards(shouldTakeAllCards);
@@ -157,7 +162,8 @@ class _StudyScreenState extends State<StudyScreen> {
 									_packMap[updatedCard.packId] = updatedPackedCard.value;
 
 								setState(() {
-									_cards[_curCardIndex] = updatedCard;			  
+									_cards[_curCardIndex] = updatedCard;
+									_removeCurrentPageFromCache();
 								});
 							}
 						)
@@ -197,6 +203,8 @@ class _StudyScreenState extends State<StudyScreen> {
             _cards.replaceRange(startIndex, _cards.length, listToOrder);
     }
 
+	void _removeCurrentPageFromCache() => _pageCache.remove(_curCardIndex);
+
     Widget _buildLayout(AppLocalizations locale, Size screenSize) =>
 		new Column(
             children: [
@@ -217,8 +225,12 @@ class _StudyScreenState extends State<StudyScreen> {
             controller: _controller,
             onPageChanged: (index) => _setIndexCard(_getIndexCard(index)),
             itemBuilder: (context, index) {
+
+				if (_pageCache.containsKey(index))
+					return _pageCache[index];
+
                 final card = _cards[_getIndexCard(index)];
-                return new Column(
+                return _pageCache[index] = new Column(
                     children: [
                         _buildRow(child: _buildPackLabel(_packMap[card.packId], screenSize)),
                         _buildRow(child: _buildCard(card, locale), flex: 9)
@@ -338,6 +350,7 @@ class _StudyScreenState extends State<StudyScreen> {
 						onPressed: () =>
 							setState(() {
 								_cardSide = _nextValue(CardSide.values, _cardSide);
+								_removeCurrentPageFromCache();
 							})
 					)
 				]
@@ -351,10 +364,10 @@ class _StudyScreenState extends State<StudyScreen> {
     void _setIndexCard(int newIndex) {
         newIndex = newIndex < 0 || newIndex == _cards.length ? 0: newIndex;
         _isStudyOver = newIndex == 0 && _curCardIndex == _cards.length - 1;
-        
+		
         setState(() { 
             _curCardIndex = newIndex;
-            _shouldReorderCards = true; 
+            _shouldReorderCards = !_pageCache.containsKey(newIndex);
         });
     }
 

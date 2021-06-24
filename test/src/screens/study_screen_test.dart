@@ -65,22 +65,22 @@ void main() {
                 CardSide.values.toList()..add(CardSide.front));
         });
 
-    testWidgets('Renders next/previous card data when swiping left/right with the forward sorting', 
+    testWidgets('Renders all next/previous cards once when swiping left/right with the forward sorting', 
         (tester) async => await _testForwardSorting(tester, shouldSwipe: true));
 
-    testWidgets('Renders next/previous card data when swiping left/right with the backward sorting', 
+    testWidgets('Renders all next/previous cards once when swiping left/right with the backward sorting', 
         (tester) async => await _testBackwardSorting(tester, shouldSwipe: true));
 
-    testWidgets('Renders next/previous card data when swiping left/right with the random sorting', 
+    testWidgets('Renders all next/previous cards once when swiping left/right with the random sorting', 
         (tester) async => await _testRandomSorting(tester, shouldSwipe: true));
-
-    testWidgets('Renders next/previous card data when clicking the next button/swiping right with the forward sorting', 
+	
+    testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the forward sorting', 
         (tester) async => await _testForwardSorting(tester, shouldSwipe: false));
 
-    testWidgets('Renders next/previous card data when clicking the next button/swiping right with the backward sorting', 
+    testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the backward sorting', 
         (tester) async => await _testBackwardSorting(tester, shouldSwipe: false));
 
-    testWidgets('Renders next/previous card data when clicking the next button/swiping right with the random sorting', 
+    testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the random sorting', 
         (tester) async => await _testRandomSorting(tester, shouldSwipe: false));
 
     testWidgets('Shows a dialog after finishing a study cycle, then closes it and starts afresh', 
@@ -118,7 +118,7 @@ void main() {
             final assistant = new WidgetAssistant(tester);
             await assistant.tapWidget(dialogBtnFinder);
 
-            await assistant.swipeWidgetRight(_findCardWidget());
+		    await _goToPreviousCard(assistant);
 
             _assureDialogBtnExistence(false);
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
@@ -171,7 +171,7 @@ void main() {
 
     testWidgets('Shows a random side of cards when clicking the next button and the opposite one when clicking on them',
         (tester) async => _testReversingRandomCardSide(tester, shouldSwipe: false));
-
+	
     testWidgets('Reverses a card side from its front to its back and to its front again',
         (tester) async {
             final packStorage = new PackStorageMock();
@@ -405,8 +405,14 @@ Future<void> _testForwardSorting(WidgetTester tester, { bool shouldSwipe }) asyn
     
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(_findCardWidget());
+	await _goToPreviousCard(assistant);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
+
+	final shownCards = <StoredWord>[cards.first];
+	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+	expect(cards.length, new Set.from(shownCards).length);
 }
 
 Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) async {
@@ -423,8 +429,14 @@ Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) asy
     await _goToNextCard(assistant, shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(_findCardWidget());
+	await _goToPreviousCard(assistant);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
+
+	final shownCards = <StoredWord>[cards.first];
+	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+	expect(cards.length, new Set.from(shownCards).length);
 }
 
 Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async {
@@ -439,16 +451,24 @@ Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async
         await _pressButtonEndingWithText(assistant, 
 			sortMode.present(Localizator.defaultLocalization));
 
+	final shownCards = <StoredWord>[];
     final firstCard = _getShownCard(tester, cards);
+	shownCards.add(firstCard);
 
     await _goToNextCard(assistant, shouldSwipe);
     
     final nextCard = _getShownCard(tester, cards);
-    _assureFrontSideRendering(tester, packs, cards, card: nextCard, expectedIndex: 1);
+    
+	_assureFrontSideRendering(tester, packs, cards, card: nextCard, expectedIndex: 1);
 
-    await assistant.swipeWidgetRight(_findCardWidget());
+    await _goToPreviousCard(assistant);
 
     _assureFrontSideRendering(tester, packs, cards, card: firstCard, expectedIndex: 0);
+
+	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+	expect(cards.length, new Set.from(shownCards).length);
 }
 
 StoredWord _getShownCard(WidgetTester tester, List<StoredWord> cards) {
@@ -487,6 +507,9 @@ Future<void> _goToNextCard(WidgetAssistant assistant, bool bySwiping) async {
     else
         await assistant.tapWidget(find.widgetWithText(ElevatedButton, 'Next'));
 }
+
+Future<void> _goToPreviousCard(WidgetAssistant assistant) =>
+	assistant.swipeWidgetRight(_findCardWidget());
 
 void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,
     List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
@@ -547,7 +570,7 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
     await _reverseCardSide(assistant);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: nextIndex, isReversed: true);
 
-    await assistant.swipeWidgetRight(_findCardWidget());
+	await _goToPreviousCard(assistant);
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
 }
 
@@ -591,12 +614,16 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
     } while (++curIndex < 2);
 }
 
-Future<void> _goThroughCardList(WidgetTester tester, int listLength) async {
+Future<void> _goThroughCardList(WidgetTester tester, int listLength, 
+	{ bool byClickingButton, void Function() onNextCard }
+) async {
 	final assistant = new WidgetAssistant(tester);
 	
 	int index = 0;
 	do {
-		await _goToNextCard(assistant, true);
+		await _goToNextCard(assistant, !(byClickingButton ?? false));
+
+		onNextCard?.call();
 	} while (++index < listLength);
 }
 
