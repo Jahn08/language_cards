@@ -97,8 +97,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					(card) => card.studyProgress != WordStudyStage.unknown).toList();
 				if (itemsToReset.length == 0 || !(await new ConfirmDialog(
 						title: locale.cardListScreenResettingProgressDialogTitle,
-						content: 
-							locale.cardListScreenResettingProgressDialogContent(itemsToReset.length),
+						content: locale.cardListScreenResettingProgressDialogContent(
+							itemsToReset.length.toString()),
 						confirmationLabel: 
 							locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
 					.show(scaffoldContext)) ?? false)
@@ -110,9 +110,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 				});
 
 				ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
-					content: new Text(
-						locale.cardListScreenBottomSnackBarResettingProgressInfo(itemsToReset.length)
-					)
+					content: new Text(locale.cardListScreenBottomSnackBarResettingProgressInfo(
+						itemsToReset.length.toString()))
 				));
 			
 				super.clearItemsMarkedInEditor();

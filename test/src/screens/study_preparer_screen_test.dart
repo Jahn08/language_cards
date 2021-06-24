@@ -24,8 +24,11 @@ main() {
                 expect(find.descendant(
 					of: packTileFinder, 
                     matching: find.text(
-						Localizator.defaultLocalization.cardNumberIndicatorContent(p.cardsNumber))
-					), findsOneWidget);
+						Localizator.defaultLocalization.cardNumberIndicatorContent(
+							p.cardsNumber.toString()
+						)
+					)
+				), findsOneWidget);
             });
 
             final studyPacks = await _fetchStudyPacks(tester, storage);

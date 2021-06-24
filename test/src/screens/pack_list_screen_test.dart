@@ -406,7 +406,7 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
     expect(find.descendant(
 		of: tileWithCardsFinder, 
         matching: find.text(
-			Localizator.defaultLocalization.cardNumberIndicatorContent(expectedNumber)
+			Localizator.defaultLocalization.cardNumberIndicatorContent(expectedNumber.toString())
 		)
 	), findsOneWidget);
 

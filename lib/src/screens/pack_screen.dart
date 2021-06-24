@@ -110,7 +110,8 @@ class PackScreenState extends State<PackScreen> {
 				alignment: Alignment.centerLeft,
 				child: new TextButton.icon(
 					icon: new Icon(Consts.cardListIcon),
-					label: new Text(locale.packScreenShowingCardsButtonLabel(_cardsNumber)),
+					label: new Text(locale.packScreenShowingCardsButtonLabel(
+						_cardsNumber.toString())),
 					onPressed: () => Router.goToCardList(context, pack: _foundPack)
 				)
 			));

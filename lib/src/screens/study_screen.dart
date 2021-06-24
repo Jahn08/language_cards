@@ -138,7 +138,8 @@ class _StudyScreenState extends State<StudyScreen> {
 				_orderCards(shouldTakeAllCards);
 
 				return new BarScaffold(
-					locale.studyScreenTitle(_curCardIndex + 1, cards.length),
+					locale.studyScreenTitle((_curCardIndex + 1).toString(), 
+						cards.length.toString()),
 					barActions: [
 						new IconButton(
 							icon: new Icon(Icons.edit),

@@ -9,5 +9,5 @@ class CardNumberIndicator extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) => 
-		new Text(AppLocalizations.of(context).cardNumberIndicatorContent(number));
+		new Text(AppLocalizations.of(context).cardNumberIndicatorContent(number?.toString()));
 }

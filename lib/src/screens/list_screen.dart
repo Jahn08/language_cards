@@ -221,7 +221,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                         _showItemRemovalInfoSnackBar(
 							scaffoldContext: scaffoldContext,
 							message: locale.listScreenBottomSnackBarRemovedItemsInfo(
-								_itemsMarkedInEditor.length),
+								_itemsMarkedInEditor.length.toString()),
                             itemIdsToRemove: _itemsMarkedInEditor.keys.toList(), 
 							locale: locale);
 

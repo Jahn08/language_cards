@@ -81,8 +81,7 @@
     "@cardListScreenResettingProgressDialogContent": {
         "placeholders": {
             "cardsToResetLength": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },
@@ -92,8 +91,7 @@
     "@cardListScreenBottomSnackBarResettingProgressInfo": {
         "placeholders": {
             "cardsToResetNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },
@@ -102,8 +100,7 @@
     "@cardNumberIndicatorContent": {
         "placeholders": {
             "cardsNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },
@@ -333,8 +330,7 @@
     "@listScreenBottomSnackBarRemovedItemsInfo": {
         "placeholders": {
             "removedItemsLength": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },
@@ -396,12 +392,10 @@
     "@packListScreenImportDialogContent": {
         "placeholders": {
             "packsNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             },
             "cardsNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             },
             "filePath": {
                 "type": "String"
@@ -431,8 +425,7 @@
     "@packScreenShowingCardsButtonLabel": {
         "placeholders": {
             "cardsNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },
@@ -555,12 +548,10 @@
     "@studyScreenTitle": {
         "placeholders": {
             "curCardIndex": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             },
             "cardsNumber": {
-                "type": "int",
-                "format": "compactLong"
+                "type": "String"
             }
         }
     },

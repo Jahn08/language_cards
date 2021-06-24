@@ -112,8 +112,11 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 						final packsWithCards = outcome.packsWithCards;
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenImportDialogTitle,
-							content: locale.packListScreenImportDialogContent(packsWithCards.keys.length, 
-								packsWithCards.values.expand((c) => c).length, outcome.filePath)
+							content: locale.packListScreenImportDialogContent(
+								packsWithCards.keys.length.toString(), 
+								packsWithCards.values.expand((c) => c).length.toString(), 
+								outcome.filePath
+							)
 						).show(scaffoldContext);
 
 						super.refetchItems(isForceful: true, shouldInitIndices: true);
