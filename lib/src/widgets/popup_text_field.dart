@@ -69,11 +69,23 @@ class _PopupTextFieldState extends State<PopupTextField> {
 		if (_isValueChosen)
 			return;
 
-		if (this._overlayEntry != null && this._overlayEntry.mounted)
-			this._overlayEntry.remove();
+		if (!hasFocus) {
+			if (_overlayEntry != null) {
+				_overlayEntry?.remove();
+				_overlayEntry = null;
+			}
 
-		if (hasFocus && (this._overlayEntry = this._createOverlayEntry()) != null)
-			Overlay.of(context).insert(this._overlayEntry);
+			return;
+		}
+
+		if (_overlayEntry == null) {
+			_overlayEntry = _createOverlayEntry();
+
+			if (_overlayEntry != null)
+				Overlay.of(context).insert(this._overlayEntry);
+		}
+		else
+			_overlayEntry.markNeedsBuild();
 	}
 	
 	OverlayEntry _createOverlayEntry() {
