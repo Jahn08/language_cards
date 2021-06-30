@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/speaker_button.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
 class CardEditorTester {
@@ -52,15 +54,6 @@ class CardEditorTester {
 	static Finder findSaveButton() => 
 		AssuredFinder.findOne(type: ElevatedButton, label: 'Save', shouldFind: true);
 
-	Future<String> enterChangedText(String initialText, { String changedText }) async {
-		changedText = changedText ?? initialText.substring(1);
-		await tester.enterText(find.widgetWithText(TextField, initialText), changedText);
-		
-		await new WidgetAssistant(tester).pumpAndAnimate();
-
-		return changedText;
-	}
-
 	Future<void> changePack(StoredPack newPack) async {
 		final assistant = new WidgetAssistant(tester);
 		await assistant.tapWidget(findPackButton());
@@ -76,4 +69,23 @@ class CardEditorTester {
 
 		return tileFinder;
 	}
+
+	Future<List<String>> enterRandomTranscription() async {
+        const symbols = EnglishPhoneticKeyboard.phonetic_symbols;
+        final expectedSymbols = [Randomiser.nextElement(symbols),
+            Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
+
+		final assistant = new WidgetAssistant(tester);
+        for (final symbol in expectedSymbols)
+            await _tapSymbolKey(symbol, assistant);
+
+        return expectedSymbols;
+    }
+
+    Future<void> _tapSymbolKey(String symbol, WidgetAssistant assistant) async {
+        final foundKey = find.widgetWithText(InkWell, symbol);
+        expect(foundKey, findsOneWidget);
+
+		await assistant.tapWidget(foundKey);
+    }
 }

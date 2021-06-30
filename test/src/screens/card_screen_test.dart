@@ -186,7 +186,7 @@ void main() {
             final assistant = new WidgetAssistant(tester);
             await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
 
-            final expectedChangedTr = await _changeTranscription(assistant, wordToShow.transcription);
+            final expectedChangedTr = await _changeTranscription(tester, wordToShow.transcription);
 
             final refocusedFieldFinder = find.widgetWithText(TextField, wordToShow.text);
             await new WidgetAssistant(tester).tapWidget(refocusedFieldFinder);
@@ -215,7 +215,7 @@ void main() {
             final assistant = new WidgetAssistant(tester);
             await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
 
-            final expectedChangedTr = await _changeTranscription(assistant, wordToShow.transcription);
+            final expectedChangedTr = await _changeTranscription(tester, wordToShow.transcription);
 
             await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
 
@@ -263,7 +263,7 @@ void main() {
 		final wordText = (
 			await _displayWord(tester, provider: dicProviderMock, pack: StoredPack.none)
 		).text;
-		await new CardEditorTester(tester).enterChangedText(wordText);
+		await new WidgetAssistant(tester).enterChangedText(wordText);
 
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
 	});
@@ -273,18 +273,18 @@ void main() {
 			onSearchForLemmas: (text) => Randomiser.nextStringList());
 		final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
 		
-		final cardEditorTester = new CardEditorTester(tester);
-		final changedText = await cardEditorTester.enterChangedText(wordText, changedText: '   ');
+		final assistant = new WidgetAssistant(tester);
+		final changedText = await assistant.enterChangedText(wordText, changedText: '   ');
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
 		
-		await cardEditorTester.enterChangedText(changedText, changedText: '');
+		await assistant.enterChangedText(changedText, changedText: '');
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
 	});
 
 	testWidgets('Shows no popup when there are no suggestions for a word', (tester) async {
 		final dicProviderMock = new DictionaryProviderMock(onSearchForLemmas: (text) => []);
 		final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
-		await new CardEditorTester(tester).enterChangedText(wordText);
+		await new WidgetAssistant(tester).enterChangedText(wordText);
 
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
 	});
@@ -300,7 +300,7 @@ void main() {
 				onSearchForLemmas: (text) => popupValues);
 			
 			final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
-			await new CardEditorTester(tester).enterChangedText(wordText);
+			await new WidgetAssistant(tester).enterChangedText(wordText);
 			
 			final foundTiles = tester.widgetList<ListTile>(
 				AssuredFinder.findSeveral(type: ListTile, shouldFind: true))
@@ -314,12 +314,14 @@ void main() {
 			final dicProviderMock = new DictionaryProviderMock(
 				onSearchForLemmas: (text) => Randomiser.nextStringList());
 			final wordText = (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
-			await new CardEditorTester(tester).enterChangedText(wordText);
+
+			final assistant = new WidgetAssistant(tester);
+			await assistant.enterChangedText(wordText);
 			
 			final tileFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true).first;
 			final expectedText = (tester.widget<ListTile>(tileFinder).title as Text).data;
 
-			await new WidgetAssistant(tester).tapWidget(tileFinder.first);
+			await assistant.tapWidget(tileFinder.first);
 		
 			AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
 			AssuredFinder.findOne(type: TextField, label: expectedText, shouldFind: true);
@@ -330,7 +332,7 @@ void main() {
 			onSearchForLemmas: (text) => Randomiser.nextStringList());
 		final shownWord = (await _displayWordWithPack(tester, provider: dicProviderMock));
 		
-		await new CardEditorTester(tester).enterChangedText(shownWord.text);
+		await new WidgetAssistant(tester).enterChangedText(shownWord.text);
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
 
 		await _focusTextField(new WidgetAssistant(tester), shownWord.translation);
@@ -378,7 +380,7 @@ Finder _findWarningDialogButton({ bool shouldFind }) {
 Future<void> _testRefocusingChangedValues(WidgetTester tester, String fieldValueToChange, 
     String fieldValueToRefocus) async {
         final expectedChangedText = 
-			await new CardEditorTester(tester).enterChangedText(fieldValueToChange);
+			await new WidgetAssistant(tester).enterChangedText(fieldValueToChange);
 
         final refocusedFieldFinder = await _focusTextField(
 			new WidgetAssistant(tester), fieldValueToRefocus);
@@ -401,10 +403,10 @@ Future<void> _testSavingChangedValue(WidgetTester tester,
     final storage = new PackStorageMock();
     final wordToShow = await _displayWord(tester, storage: storage);
 
-    final expectedChangedText = 
-		await new CardEditorTester(tester).enterChangedText(valueToChangeGetter(wordToShow));
+	final assistant = new WidgetAssistant(tester);
+    final expectedChangedText = await assistant.enterChangedText(valueToChangeGetter(wordToShow));
 
-    await new WidgetAssistant(tester).tapWidget(CardEditorTester.findSaveButton());
+    await assistant.tapWidget(CardEditorTester.findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
@@ -418,8 +420,8 @@ Future<void> _showTranscriptionKeyboard(WidgetAssistant assistant, String transc
     await assistant.tapWidget(transcriptionFinder);
 }
 
-Future<String> _changeTranscription(WidgetAssistant assistant, String curTranscription) async {
-    final expectedSymbols = await assistant.enterRandomTranscription();
+Future<String> _changeTranscription(WidgetTester tester, String curTranscription) async {
+    final expectedSymbols = await new CardEditorTester(tester).enterRandomTranscription();
     return curTranscription + expectedSymbols.join();
 }
 
@@ -495,11 +497,12 @@ Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
 }
 
 Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
-    final newText = await new CardEditorTester(tester).enterChangedText(wordText);
+	final assistant = new WidgetAssistant(tester);
+    final newText = await assistant.enterChangedText(wordText);
     final textFinder = find.widgetWithText(TextField, newText);
 
     tester.widget<TextField>(textFinder).onEditingComplete();
-    await new WidgetAssistant(tester).pumpAndAnimate();
+    await assistant.pumpAndAnimate();
 }
 
 Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool nullifyPack }) 

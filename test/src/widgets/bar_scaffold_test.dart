@@ -178,11 +178,10 @@ void main() {
 
 			final defStudyParams = defaultUserParams.studyParams;
 			final expectedCardSide = CardSide.back;
-			await _chooseDropdownItem(tester, defStudyParams.cardSide, expectedCardSide);
+			await assistant.changeDropdownItem(defStudyParams.cardSide, expectedCardSide);		
 			
 			final expectedDirection = StudyDirection.random;
-			await _chooseDropdownItem(tester, defStudyParams.direction, 
-				expectedDirection);
+			await assistant.changeDropdownItem(defStudyParams.direction, expectedDirection);		
 
             await _applySettings(assistant);
 
@@ -281,19 +280,3 @@ Future<void> _applySettings(WidgetAssistant assistant) async =>
 	assistant.pressButtonDirectlyByLabel(
 		Localizator.defaultLocalization.barScaffoldSettingsPanelApplyingButtonLabel
 	);
-
-Future<void> _chooseDropdownItem(
-	WidgetTester tester, PresentableEnum curValue, PresentableEnum valueToChoose
-) async {
-	final locale = Localizator.defaultLocalization;
-
-	final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
-	final cardSideDropdownFinder = find.widgetWithText(dropDownBtnType, 
-		curValue.present(locale));
-	
-	final widgetAssistant = new WidgetAssistant(tester);
-	await widgetAssistant.tapWidget(cardSideDropdownFinder);
-	
-	await widgetAssistant.tapWidget(
-		find.text(valueToChoose.present(locale)).hitTestable());
-}

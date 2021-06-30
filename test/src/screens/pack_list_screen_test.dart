@@ -213,7 +213,7 @@ void main() {
 			});
 		});
 
-	testWidgets("Imports packs from a JSON-file and shows the newly added packs with and the result of the operation", 
+	testWidgets("Imports packs from a JSON-file and shows the newly added packs with the result of the operation", 
 		(tester) async {
 			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
 			final assistant = new WidgetAssistant(tester);

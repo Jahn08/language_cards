@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../testers/card_editor_tester.dart';
 import '../../utilities/randomiser.dart';
-import '../../utilities/widget_assistant.dart';
 
 void main() {
     
@@ -23,7 +23,7 @@ void main() {
     testWidgets('Removes a phonetic symbol by clicking on the backspace key', (tester) async {
         await _createKeyboard(tester, show: true);
         
-        final expectedSymbols = await new WidgetAssistant(tester).enterRandomTranscription();
+        final expectedSymbols = await new CardEditorTester(tester).enterRandomTranscription();
         var input = expectedSymbols.join('');
 
         do {
@@ -42,7 +42,7 @@ void main() {
     testWidgets('Hides a keyboard by clicking on the done key', (tester) async {
         await _createKeyboard(tester, show: true);
 
-        final expectedSymbols = await new WidgetAssistant(tester).enterRandomTranscription();
+        final expectedSymbols = await new CardEditorTester(tester).enterRandomTranscription();
 
         await _tapIconKey(tester, Icons.done);
 

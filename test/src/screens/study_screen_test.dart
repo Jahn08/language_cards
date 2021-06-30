@@ -225,9 +225,9 @@ void main() {
             final cards = _sortCards(await _fetchPackedCards(tester, packs, wordStorage));
 			final cardToEdit = cards.first;
 			
+			final assistant = new WidgetAssistant(tester);
 			final initialTranslation = cardToEdit.translation;
-			final changedTranslation = 
-				await new CardEditorTester(tester).enterChangedText(initialTranslation);
+			final changedTranslation = await assistant.enterChangedText(initialTranslation);
 
 			await new CancellableDialogTester(tester).assureCancellingDialog();
 			
@@ -238,7 +238,7 @@ void main() {
 			_assureFrontSideRendering(tester, packs, cards, card: storedCard, 
 				expectedIndex: expectedIndex);
 
-            await _reverseCardSide(new WidgetAssistant(tester));
+            await _reverseCardSide(assistant);
             _assureBackSideRendering(tester, packs, cards, card: storedCard, 
 				expectedIndex: expectedIndex, isReversed: true);
 
@@ -258,14 +258,15 @@ void main() {
 			
 			final editorTester = new CardEditorTester(tester);
 			
+			final assistant = new WidgetAssistant(tester);
 			final initialTranslation = cardToEdit.translation;
-			final changedTranslation = await editorTester.enterChangedText(initialTranslation);
+			final changedTranslation = await assistant.enterChangedText(initialTranslation);
 			
 			final initialPack = _findPack(packs, cardToEdit.packId);
 			final changedPack = packs.firstWhere((p) => !p.isNone && p.id != cardToEdit.packId);
 			await editorTester.changePack(changedPack);
 
-			await new WidgetAssistant(tester).tapWidget(CardEditorTester.findSaveButton());
+			await assistant.tapWidget(CardEditorTester.findSaveButton());
 			
 			final storedCard = await wordStorage.find(cardToEdit.id);
             expect(storedCard.translation, changedTranslation);
@@ -276,7 +277,7 @@ void main() {
 				expectedIndex: expectedIndex);
 			AssuredFinder.findOne(label: initialPack.name, shouldFind: false);
 
-            await _reverseCardSide(new WidgetAssistant(tester));
+            await _reverseCardSide(assistant);
             _assureBackSideRendering(tester, packs, cards, card: storedCard, 
 				expectedIndex: expectedIndex, isReversed: true);
 			AssuredFinder.findOne(label: initialTranslation, shouldFind: false);

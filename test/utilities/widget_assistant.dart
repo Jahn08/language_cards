@@ -1,32 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
-import './randomiser.dart';
+import 'package:language_cards/src/models/presentable_enum.dart';
+import 'assured_finder.dart';
+import 'localizator.dart';
 
 class WidgetAssistant {
     WidgetTester tester;
 
     WidgetAssistant(this.tester);
-
-    Future<List<String>> enterRandomTranscription() async {
-        const symbols = EnglishPhoneticKeyboard.phonetic_symbols;
-        final expectedSymbols = [Randomiser.nextElement(symbols),
-            Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
-
-        for (final symbol in expectedSymbols)
-            await _tapSymbolKey(symbol);
-
-        return expectedSymbols;
-    }
-
-    Future<void> _tapSymbolKey(String symbol) async {
-        final foundKey = find.widgetWithText(InkWell, symbol);
-        expect(foundKey, findsOneWidget);
-
-        await tester.tap(foundKey);
-        await pumpAndAnimate();
-    }
-
+    
     Future<void> pumpAndAnimate([int durationMs]) async {
 		final duration = new Duration(milliseconds: durationMs ?? 100);
 
@@ -87,5 +69,34 @@ class WidgetAssistant {
 		on StateError catch (_) { }
 
 		return finder;
+	}
+
+	Future<void> changeDropdownItem(PresentableEnum fromValue, PresentableEnum toValue) async {
+		final locale = Localizator.defaultLocalization;
+
+		final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
+		final dropdownFinder = find.widgetWithText(dropDownBtnType, 
+			fromValue.present(locale));
+		
+		await setDropdownItem(dropdownFinder, toValue);
+	}
+
+	Future<void> setDropdownItem(Finder dropdownFinder, PresentableEnum toValue) async {
+		await tapWidget(dropdownFinder);
+
+		await tapWidget(find.text(toValue.present(Localizator.defaultLocalization)).hitTestable());
+	}
+
+	Future<String> enterChangedText(String initialText, { String changedText }) async {
+		changedText = changedText ?? initialText.substring(1);
+		return await enterText(find.widgetWithText(TextField, initialText), changedText);
+	}
+
+	Future<String> enterText(Finder fieldFinder, String changedText) async {
+		await tester.enterText(fieldFinder, changedText);
+		
+		await pumpAndAnimate();
+
+		return changedText;
 	}
 }
