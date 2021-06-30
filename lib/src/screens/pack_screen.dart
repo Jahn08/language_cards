@@ -170,8 +170,6 @@ class PackScreenState extends State<PackScreen> {
 class PackScreen extends StatefulWidget {
     final int packId;
 
-    final String packName;
-
     final bool refreshed;
     
     final BaseStorage<StoredPack> _storage;
@@ -179,7 +177,7 @@ class PackScreen extends StatefulWidget {
     final DictionaryProvider _provider;
 
     PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
-        { this.packName, this.packId, this.refreshed = false }): 
+        { this.packId, this.refreshed = false }): 
         _storage = storage,
 		_provider = provider;
 

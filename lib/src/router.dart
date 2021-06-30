@@ -115,13 +115,10 @@ class StudyModeRoute {
 class _PackRouteArgs extends _PackStorageRouteArgs {
     final int packId;
 
-    final String packName;
-
     final bool refreshed;
 
     _PackRouteArgs({ BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }): 
         packId = pack?.id,
-        packName = pack?.name ?? '',
         refreshed = refreshed ?? false,
         super(storage);
 }

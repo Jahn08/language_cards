@@ -66,8 +66,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                         final params = route.params;
                         return new PackScreen(params.storage, 
 							new AssetDictionaryProvider(context),
-                            packId: params.packId, packName: params.packName, 
-                            refreshed: params.refreshed);
+                            packId: params.packId, refreshed: params.refreshed);
                     }
                     else if (route is StudyPreparerRoute)
                         return new StudyPreparerScreen(route.params.storage);
