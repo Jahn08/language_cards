@@ -214,8 +214,6 @@ class Router {
             arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
     }
 
-    static goBackToPack(BuildContext context) => _goBackUntil(context, _packRouteName);
-
     static _goBackUntil(BuildContext context, String routeName) => 
         Navigator.popUntil(context, ModalRoute.withName(routeName));
 

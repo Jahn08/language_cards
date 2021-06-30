@@ -77,9 +77,7 @@ main() {
 		final initialPackNumber = (await _fetchPacks(tester, storage)).length;
 
 		final locale = Localizator.defaultLocalization;
-		await new WidgetAssistant(tester).tapWidget(
-			AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel, type: ElevatedButton,
-				shouldFind: true));
+		await new WidgetAssistant(tester).tapWidget(_findSavingBtn());
 
 		expect(find.text(locale.constsEmptyValueValidationError), findsNWidgets(3));
 		expect((await _fetchPacks(tester, storage)).length, initialPackNumber);
@@ -96,10 +94,9 @@ main() {
 		await assistant.setDropdownItem(langDropdownFinders.first, langToChoose);
 		await assistant.setDropdownItem(langDropdownFinders.last, langToChoose);
 
-		final locale = Localizator.defaultLocalization;
-		await assistant.tapWidget(AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel,
-			type: ElevatedButton, shouldFind: true));
+		await assistant.tapWidget(_findSavingBtn());
 
+		final locale = Localizator.defaultLocalization;
 		expect(find.text(locale.packScreenSameTranslationDirectionsValidationError), findsNWidgets(2));
 		expect((await _fetchPacks(tester, storage)).length, initialPackNumber);
 	});
@@ -116,11 +113,10 @@ main() {
 		await assistant.tapWidget(_findLanguageDropdowns().first);
 		await assistant.tapWidget(find.byType(TextFormField));
 		
-		final locale = Localizator.defaultLocalization;
-		await assistant.tapWidget(AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel,
-			type: ElevatedButton, shouldFind: true));
+		await assistant.tapWidget(_findSavingBtn());
 
-		expect(find.text(locale.constsEmptyValueValidationError), findsOneWidget);
+		expect(find.text(Localizator.defaultLocalization.constsEmptyValueValidationError), 
+			findsOneWidget);
 
 		final actualPack = await _findPack(tester, storage, packToEdit.id);
 		expect(actualPack.name == packToEdit.name && actualPack.from == packToEdit.from && 
@@ -139,10 +135,9 @@ main() {
 			if (packToEdit.from != packToEdit.to)
 				await assistant.setDropdownItem(_findLanguageDropdowns().first, packToEdit.to);
 
-			final locale = Localizator.defaultLocalization;
-			await assistant.tapWidget(AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel,
-				type: ElevatedButton, shouldFind: true));
+			await assistant.tapWidget(_findSavingBtn());
 
+			final locale = Localizator.defaultLocalization;
 			expect(find.text(locale.packScreenSameTranslationDirectionsValidationError), findsNWidgets(2));
 
 			final actualPack = await _findPack(tester, storage, packToEdit.id);
@@ -151,22 +146,15 @@ main() {
 		});
 
 	testWidgets('Adds a new pack and returns back to the pack list screen', (tester) async {
-		final locale = Localizator.defaultLocalization;
-		await _testAddingPack(tester, shouldAdd: true,
-			saveBtnSearcher: () => AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel,
-				type: ElevatedButton, shouldFind: true));
+		await _testAddingPack(tester, shouldAdd: true, saveBtnSearcher: _findSavingBtn);
 
-		AssuredFinder.findOne(label: locale.packListScreenTitle, shouldFind: true);
+		AssuredFinder.findOne(label: Localizator.defaultLocalization.packListScreenTitle, 
+			shouldFind: true);
 	});
 	
 	testWidgets('Adds a new pack and goes inside it to add cards', (tester) async {
-		final locale = Localizator.defaultLocalization;
 		final addedPack = await _testAddingPack(tester, shouldAdd: true,
-			saveBtnSearcher: () => AssuredFinder.findOne(
-				label: locale.packScreenSavingAndAddingCardsButtonLabel,
-				type: ElevatedButton, 
-				shouldFind: true
-			));
+			saveBtnSearcher: _findSavingAndAddingBtn);
 		_assureBeingInsidePack(addedPack.name);
 	});
 	
@@ -175,32 +163,39 @@ main() {
 
 	testWidgets('Saves all changes to an existing pack and returns back to the pack list screen', 
 		(tester) async {
-			final locale = Localizator.defaultLocalization;
-			await _testChangingPack(tester, shouldSave: true,
-				savingBtnSearcher: () => AssuredFinder.findOne(label: locale.constsSavingItemButtonLabel,
-					type: ElevatedButton, shouldFind: true));
+			await _testChangingPack(tester, shouldSave: true, savingBtnSearcher: _findSavingBtn);
 
-			AssuredFinder.findOne(label: locale.packListScreenTitle, shouldFind: true);
+			AssuredFinder.findOne(label: Localizator.defaultLocalization.packListScreenTitle, 
+				shouldFind: true);
 		});
 
 	testWidgets('Saves all changes to an existing pack and goes inside it to add cards', 
 		(tester) async {
-			final locale = Localizator.defaultLocalization;
 			final savedPack = await _testChangingPack(tester, shouldSave: true,
-				savingBtnSearcher: () => AssuredFinder.findOne(
-					label: locale.packScreenSavingAndAddingCardsButtonLabel,
-					type: ElevatedButton, shouldFind: true
-				));
+				savingBtnSearcher: _findSavingAndAddingBtn);
 			_assureBeingInsidePack(savedPack.name);
 		});
 
 	testWidgets('Cancels changes to an existing pack when returning back without saving', 
 		(tester) => _testChangingPack(tester, shouldSave: false, savingBtnSearcher: _findBackButton));
 
-	// testWidgets('Navigates inside a new pack and returns back without a possibility to add the pack twice', 
-	//	(tester) async {
+	testWidgets('Navigates inside a new pack and returns back without a possibility to add the pack twice', 
+		(tester) async {
+			final storage = new PackStorageMock();
 
-	// });
+			await _testAddingPack(tester, shouldAdd: true, storage: storage,
+				saveBtnSearcher: _findSavingAndAddingBtn);
+
+			final expectedPacksNumber = (await _fetchPacks(tester, storage)).length;
+
+			final assistant = new WidgetAssistant(tester);
+			await assistant.tapWidget(_findBackButton());
+
+			await assistant.tapWidget(_findSavingBtn());
+
+			final storedPacks = await _fetchPacks(tester, storage);
+			expect(storedPacks.length, expectedPacksNumber);
+		});
 }
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester, { 
@@ -250,36 +245,38 @@ Future<StoredPack> _findPack(WidgetTester tester, PackStorageMock storage, int i
 	tester.runAsync(() => storage.find(id));
 
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { 
-	bool cardWasAdded, PackStorageMock storage, int packId
+	bool cardWasAdded, PackStorageMock storage, String packName
 }) async {
     storage = storage ?? new PackStorageMock();
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		onGenerateRoute: (settings) {
             final route = Router.getRoute(settings);
 
-            if (route == null || route is PackRoute)
+            if (route == null || route is PackListRoute)
                 return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-                        child: new PackScreen(storage, new DictionaryProviderMock(), 
-							packId: route?.params?.packId ?? packId, 
-							refreshed: route?.params?.refreshed ?? false)
-					)
-                );
-            else if (route is CardListRoute)
-                return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-                        child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
-                            cardWasAdded: cardWasAdded))
-                );
-            else if (route is PackListRoute)
-				return new MaterialPageRoute(
 					settings: settings,
 					builder: (context) => new RootWidgetMock(
 						child: new PackListScreen(storage, storage.wordStorage)
 					)
 				);
+            else if (route is CardListRoute)
+                return new MaterialPageRoute(
+                    settings: settings,
+                    builder: (context) => new RootWidgetMock(
+						noBar: true,
+                        child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
+                            cardWasAdded: cardWasAdded))
+                );
+            else if (route is PackRoute)
+				return new MaterialPageRoute(
+                    settings: settings,
+                    builder: (context) => new RootWidgetMock(
+						noBar: true,
+                        child: new PackScreen(storage, new DictionaryProviderMock(), 
+							packId: route.params.packId, 
+							refreshed: route.params.refreshed)
+					)
+                );
 
 			throw new AssertionError('The $route route is unexpected');
         })
@@ -287,14 +284,32 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, {
 
     await tester.pump(new Duration(milliseconds: 500));
 
+	final assistant = new WidgetAssistant(tester);
+	await assistant.tapWidget(packName == null ? 
+		AssuredFinder.findOne(icon: Icons.add_circle, shouldFind: true):
+		AssuredFinder.findOne(type: ListTile, label: packName, shouldFind: true));
+
     return storage;
 }
 
+Finder _findSavingAndAddingBtn() =>
+	_findElevatedBtn(Localizator.defaultLocalization.packScreenSavingAndAddingCardsButtonLabel);
+	
+Finder _findElevatedBtn(String btnLabel) => 
+	AssuredFinder.findOne(
+		label: btnLabel,
+		type: ElevatedButton, 
+		shouldFind: true
+	);
+
+Finder _findSavingBtn() => _findElevatedBtn(Localizator.defaultLocalization.constsSavingItemButtonLabel);
+
 Future<StoredPack> _testAddingPack(WidgetTester tester, { 
 	@required Finder Function() saveBtnSearcher,
-	@required bool shouldAdd
+	@required bool shouldAdd,
+	PackStorageMock storage
 }) async {
-	final storage = await _pumpScreenWithRouting(tester);
+	storage = await _pumpScreenWithRouting(tester, storage: storage);
 	final initialPackNumber = (await _fetchPacks(tester, storage)).length;
 
 	final assistant = new WidgetAssistant(tester);
@@ -337,7 +352,7 @@ Future<StoredPack> _testChangingPack(WidgetTester tester, {
 	final storage = new PackStorageMock();
 	final packToEdit = storage.getRandom();
 			
-	await _pumpScreenWithRouting(tester, storage: storage, packId: packToEdit.id);
+	await _pumpScreenWithRouting(tester, storage: storage, packName: packToEdit.name);
 	
 	final assistant = new WidgetAssistant(tester);
 	final newName = await assistant.enterChangedText(packToEdit.name);

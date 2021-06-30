@@ -79,9 +79,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
             shouldRefreshPack ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context);
         else
-            shouldRefreshPack ? 
-                Router.goToPack(context, pack: widget.pack, refreshed: true): 
-                Router.goBackToPack(context);
+			Router.goToPack(context, pack: widget.pack, refreshed: shouldRefreshPack); 
     }
 
     @override
