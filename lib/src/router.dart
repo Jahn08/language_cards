@@ -22,8 +22,11 @@ class _CardListRouteArgs extends _CardStorageRouteArgs {
 
     final bool cardWasAdded;
 
-    _CardListRouteArgs({ WordStorage storage, bool cardWasAdded, this.pack }):
+    final bool packWasAdded;
+
+    _CardListRouteArgs({ WordStorage storage, bool cardWasAdded, bool packWasAdded, this.pack }):
         cardWasAdded = cardWasAdded ?? false, 
+        packWasAdded = packWasAdded ?? false, 
         super(storage);
 }
 
@@ -166,10 +169,10 @@ class Router {
     }
 
     static goToCardList(BuildContext context, 
-        { BaseStorage<StoredWord> storage, StoredPack pack, bool cardWasAdded }) {
+        { BaseStorage<StoredWord> storage, StoredPack pack, bool cardWasAdded , bool packWasAdded }) {
         Navigator.pushNamed(context, _cardListRouteName, 
             arguments: new _CardListRouteArgs(storage: storage, pack: pack,
-                cardWasAdded: cardWasAdded));
+                cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
     }
 
     static dynamic getRoute(RouteSettings settings) {

@@ -194,6 +194,20 @@ main() {
 			final storedPacks = await _fetchPacks(tester, storage);
 			expect(storedPacks.length, expectedPacksNumber);
 		});
+
+	testWidgets('Navigates inside a new pack and returns back to the pack list displaying the pack', 
+		(tester) async {
+			final storage = new PackStorageMock();
+
+			final addedPack = await _testAddingPack(tester, shouldAdd: true, storage: storage,
+				saveBtnSearcher: _findSavingAndAddingBtn);
+
+			final assistant = new WidgetAssistant(tester);
+			await assistant.tapWidget(_findBackButton());
+			await assistant.tapWidget(_findBackButton());
+
+			AssuredFinder.findOne(type: ListTile, label: addedPack.name, shouldFind: true);
+		});
 }
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester, { 

@@ -123,7 +123,7 @@ class PackScreenState extends State<PackScreen> {
             _buildSaveBtn(locale.constsSavingItemButtonLabel, 
 				(_) => Router.goToPackList(context), isDisabled: !isStateDirty),
             _buildSaveBtn(locale.packScreenSavingAndAddingCardsButtonLabel, 
-                (savedPack) => Router.goToCardList(context, pack: savedPack), 
+                (savedPack) => Router.goToCardList(context, pack: savedPack, packWasAdded: _isNew), 
                 isDisabled: !isStateDirty)
         ]);
         

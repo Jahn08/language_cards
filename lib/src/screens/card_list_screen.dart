@@ -71,7 +71,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     void onGoingBack(BuildContext context) {
-        final shouldRefreshPack = _cardsWereRemoved || widget.cardWasAdded;
+        final shouldRefreshPack = _cardsWereRemoved || widget.cardWasAdded || widget.packWasAdded;
 
         if (widget.pack == null)
             Router.goHome(context);
@@ -129,8 +129,11 @@ class CardListScreen extends ListScreen<StoredWord> {
 
     final bool cardWasAdded;
 
-    CardListScreen(this.storage, { this.pack, bool cardWasAdded }):
-        cardWasAdded = cardWasAdded ?? false;
+    final bool packWasAdded;
+
+    CardListScreen(this.storage, { this.pack, bool cardWasAdded, bool packWasAdded }):
+        cardWasAdded = cardWasAdded ?? false,
+        packWasAdded = packWasAdded ?? false;
 
     @override
     _CardListScreenState createState() => new _CardListScreenState();

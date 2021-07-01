@@ -85,7 +85,7 @@ class RootWidgetMock extends StatelessWidget {
 				builder: (context) => new RootWidgetMock(
 					noBar: noBar,
 					child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
-						cardWasAdded: cardWasAdded))
+						cardWasAdded: cardWasAdded, packWasAdded: route.params.packWasAdded))
 			);
 		else if (route is PackRoute)
 			return new MaterialPageRoute(

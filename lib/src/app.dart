@@ -60,7 +60,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                     else if (route is CardListRoute) {
                         final params = route.params;
                         return new CardListScreen(params.storage, 
-                            pack: params.pack, cardWasAdded: params.cardWasAdded);
+                            pack: params.pack, cardWasAdded: params.cardWasAdded,
+							packWasAdded: params.packWasAdded);
                     }
                     else if (route is PackRoute) {
                         final params = route.params;
