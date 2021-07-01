@@ -1,16 +1,10 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
-import 'package:language_cards/src/screens/card_list_screen.dart';
-import 'package:language_cards/src/screens/main_screen.dart';
-import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
-import 'package:language_cards/src/models/app_params.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
-import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
@@ -263,40 +257,11 @@ PackListScreen _buildPackListScreen({ PackStorageMock storage, int packsNumber }
     
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
     final storage = new PackStorageMock();
-    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
-		onGenerateRoute: (settings) {
-            final route = Router.getRoute(settings);
-
-            if (route == null)
-                return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-						child: new MainScreen(new ContactsParams(
-							fbUserId: Randomiser.nextString()
-						))
-					)
-                );
-            if (route is CardListRoute)
-                return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-                        child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
-                            cardWasAdded: cardWasAdded))
-                );
-            else if (route is PackRoute)
-                return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-                        child: new PackScreen(storage, new DictionaryProviderMock(), 
-							packId: route.params.packId, refreshed: route.params.refreshed))
-                );
-
-            return new MaterialPageRoute(
-                settings: settings,
-                builder: (context) => new RootWidgetMock(child: _buildPackListScreen(storage: storage))
-            );
-        })
-	);
+	await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithRouting(
+		storage: storage, 
+		packListScreenBuilder: () => _buildPackListScreen(storage: storage),
+		cardWasAdded: cardWasAdded
+	));
 
     await tester.pump(new Duration(milliseconds: 500));
 

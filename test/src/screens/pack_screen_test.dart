@@ -4,8 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/language.dart';
-import 'package:language_cards/src/router.dart';
-import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
@@ -245,44 +243,19 @@ Future<StoredPack> _findPack(WidgetTester tester, PackStorageMock storage, int i
 	tester.runAsync(() => storage.find(id));
 
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { 
-	bool cardWasAdded, PackStorageMock storage, String packName
+	PackStorageMock storage, String packName
 }) async {
     storage = storage ?? new PackStorageMock();
-    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
-		onGenerateRoute: (settings) {
-            final route = Router.getRoute(settings);
-
-            if (route == null || route is PackListRoute)
-                return new MaterialPageRoute(
-					settings: settings,
-					builder: (context) => new RootWidgetMock(
-						child: new PackListScreen(storage, storage.wordStorage)
-					)
-				);
-            else if (route is CardListRoute)
-                return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-						noBar: true,
-                        child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
-                            cardWasAdded: cardWasAdded))
-                );
-            else if (route is PackRoute)
-				return new MaterialPageRoute(
-                    settings: settings,
-                    builder: (context) => new RootWidgetMock(
-						noBar: true,
-                        child: new PackScreen(storage, new DictionaryProviderMock(), 
-							packId: route.params.packId, 
-							refreshed: route.params.refreshed)
-					)
-                );
-
-			throw new AssertionError('The $route route is unexpected');
-        })
-	);
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithRouting(
+		storage: storage, 
+		noBar: true,
+		packListScreenBuilder: () => new PackListScreen(storage, storage.wordStorage)
+	));
 
     await tester.pump(new Duration(milliseconds: 500));
+
+	final finder = find.byIcon(Icons.library_books);
+    await new WidgetAssistant(tester).tapWidget(finder);
 
 	final assistant = new WidgetAssistant(tester);
 	await assistant.tapWidget(packName == null ? 
