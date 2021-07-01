@@ -324,8 +324,10 @@ class _StudyScreenState extends State<StudyScreen> {
 					new ElevatedButton(
 						child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
 						onPressed: () async {
-							if (card.incrementProgress())
+							if (card.incrementProgress()) {
 								await widget.storage.upsert([card]);
+								_removeCurrentPageFromCache();
+							}
 
 							_setNextCard();
 						}

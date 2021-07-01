@@ -124,8 +124,8 @@ void main() {
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
         });
 
-    testWidgets('Increases study progress for a card after clicking the Learn button and moves next', 
-      (tester) async {
+    testWidgets('Increases study progress for a card after clicking the Learn button, updates it visually and moves next', 
+		(tester) async {
           	final packStorage = new PackStorageMock();
 
 			final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
@@ -133,25 +133,28 @@ void main() {
 				await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 			var cardToLearn = cards.first;
 
-			if (cardToLearn.studyProgress == WordStudyStage.learned)
+			if ([WordStudyStage.learned, WordStudyStage.familiar].contains(cardToLearn.studyProgress))
 				cardToLearn = await packStorage.wordStorage.updateWordProgress(cardToLearn.id, 
-					WordStudyStage.familiar);
+					WordStudyStage.wellKnown);
 
 			final curStudyProgress = cardToLearn.studyProgress;
 
 			await _pumpScreen(tester, packStorage, packs);
 
-			final learnBtnFinder = AssuredFinder.findOne(
+			final assistant = new WidgetAssistant(tester);
+			await assistant.tapWidget(AssuredFinder.findOne(
 				label: Localizator.defaultLocalization.studyScreenLearningCardButtonLabel,
 				 type: ElevatedButton, 
 				shouldFind: true
-			);
-			await new WidgetAssistant(tester).tapWidget(learnBtnFinder);
+			));
 
 			_assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
 			cardToLearn = await tester.runAsync(() => packStorage.wordStorage.find(cardToLearn.id));
 			expect(cardToLearn.studyProgress - curStudyProgress, 25);
+
+			await _goToPreviousCard(assistant);
+			_assureFrontSideRendering(tester, packs, cards, card: cardToLearn);
       });
 
     testWidgets('Shows the back side of a card when tapping it and the front side of the next one when swiping left', 
