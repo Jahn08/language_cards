@@ -16,6 +16,10 @@ class PartOfSpeech extends PresentableEnum {
 	static const verb = const PartOfSpeech._(10, ['verb', 'v']);
 	static const numeral = const PartOfSpeech._(11, ['numeral', 'num']);
 	static const determiner = const PartOfSpeech._(12, ['determiner', 'det']);
+	static const exclamation = const PartOfSpeech._(13, ['exclamation', 'e']);
+	static const prefix = const PartOfSpeech._(14, ['prefix', 'pref']);
+	static const suffix = const PartOfSpeech._(15, ['suffix', 's']);
+	static const abbreviation = const PartOfSpeech._(16, ['abbreviation', 'ab']);
 
 	final List<String> valueList;
 
@@ -53,6 +57,14 @@ class PartOfSpeech extends PresentableEnum {
 			return locale.partOfSpeechDeterminerName;
 		else if (this == numeral)
 			return locale.partOfSpeechNumeralName;
+		else if (this == exclamation)
+			return locale.partOfSpeechExclamationName;
+		else if (this == abbreviation)
+			return locale.partOfSpeechAbbreviationName;
+		else if (this == prefix)
+			return locale.partOfSpeechPrefixName;
+		else if (this == suffix)
+			return locale.partOfSpeechSuffixName;
 	
 		return locale.partOfSpeechCollocationName;
 	}
