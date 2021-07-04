@@ -8,7 +8,7 @@ class PartOfSpeech extends PresentableEnum {
 	static const collocation = const PartOfSpeech._(2, ['collocation']);
 	static const conjunction = const PartOfSpeech._(3, ['conjunction', 'conj']);
 	static const idiom = const PartOfSpeech._(4, ['idiom']);
-	static const interjection = const PartOfSpeech._(5, ['interjection', 'excl']);
+	static const interjection = const PartOfSpeech._(5, ['interjection', 'e']);
 	static const noun = const PartOfSpeech._(6, ['noun', 'n']);
 	static const participle = const PartOfSpeech._(7, ['participle']);
 	static const preposition = const PartOfSpeech._(8, ['preposition', 'prep']);
@@ -16,10 +16,9 @@ class PartOfSpeech extends PresentableEnum {
 	static const verb = const PartOfSpeech._(10, ['verb', 'v']);
 	static const numeral = const PartOfSpeech._(11, ['numeral', 'num']);
 	static const determiner = const PartOfSpeech._(12, ['determiner', 'det']);
-	static const exclamation = const PartOfSpeech._(13, ['exclamation', 'e']);
-	static const prefix = const PartOfSpeech._(14, ['prefix', 'pref']);
-	static const suffix = const PartOfSpeech._(15, ['suffix', 's']);
-	static const abbreviation = const PartOfSpeech._(16, ['abbreviation', 'ab']);
+	static const prefix = const PartOfSpeech._(13, ['prefix', 'pref']);
+	static const suffix = const PartOfSpeech._(14, ['suffix', 's']);
+	static const abbreviation = const PartOfSpeech._(15, ['abbreviation', 'ab']);
 
 	final List<String> valueList;
 
@@ -57,8 +56,6 @@ class PartOfSpeech extends PresentableEnum {
 			return locale.partOfSpeechDeterminerName;
 		else if (this == numeral)
 			return locale.partOfSpeechNumeralName;
-		else if (this == exclamation)
-			return locale.partOfSpeechExclamationName;
 		else if (this == abbreviation)
 			return locale.partOfSpeechAbbreviationName;
 		else if (this == prefix)

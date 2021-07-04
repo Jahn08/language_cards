@@ -463,8 +463,6 @@
     "@partOfSpeechDeterminerName": {},
     "partOfSpeechNumeralName": "числительное",
     "@partOfSpeechNumeralName": {},
-    "partOfSpeechExclamationName": "восклицание",
-    "@partOfSpeechExclamationName": {},
     "partOfSpeechPrefixName": "префикс",
     "@partOfSpeechPrefixName": {},
     "partOfSpeechSuffixName": "суффикс",

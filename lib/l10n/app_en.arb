@@ -462,8 +462,6 @@
     "@partOfSpeechDeterminerName": {},
     "partOfSpeechNumeralName": "numeral",
     "@partOfSpeechNumeralName": {},
-    "partOfSpeechExclamationName": "exclamation",
-    "@partOfSpeechExclamationName": {},
     "partOfSpeechPrefixName": "prefix",
     "@partOfSpeechPrefixName": {},
     "partOfSpeechSuffixName": "suffix",
