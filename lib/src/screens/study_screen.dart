@@ -82,6 +82,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
 	Future<UserParams> _futureParams;
 
+	int _cardIndexToRemoveFromCache;
 	Map<int, Widget> _pageCache;
 
     @override
@@ -164,7 +165,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
 								setState(() {
 									_cards[_curCardIndex] = updatedCard;
-									_removeCurrentPageFromCache();
+									_removePageFromCache();
 								});
 							}
 						)
@@ -204,7 +205,8 @@ class _StudyScreenState extends State<StudyScreen> {
             _cards.replaceRange(startIndex, _cards.length, listToOrder);
     }
 
-	void _removeCurrentPageFromCache() => _pageCache.remove(_curCardIndex);
+	void _removePageFromCache([int pageIndex]) => 
+		_pageCache.remove(pageIndex ?? _curCardIndex);
 
     Widget _buildLayout(AppLocalizations locale, Size screenSize) =>
 		new Column(
@@ -227,8 +229,15 @@ class _StudyScreenState extends State<StudyScreen> {
             onPageChanged: (index) => _setIndexCard(_getIndexCard(index)),
             itemBuilder: (context, index) {
 
-				if (_pageCache.containsKey(index))
-					return _pageCache[index];
+				if (_pageCache.containsKey(index)) {
+					final cachedPage = _pageCache[index];
+					if (_cardIndexToRemoveFromCache != null || _cardIndexToRemoveFromCache == index) {
+						_removePageFromCache(_cardIndexToRemoveFromCache);
+						_cardIndexToRemoveFromCache = null;
+					}					
+				
+					return cachedPage;
+				}
 
                 final card = _cards[_getIndexCard(index)];
                 return _pageCache[index] = new Column(
@@ -326,7 +335,8 @@ class _StudyScreenState extends State<StudyScreen> {
 						onPressed: () async {
 							if (card.incrementProgress()) {
 								await widget.storage.upsert([card]);
-								_removeCurrentPageFromCache();
+
+								_cardIndexToRemoveFromCache = _curCardIndex;
 							}
 
 							_setNextCard();
@@ -353,7 +363,7 @@ class _StudyScreenState extends State<StudyScreen> {
 						onPressed: () =>
 							setState(() {
 								_cardSide = _nextValue(CardSide.values, _cardSide);
-								_removeCurrentPageFromCache();
+								_removePageFromCache();
 							})
 					)
 				]
