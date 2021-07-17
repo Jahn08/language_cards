@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
-import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
+import 'package:language_cards/src/widgets/input_keyboard.dart';
+import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../testers/card_editor_tester.dart';
@@ -15,7 +16,7 @@ void main() {
         _assertKeyboardIsHidden();
         await _showKeyboard(tester, foundResult);
 
-        EnglishPhoneticKeyboard.phonetic_symbols.forEach((symbol) { 
+        PhoneticKeyboard.getLanguageSpecific().symbols.forEach((symbol) { 
             expect(find.widgetWithText(InkWell, symbol), findsWidgets);
         });
     });
@@ -60,8 +61,8 @@ void main() {
 
 Future<Finder> _createKeyboard(WidgetTester tester, { bool show }) async {
     final fieldKey = new Key(Randomiser.nextString());
-    final fieldWithKeyboard = new KeyboardedField(new EnglishPhoneticKeyboard(''), 
-        new FocusNode(), '', key: fieldKey);
+    final fieldWithKeyboard = new KeyboardedField(
+		PhoneticKeyboard.getLanguageSpecific(initialValue: ''), new FocusNode(), '', key: fieldKey);
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: fieldWithKeyboard));
 
@@ -80,8 +81,8 @@ Future<void> _showKeyboard(WidgetTester tester, Finder foundKeyboard) async {
 }
 
 void _assertKeyboardIsHidden() {
-    expect(find.byType(EnglishPhoneticKeyboard), findsNothing);
-    EnglishPhoneticKeyboard.phonetic_symbols.forEach((symbol) => 
+    expect(find.byType(InputKeyboard), findsNothing);
+    PhoneticKeyboard.getLanguageSpecific().symbols.forEach((symbol) => 
         expect(find.text(symbol), findsNothing));
 } 
 

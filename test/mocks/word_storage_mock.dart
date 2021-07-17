@@ -2,7 +2,7 @@ import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
-import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
+import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'data_provider_mock.dart';
 import 'pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
@@ -59,7 +59,7 @@ class WordStorageMock extends WordStorage {
 		int id, int packId, int parentsOverall, bool hasNoPack = false,
 		String Function(String, int) textGetter 
 	}) {
-        const phoneticSymbols = EnglishPhoneticKeyboard.phonetic_symbols;
+        final phoneticSymbols = PhoneticKeyboard.getLanguageSpecific().symbols;
 
         const studyStages = WordStudyStage.values;
 		final text = Randomiser.nextString();

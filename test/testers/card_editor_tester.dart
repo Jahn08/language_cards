@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
-import 'package:language_cards/src/widgets/english_phonetic_keyboard.dart';
+import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/speaker_button.dart';
 import '../utilities/assured_finder.dart';
 import '../utilities/randomiser.dart';
@@ -71,7 +71,7 @@ class CardEditorTester {
 	}
 
 	Future<List<String>> enterRandomTranscription() async {
-        const symbols = EnglishPhoneticKeyboard.phonetic_symbols;
+        final symbols = PhoneticKeyboard.getLanguageSpecific().symbols;
         final expectedSymbols = [Randomiser.nextElement(symbols),
             Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
 

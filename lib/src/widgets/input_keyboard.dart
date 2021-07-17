@@ -19,6 +19,8 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
         _notifier = new ValueNotifier(initialValue ?? ''),
         super(key: key);
 
+	List<String> get symbols => _symbols.toList();
+
     @override
     Widget build(BuildContext context) {
         const int rows = 4;

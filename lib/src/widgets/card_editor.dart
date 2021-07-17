@@ -2,7 +2,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'popup_text_field.dart';
-import './english_phonetic_keyboard.dart';
+import 'phonetic_keyboard.dart';
 import './keyboarded_field.dart';
 import './loader.dart';
 import './no_translation_snack_bar.dart';
@@ -157,7 +157,10 @@ class CardEditorState extends State<CardEditor> {
 							new SpeakerButton(_pack.from, (speaker) => speaker.speak(_text), 
 							defaultSpeaker: widget._defaultSpeaker)
 						]),
-                new KeyboardedField(new EnglishPhoneticKeyboard(this._transcription), 
+                new KeyboardedField(PhoneticKeyboard.getLanguageSpecific(
+						initialValue: this._transcription,
+						lang: _pack?.from
+					), 
                     _transcriptionFocusNode,
 					locale.cardEditorTranscriptionTextFieldLabel,
                     initialValue: this._transcription,
