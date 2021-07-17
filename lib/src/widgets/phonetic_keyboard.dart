@@ -4,10 +4,11 @@ import './input_keyboard.dart';
 
 class _EnglishPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-        'ʌ', 'ɑ:', 'æ', 'e', 'ə', 'ɛ', 'ɜ:ʳ', 'ɪ', 'i:', 'ɒ', 'ɔ:', 'ʊ', 
-		'u:', 'aɪ', 'aʊ', 'eɪ', 'oʊ', 'ɔɪ', 'eəʳ', 'ɪəʳ', 'ʊəʳ', 'b', 'd', 
-		'f', 'g', 'h', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'p', 'r', 's', 't', 
-        'tʃ', 'θ', 'ð', 'v', 'w', 'z', 'ʒ', 'dʒ', 'ˈ', 'ˌ', '.'
+        'ɑ:', 'ʌ', 'ə', 'æ', 'e', 'ɛ', 'ɜ:ʳ', 'ɪ',  'i', 'i:', 
+		'ɒ', 'ɔ:', 'ʊ', 'u:', 'aɪ', 'aʊ', 'eɪ', 'oʊ', 'ɔɪ', 
+		'eəʳ', 'ɪəʳ', 'ʊəʳ', 'b', 'd', 'dʒ', 'ð', 'f', 'g', 
+		'h', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'p', 'r', 's', 'ʃ',
+		't', 'tʃ', 'θ', 'v', 'w', 'z', 'ʒ', 'ˈ', 'ˌ', '.'
     ];
 
     _EnglishPhoneticKeyboard(String initialValue, { Key key }): 
@@ -16,9 +17,10 @@ class _EnglishPhoneticKeyboard extends InputKeyboard {
 
 class _FrenchPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-        'a', 'ɑ', 'ɑ̃', 'ə', 'œ̃', 'e', 'ɛ', 'ɛː', 'ɛ̃', 'i', 'o', 'ɔ̃', 'ɔ', 'u', 
-		'y', 'ø', 'œ', 'b', 'd', 'dʒ', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'ɲ',   
-		'p', 'ʁ', 's', 'ʃ', 't', 'tʃ', 'v', 'w', 'x', 'z', 'ʒ', 'ɥ', '.', '‿'
+        'a', 'ɑ', 'ɑ̃', 'œ̃', 'e', 'ɛ', 'ɛː', 'ɛ̃', 'ə', 'i', 
+		'o', 'ɔ̃', 'ɔ', 'ø', 'œ', 'œ̃', 'u', 'ɥ', 'y', 'b', 
+		'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'ɲ',   
+		'p', 'ʁ', 's', 'ʃ', 't', 'v', 'w', 'z', 'ʒ', '.', '‿'
     ];
 
     _FrenchPhoneticKeyboard(String initialValue, { Key key }): 
@@ -27,10 +29,10 @@ class _FrenchPhoneticKeyboard extends InputKeyboard {
 
 class _SpanishPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-		'a', 'e', 'ɛ', 'i', 'o', 'u', 'ɣ', 'ʎ',  'ʝ', 'ɟ',   
-		'b', 'd', 'f', 'g', 'j', 'ɟʝ', 'k', 'l', 'm', 'ɱ', 'n', 
-		'ŋ', 'ɲ', 'p', 'r', 'ɾ', 's', 'ʃ', 't', 'ts', 'tʃ', 
-		'v', 'w', 'x', 'z', 'β', 'ð', 'θ', 'ˈ', '.'
+		'a', 'e', 'ɛ', 'i', 'o', 'u', 'ʝ', 'ɟʝ', 'b', 'β', 
+		'd', 'ð', 'f', 'g', 'ɣ', 'j', 'k', 'l', 'ʎ', 'm', 'ɱ', 'n', 
+		'ŋ', 'ɲ', 'p', 'r', 'ɾ', 's', 'ʃ', 't', 'ts', 'tʃ', 'θ', 
+		'v', 'w', 'x', 'z', 'ˈ', '.'
     ];
 
     _SpanishPhoneticKeyboard(String initialValue, { Key key }): 
@@ -39,10 +41,11 @@ class _SpanishPhoneticKeyboard extends InputKeyboard {
 
 class _ItalianPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-		'a', 'e', 'i', 'o', 'ɔ', 'ø', 'u', 'ɛ', 'y', 'ʎ', 'b', 'd', 
-		'dz', 'dʒ', 'f', 'g', 'h', 'j', 'k', 'l', 'm', 'ɱ', 'n', 
-		'ŋ', 'ɲ', 'p', 'r', 's', 'ʃ', 't', 'ts', 'tʃ', 'v', 'w', 
-		'x', 'z', 'ʒ', 'θ', 'ˈ', 'ˌ', '.', ':'
+		'a', 'e', 'ɛ', 'i', 'o', 'ɔ', 'u', 'ø', 'y',  
+		'b', 'd', 'dz', 'dʒ', 'ʒ', 'f', 'g', 'h', 'j', 
+		'k', 'l', 'ʎ', 'm', 'ɱ', 'n', 'ŋ', 'ɲ', 'p', 
+		'r', 's', 'ʃ', 't', 'ts', 'tʃ', 'θ', 'v', 'w', 
+		'x', 'z', 'ˈ', 'ˌ', '.', ':'
     ];
 
     _ItalianPhoneticKeyboard(String initialValue, { Key key }): 
@@ -51,11 +54,12 @@ class _ItalianPhoneticKeyboard extends InputKeyboard {
 
 class _GermanPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-		'a', 'ã', 'ɐ', 'ɐ̯', 'e', 'ɛ', 'ɛ̃', 'ə', 'ɪ', 'i', 'i̯', 'o', 'õ', 'o̯', 'ɔ', 
-		'œ', 'œ̃', 'ø', 'ʊ', 'u', 'u̯', 'ʏ', 'y', 'y̑', 'aɪ', 'aʊ', 'ɔʏ', 'ər',   
-		'ɛɪ', 'ɔʊ', 'b', 'ç', 'd', 'dʒ', 'f', 'g', 'h', 'j', 'k', 'l', 'l̩', 
+		'a', 'ã', 'ɐ', 'ɐ̯', 'e', 'ɛ', 'ɛ̃', 'ə', 'i', 'ɪ', 'i̯',
+		'o', 'õ', 'o̯', 'ɔ', 'œ', 'œ̃', 'ø', 'u', 'ʊ', 'u̯', 'y', 
+		'y̑', 'ʏ', 'aɪ', 'aʊ', 'ɔʏ', 'ər', 'ɛɪ', 'ɔʊ', 'b', 'ç', 
+		'd', 'dʒ', 'ʒ', 'ð', 'f', 'g', 'h', 'j', 'k', 'l', 'l̩', 
 		'm', 'm̩', 'n', 'n̩', 'ŋ', 'p', 'pf', 'r', 'ʁ', 'ɹ', 's', 'ʃ', 
-		't', 'ts', 'tʃ', 'v', 'x', 'z', 'ʒ', 'ð', 'θ', ':', 'ˈ', 'ˌ'
+		't', 'ts', 'tʃ', 'θ', 'v', 'x', 'z', 'ʔ', ':', 'ˈ', 'ˌ'
     ];
 
     _GermanPhoneticKeyboard(String initialValue, { Key key }): 
@@ -64,10 +68,10 @@ class _GermanPhoneticKeyboard extends InputKeyboard {
 
 class _RussianPhoneticKeyboard extends InputKeyboard {
     static const phonetic_symbols = const <String>[
-		'a', 'æ', 'ɐ', 'ə', 'ɛ', 'e', 'ɨ', 'i', 'ɪ', 'ᵻ', 'o', 'ɵ', 
-		'ʊ', 'u', 'ʉ', 'b', 'd', 'dz', 'dʑ', 'f', 'g', 'j', 'k', 'l', 
-		'm', 'n', 'ʐ', 'p', 'r', 's', 'ʂ', 'ɕː', 't', 't͡s', 't͡ɕ', 'v', 
-		'x', 'ɣ', 'γ', 'ʐ', 'ʑː', 'z', 'ʲ', 'ˈ'
+		'a', 'æ', 'ɐ', 'ə', 'e', 'ɛ', 'i', 'ɨ', 'ɪ', 'ᵻ', 'ɵ', 'o',  
+		'ʊ', 'u', 'ʉ', 'b', 'd', 'dz', 'dʑ', 'f', 'g', 'ɣ', 'j', 'k', 
+		'l', 'm', 'n', 'ʐ', 'p', 'r', 's', 'ʂ', 'ɕː', 't', 't͡s', 't͡ɕ', 
+		'v', 'x', 'ʐ', 'ʑː', 'z', 'ʲ', 'ˈ'
 	];
 
     _RussianPhoneticKeyboard(String initialValue, { Key key }): 
