@@ -44,3 +44,4 @@ app.*.map.json
 assets/cfg/secret_params.json
 assets/dictionaries
 test_root/
+android/key.properties
