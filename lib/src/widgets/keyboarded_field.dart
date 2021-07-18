@@ -45,11 +45,16 @@ class KeyboardedField extends StatelessWidget {
                             if (hasFocus)
                                 textFieldFocusNode.requestFocus();
 
+							final ctrl = new TextEditingController(text: curValue);
+							ctrl.selection = new TextSelection.fromPosition(
+								new TextPosition(offset: curValue.length));
                             return new TextFormField(
                                 decoration: new StyledInputDecoration(label),
                                 focusNode: textFieldFocusNode,
-                                controller: new TextEditingController(text: curValue),
+                                controller: ctrl,
                                 readOnly: true,
+								enableInteractiveSelection: false,
+								showCursor: true,
                                 onSaved: (newValue) => _emitOnChangedEvent(newValue),
                                 onEditingComplete: () => _emitOnChangedEvent(curValue)
                             );
