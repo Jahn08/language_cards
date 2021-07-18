@@ -80,10 +80,10 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
             margin: new EdgeInsets.all(2),
             child: symbol,
             decoration: new BoxDecoration(
-                borderRadius: new BorderRadius.all(new Radius.circular(10)),
+                borderRadius: new BorderRadius.all(new Radius.circular(7)),
                 border: Border.all(
                     color: borderColor ?? Colors.grey[300], 
-                    width: 5,
+                    width: 1,
                     style: BorderStyle.solid
                 ),
                 boxShadow: [
@@ -104,8 +104,11 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
             color: fillingColor, 
             onTap: () {
                 final curValue = notifier.value ?? '';
-                if (curValue.isNotEmpty)
-                    updateValue(curValue.replaceFirst(_lastSymbolRegExp, ''));
+                if (curValue.isNotEmpty) {
+					final newValue = curValue.replaceFirst(_lastSymbolRegExp, '');
+                    updateValue(newValue == curValue ? 
+						curValue.substring(0, curValue.length - 1): newValue);
+				}
             }
         ), height, width, borderColor: fillingColor);
     }
