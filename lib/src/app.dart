@@ -17,11 +17,23 @@ import './screens/study_screen.dart';
 import './screens/study_preparer_screen.dart';
 import './widgets/loader.dart';
 
-class App extends StatelessWidget {
+class App extends StatefulWidget {
     
+	@override
+	AppState createState() => new AppState();
+}
+
+class AppState extends State<App> {
+    
+	SettingsBlocProvider _blocProvider;
+
     @override
-    Widget build(BuildContext context) => 
-        new SettingsBlocProvider(child: new _ThemedApp());
+    Widget build(BuildContext context) {
+		if (_blocProvider == null)
+			_blocProvider = new SettingsBlocProvider(child: new _ThemedApp());
+
+		return _blocProvider;
+	}
 }
 
 class _ThemedAppState extends State<_ThemedApp> {
