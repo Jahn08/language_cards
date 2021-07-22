@@ -6,10 +6,21 @@
     "configurations": [
         {
             "program": "lib/main.dart",
-            "name": "language_cards",
+            "name": "language_cards_debug",
             "request": "launch",
             "type": "dart",
             "args": [
+                "--dart-define",
+                "SENTRY_DSN=https://2b7cd6e6aeee40b095a8fb51bc0c4d50@o658654.ingest.sentry.io/5763758"
+            ]
+        },
+        {
+            "program": "lib/main.dart",
+            "name": "language_cards_release",
+            "request": "launch",
+            "type": "dart",
+            "args": [
+                "--release",
                 "--dart-define",
                 "SENTRY_DSN=https://2b7cd6e6aeee40b095a8fb51bc0c4d50@o658654.ingest.sentry.io/5763758"
             ]
