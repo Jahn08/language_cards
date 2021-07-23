@@ -38,6 +38,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
             (stPacks) {
 				_initPacks(stPacks);
 
+				final styler = new Styler(context);
 				return new BarScaffold(locale.studyPreparerScreenTitle,
 					barActions: <Widget>[_buildSelectorButton(_packs, locale)],
 					onNavGoingBack: () => Router.goHome(context),
@@ -53,9 +54,9 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						},
 						child: new Icon(_shouldScrollUpwards ? Icons.arrow_upward_rounded: 
 							Icons.arrow_downward_rounded), 
-						mini: true,
+						mini: styler.isDense,
 						tooltip: locale.listScreenAddingNewItemButtonTooltip,
-						backgroundColor: new Styler(context).floatingActionButtonColor
+						backgroundColor: styler.floatingActionButtonColor
 					): null
 				);
 			} );
@@ -135,9 +136,9 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						onTap: isEnabled ? () => Router.goToStudyMode(context, 
 							packs: includedPacks.map((p) => p.pack).toList(), 
 							studyStageIds: WordStudyStage.fromString(lvl.key, locale)): null,
-						dense: true,
+						dense: new Styler(context).isDense,
 						enabled: isEnabled,
-						visualDensity: VisualDensity.comfortable
+						visualDensity: VisualDensity.adaptivePlatformDensity
 					);
 				}).toList()
         	)

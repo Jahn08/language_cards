@@ -503,7 +503,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	) => new FloatingActionButton(
             onPressed: () => onGoingToItem(buildContext),
             child: new Icon(Icons.add_circle), 
-            mini: true,
+            mini: new Styler(buildContext).isDense,
             tooltip: locale.listScreenAddingNewItemButtonTooltip,
             backgroundColor: new Styler(buildContext).floatingActionButtonColor
         );

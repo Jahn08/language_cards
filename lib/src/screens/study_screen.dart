@@ -13,6 +13,7 @@ import '../models/stored_word.dart';
 import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
 import '../utilities/speaker.dart';
+import '../utilities/styler.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
@@ -85,6 +86,9 @@ class _StudyScreenState extends State<StudyScreen> {
 	int _cardIndexToRemoveFromCache;
 	Map<int, Widget> _pageCache;
 
+	Styler _styler;
+	AppLocalizations _locale;
+
     @override
     initState() {
         super.initState();
@@ -105,6 +109,9 @@ class _StudyScreenState extends State<StudyScreen> {
 
     @override
     Widget build(BuildContext context) {
+		_styler = new Styler(context);
+		_locale = AppLocalizations.of(context);
+
 		if (_futureParams == null)
         	_futureParams = SettingsBlocProvider.of(context).userParams;
 
@@ -123,13 +130,12 @@ class _StudyScreenState extends State<StudyScreen> {
 					shouldTakeAllCards = true;
 				}
 
-				final locale = AppLocalizations.of(context);
 				if (_isStudyOver) {
 					_isStudyOver = false;
 					WidgetsBinding.instance.addPostFrameCallback(
 						(_) => new ConfirmDialog.ok(
-							title: locale.studyScreenStudyEndDialogTitle,
-							content: locale.studyScreenStudyEndDialogContent
+							title: _locale.studyScreenStudyEndDialogTitle,
+							content: _locale.studyScreenStudyEndDialogContent
 						).show(context));
 				
 					shouldTakeAllCards = true;
@@ -139,7 +145,7 @@ class _StudyScreenState extends State<StudyScreen> {
 				_orderCards(shouldTakeAllCards);
 
 				return new BarScaffold(
-					locale.studyScreenTitle((_curCardIndex + 1).toString(), 
+					_locale.studyScreenTitle((_curCardIndex + 1).toString(), 
 						cards.length.toString()),
 					barActions: [
 						new IconButton(
@@ -170,7 +176,7 @@ class _StudyScreenState extends State<StudyScreen> {
 							}
 						)
 					],
-					body: _buildLayout(locale, MediaQuery.of(context).size),
+					body: _buildLayout(MediaQuery.of(context).size),
 					onNavGoingBack: () => Router.goToStudyPreparation(context)
 				);
 			})
@@ -208,11 +214,11 @@ class _StudyScreenState extends State<StudyScreen> {
 	void _removePageFromCache([int pageIndex]) => 
 		_pageCache.remove(pageIndex ?? _curCardIndex);
 
-    Widget _buildLayout(AppLocalizations locale, Size screenSize) =>
+    Widget _buildLayout(Size screenSize) =>
 		new Column(
             children: [
-                _buildRow(child: _buildCardLayout(locale, screenSize), flex: 3),
-                _buildRow(child: _buildButtonPanel(_cards[_curCardIndex], locale, screenSize))
+                _buildRow(child: _buildCardLayout(screenSize), flex: 3),
+                _buildRow(child: _buildButtonPanel(_cards[_curCardIndex], screenSize))
             ]
         );
 
@@ -223,7 +229,7 @@ class _StudyScreenState extends State<StudyScreen> {
             child: child ?? Container()
         );
 
-    Widget _buildCardLayout(AppLocalizations locale, Size screenSize) {
+    Widget _buildCardLayout(Size screenSize) {
         return new PageView.builder(
             controller: _controller,
             onPageChanged: (index) => _setIndexCard(_getIndexCard(index)),
@@ -243,7 +249,7 @@ class _StudyScreenState extends State<StudyScreen> {
                 return _pageCache[index] = new Column(
                     children: [
                         _buildRow(child: _buildPackLabel(_packMap[card.packId], screenSize)),
-                        _buildRow(child: _buildCard(card, locale), flex: 9)
+                        _buildRow(child: _buildCard(card), flex: 9)
                     ]
                 );
             }
@@ -268,20 +274,20 @@ class _StudyScreenState extends State<StudyScreen> {
         );
     }
 
-    Widget _buildCard(StoredWord card, AppLocalizations locale) {
+    Widget _buildCard(StoredWord card) {
        final isFrontSide = _cardSide == CardSide.random ? new Random().nextBool():
             _cardSide == CardSide.front;
 
         return new FlipCard(
-            front: _buildCardSide(card, locale, isFront: isFrontSide),
-            back: _buildCardSide(card, locale, isFront: !isFrontSide)
+            front: _buildCardSide(card, isFront: isFrontSide),
+            back: _buildCardSide(card, isFront: !isFrontSide)
         );
     }
 
-    Widget _buildCardSide(StoredWord card, AppLocalizations locale, { bool isFront }) {
+    Widget _buildCardSide(StoredWord card, { bool isFront }) {
         String subtext = (card.transcription ?? '').isEmpty ? '': '[${card.transcription}]\n';
         if (card.partOfSpeech != null)
-            subtext += '${card.partOfSpeech.present(locale)}';
+            subtext += '${card.partOfSpeech.present(_locale)}';
 
 		const double spaceSize = 10;
         return new Card(
@@ -291,13 +297,11 @@ class _StudyScreenState extends State<StudyScreen> {
                 child: new Container(
                     child: new Column(
                         children: [
-                            _buildStudyLevelRow(card.studyProgress, locale),
+                            _buildStudyLevelRow(card.studyProgress),
                             _buildRow(child: new Center(
                                 child: new ListTile(
-                                    title: _buildCenteredBigText(isFront ? 
-                                        card.text: card.translation),
-                                    subtitle: isFront ? 
-                                        new Text(subtext, textAlign: TextAlign.center): null
+									title: _buildCenteredBigText(isFront ? card.text: card.translation),
+                                    subtitle: isFront ? _buildCenteredBigText(subtext): null
                                 )
                             ), flex: 2)
                         ]
@@ -307,19 +311,18 @@ class _StudyScreenState extends State<StudyScreen> {
         );
     }
 
-    Widget _buildStudyLevelRow(int studyProgress, AppLocalizations locale) => 
+    Widget _buildStudyLevelRow(int studyProgress) => 
         new Row(children: [
             new Container(
                 margin: EdgeInsets.all(5),
-                child: new Text(WordStudyStage.stringify(studyProgress, locale))
+                child: new Text(WordStudyStage.stringify(studyProgress, _locale))
             )
         ]);
 
     Widget _buildCenteredBigText(String data) => 
-        new Text(data, textAlign: TextAlign.center, textScaleFactor: 1.2);
+        new Text(data, textAlign: TextAlign.center, textScaleFactor: _styler.isDense ? 1.2: 1.6);
 
-    Widget _buildButtonPanel(StoredWord card, AppLocalizations locale, Size screenSize) {
-		
+    Widget _buildButtonPanel(StoredWord card, Size screenSize) {
 		return new OrientationBuilder(builder: (_, orientation) {
 			final ratio = orientation == Orientation.landscape ? 6.25: 5.25;
 			return new GridView.count(
@@ -331,7 +334,7 @@ class _StudyScreenState extends State<StudyScreen> {
 				padding: EdgeInsets.all(5),
 				children: [
 					new ElevatedButton(
-						child: _buildCenteredBigText(locale.studyScreenLearningCardButtonLabel),
+						child: _buildCenteredBigText(_locale.studyScreenLearningCardButtonLabel),
 						onPressed: () async {
 							if (card.incrementProgress()) {
 								await widget.storage.upsert([card]);
@@ -343,12 +346,12 @@ class _StudyScreenState extends State<StudyScreen> {
 						}
 					),
 					new ElevatedButton(
-						child: _buildCenteredBigText(locale.studyScreenNextCardButtonLabel),
+						child: _buildCenteredBigText(_locale.studyScreenNextCardButtonLabel),
 						onPressed: _setNextCard
 					),
 					new ElevatedButton(
-						child: _buildCenteredBigText(locale.studyScreenSortingCardButtonLabel(
-							_studyDirection.present(locale)
+						child: _buildCenteredBigText(_locale.studyScreenSortingCardButtonLabel(
+							_studyDirection.present(_locale)
 						)),
 						onPressed: () =>
 							setState(() {
@@ -357,8 +360,8 @@ class _StudyScreenState extends State<StudyScreen> {
 							})
 					),
 					new ElevatedButton(
-						child: _buildCenteredBigText(locale.studyScreenCardSideButtonLabel(
-							_cardSide.present(locale)
+						child: _buildCenteredBigText(_locale.studyScreenCardSideButtonLabel(
+							_cardSide.present(_locale)
 						)),
 						onPressed: () =>
 							setState(() {

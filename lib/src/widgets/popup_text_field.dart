@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'styled_text_field.dart';
+import '../utilities/styler.dart';
 
 class _PopupTextFieldState extends State<PopupTextField> {
 
@@ -41,7 +42,7 @@ class _PopupTextFieldState extends State<PopupTextField> {
 					if (_isValueChosen)
 						_isValueChosen = false;
 					
-					await _setTiles(value);
+					await _setTiles(context, value);
 
 					_toggleOverlay(true);
 				},
@@ -50,11 +51,12 @@ class _PopupTextFieldState extends State<PopupTextField> {
 		);
 	}
 
-	Future<void> _setTiles(String value) async {
+	Future<void> _setTiles(BuildContext context, String value) async {
+		final isDense = new Styler(context).isDense;
 		_tiles = (await (widget.popupItemsBuilder?.call(value) ?? Future.value([])))
 			.map((t) => new ListTile(
 				title: new Text(t), 
-				dense: true,
+				dense: isDense,
 				visualDensity: VisualDensity.comfortable,
 				onTap: () { 
 					_toggleOverlay(false);

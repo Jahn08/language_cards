@@ -15,6 +15,7 @@ import './screens/pack_screen.dart';
 import './screens/slider_screen.dart';
 import './screens/study_screen.dart';
 import './screens/study_preparer_screen.dart';
+import './utilities/styler.dart';
 import './widgets/loader.dart';
 
 class App extends StatefulWidget {
@@ -49,8 +50,27 @@ class _ThemedAppState extends State<_ThemedApp> {
         
 		final enLocale = const Locale('en');
 		final ruLocale = const Locale('ru');
-        return new FutureLoader<UserParams>(_bloc.userParams, (params) {
-            return new MaterialApp(
+		return new FutureLoader<UserParams>(_bloc.userParams, (params) {
+        	ThemeData theme = params.theme == AppTheme.dark ? new ThemeData.dark():
+				new ThemeData.light();
+				
+			if (!Styler.isWindowDense)
+				theme = theme.copyWith(textTheme: theme.textTheme.copyWith(
+					headline1: _copyTextStyleAsScaled(theme.textTheme.headline1),
+					headline2: _copyTextStyleAsScaled(theme.textTheme.headline2),
+					headline3: _copyTextStyleAsScaled(theme.textTheme.headline3),
+					headline4: _copyTextStyleAsScaled(theme.textTheme.headline4),
+					headline5: _copyTextStyleAsScaled(theme.textTheme.headline5),
+					headline6: _copyTextStyleAsScaled(theme.textTheme.headline6),
+					subtitle1: _copyTextStyleAsScaled(theme.textTheme.subtitle1),
+					subtitle2: _copyTextStyleAsScaled(theme.textTheme.subtitle2),
+					bodyText1: _copyTextStyleAsScaled(theme.textTheme.bodyText1),
+					bodyText2: _copyTextStyleAsScaled(theme.textTheme.bodyText2),
+					button: _copyTextStyleAsScaled(theme.textTheme.button),
+					overline: _copyTextStyleAsScaled(theme.textTheme.overline)
+				));
+
+			return new MaterialApp(
 				localizationsDelegates: [
 					AppLocalizations.delegate,
 					GlobalMaterialLocalizations.delegate,
@@ -61,8 +81,7 @@ class _ThemedAppState extends State<_ThemedApp> {
 					enLocale,
 					ruLocale
 				],
-                theme: params.theme == AppTheme.dark ? new ThemeData.dark():
-                    new ThemeData.light(),
+                theme: theme,
                 initialRoute: Router.initialRouteName,
                 onGenerateRoute: (settings) => _buildPageRoute(settings, (context, route) {
                     if (route == null)
@@ -100,6 +119,9 @@ class _ThemedAppState extends State<_ThemedApp> {
     }
 
     void _updateState(_) => setState(() { });
+
+	TextStyle _copyTextStyleAsScaled(TextStyle original) =>
+		original.copyWith(fontSize: (original?.fontSize ?? 14) * 1.3);
 
     MaterialPageRoute _buildPageRoute(RouteSettings settings, 
         Widget Function(BuildContext, dynamic) builder) {
