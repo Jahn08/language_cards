@@ -161,7 +161,7 @@ void main() {
 		final packsToExport = (await _fetchPacks(storage, tester))
 			.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+		await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 			await assistant.tapWidget(exportBtnFinder);
 
@@ -196,8 +196,8 @@ void main() {
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
 			
-			await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-				final importFilePath = await ExporterTester.writeToJsonFile([
+			await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+				final importFilePath = ExporterTester.writeToJsonFile([
 					Randomiser.nextInt(), Randomiser.nextString(), Randomiser.nextInt()]);
 				await _activateImport(assistant, importFilePath);
 
@@ -392,7 +392,7 @@ Future<List<StoredPack>> _testImportingPacks(
 	final packsToExport = ExporterTester.getPacksForExport(storage);
 	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toList();
 
-	await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+	await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 		final importFilePath = await tester.runAsync(() =>
 			new PackExporter(storage.wordStorage).export(packsToExport, Randomiser.nextString()));
 

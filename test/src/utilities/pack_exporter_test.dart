@@ -7,8 +7,8 @@ import '../../utilities/randomiser.dart';
 
 main() {
 
-	test('Exports packs to a JSON-file', () async {
-		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+	testWidgets('Exports packs to a JSON-file', (tester) async {
+		await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 			final packStorage = new PackStorageMock();
 			final packsToExport = ExporterTester.getPacksForExport(packStorage);
 			
@@ -22,9 +22,9 @@ main() {
 		});
 	});
 
-	test('Exports packs to a JSON-file with a numbered name if there is already one named equally', 
-		() async {
-			await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+	testWidgets('Exports packs to a JSON-file with a numbered name if there is already one named equally', 
+		(tester) async {
+			await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 				final packStorage = new PackStorageMock();
 				final packsToExport = ExporterTester.getPacksForExport(packStorage);
 

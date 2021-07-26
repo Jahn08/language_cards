@@ -9,26 +9,27 @@ import '../../utilities/randomiser.dart';
 
 main() {
 
-	test('Imports packs from a JSON-file even if there are already packs with equal names', () async {
-		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-			final packStorage = new PackStorageMock();
-			final packsToExport = ExporterTester.getPacksForExport(packStorage);
-			
-			final filePath = await new PackExporter(packStorage.wordStorage)
-				.export(packsToExport, Randomiser.nextString());
-			await new ExporterTester(filePath).assertImport(packStorage, packsToExport);
+	testWidgets('Imports packs from a JSON-file even if there are already packs with equal names', 
+		(tester) async {
+			await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+				final packStorage = new PackStorageMock();
+				final packsToExport = ExporterTester.getPacksForExport(packStorage);
+				
+				final filePath = await new PackExporter(packStorage.wordStorage)
+					.export(packsToExport, Randomiser.nextString());
+				await new ExporterTester(filePath).assertImport(packStorage, packsToExport);
+			});
 		});
-	});
 
-	test('Imports a pack with no cards from a JSON-file', () async {
-		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
+	testWidgets('Imports a pack with no cards from a JSON-file', (tester) async {
+		await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 			final packStorage = new PackStorageMock();
 			final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(99) + 11);
 			
 			final packProps = emptyPack.toJsonMap(null);
 			packProps.removeWhere((_, val) => val == null);
 
-			final filePath = await ExporterTester.writeToJsonFile([packProps]);
+			final filePath = ExporterTester.writeToJsonFile([packProps]);
 			await new ExporterTester(filePath).assertImport(packStorage, [emptyPack]);
 		});
 	});
@@ -40,9 +41,9 @@ main() {
 		expect(outcome, null);
 	});
 
-	test('Imports nothing from a JSON-file with a wrong format', () async { 
-		await FakePathProviderPlatform.testWithinPathProviderContext(() async {
-			final filePath = await ExporterTester.writeToJsonFile([Randomiser.nextString(), 
+	testWidgets('Imports nothing from a JSON-file with a wrong format', (tester) async { 
+		await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+			final filePath = ExporterTester.writeToJsonFile([Randomiser.nextString(), 
 				Randomiser.nextInt(), Randomiser.nextString()]);
 
 			ImportException err;

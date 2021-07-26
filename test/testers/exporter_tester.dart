@@ -5,8 +5,8 @@ import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
 import 'package:language_cards/src/utilities/path.dart';
-import 'package:path_provider/path_provider.dart';
 import '../mocks/pack_storage_mock.dart';
+import '../utilities/fake_path_provider_platform.dart';
 import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 
@@ -126,8 +126,8 @@ class ExporterTester {
 				importedCards.singleWhere((c) => c.id == storedCard.id), storedCard));
 	}
 
-	static Future<String> writeToJsonFile(dynamic obj) async {
-		final dir = (await getExternalStorageDirectory()).path;
+	static String writeToJsonFile(dynamic obj) {
+		final dir = FakePathProviderPlatform.getExternalStoragePath();
 
 		final jsonFileName = Randomiser.nextString() + '.json';
 		final jsonFile = new File(Path.combine([dir, jsonFileName]));
