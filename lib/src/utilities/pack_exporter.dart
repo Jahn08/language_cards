@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/services.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../data/word_storage.dart';
 import '../models/stored_pack.dart';
@@ -14,7 +15,7 @@ class PackExporter {
 
 	PackExporter(this.storage);
 
-	Future<String> export(List<StoredPack> packs, String filePostfix) async {
+	Future<String> export(List<StoredPack> packs, String filePostfix, AppLocalizations locale) async {
 		final packIds = packs.map((p) => p.id).toList();
 		final cardsByParent = new Map<int, List<StoredWord>>.fromIterable(packIds,
 			key: (id) => id, value: (_) => []);
@@ -31,7 +32,7 @@ class PackExporter {
 			final status = await Permission.storage.request();
 			
 			if (!status.isGranted)
-				throw new Exception('The export file cannot be saved without permissions');
+				throw new Exception(locale.packListScreenExportDialogNoAccessError);
 		}
 
 		int postfix = 0;

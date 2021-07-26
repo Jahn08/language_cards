@@ -123,7 +123,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 					}
 					else {
 						final exportFilePath = await new PackExporter(widget.cardStorage)
-							.export(markedItems.toList(), 'packs');
+							.export(markedItems.toList(), 'packs', locale);
 
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenExportDialogTitle,

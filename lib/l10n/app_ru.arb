@@ -386,6 +386,8 @@
             }
         }
     },
+    "packListScreenExportDialogNoAccessError": "Файл экспорта не может быть сохранён без требуемых разрешений",
+    "@packListScreenExportDialogNoAccessError": {}, 
     "packListScreenImportDialogTitle": "Статус импорта",
     "@packListScreenImportDialogTitle": {}, 
     "packListScreenImportDialogContent": "Импортировано из {filePath}: наборов - {packsNumber}, карточек - {cardsNumber}",
