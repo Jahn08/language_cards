@@ -16,7 +16,7 @@ main() {
 				final packsToExport = ExporterTester.getPacksForExport(packStorage);
 				
 				final filePath = await new PackExporter(packStorage.wordStorage)
-					.export(packsToExport, Randomiser.nextString());
+					.export(packsToExport, Randomiser.nextString(), Localizator.defaultLocalization);
 				await new ExporterTester(filePath).assertImport(packStorage, packsToExport);
 			});
 		});

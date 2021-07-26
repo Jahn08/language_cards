@@ -394,7 +394,8 @@ Future<List<StoredPack>> _testImportingPacks(
 
 	await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
 		final importFilePath = await tester.runAsync(() =>
-			new PackExporter(storage.wordStorage).export(packsToExport, Randomiser.nextString()));
+			new PackExporter(storage.wordStorage)
+				.export(packsToExport, Randomiser.nextString(), Localizator.defaultLocalization));
 
 		await screenTester.activateEditorMode(assistant);
 		

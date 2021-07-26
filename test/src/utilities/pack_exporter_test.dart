@@ -3,6 +3,7 @@ import 'package:language_cards/src/utilities/pack_exporter.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../testers/exporter_tester.dart';
 import '../../utilities/fake_path_provider_platform.dart';
+import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
 main() {
@@ -14,7 +15,7 @@ main() {
 			
 			final filePostfix = Randomiser.nextString();
 			final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-				.export(packsToExport, filePostfix);
+				.export(packsToExport, filePostfix, Localizator.defaultLocalization);
 			
 			final exporterTester = new ExporterTester(expectedFilePath);
 			exporterTester.assertExportFileName(filePostfix);
@@ -29,10 +30,11 @@ main() {
 				final packsToExport = ExporterTester.getPacksForExport(packStorage);
 
 				final filePostfix = Randomiser.nextString();
-				await new PackExporter(packStorage.wordStorage).export(packsToExport, filePostfix);
+				await new PackExporter(packStorage.wordStorage)
+					.export(packsToExport, filePostfix, Localizator.defaultLocalization);
 				
 				final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-					.export(packsToExport, filePostfix);
+					.export(packsToExport, filePostfix, Localizator.defaultLocalization);
 
 				final exporterTester = new ExporterTester(expectedFilePath);
 				exporterTester.assertExportFileName(filePostfix + '_1');
