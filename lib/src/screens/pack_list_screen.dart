@@ -127,7 +127,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenExportDialogTitle,
-							content: locale.packListScreenExportDialogContent(exportFilePath)
+							content: locale.packListScreenExportDialogContent(
+								exportFilePath.replaceFirst(new RegExp('^.*Download'), 'Downloads'))
 						).show(scaffoldContext);
 					}
 				}
