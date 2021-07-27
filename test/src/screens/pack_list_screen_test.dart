@@ -6,13 +6,14 @@ import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
 import '../../mocks/pack_storage_mock.dart';
+import '../../mocks/path_provider_channel_mock.dart';
+import '../../mocks/permission_channel_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/exporter_tester.dart';
 import '../../testers/list_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
-import '../../utilities/fake_path_provider_platform.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
@@ -161,7 +162,7 @@ void main() {
 		final packsToExport = (await _fetchPacks(storage, tester))
 			.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-		await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+		await PathProviderChannelMock.testWithChannel(() async {
 			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 			await assistant.tapWidget(exportBtnFinder);
 
@@ -174,6 +175,55 @@ void main() {
 			await tester.runAsync(() => exporterTester.assertExportedPacks(storage, packsToExport));
 		});
 	});
+
+	testWidgets("Warns about having no permissions for export when a user denies the access", 
+		(tester) async {
+			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
+
+			(await _fetchPacks(storage, tester))
+				.where((p) => selectedPackDic.containsValue(p.name)).toList();
+
+			await PathProviderChannelMock.testWithChannel(() async =>
+				PermissionChannelMock.testWithChannel(() async {
+					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
+					await assistant.tapWidget(exportBtnFinder);
+
+					final exportFailureInfo = _findConfirmationDialogText(tester);
+					expect(exportFailureInfo.contains('permissions'), true);
+				}, noPermissionsByDefault: true, shouldDenyPermissions: true), 
+			arePermissionsRequired: true);
+		});
+
+	testWidgets("Exports selected packs into a JSON-file when a user grants necessary permissions for it", 
+		(tester) async {
+			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+
+			final assistant = new WidgetAssistant(tester);
+			await screenTester.activateEditorMode(assistant);
+			final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
+
+			final packsToExport = (await _fetchPacks(storage, tester))
+				.where((p) => selectedPackDic.containsValue(p.name)).toList();
+
+			await PathProviderChannelMock.testWithChannel(() async =>
+				await PermissionChannelMock.testWithChannel(() async {
+					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
+					await assistant.tapWidget(exportBtnFinder);
+
+					final dialog = DialogTester.findConfirmationDialog(tester);
+					final exportFilePath = (dialog.content as Text).data.split(' ').last;
+					
+					final exporterTester = new ExporterTester(exportFilePath);
+					exporterTester.assertExportFileName('packs');
+					
+					await tester.runAsync(() => exporterTester.assertExportedPacks(storage, packsToExport));
+				}, noPermissionsByDefault: true, shouldDenyPermissions: false), 
+			arePermissionsRequired: true);
+		});
 
 	testWidgets("Warns about a non-existent file when trying to import packs from it", (tester) async {
 		await screenTester.pumpScreen(tester);
@@ -196,7 +246,7 @@ void main() {
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
 			
-			await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+			await PathProviderChannelMock.testWithChannel(() async {
 				final importFilePath = ExporterTester.writeToJsonFile([
 					Randomiser.nextInt(), Randomiser.nextString(), Randomiser.nextInt()]);
 				await _activateImport(assistant, importFilePath);
@@ -392,7 +442,7 @@ Future<List<StoredPack>> _testImportingPacks(
 	final packsToExport = ExporterTester.getPacksForExport(storage);
 	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toList();
 
-	await FakePathProviderPlatform.testWithinPathProviderContext(tester, () async {
+	await PathProviderChannelMock.testWithChannel(() async {
 		final importFilePath = await tester.runAsync(() =>
 			new PackExporter(storage.wordStorage)
 				.export(packsToExport, Randomiser.nextString(), Localizator.defaultLocalization));

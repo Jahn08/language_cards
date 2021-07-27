@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/utilities/path.dart';
 
-class FakePathProviderPlatform {
+class PathProviderChannelMock {
 
 	static const String _rootFolderPath = 'test_root';
 
-	FakePathProviderPlatform._();
+	PathProviderChannelMock._();
 
-	static Future<void> testWithinPathProviderContext(
-		WidgetTester tester, Future<void> Function() action, { bool shouldRequirePermissions }
+	static Future<void> testWithChannel(
+		Future<void> Function() action, { bool arePermissionsRequired }
 	) async {
 		try {
 			_cleanResources();
@@ -18,7 +18,7 @@ class FakePathProviderPlatform {
 			PackExporter.pathProviderChannel.setMockMethodCallHandler((call) {
 				switch (call.method) {
 					case 'isPermissionRequired':
-						return Future.value(shouldRequirePermissions ?? false);
+						return Future.value(arePermissionsRequired ?? false);
 					case 'getDownloadsDirectoryPath':
 						return Future.value(getExternalStoragePath());
 					default:

@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:language_cards/src/data/word_storage.dart';
@@ -135,7 +136,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 				catch (error) {
 					await new ConfirmDialog.ok(
 						title: locale.importExportWarningDialogTitle, 
-						content: error.toString()
+						content: error is FileSystemException ? error.message: error.toString()
 					).show(context);
 
 					rethrow;

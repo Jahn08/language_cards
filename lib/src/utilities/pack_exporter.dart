@@ -32,7 +32,7 @@ class PackExporter {
 			final status = await Permission.storage.request();
 			
 			if (!status.isGranted)
-				throw new Exception(locale.packListScreenExportDialogNoAccessError);
+				throw new FileSystemException(locale.packListScreenExportDialogNoAccessError, file.path);
 		}
 
 		int postfix = 0;

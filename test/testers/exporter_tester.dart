@@ -6,7 +6,7 @@ import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
 import 'package:language_cards/src/utilities/path.dart';
 import '../mocks/pack_storage_mock.dart';
-import '../utilities/fake_path_provider_platform.dart';
+import '../mocks/path_provider_channel_mock.dart';
 import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 
@@ -127,7 +127,7 @@ class ExporterTester {
 	}
 
 	static String writeToJsonFile(dynamic obj) {
-		final dir = FakePathProviderPlatform.getExternalStoragePath();
+		final dir = PathProviderChannelMock.getExternalStoragePath();
 
 		final jsonFileName = Randomiser.nextString() + '.json';
 		final jsonFile = new File(Path.combine([dir, jsonFileName]));
