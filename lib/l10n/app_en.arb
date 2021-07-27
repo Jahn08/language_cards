@@ -291,11 +291,11 @@
     "@importDialogTitle": {},
     "importDialogImportBtnLabel": "Import",
     "@importDialogImportBtnLabel": {},
-    "importDialogFileNameTextFieldLabel": "Import File",
+    "importDialogFileNameTextFieldLabel": "JSON Import File",
     "@importDialogFileNameTextFieldLabel": {},
     "importDialogFileNameTextFieldValidationError": "The extension of an import file must be json",
     "@importDialogFileNameTextFieldValidationError": {},
-    "importDialogFileSelectorBtnLabel": "Choose File",
+    "importDialogFileSelectorBtnLabel": "Choose JSON File",
     "@importDialogFileSelectorBtnLabel": {},
 
     "importExportWarningDialogTitle": "Import/Export Failure",
