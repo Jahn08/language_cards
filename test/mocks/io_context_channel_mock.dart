@@ -1,23 +1,25 @@
 import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:language_cards/src/utilities/pack_exporter.dart';
+import 'package:language_cards/src/utilities/io_context_provider.dart';
 import 'package:language_cards/src/utilities/path.dart';
 
-class PathProviderChannelMock {
+class IOContextChannelMock {
 
 	static const String _rootFolderPath = 'test_root';
 
-	PathProviderChannelMock._();
+	IOContextChannelMock._();
 
 	static Future<void> testWithChannel(
 		Future<void> Function() action, { bool arePermissionsRequired }
 	) async {
+		final channel = IOContextProvider.channel;
+
 		try {
 			_cleanResources();
 			
-			PackExporter.pathProviderChannel.setMockMethodCallHandler((call) {
+			channel.setMockMethodCallHandler((call) {
 				switch (call.method) {
-					case 'isPermissionRequired':
+					case 'isStoragePermissionRequired':
 						return Future.value(arePermissionsRequired ?? false);
 					case 'getDownloadsDirectoryPath':
 						return Future.value(getExternalStoragePath());
@@ -29,7 +31,7 @@ class PathProviderChannelMock {
 			await action?.call();
 		}
 		finally {
-			PackExporter.pathProviderChannel.setMockMethodCallHandler(null);
+			channel.setMockMethodCallHandler(null);
 			_cleanResources();
 		}
 	}

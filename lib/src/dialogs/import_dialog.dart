@@ -6,6 +6,7 @@ import '../data/base_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
+import '../utilities/io_context_provider.dart';
 import '../utilities/pack_importer.dart';
 import '../widgets/styled_text_field.dart';
 import 'cancellable_dialog.dart';
@@ -16,6 +17,8 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
     final _key = new GlobalKey<FormState>();
 
 	String _importFilePath;
+
+	bool _isJsonMimeSupported;
 
 	@override
 	Widget build(BuildContext context) {
@@ -62,11 +65,14 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 					new ElevatedButton(
 						child: new Text(locale.importDialogFileSelectorBtnLabel),
 						onPressed: () async {
-							final fileResult = await FilePicker.platform.pickFiles(
+							if (_isJsonMimeSupported == null)
+								_isJsonMimeSupported = await IOContextProvider.isFileExtensionSupported(_jsonExtension);
+
+							final fileResult = await (_isJsonMimeSupported ? FilePicker.platform.pickFiles(
 								allowedExtensions: [_jsonExtension],
-								type: FileType.custom,
-								withData: true
-							);
+								type: FileType.custom
+							): FilePicker.platform.pickFiles());
+							
 							if (fileResult == null)
 								return;
 								

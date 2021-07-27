@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/services.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../data/word_storage.dart';
 import '../models/stored_pack.dart';
+import '../utilities/io_context_provider.dart';
 import '../utilities/path.dart';
 
 class PackExporter {
-
-	static const MethodChannel pathProviderChannel = const MethodChannel('directory_path_provider');
 
 	final WordStorage storage;
 
@@ -24,11 +22,12 @@ class PackExporter {
 			.forEach((c) => cardsByParent[c.packId].add(c));
 
 		final contents = jsonEncode(packs.map((p) => p.toJsonMap(cardsByParent[p.id])).toList());
-		final dirPath = await _getDownloadDirPath();
+		final dirPath = await IOContextProvider.getDownloadDirPath();
 		final fileName = 'lang_cards_' + filePostfix;
 		File file = new File(_compileFullFileName(dirPath, fileName));
 
-		if ((await _isPermissionRequired()) && !(await Permission.storage.isGranted)) {
+		if ((await IOContextProvider.isStoragePermissionRequired()) && 
+			!(await Permission.storage.isGranted)) {
 			final status = await Permission.storage.request();
 			
 			if (!status.isGranted)
@@ -43,10 +42,6 @@ class PackExporter {
 		file.writeAsStringSync(contents, flush: true);
 		return file.path;
 	}
-
-	Future<bool> _isPermissionRequired() => pathProviderChannel.invokeMethod('isPermissionRequired');
-
-	Future<String> _getDownloadDirPath() => pathProviderChannel.invokeMethod('getDownloadsDirectoryPath');
 
 	_compileFullFileName(String dirPath, String fileName) => 
 		Path.combine([dirPath, fileName + '.json']);
