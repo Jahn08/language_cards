@@ -19,7 +19,7 @@ void main() {
 	
     screenTester.testDismissingItems();
 
-	testWidgets('Switches to the search mode for cards groupped by a pack', (tester) async {
+	testWidgets('Switches to the search mode for cards grouped by a pack', (tester) async {
 		final packStorage = new PackStorageMock(cardsNumber: 70);
 		final pack = (await tester.runAsync(() => packStorage.fetch()))
 			.firstWhere((p) => !p.isNone && p.cardsNumber > 0);

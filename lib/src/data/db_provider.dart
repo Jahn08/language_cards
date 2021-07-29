@@ -102,14 +102,14 @@ class DbProvider extends DataProvider {
             ));
     }
 
-    String _composeInFilterClause(String fieldName, List<dynamic> groupValues) {
+    String _composeInFilterClause(String fieldName, List<dynamic> values) {
         String whereInExpr;
 
-		final nonEmptyValueCount = _getNonNullValues(groupValues).length;
+		final nonEmptyValueCount = _getNonNullValues(values).length;
 		if (nonEmptyValueCount > 0)
         	whereInExpr = '$fieldName IN (${List.filled(nonEmptyValueCount, '?').join(', ')})';
 
-		if (nonEmptyValueCount == groupValues.length)
+		if (nonEmptyValueCount == values.length)
 			return whereInExpr;
 
 		final whereNullExpr = '$fieldName IS NULL';
@@ -121,18 +121,51 @@ class DbProvider extends DataProvider {
 
 	String _joinWithOrOperator(Iterable items) => items.join(' OR ');
 
-    Future<List<DataGroup>> groupBy(String tableName, 
-        { @required String groupField, List<dynamic> groupValues }) {
-            final filterClause = groupValues == null || groupValues.isEmpty ? 
-				null: _composeInFilterClause(groupField, groupValues);
+	Future<int> count(String tableName, { Map<String, dynamic> filters }) {
+		return _perform(tableName, () async {
+			final res = await _db.query(tableName, 
+				columns: ['COUNT(*) ${DataGroup.lengthField}'],
+				where: _composeFilterClause(filters),
+				whereArgs: _getFilterValues(filters));
+			return res.single[DataGroup.lengthField] as int;
+		});
+	}
+
+    Future<List<DataGroup>> groupBy(String tableName, { 
+		@required String groupField, List<dynamic> groupValues, Map<String, dynamic> filters 
+	}) {
+			filters = filters ?? {};
+			if (groupValues == null || groupValues.isEmpty) 
+				filters[groupField] = groupValues;
+
             return _perform(tableName, () async {
-                final groupClause = _composeGroupClause(tableName, groupFields: [groupField], 
-                    filterClause: filterClause);
-                final res = await _db.rawQuery(groupClause, _getNonNullValues(groupValues));
+                final groupClause = _composeGroupClause(tableName, 
+					groupFields: [groupField], 
+                    filterClause: _composeFilterClause(filters));
+                final res = await _db.rawQuery(groupClause, _getFilterValues(filters));
 
                 return res.map((v) => new DataGroup(v)).toList();
             });
         }
+
+	String _composeFilterClause(Map<String, dynamic> filters) {
+		return filters == null || filters.isEmpty ? null:
+			_joinWithAndOperator(filters.entries.map((entry) {
+				if (entry.value is String)
+					return '${entry.key} LIKE ?';
+
+				return _composeInFilterClause(entry.key, 
+					entry.value is Iterable<dynamic> ? entry.value: [entry.value]);
+			}));
+	}
+
+	List<dynamic> _getFilterValues(Map<String, dynamic> filters) {
+		return filters == null || filters.isEmpty ? null: 
+			_getNonNullValues(filters.values.fold<List<dynamic>>([], (prevEl, el) {
+				el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
+				return prevEl;
+			}));
+	}
 
     String _composeGroupClause(String tableName, { 
         @required List<String> groupFields, String filterClause }) { 
@@ -168,19 +201,8 @@ class DbProvider extends DataProvider {
                 limit: take,
                 offset: skip,
                 orderBy: orderBy,
-                where: filters == null || filters.isEmpty ? null: 
-                    _joinWithAndOperator(filters.entries.map((entry) {
-						if (entry.value is String)
-							return '${entry.key} LIKE ?';
-
-                        return _composeInFilterClause(entry.key, 
-							entry.value is Iterable<dynamic> ? entry.value: [entry.value]);
-                    })),
-                whereArgs: filters == null || filters.isEmpty ? null: 
-                    _getNonNullValues(filters.values.fold<List<dynamic>>([], (prevEl, el) {
-                        el is Iterable<dynamic> ? prevEl.addAll(el): prevEl.add(el);
-                        return prevEl;
-                    }))
+                where: _composeFilterClause(filters),
+                whereArgs: _getFilterValues(filters)
             ));
         }
 

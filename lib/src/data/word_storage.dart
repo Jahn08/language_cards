@@ -38,9 +38,18 @@ class WordStorage extends BaseStorage<StoredWord> {
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) => 
         values.map((w) => new StoredWord.fromDbMap(w)).toList();
 
-    Future<Map<int, int>> groupByParent(List<int> parentIds) async {
+	Future<int> count([int parentId, String textFilter]) async {
+		if (parentId == null)
+			return await connection.count(entityName, 
+				filters: addTextFilterClause(textFilter: textFilter));
+
+		return (await groupByParent([parentId], textFilter))[parentId];
+	}
+
+    Future<Map<int, int>> groupByParent([List<int> parentIds, String textFilter]) async {
         final groups = (await connection.groupBy(entityName, 
-            groupField: StoredWord.packIdFieldName, groupValues: parentIds));
+            groupField: StoredWord.packIdFieldName, groupValues: parentIds, 
+			filters: addTextFilterClause(textFilter: textFilter)));
         return new Map<int, int>.fromIterable(groups, 
             key: (g) => g[StoredWord.packIdFieldName], value: (g) => g.length);
     }

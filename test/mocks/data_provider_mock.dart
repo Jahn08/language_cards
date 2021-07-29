@@ -15,6 +15,10 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 	}
 
 	@override
+	Future<int> count(String tableName, { Map<String, dynamic> filters }) =>
+		Future.value(_getFilteredItemProps(filters).length);
+
+	@override
 	Future<List<int>> add(String tableName, List<Map<String, dynamic>> entities) {
 		int newId = (items..sort((a, b) => a.id.compareTo(b.id))).last.id;
 		final newItems = entities.map((e) {
@@ -44,19 +48,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 	Future<List<Map<String, dynamic>>> fetch(String tableName, {
 		@required String orderBy, int take, int skip, Map<String, dynamic> filters
 	}) {
-		const String anySymbolPattern = '%';
-
-		var propItems = items.map((i) => i.toDbMap());
-		if (filters != null && filters.isNotEmpty)
-			propItems = propItems.where((i) => 
-				filters.entries.every((f) {
-					if (f.value is List) 
-						return f.value.contains(i[f.key]);
-					else if (f.value is String && f.value.endsWith(anySymbolPattern))
-						return i[f.key].startsWith(f.value.split(anySymbolPattern).first);
-
-					return i[f.key] == f.value;
-				}));
+		var propItems = _getFilteredItemProps(filters);
 
 		if (orderBy != null && orderBy.isNotEmpty)
 			propItems = propItems.toList()..sort((a, b) => a[orderBy].compareTo(b[orderBy]));
@@ -70,6 +62,24 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		return Future.value(propItems.toList());
 	}
 
+	Iterable<Map<String, dynamic>> _getFilteredItemProps(Map<String, dynamic> filters) {
+		var propItems = items.map((i) => i.toDbMap());
+		if (filters != null && filters.isNotEmpty) {
+			const String anySymbolPattern = '%';
+			propItems = propItems.where((i) => 
+				filters.entries.every((f) {
+					if (f.value is List) 
+						return f.value.contains(i[f.key]);
+					else if (f.value is String && f.value.endsWith(anySymbolPattern))
+						return i[f.key].startsWith(f.value.split(anySymbolPattern).first);
+
+					return i[f.key] == f.value;
+				}));
+		}
+	
+		return propItems;
+	}
+
 	@override
 	Future<Map<String, dynamic>> findById(String tableName, dynamic id) {
 		final item = items.singleWhere((p) => p.id == id, orElse: null);
@@ -78,20 +88,21 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	@override
 	Future<List<DataGroup>> groupBy(String tableName, { 
-		@required String groupField, List<dynamic> groupValues 
-	}) => groupBySeveral(tableName, groupFields: [groupField], 
-			groupValues: { groupField: groupValues });
+		@required String groupField, List<dynamic> groupValues, Map<String, dynamic> filters
+	}) => _groupBySeveral(tableName, groupFields: [groupField], groupValues: { groupField: groupValues },
+		filters: filters);
 
-	@override
-	Future<List<DataGroup>> groupBySeveral(String tableName, { 
-		@required List<String> groupFields, Map<String, List<dynamic>> groupValues
+	Future<List<DataGroup>> _groupBySeveral(String tableName, { 
+		@required List<String> groupFields, 
+		Map<String, List<dynamic>> groupValues,
+		Map<String, dynamic> filters
 	}) {
 		groupValues = groupValues ?? {};
 			
 		final intFields = _getIntFields();
 		final groupFieldsOverall = groupFields.length;
 		const valSeparator = '|';
-		return Future.value(items.map((i) => i.toDbMap()).fold<Map<String, int>>({}, 
+		return Future.value(_getFilteredItemProps(filters).fold<Map<String, int>>({}, 
 			(map, i) {
 				final vals = groupFields
 					.where((f) => !groupValues.containsKey(f) || groupValues[f].contains(i[f]))
@@ -117,6 +128,11 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 				return new DataGroup(obj);
 			}).toList());
 	}
+
+	@override
+	Future<List<DataGroup>> groupBySeveral(String tableName, { 
+		@required List<String> groupFields, Map<String, List<dynamic>> groupValues
+	}) => _groupBySeveral(tableName, groupFields: groupFields, groupValues: groupValues);
 
 	List<String> _getIntFields() {
 		if (_intFields == null)

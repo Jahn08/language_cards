@@ -23,11 +23,7 @@ abstract class BaseStorage<T extends StoredEntity> {
     @protected
     Future<List<T>> fetchInternally({ int skipCount, int takeCount, 
         String orderBy, String textFilter, Map<String, List<dynamic>> filters }) async {
-			final inFilters = new Map<String, dynamic>.from(filters ?? {});
-
-			if (textFilter != null && textFilter.isNotEmpty)
-				inFilters[textFilterFieldName] = '$textFilter%';
-
+			final inFilters = addTextFilterClause(filters: filters, textFilter: textFilter);
             final wordValues = await connection.fetch(entityName, 
                 take: takeCount, 
                 filters: inFilters,
@@ -35,6 +31,15 @@ abstract class BaseStorage<T extends StoredEntity> {
                 skip: skipCount);
             return convertToEntity(wordValues);
         }
+
+	@protected
+	Map<String, dynamic> addTextFilterClause({ Map<String, dynamic> filters, String textFilter }) {
+		final inFilters = new Map<String, dynamic>.from(filters ?? {});
+		if (textFilter != null && textFilter.isNotEmpty)
+			inFilters[textFilterFieldName] = '$textFilter%';
+
+		return inFilters;
+	}
 
 	@protected
 	String get textFilterFieldName;

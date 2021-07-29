@@ -11,8 +11,10 @@ abstract class DataProvider {
 
     Future<int> delete(String tableName, List<dynamic> ids);
     
+	Future<int> count(String tableName, { Map<String, dynamic> filters });
+
     Future<List<DataGroup>> groupBy(String tableName, 
-        { @required String groupField, List<dynamic> groupValues });
+        { @required String groupField, List<dynamic> groupValues, Map<String, dynamic> filters });
 
     Future<List<DataGroup>> groupBySeveral(String tableName, 
         { @required List<String> groupFields, Map<String, List<dynamic>> groupValues });
