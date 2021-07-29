@@ -37,8 +37,12 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     }
 
     @override
-    Future<List<StoredPack>> fetchNextItems(int skipCount, int takeCount, String text) => 
-        widget.storage.fetch(skipCount: skipCount, takeCount: takeCount, textFilter: text);
+    Future<List<StoredPack>> fetchNextItems(int skipCount, int takeCount, String text) {
+		if (skipCount > 0)
+			return Future.value([]);
+
+        return widget.storage.fetch(textFilter: text);
+	} 
   
     @override
     void deleteItems(List<StoredPack> items) {
