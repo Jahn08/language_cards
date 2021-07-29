@@ -129,10 +129,44 @@
         "description": "Label for a button accepting an action clarified by a dialog"
     },
 
-    "constsSelectAll": "Выбрать все",
-    "@constsSelectAll": {},
-    "constsUnselectAll": "Убрать все",
-    "@constsUnselectAll": {},
+    "constsSelectAll": "Выбрать все {itemsCount}",
+    "@constsSelectAll": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            }
+        }
+    },
+    "constsUnselectAll": "Убрать все {itemsCount}",
+    "@constsUnselectAll": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            }
+        }
+    },
+    "constsSelectSome": "Выбрать {itemsCount}/{itemsOverall}",
+    "@constsSelectSome": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            },
+            "itemsOverall": {
+                "type": "String"
+            }
+        }
+    },
+    "constsUnselectSome": "Убрать {itemsCount}/{itemsOverall}",
+    "@constsUnselectSome": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            },
+            "itemsOverall": {
+                "type": "String"
+            }
+        }
+    },
     "constsEmptyValueValidationError": "Поле не может быть пустым",
     "@constsEmptyValueValidationError": {},
     "constsSavingItemButtonLabel": "Сохранить",

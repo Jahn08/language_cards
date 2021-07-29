@@ -12,6 +12,12 @@ import '../widgets/one_line_text.dart';
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     bool _cardsWereRemoved = false;
 
+	int _loadedItemsCount;
+
+	String _curTextIndex;
+
+	Map<String, int> _itemsByTextCount = {};
+
     @override
     Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
 		final translationText = new OneLineText(item.translation);
@@ -46,10 +52,22 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
     @override
-    Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount, String text) =>
-        widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
+    Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount, String text) async {
+        final items = await widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
             parentIds: _parentIds, text: text);
-  
+		_loadedItemsCount = skipCount + items.length;
+		_curTextIndex = text;
+
+		if (!_itemsByTextCount.containsKey(text)) {
+			if (_loadedItemsCount < takeCount)
+				_itemsByTextCount[text] = _loadedItemsCount;
+			else
+				_itemsByTextCount[text] = await widget.storage.count(widget.pack?.id, text);
+		}
+
+		return items;
+	}
+
 	List<int> get _parentIds => widget.pack == null ? null: [widget.pack.id];
 
     @override
@@ -120,6 +138,17 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 	@override
 	Future<Map<String, int>> getFilterIndexes() => 
 		widget.storage.groupByTextIndexAndParent(_parentIds);
+
+	@override
+	String getSelectorBtnLabel(bool allSelected, AppLocalizations locale) {
+		final itemsOverall = _itemsByTextCount[_curTextIndex];
+		if (_loadedItemsCount == itemsOverall)
+			return super.getSelectorBtnLabel(allSelected, locale);
+
+		return allSelected ? 
+			locale.constsUnselectSome(_loadedItemsCount.toString(), itemsOverall.toString()): 
+			locale.constsSelectSome(_loadedItemsCount.toString(), itemsOverall.toString()); 
+	}
 }
 
 class CardListScreen extends ListScreen<StoredWord> {

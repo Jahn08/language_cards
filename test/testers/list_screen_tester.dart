@@ -11,7 +11,7 @@ import '../utilities/widget_assistant.dart';
 
 class ListScreenTester<TEntity extends StoredEntity> {
 
-	static const _searcherModeThreshold = 10;
+	static const _searcherModeThreshold = ListScreen.searcherModeItemsThreshold;
 
     final ListScreen<TEntity> Function([int]) _screenBuilder;
     
@@ -481,7 +481,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			(tester) async {
 				final storage = await _pumpScreenWithEnoughItems(tester, 
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold,
-					itemsNumber: 10);
+					itemsNumber: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
 				

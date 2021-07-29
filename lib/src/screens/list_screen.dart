@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/base_storage.dart';
-import '../consts.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/iconed_button.dart';
@@ -36,8 +35,6 @@ class _BottomBar extends StatelessWidget {
 abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
     extends State<TWidget> {
     static const int _removalTimeoutMs = 2000;
-
-    static const int _itemsPerPage = 30;
 
     bool _isEndOfData = false;
     bool _canFetch = false;
@@ -99,7 +96,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
     Future<List<TItem>> _fetchNextItems([String text]) => 
-        fetchNextItems(_pageIndex++ * _itemsPerPage, _itemsPerPage, text);
+        fetchNextItems(_pageIndex++ * ListScreen.itemsPerPage, ListScreen.itemsPerPage, text);
 
     @protected
     Future<List<TItem>> fetchNextItems(int skipCount, int takeCount, String text);
@@ -134,7 +131,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
 	bool get _isSearchModeAvailable => 
-		_curFilterIndex != null ||  _items.length > _itemsPerPage / 3;
+		_curFilterIndex != null ||  _items.length > ListScreen.searcherModeItemsThreshold;
 
     @protected
     String get title;
@@ -231,7 +228,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			),
 			new IconedButton(
 				icon: new Icon(Icons.select_all),
-				label: Consts.getSelectorLabel(allSelected, locale),
+				label: getSelectorBtnLabel(allSelected, locale),
 				onPressed: () {
 					if (allSelected)
                         setState(() => _itemsMarkedInEditor.clear());
@@ -250,6 +247,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     } 
         
 	Icon get _deleteIcon => new Icon(Icons.delete);
+
+	@protected
+	String getSelectorBtnLabel(bool allSelected, AppLocalizations locale) {
+		final itemsOverall = _items.length.toString();
+		return allSelected ? locale.constsUnselectAll(itemsOverall): 
+			locale.constsSelectAll(itemsOverall);
+	}
 
 	@protected
 	void clearItemsMarkedInEditor() => _itemsMarkedInEditor.clear();
@@ -321,6 +325,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 		_pageIndex = 0;
 		_items.clear();
+		_itemsMarkedInEditor.clear();
 
 		await _fetchItems(text);
 	
@@ -523,5 +528,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 }
 
 abstract class ListScreen<T extends StoredEntity> extends StatefulWidget {
+	static const int itemsPerPage = 100;
+
+    static const int searcherModeItemsThreshold = 10;
+
 	BaseStorage<T> get storage;
 }

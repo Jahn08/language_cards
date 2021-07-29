@@ -129,10 +129,44 @@
         "description": "Label for a button accepting an action clarified by a dialog"
     },
 
-    "constsSelectAll": "Select All",
-    "@constsSelectAll": {},
-    "constsUnselectAll": "Unselect All",
-    "@constsUnselectAll": {},
+    "constsSelectAll": "Select All {itemsCount}",
+    "@constsSelectAll": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            }
+        }
+    },
+    "constsUnselectAll": "Unselect All {itemsCount}",
+    "@constsUnselectAll": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            }
+        }
+    },
+    "constsSelectSome": "Select {itemsCount}/{itemsOverall}",
+    "@constsSelectSome": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            },
+            "itemsOverall": {
+                "type": "String"
+            }
+        }
+    },
+    "constsUnselectSome": "Unselect {itemsCount}/{itemsOverall}",
+    "@constsUnselectSome": {
+        "placeholders": {
+            "itemsCount": {
+                "type": "String"
+            },
+            "itemsOverall": {
+                "type": "String"
+            }
+        }
+    },
     "constsEmptyValueValidationError": "The field cannot be empty",
     "@constsEmptyValueValidationError": {},
     "constsSavingItemButtonLabel": "Save",
