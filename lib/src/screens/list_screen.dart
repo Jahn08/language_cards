@@ -250,7 +250,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	@protected
 	String getSelectorBtnLabel(bool allSelected, AppLocalizations locale) {
-		final itemsOverall = _items.length.toString();
+		final itemsOverall = _removableItems.length.toString();
 		return allSelected ? locale.constsUnselectAll(itemsOverall): 
 			locale.constsSelectAll(itemsOverall);
 	}
