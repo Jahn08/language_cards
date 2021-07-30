@@ -316,8 +316,12 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	@protected
 	Future<void> refetchItems({ String text, bool isForceful, bool shouldInitIndices }) async {
-		if (!(isForceful ?? false) && _curFilterIndex == text)
+		if (!(isForceful ?? false) && _curFilterIndex == text) {
+			if (_curFilterIndex == null)
+				return;
+
 			text = null;
+		}
 
 		_deleteEmptyFilterIndex();
 
