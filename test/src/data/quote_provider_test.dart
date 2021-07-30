@@ -7,8 +7,9 @@ main() {
 	test('Retrieves quotes from the dictionary for distinct locales', () {
 		final defLocale = Localizator.defaultLocalization;
 		final firstQuote = QuoteProvider.getNextQuote(defLocale);
-		final secondQuote = QuoteProvider.getNextQuote(defLocale);
-		expect(firstQuote.key != secondQuote.key, true);
+		
+		var secondQuote;
+		while ((secondQuote = QuoteProvider.getNextQuote(defLocale)).key == firstQuote.key) {}
 
 		final rusLocale = Localizator.russianLocalization;
 		final firstRusQuote = QuoteProvider.getNextQuote(rusLocale);
