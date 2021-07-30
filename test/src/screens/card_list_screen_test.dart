@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import 'package:language_cards/src/screens/list_screen.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/word_storage_mock.dart';
 import '../../testers/dialog_tester.dart';
@@ -25,7 +27,7 @@ void main() {
 			.firstWhere((p) => !p.isNone && p.cardsNumber > 0);
 		final wordStorage = packStorage.wordStorage;
 
-		final grouppedScreenTester = _buildScreenTester(wordStorage, pack);
+		final groupedScreenTester = _buildScreenTester(wordStorage, pack);
 		final childCards = await tester.runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]));
 		
 		int index = 0;
@@ -34,7 +36,7 @@ void main() {
 			id: e.id, packId: e.packId, partOfSpeech: e.partOfSpeech, studyProgress: e.studyProgress, 
 			transcription: e.transcription, translation: e.translation)).toList()));
 
-		await grouppedScreenTester.testSwitchingToSearchMode(tester, 
+		await groupedScreenTester.testSwitchingToSearchMode(tester, 
 			newEntityGetter: (index) => WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
 			itemsLengthGetter: () => Future.value(childCards.length),
 			indexGroupsGetter: (_) async {
@@ -128,6 +130,21 @@ void main() {
             await _operateResettingProgressDialog(assistant, shouldConfirm: true, 
                 assureNoDialog: true);
         });
+
+	testWidgets('Selects all cards on a page and scrolls down until others get available to select them too', 
+        (tester) async {
+			final packsStorage = new PackStorageMock(cardsNumber: (ListScreen.itemsPerPage * 1.5).toInt());
+			await _testSelectingOnPage(tester, packsStorage.wordStorage);
+        });
+
+	testWidgets('Selects all grouped cards on a page and scrolls down until others get available to select them too', 
+        (tester) async {
+			final packsStorage = new PackStorageMock(
+				cardsNumber: (ListScreen.itemsPerPage * 2.1).toInt(),
+				packsNumber: 2
+			);
+			await _testSelectingOnPage(tester, packsStorage.wordStorage, packsStorage.getRandom());
+        });
 }
 
 ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, StoredPack pack]) {
@@ -199,3 +216,28 @@ Future<int> _getIndexOfFirstWordWithProgress(WidgetTester tester,
             
         return wordWithProgressIndex;
     }
+
+Future<void> _testSelectingOnPage(
+	WidgetTester tester, WordStorageMock storage, [StoredPack pack]
+) async {
+	final inScreenTester = _buildScreenTester(storage, pack);
+	await inScreenTester.pumpScreen(tester);
+
+	final assistant = new WidgetAssistant(tester);
+	await inScreenTester.activateEditorMode(assistant);
+	await inScreenTester.selectAll(assistant);
+
+	final expectedCardNumberStr = (await tester.runAsync(() => 
+		pack == null ? storage.fetch(): storage.fetchFiltered(parentIds: [pack.id]))).length.toString();
+	expect(inScreenTester.getSelectorBtnLabel(tester),
+		Localizator.defaultLocalization.constsUnselectSome(
+			ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
+
+	await inScreenTester.scrollDownListView(assistant, find.byType(CheckboxListTile), 25);
+	expect(inScreenTester.getSelectorBtnLabel(tester),
+		Localizator.defaultLocalization.constsSelectAll(expectedCardNumberStr));
+	inScreenTester.assureSelectionForAllTilesInEditor(tester, onlyForSomeItems: true);
+
+	await inScreenTester.selectAll(assistant);
+	inScreenTester.assureSelectionForAllTilesInEditor(tester, selected: true);
+}

@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/models/stored_entity.dart';
 import 'package:language_cards/src/screens/list_screen.dart';
+import 'package:language_cards/src/widgets/iconed_button.dart';
 import 'dialog_tester.dart';
 import '../mocks/root_widget_mock.dart';
 import '../utilities/assured_finder.dart';
@@ -42,7 +43,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
             _tryFindingEditorRemoveButton(shouldFind: true);
             _tryFindingEditorSelectButton(shouldFind: true);
 
-            _assureSelectionForAllTilesInEditor(tester);
+            assureSelectionForAllTilesInEditor(tester);
 
             await deactivateEditorMode(assistant);
 
@@ -57,16 +58,22 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
         testWidgets(_buildDescription('selects and unselects all items in the editor mode'), 
             (tester) async {
-                await pumpScreen(tester);
+                final storage = await pumpScreen(tester);
                 
                 final assistant = new WidgetAssistant(tester);
                 await activateEditorMode(assistant);
+				
+				await selectAll(assistant);
+				assureSelectionForAllTilesInEditor(tester, selected: true);
 
-				await _selectAll(assistant);
-                _assureSelectionForAllTilesInEditor(tester, true);
+				final itemsOverall = (await tester.runAsync(() => storage.count()));
+                expect(getSelectorBtnLabel(tester), 
+					Localizator.defaultLocalization.constsUnselectAll(itemsOverall.toString()));
 
-				await _selectAll(assistant);
-                _assureSelectionForAllTilesInEditor(tester);
+				await selectAll(assistant);
+                assureSelectionForAllTilesInEditor(tester);
+                expect(getSelectorBtnLabel(tester), 
+					Localizator.defaultLocalization.constsSelectAll(itemsOverall.toString()));
             });
 
         testWidgets(_buildDescription('removes nothing when no items have been selected in the editor mode'), 
@@ -95,7 +102,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
         testWidgets(_buildDescription('removes selected items in the editor mode'), (tester) async {
             final itemsToRemove = await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
 
-            _assureSelectionForAllTilesInEditor(tester);
+            assureSelectionForAllTilesInEditor(tester);
 
             for (final item in itemsToRemove.entries)
                 AssuredFinder.findOne(type: ListTile, label: item.value);
@@ -120,7 +127,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				).map((t) => new MapEntry(index++, _extractTitle(tester, t.title))));
 
 				await activateEditorMode(assistant);
-				await _selectAll(assistant);
+				await selectAll(assistant);
 
 				return itemsToCheck;
 			});
@@ -144,7 +151,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
                 await activateEditorMode(assistant);
 
-                _assureSelectionForAllTilesInEditor(tester);
+                assureSelectionForAllTilesInEditor(tester);
             });
     }
 
@@ -184,10 +191,15 @@ class ListScreenTester<TEntity extends StoredEntity> {
     Future<void> deactivateEditorMode(WidgetAssistant assistant) =>
         assistant.tapWidget(_tryFindingEditorDoneButton(shouldFind: true));
 
-    Finder _assureSelectionForAllTilesInEditor(WidgetTester tester, [bool selected = false]) {
+    Finder assureSelectionForAllTilesInEditor(WidgetTester tester, { 
+		bool selected = false, bool onlyForSomeItems = false
+	}) {
         final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
         final tiles = tester.widgetList<CheckboxListTile>(tilesFinder);
-        expect(tiles.where((w) => w.onChanged != null).every((w) => w.value), selected);
+
+		final enabledItems = tiles.where((w) => w.onChanged != null);
+        expect(onlyForSomeItems ? enabledItems.any((w) => w.value == selected): 
+			enabledItems.every((w) => w.value == selected), true);
 
         return tilesFinder;
     }
@@ -415,7 +427,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				final tileFinders = filteredTilesAssurer();
 				
-				await _scrollDownListView(assistant, tileFinders);
+				await scrollDownListView(assistant, tileFinders);
 				
 				filteredTilesAssurer();
 
@@ -604,18 +616,72 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await chooseFilterIndex(assistant, indexGroups.first.key);
 
 				final tilesFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
-				await _scrollDownListView(assistant, tilesFinder);
+				await scrollDownListView(assistant, tilesFinder);
 				
 				await chooseFilterIndex(assistant, indexGroups.last.key);
 
 				ScrollController scroller = _retrieveListViewScroller(tester, tilesFinder);
 				expect(scroller.offset, scroller.position.minScrollExtent);
 				
-				await _scrollDownListView(assistant, tilesFinder);
+				await scrollDownListView(assistant, tilesFinder);
 				await deactivateSearcherMode(assistant);
 
 				scroller = _retrieveListViewScroller(tester, tilesFinder);
 				expect(scroller.offset, scroller.position.minScrollExtent);
+			});
+
+		final selectAndAssureSelection = (WidgetAssistant assistant, int expectedItemsOverall) async {
+			await selectAll(assistant);
+
+			final tester = assistant.tester;
+			expect(getSelectorBtnLabel(tester),
+				Localizator.defaultLocalization.constsUnselectAll(expectedItemsOverall.toString()));
+			assureSelectionForAllTilesInEditor(tester, selected: true);
+		};
+
+		testWidgets(_buildDescription('resets selection and a number of items available for selection when changing an index filter'), 
+			(tester) async {
+				final storage = await _pumpScreenWithEnoughItems(tester, 
+					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
+
+				final indexGroups = await _getIndexGroups(tester, storage);
+			
+				final assistant = new WidgetAssistant(tester);
+				await activateEditorMode(assistant);
+				await _activateSearchMode(assistant);
+
+				final firstIndexGroup = indexGroups.first;
+				await chooseFilterIndex(assistant, firstIndexGroup.key);
+				expect(getSelectorBtnLabel(tester),
+					Localizator.defaultLocalization.constsSelectAll(firstIndexGroup.value.toString()));
+
+				await selectAndAssureSelection(assistant, firstIndexGroup.value);
+
+				final lastIndexGroup = indexGroups.last;
+				await chooseFilterIndex(assistant, lastIndexGroup.key);
+				assureSelectionForAllTilesInEditor(tester, selected: false);
+
+				await selectAndAssureSelection(assistant, lastIndexGroup.value);
+			});
+
+		testWidgets(_buildDescription('does not reset selection and a number of items available for selection when exiting the search mode without choosing any indexes'), 
+			(tester) async {
+				final storage = await _pumpScreenWithEnoughItems(tester, 
+					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
+
+				await _getIndexGroups(tester, storage);
+			
+				final assistant = new WidgetAssistant(tester);
+				await activateEditorMode(assistant);
+				await _activateSearchMode(assistant);
+
+				final overallItems = (await tester.runAsync(() => storage.count()));
+				await selectAndAssureSelection(assistant, overallItems);
+
+				await deactivateSearcherMode(assistant);
+				assureSelectionForAllTilesInEditor(tester, selected: true);
+				expect(getSelectorBtnLabel(tester),
+					Localizator.defaultLocalization.constsUnselectAll(overallItems.toString()));
 			});
 	}
 
@@ -716,13 +782,22 @@ class ListScreenTester<TEntity extends StoredEntity> {
 	}
 	
 	Future<void> _deleteAllItemsInEditor(WidgetAssistant assistant) async {
-		await _selectAll(assistant);
+		await selectAll(assistant);
 
 		await deleteSelectedItems(assistant);
 	}
 
-	Future<void> _selectAll(WidgetAssistant assistant) =>
+	Future<void> selectAll(WidgetAssistant assistant) =>
 		assistant.tapWidget(_tryFindingEditorSelectButton(shouldFind: true));
+
+	String getSelectorBtnLabel(WidgetTester tester) =>
+		tester.widget<Text>(find.descendant(
+			of: find.ancestor(
+				of: _tryFindingEditorSelectButton(shouldFind: true), 
+				matching: find.byType(IconedButton)
+			), 
+			matching: find.byType(Text)
+		)).data;
 
 	Future<void> deleteSelectedItems(WidgetAssistant assistant, {
 		bool shouldCancel = false, bool shouldAccept = false, bool shouldNotWarn = false
@@ -778,14 +853,14 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		final topTiles = tester.widgetList<ListTile>(tileFinders);
 		final titles = topTiles.map((t) => _extractTitle(tester, t.title)).toList();
 		
-		await _scrollDownListView(new WidgetAssistant(tester), tileFinders);
+		await scrollDownListView(new WidgetAssistant(tester), tileFinders);
 		final bottomTiles = tester.widgetList<ListTile>(tileFinders);
 		titles.addAll(bottomTiles.map((t) => _extractTitle(tester, t.title)));
 		
 		expect(titles.any((t) => !t.startsWith(filterIndex)), true);
 	}
 
-	Future<void> _scrollDownListView(WidgetAssistant assistant, Finder childFinder, [int iterations]) 
+	Future<void> scrollDownListView(WidgetAssistant assistant, Finder childFinder, [int iterations]) 
 		async {
 			iterations = iterations ?? 5;
 			int tries = 0;

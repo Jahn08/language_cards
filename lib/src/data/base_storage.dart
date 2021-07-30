@@ -20,6 +20,10 @@ abstract class BaseStorage<T extends StoredEntity> {
     Future<List<T>> fetch({ String textFilter, int skipCount, int takeCount }) => 
         fetchInternally(textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
 
+	Future<int> count({ String textFilter }) {
+		return connection.count(entityName, filters: addTextFilterClause(textFilter: textFilter));
+	}
+
     @protected
     Future<List<T>> fetchInternally({ int skipCount, int takeCount, 
         String orderBy, String textFilter, Map<String, List<dynamic>> filters }) async {

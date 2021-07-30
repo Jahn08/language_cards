@@ -38,10 +38,10 @@ class WordStorage extends BaseStorage<StoredWord> {
     List<StoredWord> convertToEntity(List<Map<String, dynamic>> values) => 
         values.map((w) => new StoredWord.fromDbMap(w)).toList();
 
-	Future<int> count([int parentId, String textFilter]) async {
+	@override
+	Future<int> count({ int parentId, String textFilter }) async {
 		if (parentId == null)
-			return await connection.count(entityName, 
-				filters: addTextFilterClause(textFilter: textFilter));
+			return super.count(textFilter: textFilter);
 
 		return (await groupByParent([parentId], textFilter))[parentId];
 	}

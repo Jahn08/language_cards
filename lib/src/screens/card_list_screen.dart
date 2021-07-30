@@ -62,7 +62,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 			if (_loadedItemsCount < takeCount)
 				_itemsByTextCount[text] = _loadedItemsCount;
 			else
-				_itemsByTextCount[text] = await widget.storage.count(widget.pack?.id, text);
+				_itemsByTextCount[text] = await widget.storage.count(
+					parentId: widget.pack?.id, 
+					textFilter: text
+				);
 		}
 
 		return items;

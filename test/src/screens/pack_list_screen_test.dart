@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
+import 'package:language_cards/src/screens/list_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
@@ -269,9 +270,8 @@ void main() {
 	
 	testWidgets("Imports packs, adds a new search index and goes to the default search index", (tester) async {
 		final storage = new PackStorageMock();
-	    final inScreenTester = new ListScreenTester('Pack', 
-			([_]) => _buildPackListScreen(storage: storage));
-
+	    final inScreenTester = _buildScreenTester(storage);
+		
 		final indexes = await inScreenTester.testSwitchingToSearchMode(tester, 
 			newEntityGetter: PackStorageMock.generatePack, 
 			shouldKeepInSearchMode: true
@@ -297,6 +297,27 @@ void main() {
 
 		await inScreenTester.deactivateEditorMode(assistant);
 	});
+
+	testWidgets('Selects all existent packs even if there are more than should be available by default', 
+        (tester) async {
+			final itemsOverall = (ListScreen.itemsPerPage * 1.25).toInt();
+            final storage = new PackStorageMock(packsNumber: itemsOverall);
+            final inScreenTester = _buildScreenTester(storage);
+            await inScreenTester.pumpScreen(tester);
+
+            final assistant = new WidgetAssistant(tester);
+			await inScreenTester.activateEditorMode(assistant);
+			await inScreenTester.selectAll(assistant);
+
+			final selectorLabel = inScreenTester.getSelectorBtnLabel(tester);
+			expect(selectorLabel, Localizator.defaultLocalization.constsUnselectAll(itemsOverall.toString()));
+
+			await inScreenTester.scrollDownListView(assistant, find.byType(CheckboxListTile), 25);
+			final updatedSelectorLabel = inScreenTester.getSelectorBtnLabel(tester);
+			expect(selectorLabel, updatedSelectorLabel);
+
+			inScreenTester.assureSelectionForAllTilesInEditor(tester, selected: true);
+        });
 }
 
 PackListScreen _buildPackListScreen({ PackStorageMock storage, int packsNumber }) {
@@ -518,3 +539,6 @@ String _findConfirmationDialogText(WidgetTester tester) {
 	final dialog = DialogTester.findConfirmationDialog(tester);
 	return (dialog.content as Text).data;
 }
+
+ListScreenTester<StoredPack> _buildScreenTester(PackStorage storage) =>
+	new ListScreenTester<StoredPack>('Pack', ([_]) => _buildPackListScreen(storage: storage));
