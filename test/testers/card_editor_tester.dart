@@ -30,7 +30,7 @@ class CardEditorTester {
 		expect(packLabelFinder, findsOneWidget);
 		
 		final packLabel = tester.widget<Text>(packLabelFinder);
-		expect(packLabel.data.endsWith(pack?.name ?? StoredPack.noneName), true);
+		expect(packLabel.data.endsWith(pack?.name ?? StoredPack.none.name), true);
 	}
 
 	static Finder findPackButton() => 

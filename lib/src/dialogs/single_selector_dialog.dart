@@ -5,20 +5,21 @@ import '../widgets/dialog_list_view.dart';
 import '../widgets/loader.dart';
 
 abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
-    final BuildContext _context;
+    
+	@protected
+	final BuildContext context;
 
     final String _title;
     
 	final bool isShrunk;
 
-    SingleSelectorDialog(BuildContext context, String title, { this.isShrunk }):
-        _context = context,
+    SingleSelectorDialog(this.context, String title, { this.isShrunk }):
         _title = title,
         super();
 
     Future<T> showAsync(Future<List<T>> futureItems) {
         return showDialog(
-            context: _context,
+            context: context,
             builder: (dialogContext) {
                 return new FutureBuilder(
                     future: futureItems,
@@ -37,7 +38,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 		new DialogListView(
 			isShrunk: isShrunk,
 			title: new ListTile(
-				title: new Text(_title, style: new Styler(_context).titleStyle)
+				title: new Text(_title, style: new Styler(context).titleStyle)
 			), 
 			children: children,
 			buttons: buttons
@@ -45,7 +46,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 
     Widget _buildDialog(List<T> items) =>
 		_createDialogView(items.map((w) => _buildDialogOption(w)).toList(), 
-			[new Center(child: buildCancelBtn(_context))]);
+			[new Center(child: buildCancelBtn(context))]);
 
     Widget _buildDialogOption(T item) => 
 		new ShrinkableSimpleDialogOption(
@@ -54,7 +55,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 				subtitle: getItemSubtitle(item),
 				trailing: getItemTrailing(item)
 			), 
-			onPressed: () => returnResult(_context, item),
+			onPressed: () => returnResult(context, item),
 			isShrunk: isShrunk
     	);
 
@@ -62,7 +63,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     Future<T> show(List<T> items) {
         items = items ?? <T>[];
         return items.length > 0 ? showDialog(
-            context: _context,
+            context: context,
             builder: (_) => _buildDialog(items)
         ) : Future.value(null);
     } 

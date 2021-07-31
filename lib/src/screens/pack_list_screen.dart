@@ -26,7 +26,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         new CardNumberIndicator(item.cardsNumber);
     
     @override
-    Widget getItemTitle(StoredPack item) => new OneLineText(item.name);
+    Widget getItemTitle(StoredPack item) => new OneLineText(item.getLocalisedName(context));
     
     @override
     void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
@@ -63,7 +63,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		final locale = AppLocalizations.of(context);
 		final jointNames = filledPackNames.join(', ');
 		final content = locale.packListScreenRemovingNonEmptyPacksDialogContent(
-			jointNames, StoredPack.noneName);
+			jointNames, locale.storedPackNonePackName);
 		final outcome = await new ConfirmDialog(
 			title: locale.packListScreenRemovingNonEmptyPacksDialogTitle, 
 			content: content, 

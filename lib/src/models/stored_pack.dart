@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'language.dart';
 import 'stored_entity.dart';
 import 'stored_word.dart';
@@ -12,9 +14,9 @@ class StoredPack extends StoredEntity {
 
     static const _cardsFieldName = 'cards';
 
-    static const String noneName = 'None'; 
+    static const String _noneName = 'None'; 
 
-    static final StoredPack none = new StoredPack(noneName);
+    static final StoredPack none = new StoredPack(_noneName);
 
     final String name;
 
@@ -43,7 +45,7 @@ class StoredPack extends StoredEntity {
 
     set cardsNumber(int value) => _cardsNumber = _getNonNegativeNumber(value);
 
-    bool get isNone => name == noneName && id == null;
+    bool get isNone => name == _noneName && id == null;
 
     @override
     Map<String, dynamic> toDbMap({ bool excludeIds }) {
@@ -68,6 +70,9 @@ class StoredPack extends StoredEntity {
 
 	@override
 	String get textData => this.name;
+
+	String getLocalisedName(BuildContext context) => 
+		isNone ? AppLocalizations.of(context).storedPackNonePackName: name;
 
 	Map<String, dynamic> toJsonMap(List<StoredWord> cards) {
 		final packProps = toDbMap(excludeIds: true);

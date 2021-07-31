@@ -22,7 +22,7 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
 			children: [
 				item.isNone ? new TranslationIndicator.empty(): 
 					new TranslationIndicator(item.from, item.to),
-				new Text(item.name)
+				new Text(item.getLocalisedName(context))
 			]
 		);
 

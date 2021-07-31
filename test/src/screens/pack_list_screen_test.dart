@@ -50,10 +50,10 @@ void main() {
 
     testWidgets("Renders an unremovable link for a list of cards without a pack", (tester) async {
         await screenTester.pumpScreen(tester);
-        _findPackTileByName(StoredPack.noneName);
+        _findPackTileByName(_nonePackName);
 
         await screenTester.activateEditorMode(new WidgetAssistant(tester));
-        _findPackTileByName(StoredPack.noneName);
+        _findPackTileByName(_nonePackName);
     });
 
     testWidgets("Doesn't update a number of cards for the none pack without changes in it", (tester) async {
@@ -344,7 +344,7 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
 
 Future<StoredPack> _getFirstPackWithEnoughCards(PackStorageMock storage, WidgetTester tester) async =>
 	(await _fetchPacks(storage, tester))
-		.firstWhere((p) => p.cardsNumber > 0 && p.cardsNumber < 8 && p.name != StoredPack.noneName);
+		.firstWhere((p) => p.cardsNumber > 0 && p.cardsNumber < 8 && p.name != _nonePackName);
 
 Future<List<StoredPack>> _fetchPacks(PackStorageMock storage, WidgetTester tester) =>    
 	tester.runAsync<List<StoredPack>>(() => storage.fetch());
@@ -401,7 +401,7 @@ Future<void> _goToCardList(WidgetAssistant assistant, String packName) async {
     expect(tileWithCardsFinder, findsOneWidget);
     await assistant.tapWidget(tileWithCardsFinder);
 
-    if (packName == StoredPack.noneName) 
+    if (packName == _nonePackName) 
         return;
 
     final cardListBtnFinder = find.byIcon(Icons.filter_1);
@@ -420,7 +420,7 @@ Finder _findPackTileByName(String name) {
 Future<void> _goBackToPackList(WidgetAssistant assistant, String packName) async {
     await _goBack(assistant);
 
-    if (packName == StoredPack.noneName) 
+    if (packName == _nonePackName) 
         return;
 
     await _goBack(assistant);
@@ -454,7 +454,7 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 }
 
 Future<StoredPack> _getNonePack(PackStorageMock storage, WidgetTester tester) async => 
-	(await _fetchPacks(storage, tester)).firstWhere((p) => p.name == StoredPack.noneName);
+	(await _fetchPacks(storage, tester)).firstWhere((p) => p.name == _nonePackName);
 
 Future<List<StoredPack>> _testImportingPacks(
 	WidgetAssistant assistant, PackStorageMock storage, ListScreenTester screenTester
@@ -542,3 +542,5 @@ String _findConfirmationDialogText(WidgetTester tester) {
 
 ListScreenTester<StoredPack> _buildScreenTester(PackStorage storage) =>
 	new ListScreenTester<StoredPack>('Pack', ([_]) => _buildPackListScreen(storage: storage));
+
+String get _nonePackName => StoredPack.none.name;

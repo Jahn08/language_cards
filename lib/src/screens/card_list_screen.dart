@@ -82,7 +82,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     String get title {
-        final packName = widget.pack?.name;        
+        final packName = widget.pack?.getLocalisedName(context);        
         return (packName?.isEmpty ?? true) ? 
 			AppLocalizations.of(context).cardListScreenWithoutPackTitle: packName;
     }
