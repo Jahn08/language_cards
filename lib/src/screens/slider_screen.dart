@@ -150,7 +150,7 @@ class CardHelpScreen extends _SliderScreen {
 					locale.listScreenBottomSnackBarUndoingActionLabel
 				);
 			case 4:
-				return locale.helpCardScreenAddingSlideDescription;
+				return locale.helpCardScreenAddingSlideDescription(locale.storedPackNonePackName);
 			case 5:
 				return locale.helpCardScreenWordTextSlideDescription;
 			case 6:
@@ -199,7 +199,8 @@ class PackHelpScreen extends _SliderScreen {
 					locale.listScreenBottomSnackBarUndoingActionLabel
 				);
 			case 5:
-				return locale.helpPackScreenCardRelocationSlideDescription;
+				return locale.helpPackScreenCardRelocationSlideDescription(
+					locale.storedPackNonePackName);
 			case 6:
 				return locale.helpPackScreenAddingSlideDescription(
 					locale.packScreenSavingAndAddingCardsButtonLabel);
@@ -244,5 +245,5 @@ class StudyHelpScreen extends _SliderScreen {
 	}
 
 	static String _stringifyEnumValues(Iterable<PresentableEnum> values, AppLocalizations locale) =>
-		values.map((d) => d.present(locale)).join(', ');
+		values.map((d) => d.present(locale)).join('/');
 }
