@@ -19,7 +19,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     @override
     Future<List<StoredPack>> fetch({ String textFilter, int skipCount, int takeCount }) 
         async {
-            final packs = await _fetchInternally(
+            final packs = await fetchInternally(
 				textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
 
             final isFirstRequest = skipCount == null || skipCount == 0;
@@ -36,9 +36,12 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 	@protected
 	WordStorage buildWordStorage() => new WordStorage();
 
-    Future<List<StoredPack>> _fetchInternally({ String textFilter, int takeCount, int skipCount }) =>
-        super.fetchInternally(textFilter: textFilter, skipCount: skipCount, 
-			takeCount: takeCount, orderBy: StoredPack.nameFieldName);
+	@override
+    Future<List<StoredPack>> fetchInternally({ 
+		int skipCount, int takeCount, String orderBy, String textFilter, 
+		Map<String, List<dynamic>> filters 
+	}) => super.fetchInternally(skipCount: skipCount, takeCount: takeCount,
+		orderBy: orderBy ?? StoredPack.nameFieldName, filters: filters, textFilter: textFilter);
 	
 	@override
 	String get textFilterFieldName => StoredPack.nameFieldName;
@@ -57,7 +60,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
     @override
     Future<List<StudyPack>> fetchStudyPacks() async {
-        final packs = await _fetchInternally();
+        final packs = await fetchInternally();
         final packMap = new Map<int, StoredPack>.fromIterable(packs, 
             key: (p) => p.id, value: (p) => p);
         

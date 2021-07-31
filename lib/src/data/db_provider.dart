@@ -200,7 +200,7 @@ class DbProvider extends DataProvider {
                 columns: null,
                 limit: take,
                 offset: skip,
-                orderBy: orderBy,
+                orderBy: orderBy + ' COLLATE NOCASE',
                 where: _composeFilterClause(filters),
                 whereArgs: _getFilterValues(filters)
             ));

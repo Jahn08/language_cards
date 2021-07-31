@@ -10,25 +10,28 @@ class WordStorage extends BaseStorage<StoredWord> {
     @override
     String get entityName => StoredWord.entityName;
 
-    Future<List<StoredWord>> fetchFiltered({ List<int> parentIds, List<int> studyStageIds,
-        String text, int skipCount, int takeCount }) =>
-        _fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-            parentIds: parentIds, studyStageIds: studyStageIds, text: text);
+    Future<List<StoredWord>> fetchFiltered({ 
+		List<int> parentIds, List<int> studyStageIds, String text, int skipCount, int takeCount 
+	}) {
+		final filters = new Map<String, List<dynamic>>();
 
-    Future<List<StoredWord>> _fetchInternally({ List<int> parentIds, List<int> studyStageIds,
-		String text, int skipCount, int takeCount }) {
-            final filters = new Map<String, List<dynamic>>();
+		if (parentIds != null && parentIds.length > 0)
+			filters[_parentIdField] = parentIds;
 
-            if (parentIds != null && parentIds.length > 0)
-                filters[_parentIdField] = parentIds;
+		if (studyStageIds != null && studyStageIds.length > 0)
+			filters[StoredWord.studyProgressFieldName] = studyStageIds;
 
-            if (studyStageIds != null && studyStageIds.length > 0)
-                filters[StoredWord.studyProgressFieldName] = studyStageIds;
-
-            return super.fetchInternally(skipCount: skipCount, takeCount: takeCount, 
-                orderBy: StoredWord.textFieldName, filters: filters, textFilter: text);
-        }
+		return fetchInternally(skipCount: skipCount, takeCount: takeCount, 
+			filters: filters, textFilter: text);
+	}
 	
+	@override
+    Future<List<StoredWord>> fetchInternally({ 
+		int skipCount, int takeCount, String orderBy, String textFilter, 
+		Map<String, List<dynamic>> filters 
+	}) => super.fetchInternally(skipCount: skipCount, takeCount: takeCount,
+		orderBy: orderBy ?? StoredWord.textFieldName, filters: filters, textFilter: textFilter);
+
 	String get _parentIdField => StoredWord.packIdFieldName;
 
 	@override
