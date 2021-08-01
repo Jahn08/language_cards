@@ -6,7 +6,7 @@
     "configurations": [
         {
             "program": "lib/main.dart",
-            "name": "language_cards_debug",
+            "name": "debug",
             "request": "launch",
             "type": "dart",
             "args": [
@@ -16,14 +16,24 @@
         },
         {
             "program": "lib/main.dart",
-            "name": "language_cards_release",
+            "name": "release",
             "request": "launch",
+            "flutterMode": "release",
             "type": "dart",
             "args": [
-                "--release",
                 "--dart-define",
                 "SENTRY_DSN=https://2b7cd6e6aeee40b095a8fb51bc0c4d50@o658654.ingest.sentry.io/5763758"
             ]
-        }
+        },
+        {
+            "name": "profile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile",
+            "args": [
+                "--dart-define",
+                "SENTRY_DSN=https://2b7cd6e6aeee40b095a8fb51bc0c4d50@o658654.ingest.sentry.io/5763758"
+            ]
+          }
     ]
 }
