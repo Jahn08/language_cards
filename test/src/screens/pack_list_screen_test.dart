@@ -104,7 +104,7 @@ void main() {
 
 	testWidgets("Doesn't increase the number of cards without a pack when cancelling their pack deletion", 
 		(tester) async {
-			final storage = await screenTester.pumpScreen(tester) as PackStorageMock;
+			final storage = await screenTester.pumpScreen(tester, null, 3) as PackStorageMock;
 
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);

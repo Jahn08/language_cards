@@ -4,7 +4,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:language_cards/src/models/language.dart';
 import './blocs/settings_bloc.dart';
 import './data/asset_dictionary_provider.dart';
-import './data/configuration.dart';
 import './models/user_params.dart';
 import './router.dart';
 import './screens/card_list_screen.dart';
@@ -85,7 +84,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                 initialRoute: Router.initialRouteName,
                 onGenerateRoute: (settings) => _buildPageRoute(settings, (context, route) {
                     if (route == null)
-                        return _buildMainScreen(context);
+                        return new MainScreen();
                     else if (route is WordCardRoute)
                         return _buildCardScreen(context, route);
                     else if (route is CardListRoute) {
@@ -131,12 +130,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                 settings: settings,
                 builder: (inContext) => builder(inContext, route)
             );
-        } 
-
-	Widget _buildMainScreen(BuildContext context) {
-		return new FutureLoader(Configuration.getParams(context), 
-			(data) => new MainScreen(data?.contacts));
-	}
+        }
     
 	Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
         final params = route.params;

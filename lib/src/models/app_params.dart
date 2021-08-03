@@ -27,7 +27,7 @@ class ContactsParams {
 
     final String appStoreId;
 
-    ContactsParams({ this.fbUserId, this.email, this.appStoreId });
+    const ContactsParams({ this.fbUserId, this.email, this.appStoreId });
 
     ContactsParams.fromJson(Map<String, dynamic> json): 
         fbUserId = json[_fbLinkPropName],

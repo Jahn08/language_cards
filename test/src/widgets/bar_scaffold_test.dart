@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/app.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
-import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/models/user_params.dart';
@@ -111,26 +110,38 @@ void main() {
         expect(tester.widgetList(iconOptionsFinder).length, 
             UserParams.interfaceLanguages.length + AppTheme.values.length);
 
+		final getLangOptionFinder = (bool isSelected) => find.descendant(
+			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
+			matching: find.byType(AssetIcon)
+		);
+
         UserParams.interfaceLanguages.forEach((lang) {
-            final optionFinder = find.descendant(of: iconOptionsFinder, matchRoot: true,
-                matching: find.byWidgetPredicate(
-                    (w) => w is IconOption && w.isSelected == (expectedLang == lang)));
-            final iconFinder = find.descendant(of: optionFinder, 
-                matching: find.byType(AssetIcon));
-            expect(iconFinder, findsOneWidget);
-            expect(tester.widget<AssetIcon>(iconFinder), AssetIcon.getByLanguage(lang));
+            expect(tester.widget<AssetIcon>(getLangOptionFinder(expectedLang == lang)), 
+				AssetIcon.getByLanguage(lang));
         });
 
+		final assistant = new WidgetAssistant(tester);
+		await assistant.tapWidget(getLangOptionFinder(false));
+
+		final chosenLang = UserParams.interfaceLanguages.firstWhere((lang) => lang != expectedLang);
+		expect(tester.widget<AssetIcon>(getLangOptionFinder(true)), AssetIcon.getByLanguage(chosenLang));
+
+		final getThemeColour = (AppTheme theme) => Colors.blueGrey[theme == AppTheme.dark ? 900: 100];
+
+		final getThemeOptionFinder = (bool isSelected) => find.descendant(
+			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
+			matching: find.byWidgetPredicate((w) => w is Container && w.child == null)
+		);
+
         AppTheme.values.forEach((theme) {
-            final optionFinder = find.descendant(of: iconOptionsFinder, matchRoot: true,
-                matching: find.byWidgetPredicate(
-                    (w) => w is IconOption && w.isSelected == (expectedTheme == theme)));
-            final colouredContainerFinder = find.descendant(of: optionFinder, 
-                matching: find.byWidgetPredicate((w) => w is Container && w.child == null));
-            expect(colouredContainerFinder, findsOneWidget);
-            expect(tester.widget<Container>(colouredContainerFinder).color,
-                Colors.blueGrey[theme == AppTheme.dark ? 900: 100]);
+			expect(tester.widget<Container>(getThemeOptionFinder(expectedTheme == theme)).color, 
+				getThemeColour(theme));
         });
+
+		await assistant.tapWidget(getThemeOptionFinder(false));
+
+		final chosenTheme = AppTheme.values.firstWhere((theme) => theme != expectedTheme);
+		expect(tester.widget<Container>(getThemeOptionFinder(true)).color, getThemeColour(chosenTheme));
 
 		final dropdowns = tester.widgetList<StyledDropdown>(
 			AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
@@ -248,7 +259,8 @@ void main() {
 
             final allTexts = tester.widgetList<Text>(
 				AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
-			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 2);
+			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 2, 
+				reason: 'There are not enough English labels in [${allTexts.join(',')}]');
         });
 }
 
@@ -267,12 +279,7 @@ Finder _assureSettingsBtn(bool shouldFind) =>
 Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async => 
     await _buildInsideApp(tester, new SettingsBlocProvider(
         child: new BarScaffold.withSettings(Randomiser.nextString(), 
-            body: new Text(Randomiser.nextString()),
-			contactsParams: new ContactsParams(
-				appStoreId: Randomiser.nextString(),
-				email: Randomiser.nextString(),
-				fbUserId: Randomiser.nextString()
-			)
+            body: new Text(Randomiser.nextString())
         )
     ));
 

@@ -17,111 +17,181 @@ import '../widgets/styled_dropdown.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
 
-    UserParams _params;
-
-    String _originalParams;
-
 	int _expandedPanelIndex = 0;
 
     @override
-    Widget build(BuildContext context) {
-		final locale = AppLocalizations.of(context);
-        final bloc = SettingsBlocProvider.of(context);
-        return _params == null ? new FutureLoader<UserParams>(bloc.userParams, 
-            (params) => _buildControlsFromParams(context, bloc, params, locale)): 
-				_buildControls(context, bloc, locale);
-    }
-
-    Widget _buildControlsFromParams(BuildContext context, SettingsBloc bloc, UserParams params, 
-		AppLocalizations locale) {
-        _params = params;
-        return _buildControls(context, bloc, locale);
-    }
-
-    Widget _buildControls(BuildContext context, SettingsBloc bloc, AppLocalizations locale) {
-        if (_originalParams == null)
-            _originalParams = _params.toJson();
-
-        return new Drawer(
+    Widget build(BuildContext context) =>
+		new Drawer(
 			child: new SingleChildScrollView(
 				child: new Column(
 					children: [
 						new Padding(
-							child: _buildSectionPanel(locale, bloc),
+							child: new ExpansionPanelList(
+								children: [
+									_buildPanel(0, 
+										header: const _SettingsSectionHeader(),
+										body: new _SettingsSectionBody()
+									),
+									_buildPanel(1, 
+										header: const _ContactsSectionHeader(),
+										body: const _ContactsSectionBody()
+									),
+									_buildPanel(2,
+										header: const _HelpSectionHeader(),
+										body: const _HelpSectionBody()
+									)
+								],
+								expansionCallback: (panelIndex, isExpanded) {
+									setState(() => _expandedPanelIndex = isExpanded ? null: panelIndex);	
+								}
+							),
 							padding: EdgeInsets.only(top: 30)
 						)
 					]
 				)
 			)  
 		);
-    }
 
-	ExpansionPanelList _buildSectionPanel(AppLocalizations locale, SettingsBloc bloc) {
-		return new ExpansionPanelList(
-			children: [
-				_buildSettingPanel(locale, 0, bloc),
-				if (widget.params != null) 
-					_buildContactsPanel(locale, 1),
-				_buildHelpPanel(locale, 2)
-			],
-			expansionCallback: (panelIndex, isExpanded) {
-				setState(() => _expandedPanelIndex = isExpanded ? null: panelIndex);	
-			}
+	ExpansionPanel _buildPanel(int index, { Widget header, Widget body }) => 
+		new ExpansionPanel(
+			headerBuilder: (context, _) => header,
+			body: body,
+			isExpanded: _expandedPanelIndex == index
 		);
-	}
+}
 
-	ExpansionPanel _buildSettingPanel(AppLocalizations locale, int index, SettingsBloc bloc) {
-		final children = <Widget>[];
-		children.addAll(_buildLanguageSection(locale));
-		children.addAll(_buildAppearanceSection(locale));
-		children.addAll(_buildStudySection(locale));
-		children.add(_buildButtons(bloc, locale));
-		
-		return _buildPanel(locale, index, 
-			header: locale.barScaffoldSettingsPanelTitle,
-			body: new Column(children: children)
-		);
-	}
+class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
+	
+    UserParams _params;
 
-    List<Widget> _buildLanguageSection(AppLocalizations locale) {
-		return <Widget>[
-            _buildSubsectionHeader(locale.barScaffoldSettingsPanelLanguageSectionLabel),
-            new Row(children: UserParams.interfaceLanguages
-				.map((ln) => _buildLanguageOption(ln, _params)).toList())
-        ];
-    }
+    String _originalParams;
 
-    Widget _buildLanguageOption(Language lang, UserParams params) {
-        final isSelected = lang == params.interfaceLang;
+	@override
+	Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
+        final bloc = SettingsBlocProvider.of(context);
         
-        return new GestureDetector(
-            child: new IconOption(
-                icon: AssetIcon.getByLanguage(lang), 
-                isSelected: isSelected
-            ),
-            onTap: () {
-                if (isSelected)
-                    return;
+		return new FutureLoader<UserParams>(bloc.userParams, (params) {
+			if (_params == null)
+				_params = params;
 
-                setState(() => params.interfaceLang = lang);
-            }
-        );
-    }
+			final directionDic = PresentableEnum.mapStringValues(StudyDirection.values, locale);
+			final sideDic = PresentableEnum.mapStringValues(CardSide.values, locale);
+			
+			return new Column(children: [
+				const _LanguageSubSectionHeader(),
+				new _LanguageSettingsSection(
+					_params.interfaceLang, 
+					(newLang) => setState(() => _params.interfaceLang = newLang)
+				),
+				const _AppearanceSubSectionHeader(),
+				new _AppearanceSettingsSection(
+					_params.theme, 
+					(newTheme) => setState(() => _params.theme = newTheme)
+				),
+				const _SettingsSubSectionHeader(),
+				new _StudySettingsSectionRow(
+					options: directionDic.keys,
+					inintialValue: _params.studyParams.direction.present(locale),
+					label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
+					onValueChanged: (newValue) {
+						setState(() => _params.studyParams.direction = directionDic[newValue]);
+					}
+				),
+				new _StudySettingsSectionRow(
+					options: sideDic.keys,
+					inintialValue: _params.studyParams.cardSide.present(locale),
+					label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
+					onValueChanged: (newValue) {
+						setState(() => _params.studyParams.cardSide = sideDic[newValue]);
+					}
+				),
+				new Row(
+					mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+					children: [
+						new ElevatedButton(
+							child: new Text(locale.barScaffoldSettingsPanelResettingButtonLabel),
+							onPressed: () => setState(() => _params = new UserParams())
+						),
+						new ElevatedButton(
+							child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
+							onPressed: _originalParams == _params.toJson() ? null: () async {
+								await bloc.save(_params);
+								Navigator.pop(context);
+							}
+						)
+					] 
+				)
+			]);
+		});
+	}
+}
 
-    List<Widget> _buildAppearanceSection(AppLocalizations locale) {
-        return <Widget>[
-            _buildSubsectionHeader(locale.barScaffoldSettingsPanelThemeSectionLabel),
-            new Row(children: <Widget>[
-                _buildAppearanceOption(AppTheme.dark),
-                _buildAppearanceOption(AppTheme.light)
-            ])
-        ];
-    }
+class _SettingsSectionBody extends StatefulWidget {
+	
+	@override
+	State<StatefulWidget> createState() => new _SettingsSectionBodyState();
+}
 
-    Widget _buildAppearanceOption(AppTheme theme) {
-        final isSelected = theme == _params.theme;
+class _StudySettingsSectionRow extends StatelessWidget {
 
-        return new GestureDetector(
+	final Iterable<String> options;
+
+	final String inintialValue;
+
+	final String label;
+
+	final void Function(String) onValueChanged;
+
+	_StudySettingsSectionRow({ this.options, this.inintialValue, this.onValueChanged, this.label });
+
+	@override
+	Widget build(BuildContext context) => 
+		new Row(children: <Widget>[
+				new Expanded(
+					child: new Container(
+						child: new StyledDropdown(options, 
+							label: label,
+							initialValue: inintialValue,
+							onChanged: onValueChanged
+						),
+						margin: EdgeInsets.only(bottom: 5, top: 10)
+					)
+            	)
+        ]);	
+}
+
+class _AppearanceSettingsSection extends StatelessWidget {
+	
+	final AppTheme theme;
+
+	final void Function(AppTheme) onThemeChanged;
+
+	_AppearanceSettingsSection(this.theme, this.onThemeChanged);
+
+	@override
+	Widget build(BuildContext context) =>
+		new Row(children: AppTheme.values.map((t) => 
+			new _AppearanceOption(
+				theme: t, 
+				isSelected: t == theme,
+				onTap: () => onThemeChanged(t)
+			)).toList());
+}
+
+class _AppearanceOption extends StatelessWidget {
+	
+	final AppTheme theme;
+
+	final bool isSelected;
+	
+	final void Function() onTap;
+
+	_AppearanceOption({ this.theme, this.isSelected, this.onTap });
+
+	@override
+	Widget build(BuildContext context) =>
+    	new GestureDetector(
             child: new IconOption(
                 icon: new Container(
                     height: AssetIcon.heightValue,
@@ -134,87 +204,121 @@ class _SettingsPanelState extends State<_SettingsPanel> {
                 if (isSelected)
                     return;
 
-                setState(() => _params.theme = theme);
+				onTap();
             }
         );
-    }
+}
 
-	List<Widget> _buildStudySection(AppLocalizations locale) {
-		final directionDic = PresentableEnum.mapStringValues(
-			StudyDirection.values, locale);
-		final sideDic = PresentableEnum.mapStringValues(CardSide.values, locale);
+class _LanguageSettingsSection extends StatelessWidget {
+	
+	final Language interfaceLang;
 
-		return <Widget>[
-            _buildSubsectionHeader(locale.barScaffoldSettingsPanelStudySectionLabel),
-            new Row(children: <Widget>[
-				_wrapWithExpandableContainer(
-					new StyledDropdown(directionDic.keys, 
-						label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
-						initialValue: _params.studyParams.direction.present(locale),
-						onChanged: (newValue) {
-							setState(() => _params.studyParams.direction = directionDic[newValue]);
-						}
-					)
-				)
-            ]),
-			new Row(children: <Widget>[
-				_wrapWithExpandableContainer(
-					new StyledDropdown(sideDic.keys, 
-						label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
-						initialValue: _params.studyParams.cardSide.present(locale),
-						onChanged: (newValue) {
-							setState(() => _params.studyParams.cardSide = sideDic[newValue]);
-						}
-					)
-				)
-            ])
-        ];
-    }
+	final void Function(Language) onLangChanged;
 
-	Widget _wrapWithExpandableContainer(Widget child) =>
-		new Expanded(
-			child: new Container(
-				child: child, 
-				margin: EdgeInsets.only(bottom: 5, top: 10)
-			)
+	_LanguageSettingsSection(this.interfaceLang, this.onLangChanged);
+
+	@override
+	Widget build(BuildContext context) =>
+		new Row(children: UserParams.interfaceLanguages
+			.map((ln) => new _LanguageOption(
+				lang: ln, 
+				isSelected: ln == interfaceLang,
+				onTap: () => onLangChanged(ln)
+			)).toList());
+}
+
+class _LanguageOption extends StatelessWidget {
+	
+	final Language lang;
+
+	final bool isSelected;
+	
+	final void Function() onTap;
+
+	_LanguageOption({ this.lang, this.isSelected, this.onTap });
+
+	@override
+	Widget build(BuildContext context) =>
+		new GestureDetector(
+            child: new IconOption(
+                icon: AssetIcon.getByLanguage(lang), 
+                isSelected: isSelected
+            ),
+            onTap: () {
+                if (isSelected)
+                    return;
+
+				this.onTap();
+            }
+        );
+}
+
+class _HelpSectionBody extends _SimpleSectionBody {
+
+	const _HelpSectionBody();
+
+	@override
+	Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
+		return new Column(
+			children: [
+				buildTextButtonedRow(locale.mainScreenStudyModeMenuItemLabel, 
+					() => Router.goToStudyHelp(context)),
+				buildTextButtonedRow(locale.mainScreenWordPacksMenuItemLabel, 
+					() => Router.goToPackHelp(context)),
+				buildTextButtonedRow(locale.mainScreenWordCardsMenuItemLabel, 
+					() => Router.goToCardHelp(context))
+			]
 		);
+	}
+}
 
-    ExpansionPanel _buildContactsPanel(AppLocalizations locale, int index) {
-		return _buildPanel(locale, index, 
-			header: locale.barScaffoldSettingsPanelContactsSectionLabel,
-			body: new Column(
-				children: [
-					_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
-						() async => await new FBLink(widget.params.fbUserId).activate()),
-					_buildTextButtonedRow(
-						locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
-						() async => await new EmailLink(
-							email: widget.params.email, 
-							body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
-							subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
-						).activate()
-					),
-					_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
-						() async => await new EmailLink(
-							email: widget.params.email, 
-							body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
-							subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
-						).activate()),
-					_buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
-						() async => await new AppStoreLink(widget.params.appStoreId).activate())
-				]) 
-		);
-    }
+class _ContactsSectionBody extends _SimpleSectionBody {
 
-	ExpansionPanel _buildPanel(AppLocalizations locale, int index, 
-		{ String header, Widget body }
-	) => new ExpansionPanel(
-			headerBuilder: (context, isExpanded) => _buildPanelHeader(header),
-			body: body,
-			isExpanded: _expandedPanelIndex == index
-		);
+	const _ContactsSectionBody();
 
-    Widget _buildSubsectionHeader(String title) =>
+	@override
+	Widget build(BuildContext context) =>
+		new FutureLoader(Configuration.getParams(context, reload: false), (params) {
+			final locale = AppLocalizations.of(context);
+			return new Column(children: [
+				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
+					() async => await new FBLink(params.fbUserId).activate()),
+				buildTextButtonedRow(
+					locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
+					() async => await new EmailLink(
+						email: params.email, 
+						body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
+						subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
+					).activate()
+				),
+				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
+					() async => await new EmailLink(
+						email: params.email, 
+						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
+						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
+					).activate()),
+				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
+					() async => await new AppStoreLink(params.appStoreId).activate())
+			]);
+		});
+}
+
+class _LanguageSubSectionHeader extends _SubSectionHeader {
+
+	const _LanguageSubSectionHeader(): super();
+
+	@override
+	Widget build(BuildContext context) => 
+		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelLanguageSectionLabel);
+}
+
+abstract class _SubSectionHeader extends StatelessWidget {
+
+	const _SubSectionHeader();
+
+	@protected
+	Widget buildHeader(String title) => 
 		new Row(
 			mainAxisAlignment: MainAxisAlignment.start,
 			children: [
@@ -228,9 +332,78 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 				)
 			]
 		);
+}
 
-    Widget _buildPanelHeader(String title) {
-        return new Row(
+class _AppearanceSubSectionHeader extends _SubSectionHeader {
+
+	const _AppearanceSubSectionHeader(): super();
+
+	@override
+	Widget build(BuildContext context) => 
+		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelThemeSectionLabel);
+}
+
+class _SettingsSubSectionHeader extends _SubSectionHeader {
+
+	const _SettingsSubSectionHeader(): super();
+
+	@override
+	Widget build(BuildContext context) => 
+		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelStudySectionLabel);
+}
+
+abstract class _SimpleSectionBody extends StatelessWidget {
+
+	const _SimpleSectionBody();
+
+	@protected
+	Widget buildTextButtonedRow(String label, Function() onPressed) {
+		return new Row(
+			children: <Widget>[new Flexible(child: new Container(
+				child: new TextButton(child: new Text(label), onPressed: onPressed),
+				height: 40.0
+			))]
+		);
+	}
+}
+
+class _SettingsSectionHeader extends StatelessWidget {
+	
+	const _SettingsSectionHeader();
+
+	@override
+	Widget build(BuildContext context) => 
+		_SectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelTitle);
+}
+
+
+class _ContactsSectionHeader extends StatelessWidget {
+	
+	const _ContactsSectionHeader();
+
+	@override
+	Widget build(BuildContext context) => 
+		_SectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelContactsSectionLabel);
+}
+
+class _HelpSectionHeader extends StatelessWidget {
+	
+	const _HelpSectionHeader();
+
+	@override
+	Widget build(BuildContext context) => 
+		_SectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelHelpSectionLabel);
+}
+
+class _SectionHeader extends StatelessWidget {
+	
+	final String title;
+
+  	const _SectionHeader(this.title);
+
+	@override
+	Widget build(BuildContext context) =>
+		new Row(
 			crossAxisAlignment: CrossAxisAlignment.center,
 			mainAxisAlignment: MainAxisAlignment.center,
 			children: [
@@ -243,58 +416,11 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 				)
 			]
 		);
-    }
-
-	Widget _buildTextButtonedRow(String label, Function() onPressed) {
-		return new Row(
-			children: <Widget>[new Flexible(child: new Container(
-				child: new TextButton(child: new Text(label), onPressed: onPressed),
-				height: 40.0
-			))]
-		);
-	}
-
-    ExpansionPanel _buildHelpPanel(AppLocalizations locale, int index) {
-		return _buildPanel(locale, index,
-			header: locale.barScaffoldSettingsPanelHelpSectionLabel,
-			body: new Column(
-				children: [
-					_buildTextButtonedRow(locale.mainScreenStudyModeMenuItemLabel, 
-						() => Router.goToStudyHelp(context)),
-					_buildTextButtonedRow(locale.mainScreenWordPacksMenuItemLabel, 
-						() => Router.goToPackHelp(context)),
-					_buildTextButtonedRow(locale.mainScreenWordCardsMenuItemLabel, 
-						() => Router.goToCardHelp(context))
-				]
-			)
-		);
-    }
-
-    Widget _buildButtons(SettingsBloc bloc, AppLocalizations locale) {
-        return new Row(
-			mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-                new ElevatedButton(
-                    child: new Text(locale.barScaffoldSettingsPanelResettingButtonLabel),
-                    onPressed: () => setState(() => _params = new UserParams())
-                ),
-                new ElevatedButton(
-                    child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
-                    onPressed: _originalParams == _params.toJson() ? null: () async {
-                        await bloc.save(_params);
-                        Navigator.pop(context);
-                    }
-                )
-            ] 
-        );
-    }
 }
 
 class _SettingsPanel extends StatefulWidget {
     
-	final ContactsParams params;
-
-	_SettingsPanel(this.params);
+	_SettingsPanel();
 
     @override
     _SettingsPanelState createState() => new _SettingsPanelState();
@@ -329,14 +455,12 @@ class BarScaffold extends Scaffold {
 
 	BarScaffold.withSettings(String title, { 
         @required Widget body,
-		@required ContactsParams contactsParams,
         Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
         void Function() onNavGoingBack
     }): this._(title,
 			body: body,
-			contactsParams: contactsParams,
 			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
 			barActions: barActions,
@@ -349,11 +473,10 @@ class BarScaffold extends Scaffold {
         Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
-		ContactsParams contactsParams,
 		bool hasSettings = false,
         void Function() onNavGoingBack
     }): super(
-        drawer: hasSettings ? new _SettingsPanel(contactsParams): null, 
+        drawer: hasSettings ? new _SettingsPanel(): null, 
         appBar: _buildAppBar(
 			new OneLineText(title, textScaleFactor: 0.85),
 			actions: barActions, onGoingBack: onNavGoingBack, 

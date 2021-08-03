@@ -1,13 +1,11 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart' hide Router;
-import 'package:language_cards/src/data/configuration.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
-import '../utilities/randomiser.dart';
 import 'dictionary_provider_mock.dart';
 import 'pack_storage_mock.dart';
 
@@ -74,9 +72,7 @@ class RootWidgetMock extends StatelessWidget {
 				settings: settings,
 				builder: (context) => new RootWidgetMock(
 					noBar: noBar,
-					child: new MainScreen(new ContactsParams(
-						fbUserId: Randomiser.nextString()
-					))
+					child: new MainScreen()
 				)
 			);
 		if (route is CardListRoute)

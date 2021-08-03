@@ -3,21 +3,17 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../router.dart';
 import '../data/quote_provider.dart';
-import '../models/app_params.dart';
 import '../widgets/bar_scaffold.dart';
 
 class MainScreen extends StatelessWidget {
 
-	final ContactsParams params;
-
-	MainScreen(this.params);
+	MainScreen();
 
     @override
     Widget build(BuildContext context) {
 
         return new BarScaffold.withSettings('Language Cards',
-			contactsParams: params,
-            body: _buildMenu(context),
+            body: _buildMenu(context)
         );
     }
 
