@@ -18,19 +18,30 @@ import '../widgets/styled_text_field.dart';
 class PackScreenState extends State<PackScreen> {
     final _key = new GlobalKey<FormState>();
 
-    String _name;
+	final _nameNotifier = new ValueNotifier<String>(null); 
+	final _fromLangNotifier = new ValueNotifier<String>(null); 
+	final _toLangNotifier = new ValueNotifier<String>(null); 
 
+	final _isStateDirtyNotifier = new ValueNotifier<bool>(null); 
+    
     int _cardsNumber = 0;
-
-    String _fromLang;
-    String _toLang;
-
     StoredPack _foundPack;
     bool _initialised = false;
 
     Map<String, PresentableEnum> _languages;
 
     BaseStorage<StoredPack> get _storage => widget._storage;
+
+	@override
+	void dispose() {
+		_fromLangNotifier.dispose();
+		_toLangNotifier.dispose();
+		_nameNotifier.dispose();
+
+		_isStateDirtyNotifier.dispose();
+
+		super.dispose();
+	}
 
     @override
     Widget build(BuildContext context) {
@@ -39,6 +50,8 @@ class PackScreenState extends State<PackScreen> {
 		if (_languages == null)
 			_languages = PresentableEnum.mapStringValues(Language.values, locale);
         
+		final futurePack = _isNew || _initialised ? 
+            Future.value(new StoredPack('')): _storage.find(widget.packId);
 		return new BarScaffold(
             (_isNew ? locale.packScreenHeadBarAddingPackTitle:
 				locale.packScreenHeadBarChangingPackTitle),
@@ -46,125 +59,142 @@ class PackScreenState extends State<PackScreen> {
                 Router.goBackToPackList(context),
             body: new Form(
                 key: _key,
-                child: _buildFutureFormLayout(widget.packId, locale)
+                child: new FutureBuilder(
+					future: futurePack,
+					builder: (context, AsyncSnapshot<StoredPack> snapshot) {
+						if (!snapshot.hasData)
+							return new Loader();
+
+						final foundPack = snapshot.data;
+						if (foundPack != null && !foundPack.isNew && !_initialised) {
+							_foundPack = foundPack;
+							_initialised = true;
+
+							_nameNotifier.value = foundPack.name;
+							_fromLangNotifier.value = foundPack.from.present(locale);
+							_toLangNotifier.value = foundPack.to.present(locale);
+							
+							_cardsNumber = foundPack.cardsNumber;
+						}
+
+						_setStateDirtiness();
+						return new Column(children: [
+							new ValueListenableBuilder(
+								valueListenable: _nameNotifier, 
+								builder: (_, name, __) =>
+									new StyledTextField(locale.packScreenPackNameTextFieldLabel,
+										isRequired: true, 
+										onChanged: (value, _) { 
+											_nameNotifier.value = value;
+											_setStateDirtiness();
+										},
+										initialValue: name)
+							),
+							new ValueListenableBuilder(
+								valueListenable: _fromLangNotifier, 
+								builder: (buildContext, fromLang, _) =>
+									new StyledDropdown(_languages.keys, 
+										isRequired: true,
+										label: locale.packScreenTranslationFromDropdownLabel,
+										initialValue: fromLang,
+										onChanged: (value) {
+											_fromLangNotifier.value = value;
+											_checkTranslationPossibility(buildContext, locale);
+
+											_setStateDirtiness();
+										},
+										onValidate: (_) => _validateLanguages(locale))
+							),
+							new ValueListenableBuilder(
+								valueListenable: _toLangNotifier,
+								builder: (buildContext, toLang, _) =>
+									new StyledDropdown(_languages.keys, 
+										isRequired: true,
+										label: locale.packScreenTranslationToDropdownLabel,
+										initialValue: toLang,
+										onChanged: (value) {
+											_toLangNotifier.value = value;
+											_checkTranslationPossibility(buildContext, locale);
+
+											_setStateDirtiness();
+										},
+										onValidate: (_) => _validateLanguages(locale))
+							),
+							if (!_isNew && _foundPack != null)
+								new Container(
+									alignment: Alignment.centerLeft,
+									child: new TextButton.icon(
+										icon: new Icon(Consts.cardListIcon),
+										label: new Text(locale.packScreenShowingCardsButtonLabel(
+											_cardsNumber.toString())),
+										onPressed: () => Router.goToCardList(context, pack: _foundPack)
+									)
+								),
+								new ValueListenableBuilder(
+									valueListenable: _isStateDirtyNotifier,
+									builder: (_, isStateDirty, __) =>
+										new ElevatedButton(
+											child: new Text(locale.constsSavingItemButtonLabel),
+											onPressed: !isStateDirty ? null: 
+												() => _onSave((_) => Router.goToPackList(context))
+										)
+								),
+								new ValueListenableBuilder(
+									valueListenable: _isStateDirtyNotifier,
+									builder: (_, isStateDirty, __) =>
+										new ElevatedButton(
+											child: new Text(locale.packScreenSavingAndAddingCardsButtonLabel),
+											onPressed: !isStateDirty ? null: 
+												() => _onSave((savedPack) =>
+													Router.goToCardList(context, pack: savedPack, 
+														packWasAdded: _isNew))
+										)
+								)
+						]);
+					}
+				)
             )
         );
     }
 
     bool get _isNew => widget.packId == null;
 
-    Widget _buildFutureFormLayout(int packId, AppLocalizations locale) {
-        final futurePack = _isNew || _initialised ? 
-            Future.value(new StoredPack('')): _storage.find(widget.packId);
-        return new FutureBuilder(
-            future: futurePack,
-            builder: (context, AsyncSnapshot<StoredPack> snapshot) {
-                if (!snapshot.hasData)
-                    return new Loader();
+	void _setStateDirtiness() => 
+		_isStateDirtyNotifier.value = _isNew || (_foundPack != null && 
+			(_foundPack.name != _nameNotifier.value || 
+			_foundPack.to != _languages[_toLangNotifier.value] ||
+			_foundPack.from != _languages[_fromLangNotifier.value]));
 
-                final foundPack = snapshot.data;
-                if (foundPack != null && !foundPack.isNew && !_initialised) {
-                    _foundPack = foundPack;
-                    _initialised = true;
-
-                    _name = foundPack.name;
-                    
-                    _toLang = foundPack.to.present(locale);
-                    _fromLang = foundPack.from.present(locale);
-                    _cardsNumber = foundPack.cardsNumber;
-                }
-
-                return _buildFormLayout(context, locale);
-            }
-        );
-    }
-
-    Widget _buildFormLayout(BuildContext buildContext, AppLocalizations locale) {
-        final children = <Widget>[
-            new StyledTextField(locale.packScreenPackNameTextFieldLabel,
-                isRequired: true, 
-                onChanged: (value, _) => setState(() => _name = value), 
-                initialValue: this._name),
-            new StyledDropdown(_languages.keys, 
-                isRequired: true,
-                label: locale.packScreenTranslationFromDropdownLabel,
-                initialValue: this._fromLang,
-                onChanged: (value) => setState(() {
-					this._fromLang = value;
-					_checkTranslationPossibility(buildContext, locale);	
-				}),
-                onValidate: (_) => _validateLanguages(locale)),
-            new StyledDropdown(_languages.keys, 
-                isRequired: true,
-                label: locale.packScreenTranslationToDropdownLabel,
-                initialValue: this._toLang,
-                onChanged: (value) => setState(() {
-					this._toLang = value;
-					_checkTranslationPossibility(buildContext, locale);	
-				}),
-                onValidate: (_) => _validateLanguages(locale))
-        ];
-
-        if (!_isNew && _foundPack != null)
-            children.add(new Container(
-				alignment: Alignment.centerLeft,
-				child: new TextButton.icon(
-					icon: new Icon(Consts.cardListIcon),
-					label: new Text(locale.packScreenShowingCardsButtonLabel(
-						_cardsNumber.toString())),
-					onPressed: () => Router.goToCardList(context, pack: _foundPack)
-				)
-			));
-        
-        final isStateDirty = _isNew || (_foundPack != null && (
-            _foundPack.name != _name || _foundPack.to != _languages[_toLang] ||
-            _foundPack.from != _languages[_fromLang]));
-        children.addAll([
-            _buildSaveBtn(locale.constsSavingItemButtonLabel, 
-				(_) => Router.goToPackList(context), isDisabled: !isStateDirty),
-            _buildSaveBtn(locale.packScreenSavingAndAddingCardsButtonLabel, 
-                (savedPack) => Router.goToCardList(context, pack: savedPack, packWasAdded: _isNew), 
-                isDisabled: !isStateDirty)
-        ]);
-        
-        return new Column(children: children);
-    }
-
-    String _validateLanguages(AppLocalizations locale) => _fromLang == _toLang ? 
-        locale.packScreenSameTranslationDirectionsValidationError: null;
+    String _validateLanguages(AppLocalizations locale) => 
+		_fromLangNotifier.value == _toLangNotifier.value ? 
+			locale.packScreenSameTranslationDirectionsValidationError: null;
 
 	void _checkTranslationPossibility(BuildContext buildContext, AppLocalizations locale) {
 		if (_validateLanguages(locale) != null || 
-			(_fromLang?.isEmpty ?? true) || (_toLang?.isEmpty ?? true))
+			(_fromLangNotifier.value?.isEmpty ?? true) || (_toLangNotifier.value?.isEmpty ?? true))
 			return;
 
-		new WordDictionary(widget._provider, from: _languages[_fromLang], 
-			to: _languages[_toLang]).isTranslationPossible().then((resp) {
+		new WordDictionary(widget._provider, from: _languages[_fromLangNotifier.value], 
+			to: _languages[_toLangNotifier.value]).isTranslationPossible().then((resp) {
 				if (!resp)
 					NoTranslationSnackBar.show(buildContext, locale);
 			});
 	}
 
-    StoredPack _buildPack() => new StoredPack(this._name, 
+    StoredPack _buildPack() => new StoredPack(_nameNotifier.value, 
         id: widget.packId,
-        to: _languages[_toLang],
-        from: _languages[_fromLang]
+        to: _languages[_toLangNotifier.value],
+        from: _languages[_fromLangNotifier.value]
     );
 
-    ElevatedButton _buildSaveBtn(String title, void afterSaving(StoredPack pack), 
-        { bool isDisabled }) => 
-        new ElevatedButton(
-            child: new Text(title),
-            onPressed: isDisabled ? null: () async {
-                final state = _key.currentState;
-                if (!state.validate())
-                    return;
+    Future<void> _onSave(void afterSaving(StoredPack pack)) async {
+		final state = _key.currentState;
+		if (!state.validate())
+			return;
 
-                state.save();
-
-                afterSaving((await _storage.upsert([_buildPack()])).first);
-            }
-        );
+		state.save();
+		afterSaving((await _storage.upsert([_buildPack()])).first);
+	}
 }
 
 class PackScreen extends StatefulWidget {
