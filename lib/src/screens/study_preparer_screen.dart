@@ -39,7 +39,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 				_initPacks(stPacks);
 
 				final styler = new Styler(context);
-				return new BarScaffold(locale.studyPreparerScreenTitle,
+				return new BarScaffold(
+					title: locale.studyPreparerScreenTitle,
 					barActions: <Widget>[_buildSelectorButton(_packs, locale)],
 					onNavGoingBack: () => Router.goHome(context),
 					body: _buildLayout(_packs, locale),

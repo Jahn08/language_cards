@@ -436,21 +436,39 @@ class _SettingsOpenerButton extends StatelessWidget {
     }
 }
 
-class BarScaffold extends Scaffold {
+class BarScaffold extends StatelessWidget {
 
-	BarScaffold(String title, { 
+	final _SettingsOpenerButton _settingsOpener;
+
+	final Widget body;
+
+	final Widget bottomBar;
+
+	final FloatingActionButton floatingActionButton;
+
+	final List<Widget> barActions;
+
+	final void Function() onNavGoingBack;
+
+	final Widget _title;
+
+	BarScaffold({ 
+		String title, 
         @required Widget body,
         Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
 		ContactsParams contactsParams,
-        void Function() onNavGoingBack
-    }): this._(title,
+        void Function() onNavGoingBack,
+		Widget titleWidget
+    }): this._(
+			title: title,
 			body: body,
 			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
 			barActions: barActions,
-			onNavGoingBack: onNavGoingBack
+			onNavGoingBack: onNavGoingBack,
+			titleWidget: titleWidget
 		);
 
 	BarScaffold.withSettings(String title, { 
@@ -458,8 +476,9 @@ class BarScaffold extends Scaffold {
         Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
-        void Function() onNavGoingBack
-    }): this._(title,
+        void Function() onNavGoingBack,
+    }): this._(
+			title: title,
 			body: body,
 			bottomBar: bottomBar,
 			floatingActionButton: floatingActionButton,
@@ -468,32 +487,40 @@ class BarScaffold extends Scaffold {
 			hasSettings: true
 		);
 
-    BarScaffold._(String title, { 
-        @required Widget body,
-        Widget bottomBar,
-        FloatingActionButton floatingActionButton,
-        List<Widget> barActions,
-		bool hasSettings = false,
-        void Function() onNavGoingBack
-    }): super(
-        drawer: hasSettings ? new _SettingsPanel(): null, 
-        appBar: _buildAppBar(
-			new OneLineText(title, textScaleFactor: 0.85),
-			actions: barActions, onGoingBack: onNavGoingBack, 
-			showSettings: hasSettings
-		),
-        body: body,
-        bottomNavigationBar: bottomBar,
-        floatingActionButton: floatingActionButton
-    );
+    BarScaffold._({ 
+		String title, 
+        @required this.body,
+        this.bottomBar,
+    	this.floatingActionButton,
+        this.barActions,
+        this.onNavGoingBack,
+        Widget titleWidget,
+		bool hasSettings = false
+    }): 
+		_title = titleWidget ?? new BarTitle(title),
+		_settingsOpener = (hasSettings ?? false) ? new _SettingsOpenerButton(): null;
 
-    static Widget _buildAppBar(Widget title, 
-        { List<Widget> actions,  void Function() onGoingBack, bool showSettings }) {
+	@override
+	Widget build(BuildContext context) {
+		return new Scaffold(
+			drawer: _settingsOpener == null ? null: new _SettingsPanel(),
+			appBar: onNavGoingBack == null ? 
+				new AppBar(actions: barActions, leading: _settingsOpener, title: _title):
+				new NavigationBar(_title, actions: barActions, onGoingBack: onNavGoingBack, 
+					leading: _settingsOpener),
+			body: body,
+			bottomNavigationBar: bottomBar,
+			floatingActionButton: floatingActionButton
+		);
+	}    
+}
 
-        final openerBtn = (showSettings ?? false) ? new _SettingsOpenerButton(): null;
-        return onGoingBack == null ? 
-            new AppBar(actions: actions, leading: openerBtn, title: title):
-            new NavigationBar(title, actions: actions, onGoingBack: onGoingBack, 
-                leading: openerBtn);
-    }
+class BarTitle extends StatelessWidget {
+
+	final String title;
+
+	const BarTitle(this.title);
+
+	@override
+	Widget build(BuildContext context) => new OneLineText(title, textScaleFactor: 0.85);
 }

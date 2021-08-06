@@ -35,7 +35,8 @@ void main() {
             
             final navBarItemIcon = new Icon(Icons.ac_unit);
 
-            await _buildInsideApp(tester, new BarScaffold(expectedTitle, 
+            await _buildInsideApp(tester, new BarScaffold(
+				title: expectedTitle, 
                 bottomBar: new BottomNavigationBar(
                     key: bottomNavBarKey,
                     items: <BottomNavigationBarItem>[
@@ -76,7 +77,8 @@ void main() {
             final expectedBarActionText = Randomiser.nextString();
             final expectedBarAction = _buildBarAction(expectedBarActionText);
 
-            await _buildInsideApp(tester, new BarScaffold(Randomiser.nextString(), 
+            await _buildInsideApp(tester, new BarScaffold(
+				title: Randomiser.nextString(), 
                 body: new Text(Randomiser.nextString()),
                 onNavGoingBack: () {},
                 barActions: <Widget>[expectedBarAction]
@@ -88,7 +90,8 @@ void main() {
         });
 
     testWidgets('Renders no button to open the settings panel by default', (tester) async {
-        await _buildInsideApp(tester, new BarScaffold(Randomiser.nextString(), 
+        await _buildInsideApp(tester, new BarScaffold(
+			title: Randomiser.nextString(), 
             body: new Text(Randomiser.nextString())));
 
         _assureSettingsBtn(false);

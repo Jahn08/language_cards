@@ -33,7 +33,7 @@ class CardScreen extends StatelessWidget {
 			locale.cardScreenHeadBarAddingCardTitle: locale.cardScreenHeadBarChangingCardTitle;
 
         return new BarScaffold(
-			title,
+			title: title,
             body: new CardEditor(wordStorage: wordStorage, packStorage: packStorage,
 				provider: provider, defaultSpeaker: defaultSpeaker,
 				pack: pack, wordId: wordId, 

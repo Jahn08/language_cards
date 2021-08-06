@@ -53,7 +53,7 @@ class PackScreenState extends State<PackScreen> {
 		final futurePack = _isNew || _initialised ? 
             Future.value(new StoredPack('')): _storage.find(widget.packId);
 		return new BarScaffold(
-            (_isNew ? locale.packScreenHeadBarAddingPackTitle:
+            title: (_isNew ? locale.packScreenHeadBarAddingPackTitle:
 				locale.packScreenHeadBarChangingPackTitle),
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context),
@@ -132,18 +132,20 @@ class PackScreenState extends State<PackScreen> {
 								),
 								new ValueListenableBuilder(
 									valueListenable: _isStateDirtyNotifier,
-									builder: (_, isStateDirty, __) =>
+									child: new Text(locale.constsSavingItemButtonLabel),
+									builder: (_, isStateDirty, label) =>
 										new ElevatedButton(
-											child: new Text(locale.constsSavingItemButtonLabel),
+											child: label,
 											onPressed: !isStateDirty ? null: 
 												() => _onSave((_) => Router.goToPackList(context))
 										)
 								),
 								new ValueListenableBuilder(
 									valueListenable: _isStateDirtyNotifier,
-									builder: (_, isStateDirty, __) =>
+									child: new Text(locale.packScreenSavingAndAddingCardsButtonLabel),
+									builder: (_, isStateDirty, label) =>
 										new ElevatedButton(
-											child: new Text(locale.packScreenSavingAndAddingCardsButtonLabel),
+											child: label,
 											onPressed: !isStateDirty ? null: 
 												() => _onSave((savedPack) =>
 													Router.goToCardList(context, pack: savedPack, 

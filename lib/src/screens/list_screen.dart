@@ -111,7 +111,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @override
     Widget build(BuildContext buildContext) {
 		final locale = AppLocalizations.of(buildContext);
-        return new BarScaffold(title,
+        return new BarScaffold(
+			title: title,
             barActions: <Widget>[
 				_isEditorMode ? _buildEditorDoneButton(): _buildEditorButton(),
 				
