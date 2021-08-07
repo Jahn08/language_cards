@@ -1,9 +1,11 @@
 import 'dart:convert';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'language.dart';
 import 'presentable_enum.dart';
 
 enum AppTheme {
+
     light, 
 
     dark
@@ -87,9 +89,14 @@ class UserParams {
     static const _themeParam = 'theme';
     static const _studyParamsParam = 'studyParams';
 
+	static const _ruLocale = const Locale('ru');
+	static const _enLocale = const Locale('en');
+
     Language _interfaceLang;
     Language get interfaceLang => _interfaceLang;
-    set interfaceLang(Language value) => _interfaceLang = value ?? _defaultLanguage;
+    set interfaceLang(Language value) => _interfaceLang = (value ?? _defaultLanguage);
+
+	Locale getLocale() => _interfaceLang == Language.russian ? _ruLocale: _enLocale;
 
 	static const interfaceLanguages = [Language.english, Language.russian];
 
@@ -105,7 +112,16 @@ class UserParams {
         final jsonMap = json == null ? {}: jsonDecode(json);
 
         final langIndex = jsonMap[_interfaceLangParam];
-        _interfaceLang = langIndex == null ? _defaultLanguage: interfaceLanguages[langIndex];
+		if (langIndex == null) {
+			final supportedLangs = [_enLocale, _ruLocale].map((loc) => loc.languageCode).toList();
+			final allLocs = WidgetsBinding.instance.window.locales;
+			final firstLoc = allLocs.firstWhere((loc) => supportedLangs.contains(loc.languageCode), 
+				orElse: () => allLocs.first);
+			_interfaceLang = firstLoc.languageCode == _ruLocale.languageCode ? 
+				Language.russian: Language.english;
+		}
+		else
+			_interfaceLang = interfaceLanguages[langIndex];
 
         final themeIndex = jsonMap[_themeParam];
         _theme = themeIndex == null ? _defaultTheme: AppTheme.values[themeIndex];
