@@ -28,17 +28,18 @@ class CardEditorState extends State<CardEditor> {
 
     final FocusNode _transcriptionFocusNode = new FocusNode();
 
-    Future<List<StoredPack>> _futurePacks;
-    StoredPack _pack;
-
     WordDictionary _dictionary;
 
-    String _text;
-    String _translation;
-    String _transcription;
-    String _partOfSpeech;
+    Future<List<StoredPack>> _futurePacks;
     
-    int _studyProgress;
+	final _packNotifier = new ValueNotifier<StoredPack>(null);
+	
+	final _textNotifier = new ValueNotifier<String>(null);
+	final _translationNotifier = new ValueNotifier<String>(null);
+	final _transcriptionNotifier = new ValueNotifier<String>(null);
+	final _partOfSpeechNotifier = new ValueNotifier<String>(null);
+
+	final _studyProgressNotifier = new ValueNotifier<int>(WordStudyStage.unknown);
 
     bool _initialised = false;
 
@@ -59,8 +60,6 @@ class CardEditorState extends State<CardEditor> {
         futureWord = _isNew ? 
             Future.value(new StoredWord('')): _retrieveWord();
         
-        _studyProgress = WordStudyStage.unknown;
-
 		_getFuturePacks();
     }
 
@@ -77,11 +76,11 @@ class CardEditorState extends State<CardEditor> {
 	}
 
     void _setPack(StoredPack newPack) {
-        _pack = newPack;
+		_packNotifier.value = newPack;
 
         _disposeDictionary();
         _dictionary = _isNonePack ? null: 
-            new WordDictionary(widget._provider, from: _pack.from, to: _pack.to);
+            new WordDictionary(widget._provider, from: newPack.from, to: newPack.to);
 
         if (_dictionary == null)
             WidgetsBinding.instance.addPostFrameCallback((_) => _warnWhenEmptyDictionary(context));
@@ -92,9 +91,22 @@ class CardEditorState extends State<CardEditor> {
 			});
     }
 
+	Future<StoredWord> _retrieveWord() async {
+        final word = await widget._wordStorage.find(widget.wordId);
+    
+        if (widget.pack == null) {
+			final nonePack = StoredPack.none;
+
+			_setPack(word.packId == nonePack.id ? nonePack: 
+				await widget._packStorage.find(word.packId));
+		}
+
+        return word;
+    }
+
     _disposeDictionary() => _dictionary?.dispose();
 
-	bool get _isNonePack => _pack == null || _pack.isNone;
+	bool get _isNonePack => _packNotifier.value == null || _packNotifier.value.isNone;
 
     Future<void> _warnWhenEmptyDictionary(BuildContext buildContext) 
 		async {
@@ -110,185 +122,225 @@ class CardEditorState extends State<CardEditor> {
 		final locale = AppLocalizations.of(context);
         return new Form(
 			key: _key,
-			child: widget.card == null ? 
-				new FutureLoader(futureWord, (card) => _buildLayout(card, locale, context)): 
-				_buildLayout(widget.card, locale, context)
+			child: new FutureLoader(widget.card == null ? futureWord: Future.value(widget.card), 
+				(card) {
+					if (card != null && !card.isNew && !_initialised) {
+						_initialised = true;
+
+						_textNotifier.value = card.text;
+						_transcriptionNotifier.value = card.transcription;
+						_partOfSpeechNotifier.value = card.partOfSpeech?.present(locale);
+						_translationNotifier.value = card.translation;
+						_studyProgressNotifier.value = card.studyProgress;
+					}
+
+					if (_partOfSpeechDic == null)
+						_partOfSpeechDic = PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
+
+					return new Column(
+						children: <Widget>[
+							new ValueListenableBuilder(
+								valueListenable: _textNotifier,
+								builder: (_, text, __) {
+									final textField = new PopupTextField(
+										locale.cardEditorCardTextTextFieldLabel, 
+										isRequired: true, 
+										popupItemsBuilder: _buildPopupValues,
+										onChanged: _updateCardValues, 
+										initialValue: text
+									);
+
+									return _isNonePack || text == null || text.isEmpty ? textField: 
+										new ValueListenableBuilder(
+											valueListenable: _packNotifier,
+											builder: (_, pack, __) => 
+												new Row(children: [
+													new Expanded(child: textField), 
+														new SpeakerButton(
+															pack.from, 
+															(speaker) => speaker.speak(text), 
+															defaultSpeaker: widget._defaultSpeaker
+														)
+													]),
+										);
+								}
+							),
+							new AnimatedBuilder(
+								animation: Listenable.merge([_transcriptionNotifier, _packNotifier]),
+								builder: (_, __) => 
+									new KeyboardedField(PhoneticKeyboard.getLanguageSpecific(
+										initialValue: _transcriptionNotifier.value,
+										lang: _packNotifier.value?.from
+									), 
+									_transcriptionFocusNode,
+									locale.cardEditorTranscriptionTextFieldLabel,
+									initialValue: _transcriptionNotifier.value,
+									onChanged: (value) => _transcriptionNotifier.value = value)
+							),
+							new ValueListenableBuilder(
+								valueListenable: _partOfSpeechNotifier,
+								builder: (_, partOfSpeech, __) =>
+								new StyledDropdown(_partOfSpeechDic.keys, 
+									label: locale.cardEditorPartOfSpeechDropdownLabel,
+									initialValue: partOfSpeech,
+									onChanged: (value) => _partOfSpeechNotifier.value = value),
+							),
+							new ValueListenableBuilder(
+								valueListenable: _translationNotifier,
+								builder: (_, translation, __) => new StyledTextField(
+									locale.cardEditorTranslationTextFieldLabel, 
+									isRequired: true, 
+									initialValue: translation, 
+									onChanged: (value, _) => _translationNotifier.value = value
+								),
+							),
+							new _BtnLink(
+								new ValueListenableBuilder(
+									valueListenable: _packNotifier,
+									child: new Icon(Icons.folder_open),
+									builder: (_, pack, icon) => 
+										new TextButton.icon(
+											icon: icon,
+											label: new Container(
+												width: MediaQuery.of(context).size.width * 0.6,
+												child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(
+													pack.getLocalisedName(context)))
+											),
+											onPressed: () async {
+												final pack = _packNotifier.value;
+												final chosenPack = await new PackSelectorDialog(context, pack.id)
+													.showAsync(_getFuturePacks());
+
+												if (chosenPack != null && chosenPack.name != pack.name)
+													_setPack(chosenPack);
+											}
+										)
+								)
+							),
+							new ValueListenableBuilder(
+								valueListenable: _studyProgressNotifier,
+								builder: (_, studyProgress, __) => 
+									studyProgress == WordStudyStage.unknown ? new Container():
+										new _BtnLink(new TextButton.icon(
+											icon: new Icon(Icons.restore),
+											label: new Text(
+												locale.cardEditorResettingStudyProgressButtonLabel(studyProgress)
+											),
+											onPressed: () => _studyProgressNotifier.value = WordStudyStage.unknown
+										))
+							),
+							new ElevatedButton(
+								child: new Text(locale.constsSavingItemButtonLabel),
+								onPressed: () async {
+									final state = _key.currentState;
+									if (!state.validate())
+										return;
+
+									state.save();
+
+									final pack = _packNotifier.value;
+									final wordToSave = new StoredWord(
+										_textNotifier.value, 
+										id: widget.wordId,
+										packId: pack.id,
+										partOfSpeech: _partOfSpeechDic[_partOfSpeechNotifier.value], 
+										transcription: _transcriptionNotifier.value,
+										translation: _translationNotifier.value,
+										studyProgress: _studyProgressNotifier.value
+									);
+									final cardWasAdded = wordToSave.isNew || 
+										widget.pack?.id != pack.id;
+									widget.afterSave?.call(
+										(await widget._wordStorage.upsert([wordToSave])).first, pack, cardWasAdded
+									);
+								}
+							)
+						]
+					);
+				}
+			)
 		);
     }
 
     bool get _isNew => widget.wordId == null;
 
-	Widget _buildLayout(StoredWord foundWord, AppLocalizations locale, BuildContext context) {
-		if (foundWord != null && !foundWord.isNew && !_initialised) {
-			_initialised = true;
+	Future<List<String>> _buildPopupValues(String value) async {
+		if (_dictionary == null || (value ?? '').trim().isEmpty)
+			return [];
 
-			_text = foundWord.text;
-			_transcription = foundWord.transcription;
-			_partOfSpeech = foundWord.partOfSpeech?.present(locale);
-			_translation = foundWord.translation;
-			_studyProgress = foundWord.studyProgress;
-		}
+		final tilesNumber = _foundLemmas.length;
+		if (tilesNumber == 1 && _foundLemmas.contains(value))
+			return [];
 
-		return _buildFormLayout(locale, context);
+		if (tilesNumber > 0 && tilesNumber < WordDictionary.searcheableLemmaMaxNumber && 
+			_prevSearchedLemmaLength > 0 && _prevSearchedLemmaLength <= value.length) {
+				final lemmas = _foundLemmas.where((el) => el.contains(value)).toList();
+				return lemmas.length == 1 && lemmas.contains(value) ? []: lemmas;
+			}
+
+		_prevSearchedLemmaLength = value.length;
+		return (_foundLemmas = await _dictionary.searchForLemmas(value));
 	}
 
-    Future<StoredWord> _retrieveWord() async {
-        final word = await widget._wordStorage.find(widget.wordId);
-    
-        if (widget.pack == null) {
-			final nonePack = StoredPack.none;
+	Future<void> _updateCardValues(String value, bool submitted) async {
+		if (!submitted || _dictionary == null) {
+			_textNotifier.value = value;
+			return;
+		}
+		
+		if (value == null || value.isEmpty)
+			return;
 
-			_setPack(word.packId == nonePack.id ? nonePack: 
-				await widget._packStorage.find(word.packId));
+		final article = await _dictionary.lookUp(value);
+		final chosenWord = await new WordSelectorDialog(context)
+			.show(article?.words);
+
+		String translation;
+		if (chosenWord != null)
+			translation = await new TranslationSelectorDialog(context)
+				.show(chosenWord.translations);
+
+		if (chosenWord == null) {
+			_textNotifier.value = value;
+			return;
 		}
 
-        return word;
-    }
+		_textNotifier.value = chosenWord.text;
+		_partOfSpeechNotifier.value = chosenWord.partOfSpeech.present(
+			AppLocalizations.of(context));
+		_transcriptionNotifier.value = chosenWord.transcription;
+		_studyProgressNotifier.value = WordStudyStage.unknown;
 
-    Widget _buildFormLayout(AppLocalizations locale, BuildContext context) {
-		if (_partOfSpeechDic == null)
-			_partOfSpeechDic = PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
-
-        return new Column(
-            children: <Widget>[
-				_isNonePack || _text == null || _text.isEmpty ? _buildCardTextField(locale): 
-					new Row(children: [
-						new Expanded(child:_buildCardTextField(locale)), 
-							new SpeakerButton(_pack.from, (speaker) => speaker.speak(_text), 
-							defaultSpeaker: widget._defaultSpeaker)
-						]),
-                new KeyboardedField(PhoneticKeyboard.getLanguageSpecific(
-						initialValue: this._transcription,
-						lang: _pack?.from
-					), 
-                    _transcriptionFocusNode,
-					locale.cardEditorTranscriptionTextFieldLabel,
-                    initialValue: this._transcription,
-                    onChanged: (value) => setState(() => this._transcription = value)),
-                new StyledDropdown(_partOfSpeechDic.keys, 
-					label: locale.cardEditorPartOfSpeechDropdownLabel,
-                    initialValue: this._partOfSpeech,
-                    onChanged: (value) => setState(() => this._partOfSpeech = value)),
-                new StyledTextField(locale.cardEditorTranslationTextFieldLabel, 
-					isRequired: true, 
-                    initialValue: this._translation, 
-                    onChanged: (value, _) => setState(() => this._translation = value)),
-				_buildBtnLink(new TextButton.icon(
-					icon: new Icon(Icons.folder_open),
-					label: new Container(
-						width: MediaQuery.of(context).size.width * 0.6,
-						child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(
-							_pack.getLocalisedName(context)))
-					),
-					onPressed: () async {
-						final chosenPack = await new PackSelectorDialog(context, _pack.id)
-							.showAsync(_getFuturePacks());
-
-						if (chosenPack != null && chosenPack.name != _pack.name)
-							setState(() => _setPack(chosenPack));
-					}
-				)),	
-                if (this._studyProgress != WordStudyStage.unknown)
-					_buildBtnLink(new TextButton.icon(
-						icon: new Icon(Icons.restore),
-						label: new Text(
-							locale.cardEditorResettingStudyProgressButtonLabel(_studyProgress)
-						),
-						onPressed: () =>  setState(
-							() => this._studyProgress = WordStudyStage.unknown)
-					)),
-                new ElevatedButton(
-                    child: new Text(locale.constsSavingItemButtonLabel),
-                    onPressed: () async {
-                        final state = _key.currentState;
-                        if (!state.validate())
-                            return;
-
-                        state.save();
-
-                        final wordToSave = new StoredWord(this._text, 
-                            id: widget.wordId,
-                            packId: _pack.id,
-                            partOfSpeech: _partOfSpeechDic[this._partOfSpeech], 
-                            transcription: this._transcription,
-                            translation: this._translation,
-                            studyProgress: this._studyProgress
-                        );
-                        final cardWasAdded = wordToSave.isNew || 
-                            widget.pack?.id != _pack.id;
-                        widget.afterSave?.call(
-							(await widget._wordStorage.upsert([wordToSave])).first, _pack, cardWasAdded
-						);
-                    }
-                )
-            ]
-        );
-    }
-
-	Widget _buildCardTextField(AppLocalizations locale) {
-		return new PopupTextField(locale.cardEditorCardTextTextFieldLabel, 
-			isRequired: true, 
-			popupItemsBuilder: (value) async {
-				if (_dictionary == null || (value ?? '').trim().isEmpty)
-					return [];
-
-				final tilesNumber = _foundLemmas.length;
-				if (tilesNumber == 1 && _foundLemmas.contains(value))
-					return [];
-
-				if (tilesNumber > 0 && tilesNumber < WordDictionary.searcheableLemmaMaxNumber && 
-					_prevSearchedLemmaLength > 0 && _prevSearchedLemmaLength <= value.length) {
-						final lemmas = _foundLemmas.where((el) => el.contains(value)).toList();
-						return lemmas.length == 1 && lemmas.contains(value) ? []: lemmas;
-					}
-
-				_prevSearchedLemmaLength = value.length;
-				return (_foundLemmas = await _dictionary.searchForLemmas(value));
-			},
-			onChanged: (value, submitted) async {
-				if (!submitted || _dictionary == null) {
-					setState(() => _text = value);
-					return;
-				}
-				
-				if (value == null || value.isEmpty)
-					return;
-
-				final article = await _dictionary.lookUp(value);
-				final chosenWord = await new WordSelectorDialog(context)
-					.show(article?.words);
-
-				String translation;
-				if (chosenWord != null)
-					translation = await new TranslationSelectorDialog(context)
-						.show(chosenWord.translations);
-
-				setState(() {
-					if (chosenWord == null) {
-						_text = value;
-						return;
-					}
-
-					_text = chosenWord.text;
-					_partOfSpeech = chosenWord.partOfSpeech.present(locale);
-					_transcription = chosenWord.transcription;
-					_studyProgress = WordStudyStage.unknown;
-
-					if (translation != null)
-						_translation = translation;
-				});
-			}, initialValue: this._text);
+		if (translation != null)
+			_translationNotifier.value = translation;
 	}
-
-	Widget _buildBtnLink(Widget child) => 
-		new Container(alignment: Alignment.centerLeft, child: child);
 
     @override
     dispose() {
         _disposeDictionary();
 
-        super.dispose();
+		_textNotifier.dispose();
+		_translationNotifier.dispose();
+		_transcriptionNotifier.dispose();
+		_partOfSpeechNotifier.dispose();
+		
+		_studyProgressNotifier.dispose();
+
+		_packNotifier.dispose();
+
+		super.dispose();
     }
+}
+
+class _BtnLink extends StatelessWidget {
+
+	final Widget child;
+
+	_BtnLink(this.child);
+
+	@override
+	Widget build(BuildContext context) => 
+		new Container(alignment: Alignment.centerLeft, child: child);
 }
 
 class CardEditor extends StatefulWidget {
