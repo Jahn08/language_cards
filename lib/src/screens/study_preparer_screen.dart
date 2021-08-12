@@ -99,8 +99,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 								valueListenable: _excludedPacksNotifier,
 								builder: (_, excudedPacks, __) => 
 									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excudedPacks)
-							), flex: 2, fit: FlexFit.tight),
-							new Divider(thickness: 2),
+							), flex: 4, fit: FlexFit.tight),
+							new Divider(thickness: 2, height: 0),
 							new Flexible(
 								child: new Scrollbar(
 									child: new ListView(
@@ -123,7 +123,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 										controller: _scrollController
 									)
 								), 
-								flex: 3
+								flex: 5
 							)
 						]
 					),
