@@ -11,20 +11,60 @@ import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 import '../widgets/underlined_container.dart';
 
+class _ListNotifier<T> extends ValueNotifier<List<T>> {
+	  
+	_ListNotifier(List<T> value) : super(value ?? <T>[]);
+
+	void clear() {
+		if (value == null || value.length == 0)
+			return;
+
+		value.clear();
+		notifyListeners();
+	}
+
+	@override
+	set value(List<T> newValue) {
+		newValue = newValue ?? [];
+		if ((value.length + newValue.length) == 0)
+			return;
+			
+		super.value = newValue;
+	}
+
+	void add(T item) {
+		value.add(item);
+		notifyListeners();
+	}
+	
+	void addAll(Iterable<T> items) {
+		value.addAll(items);
+		notifyListeners();
+	}
+
+	void remove(T item) {
+		value.remove(item);
+		notifyListeners();
+	}
+}
+
 class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
 	List<StudyPack> _packs;
 
 	bool _hasScrollNavigator = false;
-	bool _shouldScrollUpwards = false;
 
-    final List<int> _excludedPacks = [];
+	final _shouldScrollUpNotifier = new ValueNotifier(false);
+	final _excludedPacksNotifier = new _ListNotifier<int>([]);
 
     final ScrollController _scrollController = new ScrollController();
 
 	@override
 	void dispose() {
 		_scrollController.dispose();
+
+		_shouldScrollUpNotifier.dispose();
+		_excludedPacksNotifier.dispose();
 
 		super.dispose();
 	}
@@ -41,20 +81,67 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 				final styler = new Styler(context);
 				return new BarScaffold(
 					title: locale.studyPreparerScreenTitle,
-					barActions: <Widget>[_buildSelectorButton(_packs, locale)],
+					barActions: <Widget>[
+						new IconButton(
+							onPressed: () {
+								if (_excludedPacksNotifier.value.isEmpty)
+									_excludedPacksNotifier.addAll(stPacks.map((p) => p.pack.id));
+								else
+									_excludedPacksNotifier.clear();
+							},
+							icon: new Icon(Icons.select_all)
+						)
+					],
 					onNavGoingBack: () => Router.goHome(context),
-					body: _buildLayout(_packs, locale),
+					body: new Column(
+						children: [
+							new Flexible(child: new ValueListenableBuilder(
+								valueListenable: _excludedPacksNotifier,
+								builder: (_, excudedPacks, __) => 
+									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excudedPacks)
+							), flex: 2, fit: FlexFit.tight),
+							new Divider(thickness: 2),
+							new Flexible(
+								child: new Scrollbar(
+									child: new ListView(
+										children: _packs.map((p) => new ValueListenableBuilder(
+											valueListenable: _excludedPacksNotifier,
+											child: new TranslationIndicator(p.pack.from, p.pack.to),
+											builder: (_, excludedPacks, child) => 
+												_CheckListItem(
+													stPack: p,
+													isChecked: !excludedPacks.contains(p.pack.id),
+													onChanged: (isChecked, packId) {
+														if (isChecked)
+															_excludedPacksNotifier.remove(packId);
+														else
+															_excludedPacksNotifier.add(packId);
+													}, 
+													secondary: child
+												)
+										)).toList(),
+										controller: _scrollController
+									)
+								), 
+								flex: 3
+							)
+						]
+					),
 					floatingActionButton: _hasScrollNavigator ? new FloatingActionButton(
 						onPressed: () async {
 							final pos = _scrollController.position;
 							await _scrollController.animateTo(
-								_shouldScrollUpwards ? pos.minScrollExtent : pos.maxScrollExtent, 
+								_shouldScrollUpNotifier.value ? pos.minScrollExtent : pos.maxScrollExtent, 
 								duration: new Duration(milliseconds: 500),
 								curve: Curves.easeOut
 							);
 						},
-						child: new Icon(_shouldScrollUpwards ? Icons.arrow_upward_rounded: 
-							Icons.arrow_downward_rounded), 
+						child: new ValueListenableBuilder(
+							valueListenable: _shouldScrollUpNotifier,
+							builder: (_, shouldScrollUp, __) => 
+								new Icon(shouldScrollUp ? Icons.arrow_upward_rounded: 
+									Icons.arrow_downward_rounded)
+						), 
 						mini: styler.isDense,
 						tooltip: locale.listScreenAddingNewItemButtonTooltip,
 						backgroundColor: styler.floatingActionButtonColor
@@ -72,45 +159,59 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
 		if (_hasScrollNavigator)
 			_scrollController.addListener(() {
-				if (_shouldScrollUpwards == 
+				if (_shouldScrollUpNotifier.value == 
 					_scrollController.offset > (_scrollController.position.maxScrollExtent / 2))
 					return;
 				
 				WidgetsBinding.instance.addPostFrameCallback((_) { 
-					setState(() => _shouldScrollUpwards = !_shouldScrollUpwards);
+					_shouldScrollUpNotifier.value = !_shouldScrollUpNotifier.value;
 				});
 			});
 	}
+}
 
-    Widget _buildSelectorButton(List<StudyPack> stPacks, AppLocalizations locale) {
-        final allSelected = _excludedPacks.isEmpty;
-        return new IconButton(
-            onPressed: () {
-                setState(() { 
-                    _excludedPacks.clear();
+class _CheckListItem extends StatelessWidget {
+	
+	final void Function(bool, int) onChanged;
 
-                    if (allSelected)
-                        _excludedPacks.addAll(stPacks.map((p) => p.pack.id));
-                });
-            },
-            icon: new Icon(Icons.select_all)
-        );
-    }
+	final StudyPack stPack;
 
-    Widget _buildLayout(List<StudyPack> stPacks, AppLocalizations locale) => 
-        new Column(
-            children: [
-                new Flexible(child: _buildStudyLevelList(stPacks, locale), 
-					flex: 2, fit: FlexFit.tight),
-                new Divider(thickness: 2),
-                new Flexible(child: _buildList(stPacks), flex: 3)
-            ]
-        );
+	final bool isChecked;
 
-    Widget _buildStudyLevelList(List<StudyPack> stPacks, AppLocalizations locale) {
-        final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
+	final Widget secondary;
+
+	_CheckListItem({ 
+		@required this.isChecked, @required this.stPack, @required this.onChanged, @required this.secondary
+	});
+	
+	@override
+	Widget build(BuildContext context) {
+		final pack = stPack.pack;
+        return new UnderlinedContainer(new CheckboxListTile(
+            value: isChecked,
+            onChanged: (isChecked) => onChanged(isChecked, pack.id),
+            secondary: secondary,
+            title: new OneLineText(pack.name),
+            subtitle: new CardNumberIndicator(stPack.cardsOverall)
+        ));
+	}
+}
+
+class _StudyLevelList extends StatelessWidget {
+
+	final List<StudyPack> stPacks;
+
+	final List<int> excludedPackIds;
+
+	_StudyLevelList({ @required this.stPacks, @required this.excludedPackIds });
+
+	@override
+	Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
+
+		final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
             key: (st) => st, value: (_) => 0);
-        final includedPacks = stPacks.where((p) => !_excludedPacks.contains(p.pack.id)).toList();
+        final includedPacks = stPacks.where((p) => !excludedPackIds.contains(p.pack.id)).toList();
         includedPacks.expand((e) => e.cardsByStage.entries)
             .forEach((en) => studyStages[en.key] += en.value);
 
@@ -144,33 +245,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 				}).toList()
         	)
 		);
-    }
-
-    Widget _buildList(List<StudyPack> packs) => 
-        new Scrollbar(
-            child: new ListView(
-                children: packs.map((p) => _buildCheckListItem(p)).toList(),
-                controller: _scrollController
-            )
-        );
-
-    Widget _buildCheckListItem(StudyPack stPack) {
-        final pack = stPack.pack;
-        return new UnderlinedContainer(new CheckboxListTile(
-            value: !_excludedPacks.contains(pack.id),
-            onChanged: (isChecked) {
-                setState(() {
-                    if (isChecked)
-                        _excludedPacks.remove(pack.id);
-                    else
-                        _excludedPacks.add(pack.id);
-                });
-            },
-            secondary: new TranslationIndicator(pack.from, pack.to),
-            title: new OneLineText(pack.name),
-            subtitle: new CardNumberIndicator(stPack.cardsOverall)
-        ));
-    }
+	}
 }
 
 class StudyPreparerScreen extends StatefulWidget {

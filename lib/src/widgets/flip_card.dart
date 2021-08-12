@@ -104,19 +104,17 @@ class _FlipCardState extends State<FlipCard>
             child: Stack(
                 fit: StackFit.passthrough,
                 children: <Widget>[
-                    _buildSide(true),
-                    _buildSide(false)
+					new _FlipCardSide(
+						animation: _frontRotation,
+						child: widget.front,
+						isHittable: _isFront
+					),
+					new _FlipCardSide(
+						animation: _backRotation,
+						child: widget.back,
+						isHittable: !_isFront
+					)
                 ]
-            )
-        );
-    }
-
-    Widget _buildSide(bool shouldBuildFront) {
-        return new IgnorePointer(
-            ignoring: shouldBuildFront ? !_isFront: _isFront,
-            child: new _AnimatedCard(
-                child: shouldBuildFront ? widget.front: widget.back,
-                animation: shouldBuildFront ? _frontRotation: _backRotation
             )
         );
     }
@@ -127,6 +125,27 @@ class _FlipCardState extends State<FlipCard>
         
         super.dispose();
     }
+}
+
+class _FlipCardSide extends StatelessWidget {
+
+	final bool isHittable;
+
+	final Widget child;
+
+	final Animation<double> animation;
+
+	_FlipCardSide({ @required this.child, @required this.animation, @required this.isHittable });
+
+	@override
+	Widget build(BuildContext context) =>
+		new IgnorePointer(
+            ignoring: isHittable,
+            child: new _AnimatedCard(
+                child: child,
+                animation: animation
+            )
+        );
 }
 
 class FlipCard extends StatefulWidget {

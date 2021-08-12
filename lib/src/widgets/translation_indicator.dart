@@ -27,7 +27,7 @@ class TranslationIndicator extends StatelessWidget {
 			margin: new EdgeInsets.only(right: 5),
 			child: new Stack(
 				children: <Widget>[
-					new IconOption(icon: this.from == null ? _buildEmptyContainer(): 
+					new IconOption(icon: this.from == null ? new Container(): 
 						AssetIcon.getByLanguage(this.from)),
 					if (this.to != null)
 						new CustomPaint(
@@ -42,8 +42,6 @@ class TranslationIndicator extends StatelessWidget {
 			)
 		);
 	} 
-
-    Widget _buildEmptyContainer() => new Container();
 }
 
 class _ClippedBorderPainter extends CustomPainter {

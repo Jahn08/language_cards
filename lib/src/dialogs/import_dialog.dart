@@ -16,7 +16,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
     final _key = new GlobalKey<FormState>();
 
-	String _importFilePath;
+	final _importFilePathNotifier = new ValueNotifier<String>(null);
 
 	bool _isJsonMimeSupported;
 
@@ -26,7 +26,46 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 		return new AlertDialog(
 			content: new Container(
 				height: MediaQuery.of(context).size.height * 0.2,
-				child: _buildForm(locale)
+				child: new Form(
+					key: _key,
+					child: new Column(
+						children: [
+							new ValueListenableBuilder(
+								valueListenable: _importFilePathNotifier,
+								builder: (_, importFilePath, __) =>
+									new StyledTextField(
+										locale.importDialogFileNameTextFieldLabel,
+										onChanged: (value, _) => _importFilePathNotifier.value = value,
+										initialValue: importFilePath,
+										isRequired: true,
+										validator: (val) {
+											return val == null || val.toLowerCase().endsWith('.$_jsonExtension') ?
+												null: locale.importDialogFileNameTextFieldValidationError;
+										},
+									)
+							),
+							new ElevatedButton(
+								child: new Text(locale.importDialogFileSelectorBtnLabel),
+								onPressed: () async {
+									if (_isJsonMimeSupported == null)
+										_isJsonMimeSupported = await IOContextProvider.isFileExtensionSupported(_jsonExtension);
+
+									final fileResult = await (_isJsonMimeSupported ? FilePicker.platform.pickFiles(
+										allowedExtensions: [_jsonExtension],
+										type: FileType.custom
+									): FilePicker.platform.pickFiles());
+									
+									if (fileResult == null)
+										return;
+										
+									final filePath = fileResult.paths.firstWhere(
+										(_) => true, orElse: () => null);
+									_importFilePathNotifier.value = filePath;
+								}
+							)
+						]
+					)
+				)
 			),
 			title: new Text(locale.importDialogTitle),
 			actions: [
@@ -40,50 +79,19 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
 						state.save();
 
-						widget.fileProcessor?.call(_importFilePath);
+						widget.fileProcessor?.call(_importFilePathNotifier.value);
 					}
 				)
 			]
 		);
 	}
 
-	Widget _buildForm(AppLocalizations locale) => 
-		new Form(
-			key: _key,
-			child: new Column(
-				children: [
-					new StyledTextField(
-						locale.importDialogFileNameTextFieldLabel,
-						onChanged: (value, _) => setState(() => this._importFilePath = value),
-						initialValue: this._importFilePath,
-						isRequired: true,
-						validator: (val) {
-							return val == null || val.toLowerCase().endsWith('.$_jsonExtension') ?
-								null: locale.importDialogFileNameTextFieldValidationError;
-						},
-					),
-					new ElevatedButton(
-						child: new Text(locale.importDialogFileSelectorBtnLabel),
-						onPressed: () async {
-							if (_isJsonMimeSupported == null)
-								_isJsonMimeSupported = await IOContextProvider.isFileExtensionSupported(_jsonExtension);
+	@override
+	void dispose() {
+		_importFilePathNotifier.dispose();
 
-							final fileResult = await (_isJsonMimeSupported ? FilePicker.platform.pickFiles(
-								allowedExtensions: [_jsonExtension],
-								type: FileType.custom
-							): FilePicker.platform.pickFiles());
-							
-							if (fileResult == null)
-								return;
-								
-							final filePath = fileResult.paths.firstWhere(
-								(_) => true, orElse: () => null);
-							setState(() => _importFilePath = filePath);
-						}
-					)
-				]
-			)
-		);
+		super.dispose();
+	}
 }
 
 class _ImportFormDialog extends StatefulWidget {

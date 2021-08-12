@@ -25,19 +25,37 @@ class _CheckboxListState extends State<_CheckboxList> {
 					widget.onChange?.call(_chosenItems);
 				})
 			),
-			children: widget.items.map((w) => _buildDialogOption(w)).toList()
+			children: widget.items.map((item) => 
+				new _DialogOption(
+					title: item,
+					isChosen: _chosenItems.contains(item),
+					onChanged: (value) => setState(() {
+						value ? _chosenItems.add(item) : _chosenItems.remove(item);
+						widget.onChange?.call(_chosenItems);
+					})
+				)
+			).toList()
 		);
     }
+}
 
-    Widget _buildDialogOption(String item) => 
+class _DialogOption extends StatelessWidget {
+	
+	final String title;
+
+	final bool isChosen;
+
+	final void Function(bool) onChanged;
+
+	_DialogOption({ @required this.title, @required this.isChosen, @required this.onChanged });
+	
+	@override
+	Widget build(BuildContext context) =>
 		new ShrinkableSimpleDialogOption(
 			new CheckboxListTile(
-				title: new Text(item),
-				onChanged: (value) => setState(() {
-					value ? _chosenItems.add(item) : _chosenItems.remove(item);
-					widget.onChange?.call(_chosenItems);
-				}),
-				value: _chosenItems.contains(item)
+				title: new Text(title),
+				onChanged: onChanged,
+				value: isChosen
 			),
 			isShrunk: true
 		);
