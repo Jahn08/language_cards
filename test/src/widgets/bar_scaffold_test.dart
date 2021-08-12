@@ -262,7 +262,7 @@ void main() {
 
             final allTexts = tester.widgetList<Text>(
 				AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
-			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 2, 
+			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 1, 
 				reason: 'There are not enough English labels in [${allTexts.join(',')}]');
         });
 }

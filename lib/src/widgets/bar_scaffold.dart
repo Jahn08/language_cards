@@ -10,6 +10,7 @@ import '../models/language.dart';
 import '../models/presentable_enum.dart';
 import '../models/user_params.dart';
 import '../utilities/link.dart';
+import '../utilities/string_ext.dart';
 import '../widgets/loader.dart';
 import '../widgets/navigation_bar.dart';
 import '../widgets/one_line_text.dart';
@@ -279,27 +280,29 @@ class _ContactsSectionBody extends _SimpleSectionBody {
 
 	@override
 	Widget build(BuildContext context) =>
-		new FutureLoader(Configuration.getParams(context, reload: false), (params) {
+		new FutureLoader(Configuration.getParams(context, reload: false), (AppParams params) {
 			final locale = AppLocalizations.of(context);
+			final contactsParams = params.contacts;
 			return new Column(children: [
-				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
-					() async => await new FBLink(params.fbUserId).activate()),
+				if (!isNullOrEmpty(contactsParams.fbUserId))
+					buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
+						() async => await new FBLink(contactsParams.fbUserId).activate()),
 				buildTextButtonedRow(
 					locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
 					() async => await new EmailLink(
-						email: params.email, 
+						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
 					).activate()
 				),
 				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
 					() async => await new EmailLink(
-						email: params.email, 
+						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
 					).activate()),
 				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
-					() async => await new AppStoreLink(params.appStoreId).activate())
+					() async => await new AppStoreLink(contactsParams.appStoreId).activate())
 			]);
 		});
 }
