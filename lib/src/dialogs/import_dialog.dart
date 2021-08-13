@@ -6,7 +6,7 @@ import '../data/base_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
-import '../utilities/io_context_provider.dart';
+import '../utilities/context_provider.dart';
 import '../utilities/pack_importer.dart';
 import '../widgets/styled_text_field.dart';
 import 'cancellable_dialog.dart';
@@ -48,7 +48,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 								child: new Text(locale.importDialogFileSelectorBtnLabel),
 								onPressed: () async {
 									if (_isJsonMimeSupported == null)
-										_isJsonMimeSupported = await IOContextProvider.isFileExtensionSupported(_jsonExtension);
+										_isJsonMimeSupported = await ContextProvider.isFileExtensionSupported(_jsonExtension);
 
 									final fileResult = await (_isJsonMimeSupported ? FilePicker.platform.pickFiles(
 										allowedExtensions: [_jsonExtension],

@@ -4,14 +4,14 @@ import 'package:language_cards/src/utilities/pack_exporter.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/permission_channel_mock.dart';
 import '../../testers/exporter_tester.dart';
-import '../../mocks/io_context_channel_mock.dart';
+import '../../mocks/context_channel_mock.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
 main() {
 
 	testWidgets('Exports packs to a JSON-file', (_) async {
-		await IOContextChannelMock.testWithChannel(() async {
+		await ContextChannelMock.testWithChannel(() async {
 			final packStorage = new PackStorageMock();
 			final packsToExport = ExporterTester.getPacksForExport(packStorage);
 			
@@ -27,7 +27,7 @@ main() {
 
 	testWidgets('Exports packs to a JSON-file with a numbered name if there is already one named equally', 
 		(_) async {
-			await IOContextChannelMock.testWithChannel(() async {
+			await ContextChannelMock.testWithChannel(() async {
 				final packStorage = new PackStorageMock();
 				final packsToExport = ExporterTester.getPacksForExport(packStorage);
 
@@ -46,7 +46,7 @@ main() {
 
 	testWidgets('Exports packs successfully when a user grants required permissions', 
 		(_) async {
-			await IOContextChannelMock.testWithChannel(() async {
+			await ContextChannelMock.testWithChannel(() async {
 				await PermissionChannelMock.testWithChannel(() async {
 					final packStorage = new PackStorageMock();
 					final packsToExport = ExporterTester.getPacksForExport(packStorage);
@@ -63,7 +63,7 @@ main() {
 		});
 
 	testWidgets('Throws an error when a user grants no access to an export path', (_) async {
-		await IOContextChannelMock.testWithChannel(() async {
+		await ContextChannelMock.testWithChannel(() async {
 			await PermissionChannelMock.testWithChannel(() async {
 					final packStorage = new PackStorageMock();
 					final packsToExport = ExporterTester.getPacksForExport(packStorage);

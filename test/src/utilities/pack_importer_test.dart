@@ -3,7 +3,7 @@ import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../testers/exporter_tester.dart';
-import '../../mocks/io_context_channel_mock.dart';
+import '../../mocks/context_channel_mock.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
@@ -11,7 +11,7 @@ main() {
 
 	testWidgets('Imports packs from a JSON-file even if there are already packs with equal names', 
 		(_) async {
-			await IOContextChannelMock.testWithChannel(() async {
+			await ContextChannelMock.testWithChannel(() async {
 				final packStorage = new PackStorageMock();
 				final packsToExport = ExporterTester.getPacksForExport(packStorage);
 				
@@ -22,7 +22,7 @@ main() {
 		});
 
 	testWidgets('Imports a pack with no cards from a JSON-file', (_) async {
-		await IOContextChannelMock.testWithChannel(() async {
+		await ContextChannelMock.testWithChannel(() async {
 			final packStorage = new PackStorageMock();
 			final emptyPack = PackStorageMock.generatePack(Randomiser.nextInt(99) + 11);
 			
@@ -42,7 +42,7 @@ main() {
 	});
 
 	testWidgets('Imports nothing from a JSON-file with a wrong format', (_) async { 
-		await IOContextChannelMock.testWithChannel(() async {
+		await ContextChannelMock.testWithChannel(() async {
 			final filePath = ExporterTester.writeToJsonFile([Randomiser.nextString(), 
 				Randomiser.nextInt(), Randomiser.nextString()]);
 

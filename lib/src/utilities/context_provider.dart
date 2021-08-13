@@ -1,9 +1,9 @@
 import 'package:flutter/services.dart';
 
-class IOContextProvider {
-	static const MethodChannel channel = const MethodChannel('io_context_provider');
+class ContextProvider {
+	static const MethodChannel channel = const MethodChannel('context_provider');
 
-	IOContextProvider._();
+	ContextProvider._();
 
 	static Future<bool> isStoragePermissionRequired() => channel.invokeMethod('isStoragePermissionRequired');
 
@@ -11,4 +11,6 @@ class IOContextProvider {
 		
 	static Future<bool> isFileExtensionSupported(String extention) => 
 		channel.invokeMethod('isFileExtensionSupported', { "ext": extention });
+
+	static Future<bool> isEmailHtmlSupported() => channel.invokeMethod('isEmailHtmlSupported');
 }

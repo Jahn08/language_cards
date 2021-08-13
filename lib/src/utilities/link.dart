@@ -1,4 +1,5 @@
 import 'package:url_launcher/url_launcher.dart';
+import 'context_provider.dart';
 
 abstract class Link {
 
@@ -21,11 +22,17 @@ class FBLink extends Link {
 
 class EmailLink extends Link {
 
-  	EmailLink({ String email, String subject, String body }): 
-		super(_buildUrl(email, subject, body));
+  	EmailLink._(String url): super(url);
 
-	static String _buildUrl(String email, String subject, String body) => 
-		'mailto:$email?subject=$subject&body=$body';
+	static bool _isHtmlSupported;
+
+	static Future<EmailLink> build({ String email, String subject, String body }) async {
+		if ((body?.isNotEmpty ?? false) && 
+			!(_isHtmlSupported ?? (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported())))
+			body = body.replaceAll('<br>', '\n');
+
+		return new EmailLink._('mailto:$email?subject=$subject&body=$body');
+	}
 }
 
 class AppStoreLink extends Link {

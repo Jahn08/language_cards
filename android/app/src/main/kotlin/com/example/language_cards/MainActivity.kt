@@ -11,7 +11,7 @@ import io.flutter.embedding.android.FlutterActivity
 import io.flutter.plugin.common.MethodChannel
 
 class MainActivity: FlutterActivity() {
-    private val CHANNEL = "io_context_provider"
+    private val CHANNEL = "context_provider"
 
     override fun configureFlutterEngine(@NonNull flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -21,6 +21,7 @@ class MainActivity: FlutterActivity() {
                 "getDownloadsDirectoryPath" ->
                     result.success(Environment.getExternalStoragePublicDirectory("Download").toString());
                 "isStoragePermissionRequired" -> result.success(VERSION.SDK_INT < VERSION_CODES.Q);
+                "isEmailHtmlSupported" -> result.success(VERSION.SDK_INT >= VERSION_CODES.R);
                 "isFileExtensionSupported" -> {
                     var ext = call.argument<String>("ext");
                     result.success(MimeTypeMap.getSingleton().hasExtension(ext));

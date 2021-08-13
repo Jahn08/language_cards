@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import '../data/word_storage.dart';
 import '../models/stored_pack.dart';
-import '../utilities/io_context_provider.dart';
+import 'context_provider.dart';
 import '../utilities/path.dart';
 
 class PackExporter {
@@ -22,11 +22,11 @@ class PackExporter {
 			.forEach((c) => cardsByParent[c.packId].add(c));
 
 		final contents = jsonEncode(packs.map((p) => p.toJsonMap(cardsByParent[p.id])).toList());
-		final dirPath = await IOContextProvider.getDownloadDirPath();
+		final dirPath = await ContextProvider.getDownloadDirPath();
 		final fileName = 'lang_cards_' + filePostfix;
 		File file = new File(_compileFullFileName(dirPath, fileName));
 
-		if ((await IOContextProvider.isStoragePermissionRequired()) && 
+		if ((await ContextProvider.isStoragePermissionRequired()) && 
 			!(await Permission.storage.isGranted)) {
 			final status = await Permission.storage.request();
 			

@@ -7,7 +7,7 @@ import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
 import '../../mocks/pack_storage_mock.dart';
-import '../../mocks/io_context_channel_mock.dart';
+import '../../mocks/context_channel_mock.dart';
 import '../../mocks/permission_channel_mock.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
@@ -163,7 +163,7 @@ void main() {
 		final packsToExport = (await _fetchPacks(storage, tester))
 			.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-		await IOContextChannelMock.testWithChannel(() async {
+		await ContextChannelMock.testWithChannel(() async {
 			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 			await assistant.tapWidget(exportBtnFinder);
 
@@ -188,7 +188,7 @@ void main() {
 			(await _fetchPacks(storage, tester))
 				.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-			await IOContextChannelMock.testWithChannel(() async =>
+			await ContextChannelMock.testWithChannel(() async =>
 				PermissionChannelMock.testWithChannel(() async {
 					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 					await assistant.tapWidget(exportBtnFinder);
@@ -210,7 +210,7 @@ void main() {
 			final packsToExport = (await _fetchPacks(storage, tester))
 				.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-			await IOContextChannelMock.testWithChannel(() async =>
+			await ContextChannelMock.testWithChannel(() async =>
 				await PermissionChannelMock.testWithChannel(() async {
 					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 					await assistant.tapWidget(exportBtnFinder);
@@ -247,7 +247,7 @@ void main() {
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
 			
-			await IOContextChannelMock.testWithChannel(() async {
+			await ContextChannelMock.testWithChannel(() async {
 				final importFilePath = ExporterTester.writeToJsonFile([
 					Randomiser.nextInt(), Randomiser.nextString(), Randomiser.nextInt()]);
 				await _activateImport(assistant, importFilePath);
@@ -463,7 +463,7 @@ Future<List<StoredPack>> _testImportingPacks(
 	final packsToExport = ExporterTester.getPacksForExport(storage);
 	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toList();
 
-	await IOContextChannelMock.testWithChannel(() async {
+	await ContextChannelMock.testWithChannel(() async {
 		final importFilePath = await tester.runAsync(() =>
 			new PackExporter(storage.wordStorage)
 				.export(packsToExport, Randomiser.nextString(), Localizator.defaultLocalization));
