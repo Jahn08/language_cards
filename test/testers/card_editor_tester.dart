@@ -86,6 +86,6 @@ class CardEditorTester {
         final foundKey = find.widgetWithText(InkWell, symbol);
         expect(foundKey, findsOneWidget);
 
-		await assistant.tapWidget(foundKey);
+		await assistant.tapWidget(foundKey, atCenter: true);
     }
 }
