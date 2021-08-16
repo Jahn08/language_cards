@@ -76,7 +76,7 @@ void main() {
 				CardEditorTester.findStudyProgressButton(shouldFind: true));
             CardEditorTester.findStudyProgressButton(shouldFind: false);
 
-            await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+            await assistant.tapWidget(CardEditorTester.findSaveButton(), atCenter: true);
 
             final changedWord = await storage.wordStorage.find(wordWithProgress.id);
             expect(changedWord.studyProgress, WordStudyStage.unknown);
@@ -197,30 +197,28 @@ void main() {
             expect(refocusedField.focusNode.hasFocus, true);
         });
 
-    testWidgets('Saves all changes to a word whereas the word text field is still focused', 
-        (tester) async {
-            await _testSavingChangedValue(tester, (word) => word.text);
-        });
+    testWidgets('Saves nothing when changes to the word text field have not been accepted yet', 
+        (tester) => _testSavingChangedValue(tester, (word) => word.text));
     
-    testWidgets('Saves all changes to a word whereas the word translation field is still focused', 
-        (tester) async {
-            await _testSavingChangedValue(tester, (word) => word.translation);
-        });
+    testWidgets('Saves nothing when changes to the word translation field have not been accepted yet', 
+        (tester) => _testSavingChangedValue(tester, (word) => word.translation));
     
-    testWidgets('Saves all changes to a word whereas the word transcription field is still focused', 
+    testWidgets('Saves nothing when changes to the word transcription field have not been accepted yet', 
         (tester) async {
             final storage = new PackStorageMock();
             final wordToShow = await _displayWord(tester, storage: storage);
 
             final assistant = new WidgetAssistant(tester);
-            await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
+			final initialValue = wordToShow.transcription;
+            await _showTranscriptionKeyboard(assistant, initialValue);
 
-            final expectedChangedTr = await _changeTranscription(tester, wordToShow.transcription);
+            final changedValue = await _changeTranscription(tester, initialValue);
 
             await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
 
             final changedWord = await storage.wordStorage.find(wordToShow.id);
-            expect(changedWord?.transcription, expectedChangedTr);
+            expect(changedWord?.transcription, initialValue);
+            expect(changedWord?.transcription == changedValue, false);
         });
     
     testWidgets('Saves a new pack for a card', 
@@ -404,13 +402,16 @@ Future<void> _testSavingChangedValue(WidgetTester tester,
     final wordToShow = await _displayWord(tester, storage: storage);
 
 	final assistant = new WidgetAssistant(tester);
-    final expectedChangedText = await assistant.enterChangedText(valueToChangeGetter(wordToShow));
+
+	final initialValue = valueToChangeGetter(wordToShow);
+    final changedText = await assistant.enterChangedText(initialValue);
 
     await assistant.tapWidget(CardEditorTester.findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
-    expect(valueToChangeGetter(changedWord), expectedChangedText);
+    expect(valueToChangeGetter(changedWord), initialValue);
+    expect(valueToChangeGetter(changedWord) == changedText, false);
 }
 
 Future<void> _showTranscriptionKeyboard(WidgetAssistant assistant, String transcription) async {

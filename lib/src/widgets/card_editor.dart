@@ -32,6 +32,8 @@ class CardEditorState extends State<CardEditor> {
 
     Future<List<StoredPack>> _futurePacks;
     
+	final _isStateDirtyNotifier = new ValueNotifier(false);
+
 	final _packNotifier = new ValueNotifier<StoredPack>(null);
 	
 	final _textNotifier = new ValueNotifier<String>(null);
@@ -41,11 +43,10 @@ class CardEditorState extends State<CardEditor> {
 
 	final _studyProgressNotifier = new ValueNotifier<int>(WordStudyStage.unknown);
 
-    bool _initialised = false;
-
 	Map<String, PresentableEnum> _partOfSpeechDic;
 
-    Future<StoredWord> futureWord;
+    Future<StoredWord> _futureCard;
+	StoredWord _foundCard;
 
 	List<String> _foundLemmas = [];
 	int _prevSearchedLemmaLength = 0;
@@ -57,7 +58,7 @@ class CardEditorState extends State<CardEditor> {
         if (widget.pack != null || _isNew)
             _setPack(widget.pack ?? StoredPack.none);
 
-        futureWord = _isNew ? 
+        _futureCard = _isNew ? 
             Future.value(new StoredWord('')): _retrieveWord();
         
 		_getFuturePacks();
@@ -77,6 +78,7 @@ class CardEditorState extends State<CardEditor> {
 
     void _setPack(StoredPack newPack) {
 		_packNotifier.value = newPack;
+		_setStateDirtiness();
 
         _disposeDictionary();
         _dictionary = _isNonePack ? null: 
@@ -122,10 +124,10 @@ class CardEditorState extends State<CardEditor> {
 		final locale = AppLocalizations.of(context);
         return new Form(
 			key: _key,
-			child: new FutureLoader(widget.card == null ? futureWord: Future.value(widget.card), 
+			child: new FutureLoader(widget.card == null ? _futureCard: Future.value(widget.card), 
 				(card) {
-					if (card != null && !card.isNew && !_initialised) {
-						_initialised = true;
+					if (card != null && !card.isNew && _foundCard == null) {
+						_foundCard = card;
 
 						_textNotifier.value = card.text;
 						_transcriptionNotifier.value = card.transcription;
@@ -146,7 +148,10 @@ class CardEditorState extends State<CardEditor> {
 										locale.cardEditorCardTextTextFieldLabel, 
 										isRequired: true, 
 										popupItemsBuilder: _buildPopupValues,
-										onChanged: _updateCardValues, 
+										onChanged: (value, submitted) async {
+											await _updateCardValues(value, submitted);
+											_setStateDirtiness();
+										},
 										initialValue: text
 									);
 
@@ -175,7 +180,10 @@ class CardEditorState extends State<CardEditor> {
 									_transcriptionFocusNode,
 									locale.cardEditorTranscriptionTextFieldLabel,
 									initialValue: _transcriptionNotifier.value,
-									onChanged: (value) => _transcriptionNotifier.value = value)
+									onChanged: (value) {
+										_transcriptionNotifier.value = value;
+										_setStateDirtiness();
+									})
 							),
 							new ValueListenableBuilder(
 								valueListenable: _partOfSpeechNotifier,
@@ -183,7 +191,10 @@ class CardEditorState extends State<CardEditor> {
 								new StyledDropdown(_partOfSpeechDic.keys, 
 									label: locale.cardEditorPartOfSpeechDropdownLabel,
 									initialValue: partOfSpeech,
-									onChanged: (value) => _partOfSpeechNotifier.value = value),
+									onChanged: (value) {
+										_partOfSpeechNotifier.value = value;
+										_setStateDirtiness();
+									}),
 							),
 							new ValueListenableBuilder(
 								valueListenable: _translationNotifier,
@@ -191,7 +202,10 @@ class CardEditorState extends State<CardEditor> {
 									locale.cardEditorTranslationTextFieldLabel, 
 									isRequired: true, 
 									initialValue: translation, 
-									onChanged: (value, _) => _translationNotifier.value = value
+									onChanged: (value, _) {
+										_translationNotifier.value = value;
+										_setStateDirtiness();
+									}
 								),
 							),
 							new _BtnLink(
@@ -226,35 +240,43 @@ class CardEditorState extends State<CardEditor> {
 											label: new Text(
 												locale.cardEditorResettingStudyProgressButtonLabel(studyProgress)
 											),
-											onPressed: () => _studyProgressNotifier.value = WordStudyStage.unknown
+											onPressed: () {
+												_studyProgressNotifier.value = WordStudyStage.unknown;
+												_setStateDirtiness();
+											}
 										))
 							),
-							new ElevatedButton(
-								child: new Text(locale.constsSavingItemButtonLabel),
-								onPressed: () async {
-									final state = _key.currentState;
-									if (!state.validate())
-										return;
+							new ValueListenableBuilder(
+								valueListenable: _isStateDirtyNotifier,
+								builder: (_, isStateDirty, __) =>
+									new ElevatedButton(
+										child: new Text(locale.constsSavingItemButtonLabel),
+										onPressed: isStateDirty ? () async {
+											final state = _key.currentState;
+											if (!state.validate())
+												return;
 
-									state.save();
+											state.save();
 
-									final pack = _packNotifier.value;
-									final wordToSave = new StoredWord(
-										_textNotifier.value, 
-										id: widget.wordId,
-										packId: pack.id,
-										partOfSpeech: _partOfSpeechDic[_partOfSpeechNotifier.value], 
-										transcription: _transcriptionNotifier.value,
-										translation: _translationNotifier.value,
-										studyProgress: _studyProgressNotifier.value
-									);
-									final cardWasAdded = wordToSave.isNew || 
-										widget.pack?.id != pack.id;
-									widget.afterSave?.call(
-										(await widget._wordStorage.upsert([wordToSave])).first, pack, cardWasAdded
-									);
-								}
+											final pack = _packNotifier.value;
+											final wordToSave = new StoredWord(
+												_textNotifier.value, 
+												id: widget.wordId,
+												packId: pack.id,
+												partOfSpeech: _partOfSpeechDic[_partOfSpeechNotifier.value], 
+												transcription: _transcriptionNotifier.value,
+												translation: _translationNotifier.value,
+												studyProgress: _studyProgressNotifier.value
+											);
+											final cardWasAdded = wordToSave.isNew || 
+												widget.pack?.id != pack.id;
+											widget.afterSave?.call(
+												(await widget._wordStorage.upsert([wordToSave])).first, pack, cardWasAdded
+											);
+										}: null
+									)
 							)
+							
 						]
 					);
 				}
@@ -295,15 +317,15 @@ class CardEditorState extends State<CardEditor> {
 		final chosenWord = await new WordSelectorDialog(context)
 			.show(article?.words);
 
-		String translation;
-		if (chosenWord != null)
-			translation = await new TranslationSelectorDialog(context)
-				.show(chosenWord.translations);
-
 		if (chosenWord == null) {
 			_textNotifier.value = value;
 			return;
 		}
+
+		String translation;
+		if (chosenWord != null)
+			translation = await new TranslationSelectorDialog(context)
+				.show(chosenWord.translations);
 
 		_textNotifier.value = chosenWord.text;
 		_partOfSpeechNotifier.value = chosenWord.partOfSpeech.present(
@@ -312,8 +334,17 @@ class CardEditorState extends State<CardEditor> {
 		_studyProgressNotifier.value = WordStudyStage.unknown;
 
 		if (translation != null)
-			_translationNotifier.value = translation;
+			_translationNotifier.value = translation;	
 	}
+	
+	void _setStateDirtiness() => 
+		_isStateDirtyNotifier.value = _isNew || (_foundCard != null && 
+			(_foundCard.text != _textNotifier.value || 
+			_foundCard.translation != _translationNotifier.value || 
+			_foundCard.transcription != _transcriptionNotifier.value || 
+			_foundCard.partOfSpeech != _partOfSpeechDic[_partOfSpeechNotifier.value] || 
+			_foundCard.studyProgress != _studyProgressNotifier.value || 
+			_foundCard.packId != _packNotifier.value?.id));
 
     @override
     dispose() {
@@ -327,6 +358,8 @@ class CardEditorState extends State<CardEditor> {
 		_studyProgressNotifier.dispose();
 
 		_packNotifier.dispose();
+
+		_isStateDirtyNotifier.dispose();
 
 		super.dispose();
     }
