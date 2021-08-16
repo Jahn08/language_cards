@@ -481,10 +481,15 @@ StoredWord _getShownCard(WidgetTester tester, List<StoredWord> cards) {
 }
 
 String _getShownCardText(WidgetTester tester) {
-    final cardTileFinder = find.descendant(of: _findCurrentCardSide(), 
-        matching: find.byType(ListTile));
+    final cardTileFinder = find.descendant(
+		of: _findCurrentCardSide(), 
+        matching: find.descendant(
+			of: find.byType(ListTile), 
+			matching: find.byType(Text)
+		)
+	);
 
-    return (tester.widget<ListTile>(cardTileFinder).title as Text).data;
+    return tester.widget<Text>(cardTileFinder.first).data;
 }
 
 Finder _assureDialogBtnExistence(bool shouldFind) {
@@ -550,7 +555,7 @@ Future<void> _testReversingFrontCardSide(WidgetTester tester, { bool shouldSwipe
 }
 
 Future<void> _reverseCardSide(WidgetAssistant assistant) async => 
-    await assistant.tapWidget(_findCardWidget());
+    await assistant.tapWidget(_findCardWidget(), atCenter: true);
 
 Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();
