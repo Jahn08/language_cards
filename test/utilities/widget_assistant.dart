@@ -36,7 +36,7 @@ class WidgetAssistant {
 
     Future<void> pressButtonDirectly(Finder btnFinder) async {
         expect(btnFinder, findsOneWidget);
-        tester.widget<ElevatedButton>(btnFinder).onPressed();
+        tester.widget<ElevatedButton>(btnFinder).onPressed?.call();
 
         await pumpAndAnimate();
     }
