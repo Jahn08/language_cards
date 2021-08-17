@@ -289,18 +289,18 @@ class _ContactsSectionBody extends _SimpleSectionBody {
 						() async => await new FBLink(contactsParams.fbUserId).activate()),
 				buildTextButtonedRow(
 					locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
-					() async => await new EmailLink(
+					() async => await (await EmailLink.build(
 						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
-					).activate()
+					)).activate()
 				),
 				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
-					() async => await new EmailLink(
+					() async => await (await EmailLink.build(
 						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
-					).activate()),
+					)).activate()),
 				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
 					() async => await new AppStoreLink(contactsParams.appStoreId).activate())
 			]);
