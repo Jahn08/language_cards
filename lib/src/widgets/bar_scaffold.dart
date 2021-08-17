@@ -57,6 +57,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 		new ExpansionPanel(
 			headerBuilder: (context, _) => header,
 			body: body,
+			canTapOnHeader: true,
 			isExpanded: _expandedPanelIndex == index
 		);
 }
@@ -67,65 +68,138 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 
     String _originalParams;
 
+	final _langParamNotifier = new ValueNotifier<Language>(null);
+	final _themeParamNotifier = new ValueNotifier<AppTheme>(null);
+	
+	final _cardSideParamNotifier = new ValueNotifier<CardSide>(null);
+	final _directionParamNotifier = new ValueNotifier<StudyDirection>(null);
+
+	final _isStateDirtyNotifier = new ValueNotifier<bool>(false);
+
+	@override
+	void dispose() {
+		_langParamNotifier.dispose();
+		_themeParamNotifier.dispose();
+
+		_cardSideParamNotifier.dispose();
+		_directionParamNotifier.dispose();
+
+		_isStateDirtyNotifier.dispose();
+
+		super.dispose();
+	}
+
 	@override
 	Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
         final bloc = SettingsBlocProvider.of(context);
         
 		return new FutureLoader<UserParams>(bloc.userParams, (params) {
-			if (_params == null)
-				_params = params;
+			if (_params == null) {
+				_setParams(params, locale);
+				_originalParams = _params.toJson();
+			}
 
 			final directionDic = PresentableEnum.mapStringValues(StudyDirection.values, locale);
 			final sideDic = PresentableEnum.mapStringValues(CardSide.values, locale);
 			
 			return new Column(children: [
 				const _LanguageSubSectionHeader(),
-				new _LanguageSettingsSection(
-					_params.interfaceLang, 
-					(newLang) => setState(() => _params.interfaceLang = newLang)
+				new ValueListenableBuilder(
+					valueListenable: _langParamNotifier,
+					builder: (_, Language interfaceLang, __) => 
+						new _LanguageSettingsSection(interfaceLang, 
+							(newLang) {
+								_params.interfaceLang = newLang;
+								_langParamNotifier.value = newLang;
+
+								_setDirtinessState();
+							})
 				),
 				const _AppearanceSubSectionHeader(),
-				new _AppearanceSettingsSection(
-					_params.theme, 
-					(newTheme) => setState(() => _params.theme = newTheme)
+				new ValueListenableBuilder(
+					valueListenable: _themeParamNotifier,
+					builder: (_, AppTheme theme, __) => 
+						new _AppearanceSettingsSection(theme, 
+							(newTheme) {
+								_params.theme = newTheme;
+								_themeParamNotifier.value = newTheme;
+
+								_setDirtinessState();
+							})
 				),
 				const _SettingsSubSectionHeader(),
-				new _StudySettingsSectionRow(
-					options: directionDic.keys,
-					inintialValue: _params.studyParams.direction.present(locale),
-					label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
-					onValueChanged: (newValue) {
-						setState(() => _params.studyParams.direction = directionDic[newValue]);
-					}
+				new ValueListenableBuilder(
+					valueListenable: _directionParamNotifier,
+					builder: (_, StudyDirection direction, __) =>
+						new _StudySettingsSectionRow(
+							options: directionDic.keys,
+							inintialValue: direction.present(locale),
+							label: locale.barScaffoldSettingsPanelStudySectionSortingCardOptionLabel,
+							onValueChanged: (newValue) {
+								final newDirection = directionDic[newValue];
+								_params.studyParams.direction = newDirection;
+								_directionParamNotifier.value = newDirection;
+							
+								_setDirtinessState();
+							}
+						)
 				),
-				new _StudySettingsSectionRow(
-					options: sideDic.keys,
-					inintialValue: _params.studyParams.cardSide.present(locale),
-					label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
-					onValueChanged: (newValue) {
-						setState(() => _params.studyParams.cardSide = sideDic[newValue]);
-					}
+				new ValueListenableBuilder(
+					valueListenable: _cardSideParamNotifier,
+					builder: (_, CardSide cardSide, __) => 
+						new _StudySettingsSectionRow(
+							options: sideDic.keys,
+							inintialValue: cardSide.present(locale),
+							label: locale.barScaffoldSettingsPanelStudySectionCardSideOptionLabel,
+							onValueChanged: (newValue) {
+								final newCardSide = sideDic[newValue];
+								_params.studyParams.cardSide = newCardSide;
+								_cardSideParamNotifier.value = newCardSide;
+							
+								_setDirtinessState();
+							}
+						)
 				),
 				new Row(
 					mainAxisAlignment: MainAxisAlignment.spaceEvenly,
 					children: [
 						new ElevatedButton(
 							child: new Text(locale.barScaffoldSettingsPanelResettingButtonLabel),
-							onPressed: () => setState(() => _params = new UserParams())
-						),
-						new ElevatedButton(
-							child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
-							onPressed: _originalParams == _params.toJson() ? null: () async {
-								await bloc.save(_params);
-								Navigator.pop(context);
+							onPressed: () {
+								_setParams(new UserParams(), locale);
+								_setDirtinessState();
 							}
+						),
+						new ValueListenableBuilder(
+							valueListenable: _isStateDirtyNotifier,
+							child: new Text(locale.barScaffoldSettingsPanelApplyingButtonLabel),
+							builder: (_, bool isDirty, label) => 
+								new ElevatedButton(
+									child: label,
+									onPressed: isDirty ? () async {
+										await bloc.save(_params);
+										Navigator.pop(context);
+									}: null
+								)
 						)
-					] 
+					]
 				)
 			]);
 		});
 	}
+
+	void _setParams(UserParams newParams, AppLocalizations locale) {
+		_params = newParams;
+
+		_langParamNotifier.value = _params.interfaceLang;
+		_themeParamNotifier.value = _params.theme;
+
+		_cardSideParamNotifier.value = _params.studyParams.cardSide;
+		_directionParamNotifier.value = _params.studyParams.direction;
+	}
+
+	void _setDirtinessState() => _isStateDirtyNotifier.value = (_originalParams != _params.toJson());
 }
 
 class _SettingsSectionBody extends StatefulWidget {
@@ -254,7 +328,7 @@ class _LanguageOption extends StatelessWidget {
         );
 }
 
-class _HelpSectionBody extends _SimpleSectionBody {
+class _HelpSectionBody extends StatelessWidget {
 
 	const _HelpSectionBody();
 
@@ -263,18 +337,18 @@ class _HelpSectionBody extends _SimpleSectionBody {
 		final locale = AppLocalizations.of(context);
 		return new Column(
 			children: [
-				buildTextButtonedRow(locale.mainScreenStudyModeMenuItemLabel, 
+				new _TextButtonedRow(locale.mainScreenStudyModeMenuItemLabel, 
 					() => Router.goToStudyHelp(context)),
-				buildTextButtonedRow(locale.mainScreenWordPacksMenuItemLabel, 
+				new _TextButtonedRow(locale.mainScreenWordPacksMenuItemLabel, 
 					() => Router.goToPackHelp(context)),
-				buildTextButtonedRow(locale.mainScreenWordCardsMenuItemLabel, 
+				new _TextButtonedRow(locale.mainScreenWordCardsMenuItemLabel, 
 					() => Router.goToCardHelp(context))
 			]
 		);
 	}
 }
 
-class _ContactsSectionBody extends _SimpleSectionBody {
+class _ContactsSectionBody extends StatelessWidget {
 
 	const _ContactsSectionBody();
 
@@ -285,9 +359,9 @@ class _ContactsSectionBody extends _SimpleSectionBody {
 			final contactsParams = params.contacts;
 			return new Column(children: [
 				if (!isNullOrEmpty(contactsParams.fbUserId))
-					buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
+					new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
 						() async => await new FBLink(contactsParams.fbUserId).activate()),
-				buildTextButtonedRow(
+				new _TextButtonedRow(
 					locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
 					() async => await (await EmailLink.build(
 						email: contactsParams.email, 
@@ -295,33 +369,35 @@ class _ContactsSectionBody extends _SimpleSectionBody {
 						subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
 					)).activate()
 				),
-				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
+				new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
 					() async => await (await EmailLink.build(
 						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
 					)).activate()),
-				buildTextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
+				new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
 					() async => await new AppStoreLink(contactsParams.appStoreId).activate())
 			]);
 		});
 }
 
-class _LanguageSubSectionHeader extends _SubSectionHeader {
+class _LanguageSubSectionHeader extends StatelessWidget {
 
 	const _LanguageSubSectionHeader(): super();
 
 	@override
 	Widget build(BuildContext context) => 
-		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelLanguageSectionLabel);
+		new _SubSectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelLanguageSectionLabel);
 }
 
-abstract class _SubSectionHeader extends StatelessWidget {
+class _SubSectionHeader extends StatelessWidget {
 
-	const _SubSectionHeader();
+	final String title;
 
-	@protected
-	Widget buildHeader(String title) => 
+	const _SubSectionHeader(this.title);
+
+ 	@override
+  	Widget build(BuildContext context) => 
 		new Row(
 			mainAxisAlignment: MainAxisAlignment.start,
 			children: [
@@ -337,37 +413,40 @@ abstract class _SubSectionHeader extends StatelessWidget {
 		);
 }
 
-class _AppearanceSubSectionHeader extends _SubSectionHeader {
+class _AppearanceSubSectionHeader extends StatelessWidget {
 
 	const _AppearanceSubSectionHeader(): super();
 
 	@override
 	Widget build(BuildContext context) => 
-		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelThemeSectionLabel);
+		new _SubSectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelThemeSectionLabel);
 }
 
-class _SettingsSubSectionHeader extends _SubSectionHeader {
+class _SettingsSubSectionHeader extends StatelessWidget {
 
 	const _SettingsSubSectionHeader(): super();
 
 	@override
 	Widget build(BuildContext context) => 
-		buildHeader(AppLocalizations.of(context).barScaffoldSettingsPanelStudySectionLabel);
+		new _SubSectionHeader(AppLocalizations.of(context).barScaffoldSettingsPanelStudySectionLabel);
 }
 
-abstract class _SimpleSectionBody extends StatelessWidget {
+class _TextButtonedRow extends StatelessWidget {
+	
+	final void Function() onPressed;
 
-	const _SimpleSectionBody();
+	final String label;
 
-	@protected
-	Widget buildTextButtonedRow(String label, Function() onPressed) {
-		return new Row(
+	_TextButtonedRow(this.label, this.onPressed);
+
+	@override
+	Widget build(BuildContext context) => 
+		new Row(
 			children: <Widget>[new Flexible(child: new Container(
 				child: new TextButton(child: new Text(label), onPressed: onPressed),
 				height: 40.0
 			))]
 		);
-	}
 }
 
 class _SettingsSectionHeader extends StatelessWidget {
@@ -504,8 +583,8 @@ class BarScaffold extends StatelessWidget {
 		_settingsOpener = (hasSettings ?? false) ? new _SettingsOpenerButton(): null;
 
 	@override
-	Widget build(BuildContext context) {
-		return new Scaffold(
+	Widget build(BuildContext context) =>
+		new Scaffold(
 			drawer: _settingsOpener == null ? null: new _SettingsPanel(),
 			appBar: onNavGoingBack == null ? 
 				new AppBar(actions: barActions, leading: _settingsOpener, title: _title):
@@ -515,7 +594,6 @@ class BarScaffold extends StatelessWidget {
 			bottomNavigationBar: bottomBar,
 			floatingActionButton: floatingActionButton
 		);
-	}    
 }
 
 class BarTitle extends StatelessWidget {
