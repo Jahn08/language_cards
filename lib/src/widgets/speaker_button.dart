@@ -16,23 +16,22 @@ class SpeakerButton extends StatelessWidget {
 	SpeakerButton(this.lang, this.onPressed, { this.defaultSpeaker });
 
 	@override
-	Widget build(BuildContext context) =>
-		defaultSpeaker == null ? 
-			new FutureLoader(Speaker.getSpeaker(lang), (speaker) => _buildButton(context, speaker)): 
-			_buildButton(context, defaultSpeaker);
-
-	Widget _buildButton(BuildContext context, ISpeaker speaker) {
-		if (speaker == null) {
-			final locale = AppLocalizations.of(context);
-			new ConfirmDialog.ok(
-				title: locale.speakerButtonUnaivailableTTSDialogTitle,
-				content: locale.speakerButtonUnaivailableTTSDialogContent(lang.toString())
-			).show(context);
-		}
-			
-		return IconButton(
-			icon: new Icon(Icons.textsms_outlined),
-			onPressed: speaker == null ? null: () => onPressed(speaker)
-		);
+	Widget build(BuildContext context) {
+		final futureSpeaker = defaultSpeaker == null ? 
+			Speaker.getSpeaker(lang): Future.value(defaultSpeaker);
+		return new FutureLoader(futureSpeaker, (speaker) {
+			if (speaker == null) {
+				final locale = AppLocalizations.of(context);
+				new ConfirmDialog.ok(
+					title: locale.speakerButtonUnaivailableTTSDialogTitle,
+					content: locale.speakerButtonUnaivailableTTSDialogContent(lang.toString())
+				).show(context);
+			}
+				
+			return IconButton(
+				icon: new Icon(Icons.textsms_outlined),
+				onPressed: speaker == null ? null: () => onPressed(speaker)
+			);
+		});
 	}
 }

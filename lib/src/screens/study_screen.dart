@@ -19,6 +19,7 @@ import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
 import '../widgets/one_line_text.dart';
+import '../widgets/tight_flexible.dart';
 import '../widgets/translation_indicator.dart';
 
 class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPack>> {
@@ -160,14 +161,14 @@ class _StudyScreenState extends State<StudyScreen> {
 					],
 					body: new Column(
 						children: [
-							new _FlexibleRow(
+							new TightFlexible(
 								child: new PageView.builder(
 									controller: _controller,
 									itemBuilder: _buildCard
 								), 
 								flex: 3
 							),
-							new _FlexibleRow(
+							new TightFlexible(
 								child: new _ButtonPanel(
 									onLearningPressed: () async {
 										final card = _cards[_curCardIndexNotifier.value];
@@ -273,8 +274,8 @@ class _StudyScreenState extends State<StudyScreen> {
 				final card = _cards[index];
 				return new Column(
 					children: [
-						new _FlexibleRow(child: _PackLabel(_packMap[card.packId])),
-						new _FlexibleRow(
+						new TightFlexible(child: _PackLabel(_packMap[card.packId])),
+						new TightFlexible(
 							child: new ValueListenableBuilder(
 								valueListenable: _cardSideNotifier,
 								builder: (_, CardSide cardSide, __) {
@@ -397,7 +398,7 @@ class _CardSideFrame extends StatelessWidget {
 									child: new Text(WordStudyStage.stringify(card.studyProgress, locale))
 								)
 							]),
-							_FlexibleRow(
+							TightFlexible(
 								child: new Center(
 									child: new ListTile(
 										title: new _CenteredBigText(isFront ? card.text: card.translation),
@@ -453,23 +454,6 @@ class _ButtonPanel extends StatelessWidget {
 			);
 		});
 	}
-}
-
-class _FlexibleRow extends StatelessWidget {
-
-	final int flex;
-
-	final Widget child;
-
-	_FlexibleRow({ this.flex, this.child });
-
-	@override
-	Widget build(BuildContext context) =>
-        new Flexible(
-            fit: FlexFit.tight,
-            flex: flex ?? 1,
-            child: child ?? Container()
-        );
 }
 
 class _CenteredBigText extends StatelessWidget {

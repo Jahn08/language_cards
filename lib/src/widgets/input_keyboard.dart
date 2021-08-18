@@ -30,13 +30,47 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
         final screenWidth = MediaQuery.of(context).size.width;
         final width = screenWidth / itemsPerRow;
 
-        final children = _symbols.map((s) => _buildKey(_buildSymbolButton(s), height, width))
-            .toList();
+        final children = _symbols.map((s) => new _Key(
+			symbol: new _SymbolButton(
+				symbol: s,
+				symbolSize: _symbolSize,
+				onTap: () => updateValue((notifier.value ?? '') + s)
+			), 
+			height: height, 
+			width: width
+		)).toList();
         
         final wideBtnWidth = width * 2;
+        final backspaceColor = Colors.grey;
+        final doneColor = Colors.blue;
         children.addAll([
-            _buildBackspaceKey(height, wideBtnWidth),
-            _buildDoneKey(context, height, wideBtnWidth)
+			new _Key(
+				symbol: new _Button(
+					child: new Icon(Icons.backspace), 
+					color: backspaceColor, 
+					onTap: () {
+						final curValue = notifier.value ?? '';
+						if (curValue.isNotEmpty) {
+							final newValue = curValue.replaceFirst(_lastSymbolRegExp, '');
+							updateValue(newValue == curValue ? 
+								curValue.substring(0, curValue.length - 1): newValue);
+						}
+					}
+				), 
+				height: height, 
+				width: wideBtnWidth, 
+				borderColor: backspaceColor
+			),
+			new _Key(
+				symbol: new _Button(
+					child: new Icon(Icons.done), 
+					color: doneColor,
+					onTap: () => FocusScope.of(context).unfocus()
+				), 
+				height: height, 
+				width: wideBtnWidth, 
+				borderColor: doneColor
+			)
         ]);
 
         return new Container(
@@ -51,32 +85,28 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
         ); 
     }
 
-    Widget _buildSymbolButton(String symbol) {
-        return _buildButton(new Center(
-            child: new Text(symbol, 
-                textAlign: TextAlign.center,
-                style: new TextStyle(
-                    color: Colors.black,
-                    fontWeight: Consts.boldFontWeight,
-                    fontSize: _symbolSize
-                )
-            )
-        ), onTap: () => updateValue((notifier.value ?? '') + symbol));
-    }
+    @override
+    ValueNotifier<String> get notifier => _notifier;
 
-    Widget _buildButton(Widget content, { Color color, Function() onTap }) {
-        return new Material(
-            color: color ?? Colors.grey[200],
-            child: new InkWell(
-                onTap: onTap,
-                child: content,
-                splashColor: Colors.grey[300]
-            )
-        );
-    }
+    @override
+    Size get preferredSize => new Size.fromHeight(_keyboard_height);
+}
 
-    Widget _buildKey(Widget symbol, double height, double width, { Color borderColor }) {
-        return new Container(
+class _Key extends StatelessWidget {
+
+	final Widget symbol;
+	
+	final double height;
+	
+	final double width;
+	
+	final Color borderColor; 	
+
+	_Key({ @required this.symbol, @required this.height, @required this.width, this.borderColor });
+
+	@override
+	Widget build(BuildContext context) =>
+        new Container(
             margin: new EdgeInsets.all(2),
             child: symbol,
             decoration: new BoxDecoration(
@@ -96,35 +126,52 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
             width: width,
             height: height
         ); 
-    }
+}
 
-    Widget _buildBackspaceKey(double height, double width) {
-        final fillingColor = Colors.grey;
-        return _buildKey(_buildButton(new Icon(Icons.backspace), 
-            color: fillingColor, 
-            onTap: () {
-                final curValue = notifier.value ?? '';
-                if (curValue.isNotEmpty) {
-					final newValue = curValue.replaceFirst(_lastSymbolRegExp, '');
-                    updateValue(newValue == curValue ? 
-						curValue.substring(0, curValue.length - 1): newValue);
-				}
-            }
-        ), height, width, borderColor: fillingColor);
-    }
+class _Button extends StatelessWidget {
 
-    Widget _buildDoneKey(BuildContext context, double height, double width) {
-        final fillingColor = Colors.blue;
-        return _buildKey(
-            _buildButton(new Icon(Icons.done), 
-            color: fillingColor,
-            onTap: () => FocusScope.of(context).unfocus()
-        ), height, width, borderColor: fillingColor);
-    }
+	final Color color;
 
-    @override
-    ValueNotifier<String> get notifier => _notifier;
+	final Widget child;
 
-    @override
-    Size get preferredSize => new Size.fromHeight(_keyboard_height);
+	final void Function() onTap;
+
+	_Button({ @required this.child, @required this.onTap, this.color });
+
+	@override
+	Widget build(BuildContext context) =>
+        new Material(
+            color: color ?? Colors.grey[200],
+            child: new InkWell(
+                onTap: onTap,
+                child: child,
+                splashColor: Colors.grey[300]
+            )
+        );
+}
+
+class _SymbolButton extends StatelessWidget {
+	
+	final String symbol;
+
+	final double symbolSize;
+
+	final void Function() onTap;
+
+	_SymbolButton({ @required this.symbol, @required this.symbolSize, @required this.onTap });
+
+	@override
+	Widget build(BuildContext context) =>
+        new _Button(
+			child: new Center(
+				child: new Text(symbol, 
+					textAlign: TextAlign.center,
+					style: new TextStyle(
+						color: Colors.black,
+						fontWeight: Consts.boldFontWeight,
+						fontSize: symbolSize
+					))
+			),
+			onTap: onTap
+		);
 }

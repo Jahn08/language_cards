@@ -27,9 +27,8 @@ class DialogListView extends StatelessWidget {
 		this.isShrunk = isShrunk ?? false;
 
 	@override
-	Widget build(BuildContext context) {
-		
-		return new AlertDialog(
+	Widget build(BuildContext context) =>
+		new AlertDialog(
 			actions: this.buttons,
 			contentPadding: isShrunk ? _zeroPadding: _defaultAlertDialog.contentPadding,
 			titlePadding: isShrunk ? _zeroPadding: _defaultAlertDialog.titlePadding,
@@ -41,18 +40,28 @@ class DialogListView extends StatelessWidget {
 				width: double.maxFinite,
 				child: new Scrollbar(
 					isAlwaysShown: true,
-					child: _buildScrollView(
-						new Column(
+					child: new _ScrollView(
+						child: new Column(
 							mainAxisSize: MainAxisSize.min,
 							children: children
-						)
-					) 
+						),
+						isShrunk: isShrunk
+					)
 				)
 			)
 		);
-	}
+}
 
-	Widget _buildScrollView(Widget child) =>
+class _ScrollView extends StatelessWidget {
+
+	final bool isShrunk;
+
+	final Widget child;
+
+	_ScrollView({ @required this.child, @required this.isShrunk });
+
+	@override
+	Widget build(BuildContext context) =>
 		isShrunk ? new SingleChildScrollView(child: child, padding: _zeroPadding):
 			new SingleChildScrollView(child: child);
 }
