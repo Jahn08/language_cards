@@ -88,14 +88,13 @@ class _StudyScreenState extends State<StudyScreen> {
 	AppLocalizations _locale;
 
     @override
-    initState() {
+    void initState() {
         super.initState();
 
         _shouldReorderCards = true;
         _isStudyOver = false;
         
-        _packMap = new Map<int, StoredPack>.fromIterable(widget.packs, 
-            key: (p) => p.id, value: (p) => p);
+        _packMap = <int, StoredPack>{ for (var p in widget.packs) p.id: p };
         _futureCards = widget.storage.fetchFiltered(
             parentIds: _packMap.keys.toList(), 
             studyStageIds: widget.studyStageIds);
@@ -104,17 +103,13 @@ class _StudyScreenState extends State<StudyScreen> {
     @override
     Widget build(BuildContext context) {
 		_locale = AppLocalizations.of(context);
-
-		if (_futureParams == null)
-        	_futureParams = SettingsBlocProvider.of(context).userParams;
+		_futureParams ??= SettingsBlocProvider.of(context).userParams;
 
 		return new FutureLoader<UserParams>(_futureParams, (userParams) =>
 			new FutureLoader<List<StoredWord>>(_futureCards, (cards) {
 				final studyParams = userParams.studyParams;
-				if (_studyDirectionNotifier.value == null)
-					_studyDirectionNotifier.value = studyParams.direction;
-				if (_cardSideNotifier.value == null)
-					_cardSideNotifier.value = studyParams.cardSide;
+				_studyDirectionNotifier.value ??= studyParams.direction;
+				_cardSideNotifier.value ??= studyParams.cardSide;
 
 				bool shouldTakeAllCards = false;
 				if (_cards == null || _cards.isEmpty) {
@@ -133,7 +128,7 @@ class _StudyScreenState extends State<StudyScreen> {
 					),
 					barActions: [
 						new IconButton(
-							icon: new Icon(Icons.edit),
+							icon: const Icon(Icons.edit),
 							onPressed: () async {
 								final curCard = _cards[_curCardIndexNotifier.value];
 								final updatedPackedCard = await new _CardEditorDialog(

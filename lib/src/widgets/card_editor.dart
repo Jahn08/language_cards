@@ -43,7 +43,7 @@ class CardEditorState extends State<CardEditor> {
 
 	final _studyProgressNotifier = new ValueNotifier<int>(WordStudyStage.unknown);
 
-	Map<String, PresentableEnum> _partOfSpeechDic;
+	Map<String, PartOfSpeech> _partOfSpeechDic;
 
     Future<StoredWord> _futureCard;
 	StoredWord _foundCard;
@@ -106,7 +106,7 @@ class CardEditorState extends State<CardEditor> {
         return word;
     }
 
-    _disposeDictionary() => _dictionary?.dispose();
+    void _disposeDictionary() => _dictionary?.dispose();
 
 	bool get _isNonePack => _packNotifier.value == null || _packNotifier.value.isNone;
 
@@ -125,7 +125,7 @@ class CardEditorState extends State<CardEditor> {
         return new Form(
 			key: _key,
 			child: new FutureLoader(widget.card == null ? _futureCard: Future.value(widget.card), 
-				(card) {
+				(StoredWord card) {
 					if (card != null && !card.isNew && _foundCard == null) {
 						_foundCard = card;
 
@@ -136,14 +136,12 @@ class CardEditorState extends State<CardEditor> {
 						_studyProgressNotifier.value = card.studyProgress;
 					}
 
-					if (_partOfSpeechDic == null)
-						_partOfSpeechDic = PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
-
+					_partOfSpeechDic ??= PresentableEnum.mapStringValues(PartOfSpeech.values, locale);
 					return new Column(
 						children: <Widget>[
 							new ValueListenableBuilder(
 								valueListenable: _textNotifier,
-								builder: (_, text, __) {
+								builder: (_, String text, __) {
 									final textField = new PopupTextField(
 										locale.cardEditorCardTextTextFieldLabel, 
 										isRequired: true, 
@@ -158,7 +156,7 @@ class CardEditorState extends State<CardEditor> {
 									return _isNonePack || text == null || text.isEmpty ? textField: 
 										new ValueListenableBuilder(
 											valueListenable: _packNotifier,
-											builder: (_, pack, __) => 
+											builder: (_, StoredPack pack, __) => 
 												new Row(children: [
 													new Expanded(child: textField), 
 														new SpeakerButton(
@@ -187,7 +185,7 @@ class CardEditorState extends State<CardEditor> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _partOfSpeechNotifier,
-								builder: (_, partOfSpeech, __) =>
+								builder: (_, String partOfSpeech, __) =>
 								new StyledDropdown(_partOfSpeechDic.keys, 
 									label: locale.cardEditorPartOfSpeechDropdownLabel,
 									initialValue: partOfSpeech,
@@ -198,7 +196,7 @@ class CardEditorState extends State<CardEditor> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _translationNotifier,
-								builder: (_, translation, __) => new StyledTextField(
+								builder: (_, String translation, __) => new StyledTextField(
 									locale.cardEditorTranslationTextFieldLabel, 
 									isRequired: true, 
 									initialValue: translation, 
@@ -211,8 +209,8 @@ class CardEditorState extends State<CardEditor> {
 							new _BtnLink(
 								new ValueListenableBuilder(
 									valueListenable: _packNotifier,
-									child: new Icon(Icons.folder_open),
-									builder: (_, pack, icon) => 
+									child: const Icon(Icons.folder_open),
+									builder: (_, StoredPack pack, icon) => 
 										new TextButton.icon(
 											icon: icon,
 											label: new Container(
@@ -233,10 +231,10 @@ class CardEditorState extends State<CardEditor> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _studyProgressNotifier,
-								builder: (_, studyProgress, __) => 
+								builder: (_, int studyProgress, __) => 
 									studyProgress == WordStudyStage.unknown ? new Container():
 										new _BtnLink(new TextButton.icon(
-											icon: new Icon(Icons.restore),
+											icon: const Icon(Icons.restore),
 											label: new Text(
 												locale.cardEditorResettingStudyProgressButtonLabel(studyProgress)
 											),
@@ -248,7 +246,7 @@ class CardEditorState extends State<CardEditor> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _isStateDirtyNotifier,
-								builder: (_, isStateDirty, __) =>
+								builder: (_, bool isStateDirty, __) =>
 									new ElevatedButton(
 										child: new Text(locale.constsSavingItemButtonLabel),
 										onPressed: isStateDirty ? () async {

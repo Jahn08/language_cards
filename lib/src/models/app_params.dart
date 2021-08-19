@@ -8,7 +8,7 @@ class DictionaryParams {
     DictionaryParams({ this.apiKey });
 
     DictionaryParams.fromJson(Map<String, dynamic> json): 
-        apiKey = json[_apiKeyPropName];
+        apiKey = json[_apiKeyPropName] as String;
 
     DictionaryParams merge(DictionaryParams params) => 
 		new DictionaryParams(apiKey: getValueOrDefault(params?.apiKey, apiKey));
@@ -30,9 +30,9 @@ class ContactsParams {
     const ContactsParams({ this.fbUserId, this.email, this.appStoreId });
 
     ContactsParams.fromJson(Map<String, dynamic> json): 
-        fbUserId = json[_fbLinkPropName],
-        appStoreId = json[_appStoreIdPropName],
-        email = json[_emailPropName];
+        fbUserId = json[_fbLinkPropName] as String,
+        appStoreId = json[_appStoreIdPropName] as String,
+        email = json[_emailPropName] as String;
 
     ContactsParams merge(ContactsParams params) =>
 		new ContactsParams(
@@ -56,8 +56,10 @@ class AppParams {
     AppParams({ this.dictionary, this.contacts});
 
     AppParams.fromJson(Map<String, dynamic> json): 
-        dictionary = new DictionaryParams.fromJson(json[_dictionaryPropName] ?? {}),
-		contacts = new ContactsParams.fromJson(json[_contactsPropName] ?? {});
+        dictionary = new DictionaryParams.fromJson(
+			json[_dictionaryPropName] as Map<String, dynamic> ?? {}),
+		contacts = new ContactsParams.fromJson(
+			json[_contactsPropName] as Map<String, dynamic> ?? {});
 
     AppParams merge(AppParams params) {
         return new AppParams(dictionary: dictionary?.merge(params?.dictionary),

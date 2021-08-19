@@ -66,11 +66,11 @@ class StudyParams {
     StudyParams([Map<String, dynamic> jsonMap]) {
         jsonMap = jsonMap ?? {};
 
-        final directionIndex = jsonMap[_directionParam];
+        final directionIndex = jsonMap[_directionParam] as int;
         _direction = directionIndex == null ? _defaultDirection:
             StudyDirection.values[directionIndex]; 
 
-        final cardSideIndex = jsonMap[_cardSideParam];
+        final cardSideIndex = jsonMap[_cardSideParam] as int;
         _cardSide = cardSideIndex == null ? _defaultCardSide: 
             CardSide.values[cardSideIndex];
     }
@@ -111,7 +111,7 @@ class UserParams {
     UserParams([String json]) {
         final jsonMap = json == null ? {}: jsonDecode(json);
 
-        final langIndex = jsonMap[_interfaceLangParam];
+        final langIndex = jsonMap[_interfaceLangParam] as int;
 		if (langIndex == null) {
 			final supportedLangs = [_enLocale, _ruLocale].map((loc) => loc.languageCode).toList();
 			final allLocs = WidgetsBinding.instance.window.locales;
@@ -123,10 +123,10 @@ class UserParams {
 		else
 			_interfaceLang = interfaceLanguages[langIndex];
 
-        final themeIndex = jsonMap[_themeParam];
+        final themeIndex = jsonMap[_themeParam] as int;
         _theme = themeIndex == null ? _defaultTheme: AppTheme.values[themeIndex];
 
-        _studyParams = new StudyParams(jsonMap[_studyParamsParam]);
+        _studyParams = new StudyParams(jsonMap[_studyParamsParam] as Map<String, dynamic>);
     }
 
     String toJson() => jsonEncode({

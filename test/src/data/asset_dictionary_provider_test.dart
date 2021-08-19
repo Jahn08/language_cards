@@ -5,7 +5,7 @@ import '../../mocks/root_widget_mock.dart';
 import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/randomiser.dart';
 
-main() {
+void main() {
 
 	testWidgets('Gets the names of language pairs available for translation', (tester) async {
 		await tester.pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
@@ -23,20 +23,20 @@ main() {
 	testWidgets('Shows that translation is possible for a given language pair', (tester) async {
 		await tester.pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
 			final langParam = WordDictionaryTester.buildLangPair(Language.english, Language.russian);
-			expect((await new AssetDictionaryProvider(context).isTranslationPossible(langParam)), true);
+			expect(await new AssetDictionaryProvider(context).isTranslationPossible(langParam), true);
 		}));
 	});
 
 	testWidgets('Shows that translation is not possible for a given language pair', (tester) async {
 		await tester.pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
 			final langParam = WordDictionaryTester.buildLangPair(Language.italian, Language.german);
-			expect((await new AssetDictionaryProvider(context).isTranslationPossible(langParam)), false);
+			expect(await new AssetDictionaryProvider(context).isTranslationPossible(langParam), false);
 		}));
 	});
 
 	testWidgets('Retrieves an article for an existent word', (tester) async {
 		await tester.pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
-			final wordToLookUp = 'World';
+			const wordToLookUp = 'World';
 			final article = await new AssetDictionaryProvider(context)
 				.lookUp(WordDictionaryTester.buildLangPair(Language.english, Language.russian), 
 					wordToLookUp);

@@ -8,28 +8,32 @@ class WordDictionaryTester {
 
 	WordDictionaryTester._();
 	
-	static Object buildEmptyArticleJson() => _buildArticle([]);
+	static Map<String, dynamic> buildEmptyArticleJson() => _buildArticle([]);
 	
-	static Object buildArticleJson({ String text, PartOfSpeech partOfSpeech }) {
-		text = text ?? Randomiser.nextString();
-		partOfSpeech = partOfSpeech ?? Randomiser.nextElement(PartOfSpeech.values);
+	static Map<String, dynamic> buildArticleJson({ String text, PartOfSpeech partOfSpeech }) {
+		text ??= Randomiser.nextString();
+		partOfSpeech ??= Randomiser.nextElement(PartOfSpeech.values);
 
 		final usedPos = <PartOfSpeech>[partOfSpeech];
 		return _buildArticle(List.generate(Randomiser.nextInt(3) + 2, (index) {
+			PartOfSpeech articlePos; 
 			if (index > 0) {
 				do {
-					partOfSpeech = Randomiser.nextElement(PartOfSpeech.values);
-				} while (usedPos.contains(partOfSpeech));
-				usedPos.add(partOfSpeech);
+					articlePos = Randomiser.nextElement(PartOfSpeech.values);
+				} while (usedPos.contains(articlePos));
+				usedPos.add(articlePos);
 			}
+			else
+				articlePos = partOfSpeech;
 
-			return _buildWordDefinition(text ?? Randomiser.nextString(), partOfSpeech.valueList.first);
+			return _buildWordDefinition(text ?? Randomiser.nextString(), articlePos.valueList.first);
 		}));
 	}
 
-	static Object _buildArticle(List<Object> wordsDefinitions) => ({ "def": wordsDefinitions });
+	static Map<String, dynamic> _buildArticle(List<Object> wordsDefinitions) => 
+		{ "def": wordsDefinitions };
 
-	static Object _buildWordDefinition(String text, String partOfSpeech) {
+	static Map<String, dynamic> _buildWordDefinition(String text, String partOfSpeech) {
 		return {"text": text, "pos": partOfSpeech, "ts": Randomiser.nextString(), 
 			"tr": List.generate(Randomiser.nextInt(3) + 1, (_) => _buildTranslation())
 		};
@@ -42,7 +46,7 @@ class WordDictionaryTester {
 			buildLangPair(to, from)]).expand((v) => v)).cast<String>().toList();
 	}
 
-	static buildLangPair(Language from, Language to) => 
+	static String buildLangPair(Language from, Language to) => 
 		DictionaryProvider.buildLangPair(DictionaryProvider.representLanguage(from), 
 			DictionaryProvider.representLanguage(to));
 

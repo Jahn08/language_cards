@@ -21,7 +21,7 @@ class Speaker implements ISpeaker {
 			return true;
 
 		final langStr = _stringifyLanguage(newLang);
-		if (!await _tts.isLanguageAvailable(langStr))
+		if (!(await _tts.isLanguageAvailable(langStr) as bool))
 			return false;
 
 		await _tts.setLanguage(langStr);

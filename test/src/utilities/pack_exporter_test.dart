@@ -75,7 +75,7 @@ main() {
 						await new PackExporter(packStorage.wordStorage)
 							.export(packsToExport, filePostfix, Localizator.defaultLocalization);
 					}
-					catch (err) {
+					on FileSystemException catch (err) {
 						error = err;
 					}
 

@@ -4,14 +4,14 @@ import './data/pack_storage.dart';
 import './data/study_storage.dart';
 import './data/word_storage.dart';
 
-WordStorage _getCardStorageOrDefault(BaseStorage<StoredWord> storage) => 
+WordStorage _getCardStorageOrDefault(WordStorage storage) => 
 	storage ?? new WordStorage();
 
-PackStorage _getPackStorageOrDefault(BaseStorage<StoredPack> storage) => 
+PackStorage _getPackStorageOrDefault(PackStorage storage) => 
 	storage ?? new PackStorage();
 
 class _CardStorageRouteArgs {
-    final BaseStorage<StoredWord> storage;
+    final WordStorage storage;
 
     _CardStorageRouteArgs([WordStorage storage]): 
 		storage = _getCardStorageOrDefault(storage);
@@ -38,7 +38,7 @@ class CardListRoute {
 }
 
 class _PackStorageRouteArgs {
-    final BaseStorage<StoredPack> storage;
+    final PackStorage storage;
 
     _PackStorageRouteArgs([PackStorage storage]): 
         storage = _getPackStorageOrDefault(storage);
@@ -65,11 +65,9 @@ class _WordCardRouteArgs extends _CardStorageRouteArgs {
 
     final StoredPack pack;
 
-    final BaseStorage<StoredPack> packStorage;
+    final PackStorage packStorage;
 
-    _WordCardRouteArgs({ BaseStorage<StoredWord> storage, 
-        BaseStorage<StoredPack> packStorage, int wordId, this.pack }): 
-        wordId = wordId,
+    _WordCardRouteArgs({ WordStorage storage, PackStorage packStorage, this.wordId, this.pack }): 
         packStorage = packStorage ?? new PackStorage(),
         super(storage);
 }
@@ -120,7 +118,7 @@ class _PackRouteArgs extends _PackStorageRouteArgs {
 
     final bool refreshed;
 
-    _PackRouteArgs({ BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }): 
+    _PackRouteArgs({ PackStorage storage, StoredPack pack, bool refreshed }): 
         packId = pack?.id,
         refreshed = refreshed ?? false,
         super(storage);
@@ -130,7 +128,7 @@ class PackRoute {
     final _PackRouteArgs params;
 
     PackRoute.fromArguments(Object arguments): 
-        params = arguments is _PackStorageRouteArgs ? arguments : new _PackStorageRouteArgs();
+        params = arguments is _PackRouteArgs ? arguments : new _PackRouteArgs();
 }
 
 class PackHelpRoute {}
@@ -162,14 +160,16 @@ class Router {
 
     static String get initialRouteName => _mainMenuRouteName;
 
-    static goToCard(BuildContext context, 
-        { BaseStorage<StoredWord> storage, int wordId, StoredPack pack }) {
+    static goToCard(BuildContext context, { 
+		WordStorage storage, int wordId, StoredPack pack 
+	}) {
         Navigator.pushNamed(context, _cardRouteName, 
             arguments: new _WordCardRouteArgs(storage: storage, wordId: wordId, pack: pack));
     }
 
-    static goToCardList(BuildContext context, 
-        { BaseStorage<StoredWord> storage, StoredPack pack, bool cardWasAdded , bool packWasAdded }) {
+    static goToCardList(BuildContext context, { 
+		WordStorage storage, StoredPack pack, bool cardWasAdded , bool packWasAdded 
+	}) {
         Navigator.pushNamed(context, _cardListRouteName, 
             arguments: new _CardListRouteArgs(storage: storage, pack: pack,
                 cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
@@ -211,8 +211,9 @@ class Router {
         Navigator.pushNamed(context, _studyModeRouteName, 
             arguments: new _StudyModeRouteArgs(packs, studyStageIds: studyStageIds, storage: storage));
 
-    static goToPack(BuildContext context, 
-        { BaseStorage<StoredPack> storage, StoredPack pack, bool refreshed }) {
+    static goToPack(BuildContext context, { 
+		PackStorage storage, StoredPack pack, bool refreshed 
+	}) {
         Navigator.pushNamed(context, _packRouteName, 
             arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
     }

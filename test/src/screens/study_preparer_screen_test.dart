@@ -11,7 +11,7 @@ import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/widget_assistant.dart';
 
-main() {
+void main() {
 
     testWidgets('Renders card packs as selected displaying their number of cards and study levels', 
         (tester) async {
@@ -138,12 +138,12 @@ main() {
 List<StoredPack> _sortPacksByName(List<StoredPack> packs) => 
 	packs..sort((a, b) => a.name.compareTo(b.name));
 
-Future<StudyStorage> _pumpScreen(WidgetTester tester, { int packsNumber, int cardsNumber }) 
+Future<PackStorageMock> _pumpScreen(WidgetTester tester, { int packsNumber, int cardsNumber }) 
 	async {
 		final storage = new PackStorageMock(packsNumber: packsNumber, cardsNumber: cardsNumber);
 		await tester.pumpWidget(
 			RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage), noBar: true));
-		await tester.pump(new Duration(milliseconds: 700));
+		await tester.pump(const Duration(milliseconds: 700));
 
 		return storage;
 	}
@@ -218,9 +218,7 @@ Future<Finder> _findPackTile(WidgetAssistant assistant, String packName, { bool 
 }
 
 void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> includedPackIds]) {
-    final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
-        key: (k) => k, value: (_) => 0);
-
+    final studyStages = <int, int>{ for (var v in WordStudyStage.values) v: 0 };
     if (includedPackIds != null)
         stPacks = stPacks.where((p) => includedPackIds.contains(p.pack.id));
 

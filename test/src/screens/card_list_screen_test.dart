@@ -48,7 +48,7 @@ void main() {
 	});
 
     testWidgets('Renders study progress for each card', (tester) async {
-        final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
+        final wordStorage = await screenTester.pumpScreen(tester) as WordStorageMock;
         final words = await _fetchWords(tester, wordStorage);
 
         final listItemFinders = find.descendant(
@@ -64,7 +64,7 @@ void main() {
 
     testWidgets("Cancels resetting study progress for selected cards when it wasn't confirmed", 
         (tester) async {
-            final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
+            final wordStorage = await screenTester.pumpScreen(tester) as WordStorageMock;
             final wordWithProgressIndex = 
                 await _getIndexOfFirstWordWithProgress(tester, wordStorage);
 
@@ -75,11 +75,9 @@ void main() {
                 wordWithProgressIndex)).values;
             final selectedWords = (await _fetchWords(tester, wordStorage))
                 .where((w) => selectedItems.contains(w.text));
-            final selectedWordsWithProgress = new Map<String, int>.fromIterable(
-                selectedWords, 
-                value: (w) => w.studyProgress,
-                key: (w) => w.text);
-
+            final selectedWordsWithProgress = <String, int> {
+				for (var w in selectedWords) w.text: w.studyProgress 
+			};
             await _operateResettingProgressDialog(assistant, shouldConfirm: false);
 
             await screenTester.deactivateEditorMode(assistant);
@@ -91,7 +89,7 @@ void main() {
         });
 
     testWidgets('Resets study progress for selected cards', (tester) async {
-        final wordStorage = (await screenTester.pumpScreen(tester)) as WordStorageMock;
+        final wordStorage = await screenTester.pumpScreen(tester) as WordStorageMock;
 		final wordWithProgressIndex = 
             await _getIndexOfFirstWordWithProgress(tester, wordStorage);
 

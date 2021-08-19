@@ -8,7 +8,7 @@ abstract class PresentableEnum {
 
 	String present(AppLocalizations locale);
 	
-	static Map<String, PresentableEnum> mapStringValues(
-		Iterable<PresentableEnum> values, AppLocalizations locale
-	) => new Map.fromIterable(values, key: (v) => v.present(locale), value: (v) => v);
+	static Map<String, T> mapStringValues<T extends PresentableEnum>(
+		Iterable<T> values, AppLocalizations locale
+	) => <String, T>{ for (var v in values) v.present(locale): v };
 }

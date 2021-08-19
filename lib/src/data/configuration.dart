@@ -9,7 +9,7 @@ export '../models/app_params.dart';
 class Configuration {
     static AppParams _params;
 
-    static Future<AppParams> getParams(BuildContext context, { bool reload: true }) async {
+    static Future<AppParams> getParams(BuildContext context, { bool reload = true }) async {
         try {
 			if (_params == null || reload)
             	await _load(context);
@@ -25,7 +25,7 @@ class Configuration {
 		}
     }
 
-    static _load(BuildContext context) async {
+    static Future<void> _load(BuildContext context) async {
         const cfgFolderName = 'cfg';
         final configs = await Future.wait([
             _tryLoadParams([cfgFolderName, 'secret_params.json'], 
@@ -48,13 +48,13 @@ class Configuration {
 
         try {
             final json = await new AssetReader(context).loadString(paths);
-            params = new AppParams.fromJson(jsonDecode(json));
+            params = new AppParams.fromJson(jsonDecode(json) as Map<String, dynamic>);
         }
         catch (ex) {
             params = null;
         }
 
-        return { (isSecret ?? false): params }; 
+        return { isSecret ?? false: params }; 
     }
 
     static AppParams _filterConfigs(List<Map<bool, AppParams>> configs, { bool isSecret }) => 

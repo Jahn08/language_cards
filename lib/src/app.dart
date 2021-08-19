@@ -27,12 +27,8 @@ class AppState extends State<App> {
 	SettingsBlocProvider _blocProvider;
 
     @override
-    Widget build(BuildContext context) {
-		if (_blocProvider == null)
-			_blocProvider = new SettingsBlocProvider(child: new _ThemedApp());
-
-		return _blocProvider;
-	}
+    Widget build(BuildContext context) =>
+		_blocProvider ??= new SettingsBlocProvider(child: new _ThemedApp());
 }
 
 class _ThemedAppState extends State<_ThemedApp> {
@@ -67,7 +63,7 @@ class _ThemedAppState extends State<_ThemedApp> {
 				));
 
 			return new MaterialApp(
-				localizationsDelegates: [
+				localizationsDelegates: const [
 					AppLocalizations.delegate,
 					GlobalMaterialLocalizations.delegate,
 					GlobalWidgetsLocalizations.delegate

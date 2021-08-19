@@ -8,8 +8,8 @@ class StyledDropdown extends StatelessWidget {
     
     final bool isRequired;
 
-    final Function(String) onChanged;
-    final Function(String) onValidate;
+    final void Function(String) onChanged;
+    final String Function(String) onValidate;
     final List<String> options;
 
     StyledDropdown(Iterable<String> options, { Key key, bool isRequired, this.onChanged, 
@@ -27,7 +27,7 @@ class StyledDropdown extends StatelessWidget {
             onChanged: onChanged,
             decoration: new StyledInputDecoration(label),
             value: initialValue,
-            validator: (text) {
+            validator: (String text) {
                 if (isRequired && (text == null || text.isEmpty))
                     return locale.constsEmptyValueValidationError;
 

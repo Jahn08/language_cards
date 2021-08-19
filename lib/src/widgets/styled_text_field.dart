@@ -25,7 +25,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
     }
 
     @override
-    void didUpdateWidget(Widget oldWidget) {
+    void didUpdateWidget(StyledTextField oldWidget) {
         super.didUpdateWidget(oldWidget);
 
         if (_controller.text != widget.initialValue) {

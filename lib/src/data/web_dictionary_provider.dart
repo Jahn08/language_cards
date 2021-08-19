@@ -51,10 +51,11 @@ class WebDictionaryProvider extends DictionaryProvider {
 		params['text'] = text;
 
 		final response = await _client.post(Uri.https(rootUri.authority, rootUri.path, params));
-		return new Article.fromJson(jsonDecode(response.body));
+		return new Article.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
 	}
 
-    dispose() => _client?.close();
+	@override
+    void dispose() => _client?.close();
 	
   	@override
   	Future<Iterable<String>> searchForLemmas(String langParam, String text) => Future.value([]);

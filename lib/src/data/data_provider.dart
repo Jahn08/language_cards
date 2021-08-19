@@ -9,7 +9,7 @@ abstract class DataProvider {
 
     Future<List<int>> add(String tableName, List<Map<String, dynamic>> entities);
 
-    Future<int> delete(String tableName, List<dynamic> ids);
+    Future<int> delete(String tableName, List<int> ids);
     
 	Future<int> count(String tableName, { Map<String, dynamic> filters });
 

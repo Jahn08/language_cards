@@ -3,7 +3,6 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import './list_screen.dart';
-import '../data/base_storage.dart';
 import '../data/pack_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../dialogs/import_dialog.dart';
@@ -48,12 +47,13 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     void deleteItems(List<StoredPack> items) {
 		widget.storage.delete(items.map((i) => i.id).toList()).then((res) {
 			final untiedCardsNumber = items.map((i) => i.cardsNumber)
-				.fold(0, (prev, el) => prev + el);
+				.fold<int>(0, (prev, el) => prev + el);
 			if (untiedCardsNumber > 0)
 				setState(() => StoredPack.none.cardsNumber += untiedCardsNumber);
 		});
 	}
 
+	@override
 	Future<bool> shouldContinueRemoval(List<StoredPack> itemsToRemove) async {
 		final filledPackNames = itemsToRemove.where((p) => p.cardsNumber > 0)
 			.map((p) => '"${p.name}"').toList();
@@ -97,12 +97,15 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
             label: markedItems.isEmpty ? 
 				locale.packListScreenBottomNavBarImportActionLabel:
 				locale.packListScreenBottomNavBarExportActionLabel,
-            icon: new Icon(Icons.import_export),
+            icon: const Icon(Icons.import_export),
 			onPressed: () async {
 				try {
 					if (markedItems.isEmpty) {
 						final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
 							.show(scaffoldContext);
+
+						if (!mounted)
+							return false;
 
 						if (outcome == null)
 							return true;
@@ -113,6 +116,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 							).show(scaffoldContext);
 							return true;
 						}
+
+						if (!mounted)
+							return false;
 
 						final packsWithCards = outcome.packsWithCards;
 						await new ConfirmDialog.ok(
@@ -129,6 +135,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 					else {
 						final exportFilePath = await new PackExporter(widget.cardStorage)
 							.export(markedItems.toList(), 'packs', locale);
+
+						if (!mounted)
+							return false;
 
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenExportDialogTitle,
@@ -151,9 +160,11 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 }
 
 class PackListScreen extends ListScreen<StoredPack> {
-    final BaseStorage<StoredPack> storage;
+    
+	@override
+	final PackStorage storage;
 
-    final BaseStorage<StoredWord> cardStorage;
+    final WordStorage cardStorage;
 
     PackListScreen(this.storage, this.cardStorage);
 

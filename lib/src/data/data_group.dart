@@ -10,5 +10,5 @@ class DataGroup {
         length = values[lengthField] as int,
         fields = new Map.fromEntries(values.entries.where((e) => e.key != DataGroup.lengthField));
 
-    operator[](String prop) => fields[prop];
+    dynamic operator[](String prop) => fields[prop];
 }

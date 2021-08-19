@@ -32,12 +32,13 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
     }
 
     @protected
-    void didUpdateWidget(Widget oldWidget) {
+	@override
+    void didUpdateWidget(KeyboardActions oldWidget) {
         super.didUpdateWidget(oldWidget);
 
         _removeFocusListener();
 
-        this._focusNode = (this.widget as KeyboardActionsBottomed).focusNode;
+        _focusNode = (widget as KeyboardActionsBottomed).focusNode;
         _addFocusListener();
     }
 

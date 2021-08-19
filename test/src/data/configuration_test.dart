@@ -52,7 +52,7 @@ void main() {
 				fbUserId: expectedFbUserId
 			)),
 			child: new RootWidgetMock(onBuilding: (context) async =>
-				params = await Configuration.getParams(context, reload: true)),
+				params = await Configuration.getParams(context)),
 		));
 
         expect(params.dictionary?.apiKey, expectedApiKey);
@@ -62,22 +62,14 @@ void main() {
     });
 
     testWidgets('Returns empty parameters when there is no configuration found', (tester) async {
-        Error expectedError;
         await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new AssetBundleMock(params: null),
+			bundle: new AssetBundleMock(),
 			child: new RootWidgetMock(onBuilding: (context) async {
-				try {
-					final params = await Configuration.getParams(context, reload: true);
-					expect(params.contacts, null);
-					expect(params.dictionary, null);
-				}
-				catch (err) {
-					expectedError = err;
-				}
+				final params = await Configuration.getParams(context);
+				expect(params.contacts, null);
+				expect(params.dictionary, null);
 			})
 		));
-
-        expect(expectedError, null);
     });
 }
 

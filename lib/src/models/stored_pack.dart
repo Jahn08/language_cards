@@ -27,19 +27,18 @@ class StoredPack extends StoredEntity {
     int _cardsNumber;
 
     StoredPack(this.name, { int id, this.from, this.to, int cardsNumber }):
+		assert(name != null),
+		assert(from == null || to == null || from != to),
         _cardsNumber = _getNonNegativeNumber(cardsNumber),
-        super(id: id) {
-            assert(name != null);
-            assert(from == null || to == null || from != to);
-        }
+        super(id: id);
 
     static int _getNonNegativeNumber(int value) => (value ?? 0) > 0 ? value : 0;
 
     StoredPack.fromDbMap(Map<String, dynamic> values):
-        this(values[nameFieldName], 
-            id: values[StoredEntity.idFieldName], 
-            from: Language.values[values[fromFieldName]],
-            to: Language.values[values[toFieldName]]);
+        this(values[nameFieldName] as String, 
+            id: values[StoredEntity.idFieldName] as int, 
+            from: Language.values[values[fromFieldName] as int],
+            to: Language.values[values[toFieldName] as int]);
 
     int  get cardsNumber => _cardsNumber;
 

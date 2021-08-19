@@ -12,19 +12,17 @@ class Word {
 
     final List<String> translations;
 
-    Word(this.text, 
-		{ int id, String transcription, PartOfSpeech partOfSpeech, List<String> translations }):
-		id = id,
-        transcription = transcription ?? '',
-        partOfSpeech = partOfSpeech,
+    Word(this.text, { 
+		this.id, this.partOfSpeech, String transcription, List<String> translations 
+	}): transcription = transcription ?? '',
         translations = translations ?? [];
 
     Word.fromJson(Map<String, dynamic> json):
 		this(
-			json['text'],
-			transcription: json['ts'], 
-			partOfSpeech: _lookUpPartOfSpeech(json['pos']),
-			translations: _decodeTranslations(json['tr'])
+			json['text'] as String,
+			transcription: json['ts'] as String, 
+			partOfSpeech: _lookUpPartOfSpeech(json['pos'] as String),
+			translations: _decodeTranslations(json['tr'] as List<dynamic>)
 		);
 
 	static PartOfSpeech _lookUpPartOfSpeech(String givenPos) =>
@@ -36,7 +34,7 @@ class Word {
         translationJson.map((value) => value['text'] as String).toList();
 
 	@override
-	bool operator ==(Object obj) => obj?.runtimeType == runtimeType && obj.hashCode == hashCode;
+	bool operator ==(Object obj) => obj.runtimeType == runtimeType && obj.hashCode == hashCode;
 
 	@override
 	int get hashCode => [text.hashCode, partOfSpeech.hashCode].join().hashCode;
@@ -51,9 +49,9 @@ class AssetWord extends Word {
 
     AssetWord.fromJson(String text, Map<String, dynamic> json):
 		super(
-			json['t'] ?? text,
-			transcription: json['s'], 
-			partOfSpeech: Word._lookUpPartOfSpeech(json['p']),
+			json['t'] as String ?? text,
+			transcription: json['s'] as String, 
+			partOfSpeech: Word._lookUpPartOfSpeech(json['p'] as String),
 			translations: (json['r'] as List).cast<String>()
 		);
 }

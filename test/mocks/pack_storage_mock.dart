@@ -22,7 +22,7 @@ class _PackDataProvider extends DataProviderMock<StoredPack> {
 	String get indexFieldName => StoredPack.nameFieldName;
 
 	@override
-	Future<int> delete(String tableName, List<dynamic> ids) async {
+	Future<int> delete(String tableName, List<int> ids) async {
 		final deletedCount = await super.delete(tableName, ids);
 
 		await wordStorage.removeFromPacks(ids);
@@ -43,7 +43,7 @@ class PackStorageMock extends PackStorage with StudyStorage {
 	@override
 	DataProvider get connection => new _PackDataProvider(_packs, wordStorage);
 
-    PackStorageMock({ int packsNumber, int cardsNumber, Function(String, int) textGetter }): 
+    PackStorageMock({ int packsNumber, int cardsNumber, String Function(String, int) textGetter }): 
 		_packs = _generatePacks(packsNumber ?? namedPacksNumber, textGetter: textGetter),
 		wordStorage = new WordStorageMock(cardsNumber: cardsNumber, 
 			parentsOverall: packsNumber ?? namedPacksNumber, textGetter: textGetter);
@@ -51,7 +51,9 @@ class PackStorageMock extends PackStorage with StudyStorage {
     static void _sort(List<StoredPack> packs) => 
         packs.sort((a, b) => a.isNone ? -1: a.name.compareTo(b.name));
 
-    static List<StoredPack> _generatePacks(int packsNumber, { Function(String, int) textGetter }) {
+    static List<StoredPack> _generatePacks(int packsNumber, { 
+		String Function(String, int) textGetter 
+	}) {
         final packs = new List<StoredPack>.generate(packsNumber, 
             (index) => generatePack(index + 1, textGetter));
         _sort(packs);
@@ -59,7 +61,7 @@ class PackStorageMock extends PackStorage with StudyStorage {
         return packs;
     }
 
-    static StoredPack generatePack([int id, Function(String, int) textGetter]) {
+    static StoredPack generatePack([int id, String Function(String, int) textGetter]) {
 		final text = Randomiser.nextString();
 		return new StoredPack(textGetter?.call(text, id) ?? text, 
             id: id, 

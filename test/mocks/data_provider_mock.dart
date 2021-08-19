@@ -10,9 +10,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	List<String> _intFields;
 
-	DataProviderMock(this.items) {
-		assert(items != null);
-	}
+	DataProviderMock(this.items): assert(items != null);
 
 	@override
 	Future<int> count(String tableName, { Map<String, dynamic> filters }) =>
@@ -37,7 +35,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 	Future<void> close() => Future.value();
 
 	@override
-	Future<int> delete(String tableName, List<dynamic> ids) {
+	Future<int> delete(String tableName, List<int> ids) {
 		final prevLength = items.length;
 		final newLength = (items..removeWhere((p) => ids.contains(p.id))).length;
 
@@ -51,7 +49,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		var propItems = _getFilteredItemProps(filters);
 
 		if (orderBy != null && orderBy.isNotEmpty)
-			propItems = propItems.toList()..sort((a, b) => a[orderBy].compareTo(b[orderBy]));
+			propItems = propItems.toList()..sort((a, b) => a[orderBy].compareTo(b[orderBy]) as int);
 
 		if (skip != null)
 			propItems = propItems.skip(skip);
@@ -68,10 +66,11 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 			const String anySymbolPattern = '%';
 			propItems = propItems.where((i) => 
 				filters.entries.every((f) {
-					if (f.value is List) 
-						return f.value.contains(i[f.key]);
-					else if (f.value is String && f.value.endsWith(anySymbolPattern))
-						return i[f.key].startsWith(f.value.split(anySymbolPattern).first);
+					if (f.value is List<dynamic>) 
+						return (f.value as List<dynamic>).contains(i[f.key]);
+					else if (f.value is String && (f.value as String).endsWith(anySymbolPattern))
+						return (i[f.key] as String).startsWith(
+							(f.value as String).split(anySymbolPattern).first);
 
 					return i[f.key] == f.value;
 				}));

@@ -20,7 +20,9 @@ class ImportException implements Exception {
 		@required this.locale, @required this.importFilePath
 	});
 
-	toString() => locale.packImporterImportExceptionContent(importFilePath, error.toString());
+	@override
+	String toString() => 
+		locale.packImporterImportExceptionContent(importFilePath, error.toString());
 }
 
 class PackImporter {
@@ -45,10 +47,10 @@ class PackImporter {
 			
 			final packDic = new Map.fromEntries((jsonDecode(file.readAsStringSync()) as List<dynamic>)
 				.map<MapEntry<StoredPack, List<StoredWord>>>((pObj) {
-					final packWithCardObjs = StoredPack.fromJsonMap(pObj);
+					final packWithCardObjs = StoredPack.fromJsonMap(pObj as Map<String, dynamic>);
 					return new MapEntry(packWithCardObjs.key, 
 						packWithCardObjs.value.map((cObj) => 
-							StoredWord.fromDbMap(cObj is String ? jsonDecode(cObj): cObj)).toList());
+							StoredWord.fromDbMap((cObj is String ? jsonDecode(cObj): cObj) as Map<String, dynamic>)).toList());
 				}));
 
 			final newPackDic = new Map.fromEntries(

@@ -1,9 +1,9 @@
-import 'dart:io' as io;
 import 'dart:convert';
+import 'dart:io' as io;
 import 'package:flutter/material.dart';
+import '../models/article.dart';
 import './asset_reader.dart';
 import './dictionary_provider.dart';
-import '../models/article.dart';
 
 class AssetDictionaryProvider extends DictionaryProvider {
 
@@ -23,12 +23,12 @@ class AssetDictionaryProvider extends DictionaryProvider {
 	Future<AssetArticle> lookUp(String langParam, String text) async {
 		final key = text.toLowerCase();
 		
-		var dic = await _getCachedDictionary(langParam);
+		final dic = await _getCachedDictionary(langParam);
 		if (dic == null)
 			return new AssetArticle(key, []);
 
 		final json = dic[key];
-		return new AssetArticle(key, json);
+		return new AssetArticle(key, (json as List<dynamic>)?.cast<Map<String, dynamic>>());
 	}
 
 	Future<Map<String, dynamic>> _getCachedDictionary(String langParam) async {
@@ -49,15 +49,17 @@ class AssetDictionaryProvider extends DictionaryProvider {
 
 		final compressedData = await _reader.load(['dictionaries', dicFileName]);
 
-		final content = Utf8Codec().decode(io.gzip.decode(compressedData.buffer.asInt8List()));
-		return json.decode(content);
+		final content = const Utf8Codec().decode(io.gzip.decode(compressedData.buffer.asInt8List()));
+		return json.decode(content) as Map<String, dynamic>;
 	}
 
 	Future<Map<String, String>> _getDicNames() async {
 		if (_dicNamesCache == null) {
 			final filePaths = await _reader.listAssetNames('dictionaries');
-			_dicNamesCache = new Map<String, String>.fromIterable(filePaths, 
-				key: (p) =>	p.split('.').first, value: (p) => p);
+			_dicNamesCache = <String, String>{
+				for (final p in filePaths)
+					p.split('.').first: p
+			};
 		}
 
 		return _dicNamesCache;
@@ -65,7 +67,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
 	
 	@override
 	Future<Iterable<String>> searchForLemmas(String langParam, String text) async {
-		var dic = await _getCachedDictionary(langParam);
+		final dic = await _getCachedDictionary(langParam);
 		if (dic == null)
 			return [];
 

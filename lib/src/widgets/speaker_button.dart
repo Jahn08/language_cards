@@ -13,13 +13,13 @@ class SpeakerButton extends StatelessWidget {
 
 	final ISpeaker defaultSpeaker;
 
-	SpeakerButton(this.lang, this.onPressed, { this.defaultSpeaker });
+	const SpeakerButton(this.lang, this.onPressed, { this.defaultSpeaker });
 
 	@override
 	Widget build(BuildContext context) {
 		final futureSpeaker = defaultSpeaker == null ? 
 			Speaker.getSpeaker(lang): Future.value(defaultSpeaker);
-		return new FutureLoader(futureSpeaker, (speaker) {
+		return new FutureLoader(futureSpeaker, (ISpeaker speaker) {
 			if (speaker == null) {
 				final locale = AppLocalizations.of(context);
 				new ConfirmDialog.ok(
@@ -29,7 +29,7 @@ class SpeakerButton extends StatelessWidget {
 			}
 				
 			return IconButton(
-				icon: new Icon(Icons.textsms_outlined),
+				icon: const Icon(Icons.textsms_outlined),
 				onPressed: speaker == null ? null: () => onPressed(speaker)
 			);
 		});

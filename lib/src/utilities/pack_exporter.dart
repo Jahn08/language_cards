@@ -15,8 +15,7 @@ class PackExporter {
 
 	Future<String> export(List<StoredPack> packs, String filePostfix, AppLocalizations locale) async {
 		final packIds = packs.map((p) => p.id).toList();
-		final cardsByParent = new Map<int, List<StoredWord>>.fromIterable(packIds,
-			key: (id) => id, value: (_) => []);
+		final cardsByParent = <int, List<StoredWord>>{ for (int id in packIds) id: [] };
 
 		(await storage.fetchFiltered(parentIds: packIds))
 			.forEach((c) => cardsByParent[c.packId].add(c));
@@ -43,6 +42,6 @@ class PackExporter {
 		return file.path;
 	}
 
-	_compileFullFileName(String dirPath, String fileName) => 
+	String _compileFullFileName(String dirPath, String fileName) => 
 		Path.combine([dirPath, fileName + '.json']);
 }

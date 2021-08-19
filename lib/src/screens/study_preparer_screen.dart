@@ -97,17 +97,17 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						children: [
 							new Flexible(child: new ValueListenableBuilder(
 								valueListenable: _excludedPacksNotifier,
-								builder: (_, excudedPacks, __) => 
-									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excudedPacks)
+								builder: (_, List<int> excludedPacks, __) => 
+									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excludedPacks)
 							), flex: 4, fit: FlexFit.tight),
-							new Divider(thickness: 2, height: 0),
+							const Divider(thickness: 2, height: 0),
 							new Flexible(
 								child: new Scrollbar(
 									child: new ListView(
 										children: _packs.map((p) => new ValueListenableBuilder(
 											valueListenable: _excludedPacksNotifier,
 											child: new TranslationIndicator(p.pack.from, p.pack.to),
-											builder: (_, excludedPacks, child) => 
+											builder: (_, List<int> excludedPacks, child) => 
 												_CheckListItem(
 													stPack: p,
 													isChecked: !excludedPacks.contains(p.pack.id),
@@ -138,9 +138,9 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						},
 						child: new ValueListenableBuilder(
 							valueListenable: _shouldScrollUpNotifier,
-							builder: (_, shouldScrollUp, __) => 
-								new Icon(shouldScrollUp ? Icons.arrow_upward_rounded: 
-									Icons.arrow_downward_rounded)
+							builder: (_, bool shouldScrollUp, __) => 
+								shouldScrollUp ? const Icon(Icons.arrow_upward_rounded): 
+									const Icon(Icons.arrow_downward_rounded)
 						), 
 						mini: styler.isDense,
 						tooltip: locale.listScreenAddingNewItemButtonTooltip,
@@ -209,8 +209,7 @@ class _StudyLevelList extends StatelessWidget {
 	Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
 
-		final studyStages = new Map<int, int>.fromIterable(WordStudyStage.values,
-            key: (st) => st, value: (_) => 0);
+		final studyStages = <int, int>{ for (var st in WordStudyStage.values) st: 0 };
         final includedPacks = stPacks.where((p) => !excludedPackIds.contains(p.pack.id)).toList();
         includedPacks.expand((e) => e.cardsByStage.entries)
             .forEach((en) => studyStages[en.key] += en.value);

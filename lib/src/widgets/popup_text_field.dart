@@ -94,9 +94,8 @@ class _PopupTextFieldState extends State<PopupTextField> {
 		if (_tiles.isEmpty)
 			return null;
 
-		RenderBox renderBox = context.findRenderObject();
-		var size = renderBox.size;
-
+		final renderBox = context.findRenderObject() as RenderBox;
+		final size = renderBox.size;
 		return OverlayEntry(
 			builder: (context) => Positioned(
 				width: size.width,

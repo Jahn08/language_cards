@@ -66,7 +66,7 @@ class DbProvider extends DataProvider {
                 dependantEntitiesToCreate.add(ent);
             });
 
-            if (dependantEntitiesToCreate.length > 0)
+            if (dependantEntitiesToCreate.isNotEmpty)
                 creationCmds.addAll(
                     _compileCreationClauses(dependantEntitiesToCreate, tableNames));
 
@@ -155,7 +155,7 @@ class DbProvider extends DataProvider {
 					return '${entry.key} LIKE ?';
 
 				return _composeInFilterClause(entry.key, 
-					entry.value is Iterable<dynamic> ? entry.value: [entry.value]);
+					entry.value is List<dynamic> ? entry.value as List<dynamic>: [entry.value]);
 			}));
 	}
 

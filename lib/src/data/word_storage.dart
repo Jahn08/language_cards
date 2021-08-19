@@ -53,8 +53,7 @@ class WordStorage extends BaseStorage<StoredWord> {
         final groups = (await connection.groupBy(entityName, 
             groupField: StoredWord.packIdFieldName, groupValues: parentIds, 
 			filters: addTextFilterClause(textFilter: textFilter)));
-        return new Map<int, int>.fromIterable(groups, 
-            key: (g) => g[StoredWord.packIdFieldName], value: (g) => g.length);
+        return <int, int>{ for (var g in groups) g[StoredWord.packIdFieldName] as int: g.length }; 
     }
 
     Future<Map<int, Map<int, int>>> groupByStudyLevels() async {

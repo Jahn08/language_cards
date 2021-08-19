@@ -286,9 +286,7 @@ void main() {
 
 		inScreenTester.findSearcherEndButton(shouldFind: true);
 
-		final newIndexes = new Map<String, int>.fromIterable(
-			indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())), 
-			key: (i) => i, value: (_) => 0).keys.toList();
+		final newIndexes = (indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())));
 		inScreenTester.assureFilterIndexes(newIndexes, shouldFind: true);
 
 		inScreenTester.assureFilterIndexActiveness(tester, activeIndex, isActive: false);
@@ -540,7 +538,7 @@ String _findConfirmationDialogText(WidgetTester tester) {
 	return (dialog.content as Text).data;
 }
 
-ListScreenTester<StoredPack> _buildScreenTester(PackStorage storage) =>
+ListScreenTester<StoredPack> _buildScreenTester(PackStorageMock storage) =>
 	new ListScreenTester<StoredPack>('Pack', ([_]) => _buildPackListScreen(storage: storage));
 
 String get _nonePackName => StoredPack.none.name;

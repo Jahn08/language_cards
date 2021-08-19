@@ -13,7 +13,7 @@ class ConfirmDialog extends CancellableDialog<bool> {
 	final bool isCancellable;
 
     ConfirmDialog({ 
-		@required title, @required content, @required confirmationLabel 
+		@required String title, @required String content, @required String confirmationLabel 
 	}): this._(
 		title: title, 
 		content: content, 

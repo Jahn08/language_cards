@@ -32,7 +32,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 						children: [
 							new ValueListenableBuilder(
 								valueListenable: _importFilePathNotifier,
-								builder: (_, importFilePath, __) =>
+								builder: (_, String importFilePath, __) =>
 									new StyledTextField(
 										locale.importDialogFileNameTextFieldLabel,
 										onChanged: (value, _) => _importFilePathNotifier.value = value,

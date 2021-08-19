@@ -433,7 +433,7 @@ Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPa
 }
 
 Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId, 
-    { canBeNonePack = false }) async => 
+    { bool canBeNonePack = false }) async => 
         (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId && 
             (canBeNonePack || !p.isNone));
 

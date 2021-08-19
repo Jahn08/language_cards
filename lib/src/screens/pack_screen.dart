@@ -28,7 +28,7 @@ class PackScreenState extends State<PackScreen> {
     StoredPack _foundPack;
     bool _initialised = false;
 
-    Map<String, PresentableEnum> _languages;
+    Map<String, Language> _languages;
 
     BaseStorage<StoredPack> get _storage => widget._storage;
 
@@ -46,9 +46,7 @@ class PackScreenState extends State<PackScreen> {
     @override
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
-    	
-		if (_languages == null)
-			_languages = PresentableEnum.mapStringValues(Language.values, locale);
+		_languages ??= PresentableEnum.mapStringValues(Language.values, locale);
         
 		final futurePack = _isNew || _initialised ? 
             Future.value(new StoredPack('')): _storage.find(widget.packId);
@@ -81,7 +79,7 @@ class PackScreenState extends State<PackScreen> {
 						return new Column(children: [
 							new ValueListenableBuilder(
 								valueListenable: _nameNotifier, 
-								builder: (_, name, __) =>
+								builder: (_, String name, __) =>
 									new StyledTextField(locale.packScreenPackNameTextFieldLabel,
 										isRequired: true, 
 										onChanged: (value, _) { 
@@ -92,7 +90,7 @@ class PackScreenState extends State<PackScreen> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _fromLangNotifier, 
-								builder: (buildContext, fromLang, _) =>
+								builder: (buildContext, String fromLang, _) =>
 									new StyledDropdown(_languages.keys, 
 										isRequired: true,
 										label: locale.packScreenTranslationFromDropdownLabel,
@@ -107,7 +105,7 @@ class PackScreenState extends State<PackScreen> {
 							),
 							new ValueListenableBuilder(
 								valueListenable: _toLangNotifier,
-								builder: (buildContext, toLang, _) =>
+								builder: (buildContext, String toLang, _) =>
 									new StyledDropdown(_languages.keys, 
 										isRequired: true,
 										label: locale.packScreenTranslationToDropdownLabel,
@@ -124,7 +122,7 @@ class PackScreenState extends State<PackScreen> {
 								new Container(
 									alignment: Alignment.centerLeft,
 									child: new TextButton.icon(
-										icon: new Icon(Consts.cardListIcon),
+										icon: const Icon(Consts.cardListIcon),
 										label: new Text(locale.packScreenShowingCardsButtonLabel(
 											_cardsNumber.toString())),
 										onPressed: () => Router.goToCardList(context, pack: _foundPack)
@@ -133,7 +131,7 @@ class PackScreenState extends State<PackScreen> {
 								new ValueListenableBuilder(
 									valueListenable: _isStateDirtyNotifier,
 									child: new Text(locale.constsSavingItemButtonLabel),
-									builder: (_, isStateDirty, label) =>
+									builder: (_, bool isStateDirty, label) =>
 										new ElevatedButton(
 											child: label,
 											onPressed: !isStateDirty ? null: 
@@ -143,7 +141,7 @@ class PackScreenState extends State<PackScreen> {
 								new ValueListenableBuilder(
 									valueListenable: _isStateDirtyNotifier,
 									child: new Text(locale.packScreenSavingAndAddingCardsButtonLabel),
-									builder: (_, isStateDirty, label) =>
+									builder: (_, bool isStateDirty, label) =>
 										new ElevatedButton(
 											child: label,
 											onPressed: !isStateDirty ? null: 

@@ -42,7 +42,7 @@ class _FlipCardState extends State<FlipCard>
     bool _isFront;
 
     @override
-    didUpdateWidget(Widget oldWidget) {
+    void didUpdateWidget(FlipCard oldWidget) {
         super.didUpdateWidget(oldWidget);
 
         _controller.reset();

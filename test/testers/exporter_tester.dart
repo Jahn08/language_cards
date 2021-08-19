@@ -32,7 +32,7 @@ class ExporterTester {
 			parentIds: packsToExport.map((p) => p.id).toList());
 
 		for (final obj in packObjs) {
-			final exportedPackWithCards = StoredPack.fromJsonMap(obj);
+			final exportedPackWithCards = StoredPack.fromJsonMap(obj as Map<String, dynamic>);
 			final exportedPack = exportedPackWithCards.key;
 			expect(exportedPack.id, null);
 			
@@ -44,7 +44,8 @@ class ExporterTester {
 			expect(exportedCards.length, originalCards.length);
 
 			exportedCards.forEach((cardDescr) {
-				final exportedCard = StoredWord.fromDbMap(jsonDecode(cardDescr));
+				final exportedCard = StoredWord.fromDbMap(
+					jsonDecode(cardDescr as String) as Map<String, dynamic>);
 				expect(exportedCard.id, null);
 				expect(exportedCard.packId, null);
 				

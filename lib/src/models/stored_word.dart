@@ -33,13 +33,13 @@ class StoredWord extends StoredEntity {
         super(id: id);
 
     StoredWord.fromDbMap(Map<String, dynamic> values):
-        this(values[textFieldName], 
-            id: values[StoredEntity.idFieldName], 
-            packId: values[packIdFieldName],
-            transcription: values[transcriptionFieldName],
-            studyProgress: values[studyProgressFieldName],
-            partOfSpeech: PartOfSpeech.retrieve(values[partOfSpeechFieldName]),
-            translation: values[translationFieldName]);
+        this(values[textFieldName] as String, 
+            id: values[StoredEntity.idFieldName] as int, 
+            packId: values[packIdFieldName] as int,
+            transcription: values[transcriptionFieldName] as String,
+            studyProgress: values[studyProgressFieldName] as int,
+            partOfSpeech: PartOfSpeech.retrieve(values[partOfSpeechFieldName] as String),
+            translation: values[translationFieldName] as String);
 
     int get packId => _packId;
 
