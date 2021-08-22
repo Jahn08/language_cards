@@ -339,7 +339,7 @@
     "@importDialogImportBtnLabel": {},
     "importDialogFileNameTextFieldLabel": "JSON-файл импорта",
     "@importDialogFileNameTextFieldLabel": {},
-    "importDialogFileNameTextFieldValidationError": "Расширение файла импорта должно быть json",
+    "importDialogFileNameTextFieldValidationError": "Ожидается JSON-файл",
     "@importDialogFileNameTextFieldValidationError": {},
     "importDialogFileSelectorBtnLabel": "Выбрать JSON-файл",
     "@importDialogFileSelectorBtnLabel": {},
