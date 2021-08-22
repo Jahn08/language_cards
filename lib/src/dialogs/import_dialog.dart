@@ -24,7 +24,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 	Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
 		return new AlertDialog(
-			content: new Container(
+			content: new SizedBox(
 				height: MediaQuery.of(context).size.height * 0.2,
 				child: new Form(
 					key: _key,
@@ -47,8 +47,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 							new ElevatedButton(
 								child: new Text(locale.importDialogFileSelectorBtnLabel),
 								onPressed: () async {
-									if (_isJsonMimeSupported == null)
-										_isJsonMimeSupported = await ContextProvider.isFileExtensionSupported(_jsonExtension);
+									_isJsonMimeSupported ??= await ContextProvider.isFileExtensionSupported(_jsonExtension);
 
 									final fileResult = await (_isJsonMimeSupported ? FilePicker.platform.pickFiles(
 										allowedExtensions: [_jsonExtension],
@@ -100,7 +99,7 @@ class _ImportFormDialog extends StatefulWidget {
 
 	final Function(String) fileProcessor;
 
-	_ImportFormDialog(this.cancelButton, this.fileProcessor);
+	const _ImportFormDialog(this.cancelButton, this.fileProcessor);
 
 	@override
 	_ImportFormDialogState createState() => new _ImportFormDialogState();
@@ -127,11 +126,11 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
         return showDialog<ImportDialogResult>(
             context: context, 
             builder: (buildContext) => new _ImportFormDialog(
-				buildCancelBtn(context, null),
+				buildCancelBtn(buildContext, null),
 				(filePath) async {
 					Map<StoredPack, List<StoredWord>> outcome;
 					
-					final locale = AppLocalizations.of(context);
+					final locale = AppLocalizations.of(buildContext);
 					try {
 						outcome = await new PackImporter(packStorage, cardStorage, locale)
 							.import(filePath);
@@ -140,13 +139,14 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
 						await new ConfirmDialog.ok(
 							title: locale.importExportWarningDialogTitle, 
 							content: locale.packListScreenImportDialogWrongFormatContent(filePath)
-						).show(context);
+						).show(buildContext);
 
 						if (!Platform.environment.containsKey('FLUTTER_TEST'))
 							rethrow;
 					}
 
-					returnResult(context, new ImportDialogResult(filePath, outcome));
+     				// ignore: use_build_context_synchronously
+					returnResult(buildContext, new ImportDialogResult(filePath, outcome));
 				}
 			)
         );

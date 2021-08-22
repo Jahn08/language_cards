@@ -27,11 +27,12 @@ class EmailLink extends Link {
 	static bool _isHtmlSupported;
 
 	static Future<EmailLink> build({ String email, String subject, String body }) async {
-		if ((body?.isNotEmpty ?? false) && 
+		String linkBody = body;
+		if ((linkBody?.isNotEmpty ?? false) && 
 			!(_isHtmlSupported ?? (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported())))
-			body = body.replaceAll('<br>', '\n');
+			linkBody = linkBody.replaceAll('<br>', '\n');
 
-		return new EmailLink._('mailto:$email?subject=$subject&body=$body');
+		return new EmailLink._('mailto:$email?subject=$subject&body=$linkBody');
 	}
 }
 

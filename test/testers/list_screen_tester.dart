@@ -22,7 +22,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
         screenName = screenName + ' List Screen',
         _screenBuilder = screenBuilder;
 
-    testEditorMode() {
+    void testEditorMode() {
 
         testWidgets(_buildDescription('switches to the editor mode and back'), (tester) async {
             await pumpScreen(tester);
@@ -66,7 +66,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await selectAll(assistant);
 				assureSelectionForAllTilesInEditor(tester, selected: true);
 
-				final itemsOverall = (await tester.runAsync(() => storage.count()));
+				final itemsOverall = await tester.runAsync(() => storage.count());
                 expect(getSelectorBtnLabel(tester), 
 					Localizator.defaultLocalization.constsUnselectAll(itemsOverall.toString()));
 
@@ -164,7 +164,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		await beforePumping?.call(storage);
 
         await tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: screen));
-        await tester.pump(new Duration(milliseconds: 500));
+        await tester.pump(const Duration(milliseconds: 500));
 		await tester.pump();
 
 		return storage;
@@ -283,7 +283,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
                 chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
 			
 			final tileIndexesToSelect = [0, middleTileIndex, lastTileIndex];
-            final itemsToRemove = new Map<int, String>();
+            final itemsToRemove = <int, String>{};
             for (final indexToSelect in tileIndexesToSelect) {
 				final index = indexToSelect + indexLag;
 				if (itemsToRemove.containsKey(index))
@@ -298,17 +298,18 @@ class ListScreenTester<TEntity extends StoredEntity> {
             return itemsToRemove;
         }
 
-	testDismissingItems() {
+	void testDismissingItems() {
 
-		final forEachDismissible = (int itemsNumber, Future<void> Function(Finder) processor) async {
+		Future<void> forEachDismissible(int itemsNumber, Future<void> Function(Finder) processor) async {
 			final dismissibleFinders = tryFindingListItems(shouldFind: true);
 			for (int i = 0; i < itemsNumber; ++i)
 				await processor(find.ancestor(of: find.byType(ListTile), 
 					matching: dismissibleFinders).last);
-		};
+		}
 
-		final assertItemsRemoval = 
-			(WidgetAssistant assistant, List<String> removedTitles, BaseStorage<TEntity> storage) async {
+		Future<void> assertItemsRemoval(
+			WidgetAssistant assistant, List<String> removedTitles, BaseStorage<TEntity> storage
+		) async {
 				await assistant.pumpAndAnimate(500);
 
 				for (final title in removedTitles) {
@@ -318,7 +319,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 						() => storage.fetch(textFilter: title));
 					expect(storedItems.isEmpty, true);
 				}
-			};
+			}
 
         testWidgets(_buildDescription('removes items by dismissing'), (tester) async {
 			final storage = await pumpScreen(tester);
@@ -377,7 +378,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		return removedTitle;
 	}
 
-	testSearchMode(TEntity Function(int) newEntityGetter) {
+	void testSearchMode(TEntity Function(int) newEntityGetter) {
 
 		testWidgets(_buildDescription('switches to the search mode and back'), 
 			(tester) => testSwitchingToSearchMode(tester, newEntityGetter: newEntityGetter));
@@ -416,14 +417,14 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await chooseFilterIndex(assistant, filterIndex);
 				assureFilterIndexActiveness(tester, filterIndex, isActive: true);
 
-                final filteredTilesAssurer = () {
+                Finder filteredTilesAssurer() {
 					final tilesFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
 					final filteredTiles = tester.widgetList<ListTile>(tilesFinder);
 					expect(filteredTiles.every((t) => 
 						_extractTitle(tester, t.title).startsWith(filterIndex)), true);
 
 					return tilesFinder;
-				};
+				}
 
 				final tileFinders = filteredTilesAssurer();
 				
@@ -630,14 +631,14 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				expect(scroller.offset, scroller.position.minScrollExtent);
 			});
 
-		final selectAndAssureSelection = (WidgetAssistant assistant, int expectedItemsOverall) async {
+		Future<void> selectAndAssureSelection(WidgetAssistant assistant, int expectedItemsOverall) async {
 			await selectAll(assistant);
 
 			final tester = assistant.tester;
 			expect(getSelectorBtnLabel(tester),
 				Localizator.defaultLocalization.constsUnselectAll(expectedItemsOverall.toString()));
 			assureSelectionForAllTilesInEditor(tester, selected: true);
-		};
+		}
 
 		testWidgets(_buildDescription('resets selection and a number of items available for selection when changing an index filter'), 
 			(tester) async {
@@ -659,7 +660,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				final lastIndexGroup = indexGroups.last;
 				await chooseFilterIndex(assistant, lastIndexGroup.key);
-				assureSelectionForAllTilesInEditor(tester, selected: false);
+				assureSelectionForAllTilesInEditor(tester);
 
 				await selectAndAssureSelection(assistant, lastIndexGroup.value);
 			});
@@ -675,7 +676,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await activateEditorMode(assistant);
 				await _activateSearchMode(assistant);
 
-				final overallItems = (await tester.runAsync(() => storage.count()));
+				final overallItems = await tester.runAsync(() => storage.count());
 				await selectAndAssureSelection(assistant, overallItems);
 
 				await deactivateSearcherMode(assistant);
@@ -704,7 +705,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 		Iterable<MapEntry<String, int>> indexGroups;
 		if (indexGroupsGetter == null)
-			indexGroups = (await _getIndexGroups(tester, storage)); 
+			indexGroups = await _getIndexGroups(tester, storage); 
 		else
 			indexGroups = (await indexGroupsGetter(storage)).entries; 
 
@@ -862,7 +863,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 	Future<void> scrollDownListView(WidgetAssistant assistant, Finder childFinder, [int iterations]) 
 		async {
-			iterations = iterations ?? 5;
+			iterations ??= 5;
 			int tries = 0;
 			while (++tries < iterations) {
 				final ctrl = _retrieveListViewScroller(assistant.tester, childFinder);

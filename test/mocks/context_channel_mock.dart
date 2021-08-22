@@ -12,7 +12,7 @@ class ContextChannelMock {
 	static Future<void> testWithChannel(
 		Future<void> Function() action, { bool arePermissionsRequired }
 	) async {
-		final channel = ContextProvider.channel;
+		const channel = ContextProvider.channel;
 
 		try {
 			_cleanResources();

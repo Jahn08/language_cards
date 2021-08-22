@@ -95,5 +95,5 @@ class StoredWord extends StoredEntity {
                 REFERENCES $foreignTableName(${StoredEntity.idFieldName}) ON DELETE SET NULL """;
 
 	@override
-	String get textData => this.text;
+	String get textData => text;
 }

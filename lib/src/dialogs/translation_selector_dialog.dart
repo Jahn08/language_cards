@@ -12,15 +12,15 @@ class _CheckboxListState extends State<_CheckboxList> {
 
         return new DialogListView(
 			isShrunk: true,
-			buttons: this.widget.buttons,
+			buttons: widget.buttons,
 			title: new CheckboxListTile(
-				title: new Text(this.widget.title, style: new Styler(context).titleStyle),
+				title: new Text(widget.title, style: new Styler(context).titleStyle),
 				value: widget.items.length == _chosenItems.length,
 				onChanged: (value) => setState(() {
 					_chosenItems.clear();
 
 					if (value)
-						_chosenItems.addAll(this.widget.items);
+						_chosenItems.addAll(widget.items);
 
 					widget.onChange?.call(_chosenItems);
 				})
@@ -47,7 +47,7 @@ class _DialogOption extends StatelessWidget {
 
 	final void Function(bool) onChanged;
 
-	_DialogOption({ @required this.title, @required this.isChosen, @required this.onChanged });
+	const _DialogOption({ @required this.title, @required this.isChosen, @required this.onChanged });
 	
 	@override
 	Widget build(BuildContext context) =>
@@ -67,7 +67,7 @@ class _CheckboxList extends StatefulWidget {
     final List<Widget> buttons;
     final Function(List<String>) onChange;
 
-    _CheckboxList(this.title, this.items, 
+    const _CheckboxList(this.title, this.items, 
         { @required this.onChange, @required this.buttons }): super();
 
     @override
@@ -86,10 +86,10 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
         super();
 
     @override
-    Future<String> show(List<String> items) {
+    Future<String> show([List<String> items]) {
 		final locale = AppLocalizations.of(_context);
-        items = items ?? <String>[];
-        return items.length > 0 ? showDialog(
+        items ??= <String>[];
+        return items.isNotEmpty ? showDialog(
             context: _context,
             builder: (dialogContext) {
                 return new _CheckboxList(

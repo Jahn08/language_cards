@@ -49,13 +49,13 @@ class Speaker implements ISpeaker {
 		}
 	}
 
+	@override
 	Future<void> speak(String text) async {
 		await _tts.speak(text);
 	}
 
 	static Future<ISpeaker> getSpeaker(Language lang) async {
-		if (_instance == null)
-			_instance = new Speaker._();
+		_instance ??= new Speaker._();
 
 		if (!(await _instance._setLanguage(lang)))
 			return null;

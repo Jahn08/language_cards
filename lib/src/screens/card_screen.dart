@@ -23,13 +23,13 @@ class CardScreen extends StatelessWidget {
 
     final BaseStorage<StoredPack> packStorage;
     
-    CardScreen({ @required this.wordStorage, @required this.packStorage,
+    const CardScreen({ @required this.wordStorage, @required this.packStorage,
 		@required this.provider, this.defaultSpeaker, this.pack, this.wordId });
 
     @override
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
-		final title = this.wordId == null ? 
+		final title = wordId == null ? 
 			locale.cardScreenHeadBarAddingCardTitle: locale.cardScreenHeadBarChangingCardTitle;
 
         return new BarScaffold(

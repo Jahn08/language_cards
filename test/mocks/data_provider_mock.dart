@@ -81,7 +81,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	@override
 	Future<Map<String, dynamic>> findById(String tableName, dynamic id) {
-		final item = items.singleWhere((p) => p.id == id, orElse: null);
+		final item = items.singleWhere((p) => p.id == id, orElse: () => null);
 		return Future.value(item?.toDbMap());
 	}
 
@@ -96,7 +96,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		Map<String, List<dynamic>> groupValues,
 		Map<String, dynamic> filters
 	}) {
-		groupValues = groupValues ?? {};
+		groupValues ??= {};
 			
 		final intFields = _getIntFields();
 		final groupFieldsOverall = groupFields.length;
@@ -133,12 +133,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		@required List<String> groupFields, Map<String, List<dynamic>> groupValues
 	}) => _groupBySeveral(tableName, groupFields: groupFields, groupValues: groupValues);
 
-	List<String> _getIntFields() {
-		if (_intFields == null)
-			_intFields = intFieldNames;
-
-		return _intFields;
-	}
+	List<String> _getIntFields() => _intFields ??= intFieldNames;
 
 	@protected
 	List<String> get intFieldNames => [StoredEntity.idFieldName];

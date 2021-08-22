@@ -13,11 +13,11 @@ enum AppTheme {
 
 class CardSide extends PresentableEnum {
 
-	static const CardSide front = const CardSide._(0);
+	static const CardSide front = CardSide._(0);
 
-    static const CardSide back = const CardSide._(1);
+    static const CardSide back = CardSide._(1);
 
-    static const CardSide random = const CardSide._(2);
+    static const CardSide random = CardSide._(2);
 
 	static List<CardSide> get values => [front, back, random];
 
@@ -31,11 +31,11 @@ class CardSide extends PresentableEnum {
 
 class StudyDirection extends PresentableEnum {
 	
-	static const StudyDirection forward = const StudyDirection._(0);
+	static const StudyDirection forward = StudyDirection._(0);
 
-    static const StudyDirection backward = const StudyDirection._(1);
+    static const StudyDirection backward = StudyDirection._(1);
 
-    static const StudyDirection random = const StudyDirection._(2);
+    static const StudyDirection random = StudyDirection._(2);
 
 	static List<StudyDirection> get values => [forward, backward, random];
 
@@ -49,8 +49,8 @@ class StudyDirection extends PresentableEnum {
 }
 
 class StudyParams {
-    static final _defaultCardSide = CardSide.front;
-    static final _defaultDirection = StudyDirection.forward;
+    static const _defaultCardSide = CardSide.front;
+    static const _defaultDirection = StudyDirection.forward;
 
     static const _directionParam = 'direction';
     static const _cardSideParam = 'cardSide';
@@ -82,19 +82,19 @@ class StudyParams {
 }
 
 class UserParams {
-    static final _defaultLanguage = Language.english;
+    static const _defaultLanguage = Language.english;
     static const _defaultTheme = AppTheme.light;
 
     static const _interfaceLangParam = 'interfaceLang';
     static const _themeParam = 'theme';
     static const _studyParamsParam = 'studyParams';
 
-	static const _ruLocale = const Locale('ru');
-	static const _enLocale = const Locale('en');
+	static const _ruLocale = Locale('ru');
+	static const _enLocale = Locale('en');
 
     Language _interfaceLang;
     Language get interfaceLang => _interfaceLang;
-    set interfaceLang(Language value) => _interfaceLang = (value ?? _defaultLanguage);
+    set interfaceLang(Language value) => _interfaceLang = value ?? _defaultLanguage;
 
 	Locale getLocale() => _interfaceLang == Language.russian ? _ruLocale: _enLocale;
 

@@ -5,7 +5,7 @@ class CardNumberIndicator extends StatelessWidget {
 
     final int number;
 
-    CardNumberIndicator(this.number);
+    const CardNumberIndicator(this.number);
 
     @override
     Widget build(BuildContext context) => 

@@ -19,11 +19,11 @@ class Article extends BaseArticle<Word> {
 
 class AssetArticle extends BaseArticle<AssetWord> {
 
-	AssetArticle._(List<AssetWord> words): super._(words);
-
-    AssetArticle(String text, List<Map<String, dynamic>> words): 
+	AssetArticle(String text, List<Map<String, dynamic>> words): 
 		this._(_decodeWords(text, words));
 
+	AssetArticle._(List<AssetWord> words): super._(words);
+    
 	static List<AssetWord> _decodeWords(String text, List<Map<String, dynamic>> definitionJson) =>
         (definitionJson ?? []).map((e) => new AssetWord.fromJson(text, e)).toList();
 }

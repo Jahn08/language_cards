@@ -38,7 +38,7 @@ void main() {
 }
 
 Future<List<StoredPack>> _generatePacks(WidgetTester tester, [PackStorageMock storage]) async {
-    storage = storage ?? new PackStorageMock();
+    storage ??= new PackStorageMock();
         
     List<StoredPack> packs;
     await tester.runAsync(() async => packs = await storage.fetch());

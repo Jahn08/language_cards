@@ -3,22 +3,22 @@ import 'presentable_enum.dart';
 
 class PartOfSpeech extends PresentableEnum {
 
-	static const adjective = const PartOfSpeech._(0, ['adjective', 'adj']);
-	static const adverb = const PartOfSpeech._(1, ['adverb', 'adv']);
-	static const collocation = const PartOfSpeech._(2, ['collocation']);
-	static const conjunction = const PartOfSpeech._(3, ['conjunction', 'conj']);
-	static const idiom = const PartOfSpeech._(4, ['idiom']);
-	static const interjection = const PartOfSpeech._(5, ['interjection', 'e']);
-	static const noun = const PartOfSpeech._(6, ['noun', 'n']);
-	static const participle = const PartOfSpeech._(7, ['participle']);
-	static const preposition = const PartOfSpeech._(8, ['preposition', 'prep']);
-	static const pronoun = const PartOfSpeech._(9, ['pronoun', 'pron']);
-	static const verb = const PartOfSpeech._(10, ['verb', 'v']);
-	static const numeral = const PartOfSpeech._(11, ['numeral', 'num']);
-	static const determiner = const PartOfSpeech._(12, ['determiner', 'det']);
-	static const prefix = const PartOfSpeech._(13, ['prefix', 'pref']);
-	static const suffix = const PartOfSpeech._(14, ['suffix', 's']);
-	static const abbreviation = const PartOfSpeech._(15, ['abbreviation', 'ab']);
+	static const adjective = PartOfSpeech._(0, ['adjective', 'adj']);
+	static const adverb = PartOfSpeech._(1, ['adverb', 'adv']);
+	static const collocation = PartOfSpeech._(2, ['collocation']);
+	static const conjunction = PartOfSpeech._(3, ['conjunction', 'conj']);
+	static const idiom = PartOfSpeech._(4, ['idiom']);
+	static const interjection = PartOfSpeech._(5, ['interjection', 'e']);
+	static const noun = PartOfSpeech._(6, ['noun', 'n']);
+	static const participle = PartOfSpeech._(7, ['participle']);
+	static const preposition = PartOfSpeech._(8, ['preposition', 'prep']);
+	static const pronoun = PartOfSpeech._(9, ['pronoun', 'pron']);
+	static const verb = PartOfSpeech._(10, ['verb', 'v']);
+	static const numeral = PartOfSpeech._(11, ['numeral', 'num']);
+	static const determiner = PartOfSpeech._(12, ['determiner', 'det']);
+	static const prefix = PartOfSpeech._(13, ['prefix', 'pref']);
+	static const suffix = PartOfSpeech._(14, ['suffix', 's']);
+	static const abbreviation = PartOfSpeech._(15, ['abbreviation', 'ab']);
 
 	final List<String> valueList;
 

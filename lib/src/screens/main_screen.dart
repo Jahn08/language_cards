@@ -8,7 +8,7 @@ import '../widgets/tight_flexible.dart';
 
 class MainScreen extends StatelessWidget {
 
-	MainScreen();
+	const MainScreen();
 
     @override
     Widget build(BuildContext context) {
@@ -27,17 +27,17 @@ class MainScreen extends StatelessWidget {
 									new Text(
 										quote.key,
 										textAlign: TextAlign.start,
-										style: TextStyle(fontSize: Consts.largeFontSize)
+										style: const TextStyle(fontSize: Consts.largeFontSize)
 									),
-									new Text(''),
+									const Text(''),
 									new Text(
 										quote.value,
 										textAlign: TextAlign.left,
-										style: TextStyle(fontSize: Consts.biggerFontSize)
+										style: const TextStyle(fontSize: Consts.biggerFontSize)
 									)
 								]
 							),
-							padding: EdgeInsets.all(10.0)
+							padding: const EdgeInsets.all(10.0)
 						), 2),
 					new _FlexibleRow(new _MenuItem(
 						locale.mainScreenStudyModeMenuItemLabel,
@@ -66,7 +66,7 @@ class _FlexibleRow extends StatelessWidget {
 
 	final int flex;
 
-	_FlexibleRow(this.child, [this.flex]);
+	const _FlexibleRow(this.child, [this.flex]);
 
 	@override
 	Widget build(BuildContext context) =>
@@ -87,19 +87,18 @@ class _MenuItem extends StatelessWidget {
 
 	final void Function() onClick;
 
-	_MenuItem(this.title, this.icon, this.onClick);
+	const _MenuItem(this.title, this.icon, this.onClick);
 
 	@override
 	Widget build(BuildContext context) =>
         new Expanded(
             child: new Container(
-                padding: EdgeInsets.all(10),
+                padding: const EdgeInsets.all(10),
                 child: new ElevatedButton.icon(
                     style: new ButtonStyle(
                         textStyle: MaterialStateProperty.resolveWith(
-                            (states) => new TextStyle(
-                                fontSize: Consts.largeFontSize
-                            )) 
+                            (states) => const TextStyle(fontSize: Consts.largeFontSize)
+						) 
                     ),
                     onPressed: onClick, 
                     icon: new Icon(icon), 

@@ -8,7 +8,7 @@ import '../../mocks/context_channel_mock.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
-main() {
+void main() {
 
 	testWidgets('Exports packs to a JSON-file', (_) async {
 		await ContextChannelMock.testWithChannel(() async {

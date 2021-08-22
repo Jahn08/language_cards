@@ -56,7 +56,7 @@ void main() {
             final storage = new PackStorageMock();
             StoredWord wordWithProgress;
             await tester.runAsync(() async {
-                final words = (await storage.wordStorage.fetch());
+                final words = await storage.wordStorage.fetch();
                 wordWithProgress = words.firstWhere((w) => w.studyProgress != WordStudyStage.unknown, 
                     orElse: () => words.first);
 
@@ -225,7 +225,7 @@ void main() {
         (tester) async {
             final storage = new PackStorageMock();
             await _testChangingPack(storage, tester, 
-                (word) async => await _fetchAnotherPack(storage, word.packId));
+                (word) => _fetchAnotherPack(storage, word.packId));
         });
     
     testWidgets('Saves the none pack for a card', 
@@ -328,7 +328,7 @@ void main() {
 	testWidgets('Closes the suggestion popup after the field gets unfocused', (tester) async { 
 		final dicProviderMock = new DictionaryProviderMock(
 			onSearchForLemmas: (text) => Randomiser.nextStringList());
-		final shownWord = (await _displayWordWithPack(tester, provider: dicProviderMock));
+		final shownWord = await _displayWordWithPack(tester, provider: dicProviderMock);
 		
 		await new WidgetAssistant(tester).enterChangedText(shownWord.text);
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
@@ -343,9 +343,9 @@ Future<StoredWord> _displayWord(WidgetTester tester, {
         PackStorageMock storage, StoredPack pack, 
         StoredWord wordToShow, SpeakerMock speaker,
 		bool shouldHideWarningDialog = true }) async {
-    storage = storage ?? new PackStorageMock();
+    storage ??= new PackStorageMock();
     final wordStorage = storage.wordStorage;
-    wordToShow = wordToShow ?? wordStorage.getRandom();
+    wordToShow ??= wordStorage.getRandom();
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
         childBuilder: (context) => new CardScreen(
@@ -355,7 +355,7 @@ Future<StoredWord> _displayWord(WidgetTester tester, {
 			defaultSpeaker: speaker ?? new SpeakerMock()
 		)));
     await tester.pump();
-    await tester.pump(new Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
 
     if (shouldHideWarningDialog) {
 		final nonePack = StoredPack.none;
@@ -536,7 +536,7 @@ Future<StoredWord> _displayWordWithPack(WidgetTester tester, {
 	DictionaryProvider provider, PackStorageMock storage, StoredWord wordToShow, 
 	SpeakerMock speaker, bool shouldHideWarningDialog = true 
 }) {
-	storage = storage ?? new PackStorageMock();
+	storage ??= new PackStorageMock();
 
 	return _displayWord(tester, provider: provider, storage: storage, 
 		pack: storage.getRandom(), 

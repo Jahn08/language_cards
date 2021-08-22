@@ -17,14 +17,14 @@ class _SliderScreenState extends State<_SliderScreen> {
 	PageController _ctrl;
 
 	@override
-	initState() {
+	void initState() {
 		super.initState();
 
 		_ctrl = new PageController();
 	}
 
 	@override
-	dispose() {
+	void dispose() {
 		_ctrl?.dispose();
 		
 		_pageIndexNotifier.dispose();
@@ -35,13 +35,11 @@ class _SliderScreenState extends State<_SliderScreen> {
 	@override
 	Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
-
-		if (_slides == null)
-			_slides = widget.slideNames.map((n) => 
-				_buildSlide(new Image(
-					image: new LocalAssetImage(n, localeName: locale.localeName, fileExtension: 'png')
-				))
-			).toList();
+		_slides ??= widget.slideNames.map((n) => 
+			_buildSlide(new Image(
+				image: new LocalAssetImage(n, localeName: locale.localeName, fileExtension: 'png')
+			))
+		).toList();
 
 		WidgetsBinding.instance.addPostFrameCallback((_) => _showInfoDialog(context, locale));
 		return new BarScaffold(
@@ -59,7 +57,7 @@ class _SliderScreenState extends State<_SliderScreen> {
 						_showInfoDialog(context, locale);
 					}
 				),
-				margin: new EdgeInsets.all(5.0),
+				margin: const EdgeInsets.all(5.0),
 				decoration: new BoxDecoration(
 					border: new Border.all(color: new Styler(context).primaryColor)
 				)
@@ -67,14 +65,14 @@ class _SliderScreenState extends State<_SliderScreen> {
 			barActions: [
 				new IconButton(
 					onPressed: () => _showInfoDialog(context, locale),
-					icon: new Icon(Icons.info)
+					icon: const Icon(Icons.info)
 				)
 			],
 		);
 	}
 		
 	String _compileTitle(AppLocalizations locale) => 
-		'${widget.titleGetter(locale)}\n' + 
+		'${widget.getTitle(locale)}\n' + 
 			locale.helpScreenPageIndicator(_pageIndexNotifier.value + 1, _slides.length);
 
 	Widget _buildSlide(Image image) {
@@ -90,13 +88,13 @@ class _SliderScreenState extends State<_SliderScreen> {
 					alignment: Alignment.centerRight,
 					child: new ValueListenableBuilder(
 						valueListenable: _pageIndexNotifier,
-						child: new Icon(Icons.chevron_right_outlined),
+						child: const Icon(Icons.chevron_right_outlined),
 						builder: (_, pageIndex, icon) => 
 							new IconButton(
 								icon: icon, 
 								onPressed: pageIndex == _slides.length - 1 ? null: 
 									() => _ctrl.nextPage(
-										duration: new Duration(milliseconds: 200), 
+										duration: const Duration(milliseconds: 200), 
 										curve: Curves.easeInOut
 									),
 								iconSize: iconSize
@@ -107,12 +105,12 @@ class _SliderScreenState extends State<_SliderScreen> {
 					alignment: Alignment.centerLeft,
 					child: new ValueListenableBuilder(
 						valueListenable: _pageIndexNotifier,
-						child: new Icon(Icons.chevron_left_outlined),
+						child: const Icon(Icons.chevron_left_outlined),
 						builder: (_, pageIndex, icon) => 
 							new IconButton(
 								icon: icon, 
 								onPressed: pageIndex == 0 ? null: () => _ctrl.previousPage(
-									duration: new Duration(milliseconds: 200), 
+									duration: const Duration(milliseconds: 200), 
 									curve: Curves.easeInOut
 								),
 								iconSize: iconSize
@@ -131,29 +129,34 @@ class _SliderScreenState extends State<_SliderScreen> {
 	}
 }
 
-class _SliderScreen extends StatefulWidget {
+abstract class _SliderScreen extends StatefulWidget {
 
 	final List<String> slideNames;
 
-	final String Function(AppLocalizations locale) titleGetter;
 
 	final String Function(int slideIndex, AppLocalizations locale) descriptor;
 
-	_SliderScreen(this.titleGetter, this.slideNames, this.descriptor);
+	const _SliderScreen(this.slideNames, this.descriptor);
 
 	@override
 	State<StatefulWidget> createState() => new _SliderScreenState();
+
+	@protected
+	String getTitle(AppLocalizations locale);
 }
 
 class CardHelpScreen extends _SliderScreen {
 
-	CardHelpScreen(): super(
-		(locale) => locale.helpScreenTitle(locale.mainScreenWordCardsMenuItemLabel), [
-			'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
-			'help_card_removal', 'help_card_adding', 'help_card_word_text', 
-			'help_card_word_dictionary', 'help_card_word_translation', 
-			'help_card_saving', 'help_card_search'
-		], _descriptor);
+	const CardHelpScreen(): super(const [
+		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
+		'help_card_removal', 'help_card_adding', 'help_card_word_text', 
+		'help_card_word_dictionary', 'help_card_word_translation', 
+		'help_card_saving', 'help_card_search'
+	], _descriptor);
+
+	@override
+	String getTitle(AppLocalizations locale) => 
+		locale.helpScreenTitle(locale.mainScreenWordCardsMenuItemLabel);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
 		switch (slideIndex) {
@@ -192,12 +195,15 @@ class CardHelpScreen extends _SliderScreen {
 
 class PackHelpScreen extends _SliderScreen {
 
-	PackHelpScreen(): super(
-		(locale) => locale.helpScreenTitle(locale.mainScreenWordPacksMenuItemLabel), [
-			'help_pack_screen', 'help_pack_editor', 'help_pack_export',
-			'help_pack_import', 'help_pack_removal', 'help_pack_card_relocation',
-			'help_pack_adding', 'help_pack_amending', 'help_pack_search'
-		], _descriptor);
+	const PackHelpScreen(): super(const [
+		'help_pack_screen', 'help_pack_editor', 'help_pack_export',
+		'help_pack_import', 'help_pack_removal', 'help_pack_card_relocation',
+		'help_pack_adding', 'help_pack_amending', 'help_pack_search'
+	], _descriptor);
+
+	@override
+	String getTitle(AppLocalizations locale) => 
+		locale.helpScreenTitle(locale.mainScreenWordPacksMenuItemLabel);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
 		switch (slideIndex) {
@@ -236,11 +242,14 @@ class PackHelpScreen extends _SliderScreen {
 
 class StudyHelpScreen extends _SliderScreen {
 
-	StudyHelpScreen(): super(
-		(locale) => locale.helpScreenTitle(locale.mainScreenStudyModeMenuItemLabel), [
-			'help_study_preparation', 'help_study_screen', 'help_study_editor', 
-			'help_study_settings' 
-		], _descriptor);
+	const StudyHelpScreen(): super(const [
+		'help_study_preparation', 'help_study_screen', 'help_study_editor', 
+		'help_study_settings' 
+	], _descriptor);
+
+	@override
+	String getTitle(AppLocalizations locale) => 
+		locale.helpScreenTitle(locale.mainScreenStudyModeMenuItemLabel);
 
 	static String _descriptor(int slideIndex, AppLocalizations locale) {
 		switch (slideIndex) {

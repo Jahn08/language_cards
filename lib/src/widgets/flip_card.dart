@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 class _AnimatedCard extends StatelessWidget {
 
-    _AnimatedCard({ this.child, this.animation });
+    const _AnimatedCard({ this.child, this.animation });
 
     final Widget child;
 
@@ -15,7 +15,7 @@ class _AnimatedCard extends StatelessWidget {
         return AnimatedBuilder(
             animation: animation,
             builder: (BuildContext context, Widget child) {
-                var transform = Matrix4.identity();
+                final transform = Matrix4.identity();
                 transform.setEntry(3, 2, 0.001);
                 transform.rotateY(animation.value);
                 
@@ -56,7 +56,7 @@ class _FlipCardState extends State<FlipCard>
         _isFront = true;
 
         _controller = new AnimationController(
-            duration: new Duration(milliseconds: 600), vsync: this);
+            duration: const Duration(milliseconds: 600), vsync: this);
 
         _frontRotation = new TweenSequence<double>([
             new TweenSequenceItem(
@@ -135,7 +135,7 @@ class _FlipCardSide extends StatelessWidget {
 
 	final Animation<double> animation;
 
-	_FlipCardSide({ @required this.child, @required this.animation, @required this.isHittable });
+	const _FlipCardSide({ @required this.child, @required this.animation, @required this.isHittable });
 
 	@override
 	Widget build(BuildContext context) =>
@@ -154,7 +154,7 @@ class FlipCard extends StatefulWidget {
 
     final Widget back;
 
-    FlipCard({ this.front, this.back });
+    const FlipCard({ this.front, this.back });
 
     @override
     _FlipCardState createState() => new _FlipCardState();

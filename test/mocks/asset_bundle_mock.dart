@@ -32,7 +32,7 @@ class AssetBundleMock extends CachingAssetBundle {
 		if (obj == null)
 			return null;
 
-        final bytes = new Utf8Codec().encode(jsonEncode(obj));
+        final bytes = const Utf8Codec().encode(jsonEncode(obj));
         return new ByteData.sublistView(Int8List.fromList(bytes));
     }
 }

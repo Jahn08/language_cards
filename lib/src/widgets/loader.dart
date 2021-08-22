@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 
 class Loader extends StatelessWidget {
+
+	const Loader();
+
     @override
-    Widget build(BuildContext context) {
-        return new Center(
-            child: new CircularProgressIndicator()
-        );
-    }
+    Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
 }
 
 class FutureLoader<TData> extends StatelessWidget {
@@ -14,17 +13,16 @@ class FutureLoader<TData> extends StatelessWidget {
 
     final Future<TData> future;
 
-    FutureLoader(this.future, this.dataWidgetBuilder) {
-        assert(future != null);
+    const FutureLoader(this.future, this.dataWidgetBuilder):
+        assert(future != null),
         assert(dataWidgetBuilder != null);
-    }
 
     @override
     Widget build(BuildContext context) {
         return FutureBuilder(future: future,
             builder: (futureContext, AsyncSnapshot<TData> snapshot) {
                 if (!snapshot.hasData)
-                    return new Loader();
+                    return const Loader();
 
                 return dataWidgetBuilder(snapshot.data);
             });

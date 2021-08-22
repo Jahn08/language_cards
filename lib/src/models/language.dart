@@ -3,17 +3,17 @@ import 'presentable_enum.dart';
 
 class Language extends PresentableEnum {
 	
-	static const Language english = const Language._(0);
+	static const Language english = Language._(0);
 
-    static const Language russian = const Language._(1);
+    static const Language russian = Language._(1);
 
-    static const Language german = const Language._(2);
+    static const Language german = Language._(2);
 
-    static const Language french = const Language._(3);
+    static const Language french = Language._(3);
 
-    static const Language italian = const Language._(4);
+    static const Language italian = Language._(4);
 
-    static const Language spanish = const Language._(5);
+    static const Language spanish = Language._(5);
 
 	static const values = [english, russian, german, french, italian, spanish];
 

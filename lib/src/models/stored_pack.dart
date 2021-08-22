@@ -68,7 +68,7 @@ class StoredPack extends StoredEntity {
             $toFieldName INTEGER NOT NULL""";
 
 	@override
-	String get textData => this.name;
+	String get textData => name;
 
 	String getLocalisedName(BuildContext context) => 
 		isNone ? AppLocalizations.of(context).storedPackNonePackName: name;

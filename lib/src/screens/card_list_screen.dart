@@ -16,7 +16,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
 	String _curTextIndex;
 
-	Map<String, int> _itemsByTextCount = {};
+	final Map<String, int> _itemsByTextCount = {};
 
     @override
     Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
@@ -110,11 +110,11 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
         final options = super.getBottomBarOptions(markedItems, locale, scaffoldContext);
         return options..add(new IconedButton(
             label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
-            icon: new Icon(Icons.restore),
+            icon: const Icon(Icons.restore),
 			onPressed: () async {
 				final itemsToReset = markedItems.where(
 					(card) => card.studyProgress != WordStudyStage.unknown).toList();
-				if (itemsToReset.length == 0 || !(await new ConfirmDialog(
+				if (itemsToReset.isEmpty || !(await new ConfirmDialog(
 						title: locale.cardListScreenResettingProgressDialogTitle,
 						content: locale.cardListScreenResettingProgressDialogContent(
 							itemsToReset.length.toString()),
@@ -127,6 +127,9 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					itemsToReset.forEach((w) => w.resetStudyProgress());
 					widget.storage.upsert(itemsToReset);
 				});
+
+				if (!mounted)
+					return false;
 
 				ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
 					content: new Text(locale.cardListScreenBottomSnackBarResettingProgressInfo(
@@ -143,10 +146,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 		widget.storage.groupByTextIndexAndParent(_parentIds);
 
 	@override
-	String getSelectorBtnLabel(bool allSelected, AppLocalizations locale) {
+	String getSelectorBtnLabel({ bool allSelected, AppLocalizations locale }) {
 		final itemsOverall = _itemsByTextCount[_curTextIndex];
 		if (_loadedItemsCount == itemsOverall)
-			return super.getSelectorBtnLabel(allSelected, locale);
+			return super.getSelectorBtnLabel(allSelected: allSelected, locale: locale);
 
 		return allSelected ? 
 			locale.constsUnselectSome(_loadedItemsCount.toString(), itemsOverall.toString()): 
@@ -155,6 +158,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 }
 
 class CardListScreen extends ListScreen<StoredWord> {
+	@override
     final WordStorage storage;
 
     final StoredPack pack;
@@ -163,9 +167,10 @@ class CardListScreen extends ListScreen<StoredWord> {
 
     final bool packWasAdded;
 
-    CardListScreen(this.storage, { this.pack, bool cardWasAdded, bool packWasAdded }):
+    const CardListScreen(this.storage, { this.pack, bool cardWasAdded, bool packWasAdded }):
         cardWasAdded = cardWasAdded ?? false,
-        packWasAdded = packWasAdded ?? false;
+        packWasAdded = packWasAdded ?? false,
+		super();
 
     @override
     _CardListScreenState createState() => new _CardListScreenState();

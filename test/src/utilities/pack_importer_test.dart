@@ -7,7 +7,7 @@ import '../../mocks/context_channel_mock.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
-main() {
+void main() {
 
 	testWidgets('Imports packs from a JSON-file even if there are already packs with equal names', 
 		(_) async {

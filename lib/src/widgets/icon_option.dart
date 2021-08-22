@@ -5,13 +5,13 @@ class IconOption extends StatelessWidget {
     final Widget _iconWidget;
     final bool isSelected;
     
-    IconOption({ @required Widget icon, bool isSelected }): 
+    const IconOption({ @required Widget icon, bool isSelected }): 
         _iconWidget = icon,
         isSelected = isSelected ?? false;
 
     @override
-    Widget build(BuildContext context) {
-        return new Container(
+    Widget build(BuildContext context) =>
+        new Container(
             width: AssetIcon.widthValue,
             height: AssetIcon.heightValue,
             child: _iconWidget,
@@ -22,5 +22,4 @@ class IconOption extends StatelessWidget {
                 ): null
             )
         );
-    }
 }

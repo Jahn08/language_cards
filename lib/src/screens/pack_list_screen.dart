@@ -17,7 +17,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
     Widget getItemLeading(StoredPack item) => 
-        item.isNone ? new TranslationIndicator.empty():
+        item.isNone ? const TranslationIndicator.empty():
             new TranslationIndicator(item.from, item.to);
 
     @override
@@ -166,7 +166,10 @@ class PackListScreen extends ListScreen<StoredPack> {
 
     final WordStorage cardStorage;
 
-    PackListScreen(this.storage, this.cardStorage);
+    const PackListScreen([PackStorage storage, WordStorage cardStorage]): 
+		storage = storage ?? const PackStorage(),
+		cardStorage = cardStorage ?? const WordStorage(),
+		super();
 
     @override
     _PackListScreenState createState() => new _PackListScreenState();

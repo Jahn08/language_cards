@@ -46,5 +46,5 @@ class WordDictionary {
 		provider == null ? Future.value(false): 
 			provider.isTranslationPossible(DictionaryProvider.buildLangPair(_from, _to));
 
-	dispose() => provider?.dispose();
+	void dispose() => provider?.dispose();
 }

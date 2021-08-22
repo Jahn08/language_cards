@@ -66,28 +66,28 @@ void main() {
         });
 
     testWidgets('Renders all next/previous cards once when swiping left/right with the forward sorting', 
-        (tester) async => await _testForwardSorting(tester, shouldSwipe: true));
+        (tester) => _testForwardSorting(tester, shouldSwipe: true));
 
     testWidgets('Renders all next/previous cards once when swiping left/right with the backward sorting', 
-        (tester) async => await _testBackwardSorting(tester, shouldSwipe: true));
+        (tester) => _testBackwardSorting(tester, shouldSwipe: true));
 
     testWidgets('Renders all next/previous cards once when swiping left/right with the random sorting', 
-        (tester) async => await _testRandomSorting(tester, shouldSwipe: true));
+        (tester) => _testRandomSorting(tester, shouldSwipe: true));
 	
     testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the forward sorting', 
-        (tester) async => await _testForwardSorting(tester, shouldSwipe: false));
+        (tester) => _testForwardSorting(tester, shouldSwipe: false));
 
     testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the backward sorting', 
-        (tester) async => await _testBackwardSorting(tester, shouldSwipe: false));
+        (tester) => _testBackwardSorting(tester, shouldSwipe: false));
 
     testWidgets('Renders all next/previous cards once when clicking the next button/swiping right with the random sorting', 
-        (tester) async => await _testRandomSorting(tester, shouldSwipe: false));
+        (tester) => _testRandomSorting(tester, shouldSwipe: false));
 
     testWidgets('Shows a dialog after finishing a study cycle, then closes it and starts afresh', 
         (tester) async {
             final packStorage = new PackStorageMock();
 
-            final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+            final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
             await _pumpScreen(tester, packStorage, packs);
 
             final cards = _sortCards(
@@ -107,7 +107,7 @@ void main() {
         (tester) async {
             final packStorage = new PackStorageMock();
 
-            final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+            final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
             await _pumpScreen(tester, packStorage, packs);
 
             final cards = _sortCards(
@@ -128,7 +128,7 @@ void main() {
 		(tester) async {
           	final packStorage = new PackStorageMock();
 
-			final packs = _takeEnoughCards((await _fetchNamedPacks(tester, packStorage)));
+			final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
 			final cards = _sortCards(
 				await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 			var cardToLearn = cards.first;
@@ -237,7 +237,7 @@ void main() {
             final storedCard = await wordStorage.find(cardToEdit.id);
             expect(storedCard.translation, initialTranslation);
 
-			final expectedIndex = 0;
+			const expectedIndex = 0;
 			_assureFrontSideRendering(tester, packs, cards, card: storedCard, 
 				expectedIndex: expectedIndex);
 
@@ -275,7 +275,7 @@ void main() {
             expect(storedCard.translation, changedTranslation);
             expect(storedCard.packId, changedPack.id);
 
-			final expectedIndex = 0;
+			const expectedIndex = 0;
 			_assureFrontSideRendering(tester, packs, cards, card: storedCard, 
 				expectedIndex: expectedIndex);
 			AssuredFinder.findOne(label: initialPack.name, shouldFind: false);
@@ -289,8 +289,7 @@ void main() {
 
 Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packStorage,
     [List<StoredPack> packs]) async {
-    if (packs == null)
-        packs = await _fetchNamedPacks(tester, packStorage);
+	packs ??= await _fetchNamedPacks(tester, packStorage);
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		noBar: true,
@@ -302,25 +301,24 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
 		)
 	));
     await tester.pump();
-    await tester.pump(new Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     return packs;
 }
 
 Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock packStorage) async =>
-    (await tester.runAsync(() async => await packStorage.fetch()))
+    (await tester.runAsync(() => packStorage.fetch()))
         .where((p) => !p.isNone).toList();
 
 Future<List<StoredWord>> _fetchPackedCards(WidgetTester tester, List<StoredPack> packs, 
-    WordStorageMock wordStorage) async {
-    
-    return await tester.runAsync(() async => 
-        await wordStorage.fetchFiltered(parentIds: packs.map((p) => p.id).toList()));
+    WordStorageMock wordStorage) {
+    return tester.runAsync(() => 
+    	wordStorage.fetchFiltered(parentIds: packs.map((p) => p.id).toList()));
 }
 
 List<StoredWord> _sortCards(List<StoredWord> cards, [bool isBackward = false]) {
     if (isBackward) {
-        final startIndex = 1;
+        const startIndex = 1;
         final cardsToSort = cards.sublist(startIndex, cards.length);
         cardsToSort.sort((a, b) => b.packId.compareTo(a.packId));
         cardsToSort.sort((a, b) => b.text.compareTo(a.text));
@@ -337,7 +335,7 @@ List<StoredWord> _sortCards(List<StoredWord> cards, [bool isBackward = false]) {
 
 void _assureFrontSideRendering(WidgetTester tester, List<StoredPack> packs,
     List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
-    expectedIndex = expectedIndex ?? 0;
+    expectedIndex ??= 0;
     final expectedCard = card ?? cards.elementAt(expectedIndex);
 
     final cardFinder = _findCurrentCardSide(isReversed: isReversed);
@@ -522,7 +520,7 @@ Future<void> _goToPreviousCard(WidgetAssistant assistant) =>
 
 void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,
     List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
-    expectedIndex = expectedIndex ?? 0;
+    expectedIndex ??= 0;
     final expectedCard = card ?? cards.elementAt(expectedIndex);
 
     final cardFinder = _findCurrentCardSide(isReversed: isReversed);
@@ -554,8 +552,8 @@ Future<void> _testReversingFrontCardSide(WidgetTester tester, { bool shouldSwipe
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 }
 
-Future<void> _reverseCardSide(WidgetAssistant assistant) async => 
-    await assistant.tapWidget(_findCardWidget(), atCenter: true);
+Future<void> _reverseCardSide(WidgetAssistant assistant) => 
+    assistant.tapWidget(_findCardWidget(), atCenter: true);
 
 Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();

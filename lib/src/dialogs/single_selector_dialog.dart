@@ -25,7 +25,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
                     future: futureItems,
                     builder: (builderContext, AsyncSnapshot<List<T>> snapshot) {
                         if (!snapshot.hasData)
-                            return _createDialogView([new Loader()]);
+                            return _createDialogView([const Loader()]);
                         
                         return _buildDialog(snapshot.data);
                     }
@@ -60,9 +60,9 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     	);
 
     @override
-    Future<T> show(List<T> items) {
-        items = items ?? <T>[];
-        return items.length > 0 ? showDialog(
+    Future<T> show([List<T> items]) {
+        items ??= <T>[];
+        return items.isNotEmpty ? showDialog(
             context: context,
             builder: (_) => _buildDialog(items)
         ) : Future.value(null);

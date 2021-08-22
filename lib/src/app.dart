@@ -74,7 +74,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                 initialRoute: Router.initialRouteName,
                 onGenerateRoute: (settings) => _buildPageRoute(settings, (context, route) {
                     if (route == null)
-                        return new MainScreen();
+                        return const MainScreen();
                     else if (route is WordCardRoute)
                         return _buildCardScreen(context, route);
                     else if (route is CardListRoute) {
@@ -90,18 +90,21 @@ class _ThemedAppState extends State<_ThemedApp> {
                             packId: params.packId, refreshed: params.refreshed);
                     }
                     else if (route is StudyPreparerRoute)
-                        return new StudyPreparerScreen(route.params.storage);
+                        return route.params.storage == null ? 
+							const StudyPreparerScreen(): new StudyPreparerScreen(route.params.storage);
                     else if (route is StudyModeRoute)
                         return _buildStudyScreen(context, route);
 					else if (route is CardHelpRoute)
-						return new CardHelpScreen();
+						return const CardHelpScreen();
 					else if (route is PackHelpRoute)
-						return new PackHelpScreen();
+						return const PackHelpScreen();
 					else if (route is StudyHelpRoute)
-						return new StudyHelpScreen();
+						return const StudyHelpScreen();
                         
 					final packListParams = (route as PackListRoute).params;
-                    return new PackListScreen(packListParams.storage, packListParams.cardStorage);
+                    return packListParams.storage == null && packListParams.cardStorage == null ?
+						const PackListScreen():
+						new PackListScreen(packListParams.storage, packListParams.cardStorage);
                 })
             );
         });

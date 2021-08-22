@@ -9,12 +9,12 @@ import '../../utilities/assured_finder.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
-main() {
-	_runTestsForScreen('Card Help Screen', () => new CardHelpScreen());
+void main() {
+	_runTestsForScreen('Card Help Screen', () => const CardHelpScreen());
 	
-	_runTestsForScreen('Pack Help Screen', () => new PackHelpScreen());
+	_runTestsForScreen('Pack Help Screen', () => const PackHelpScreen());
 
-	_runTestsForScreen('Study Help Screen', () => new StudyHelpScreen());
+	_runTestsForScreen('Study Help Screen', () => const StudyHelpScreen());
 }
 
 void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {

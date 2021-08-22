@@ -2,13 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/quote_provider.dart';
 import '../../utilities/localizator.dart';
 
-main() {
+void main() {
 
 	test('Retrieves quotes from the dictionary for distinct locales', () {
 		final defLocale = Localizator.defaultLocalization;
 		final firstQuote = QuoteProvider.getNextQuote(defLocale);
 		
-		var secondQuote;
+		MapEntry<String, String> secondQuote;
 		while ((secondQuote = QuoteProvider.getNextQuote(defLocale)).key == firstQuote.key) {}
 
 		final rusLocale = Localizator.russianLocalization;

@@ -7,18 +7,20 @@ export '../data/base_storage.dart';
 
 class WordStorage extends BaseStorage<StoredWord> {
 
+	const WordStorage(): super();
+
     @override
     String get entityName => StoredWord.entityName;
 
     Future<List<StoredWord>> fetchFiltered({ 
 		List<int> parentIds, List<int> studyStageIds, String text, int skipCount, int takeCount 
 	}) {
-		final filters = new Map<String, List<dynamic>>();
+		final filters = <String, List<dynamic>>{};
 
-		if (parentIds != null && parentIds.length > 0)
+		if (parentIds != null && parentIds.isNotEmpty)
 			filters[_parentIdField] = parentIds;
 
-		if (studyStageIds != null && studyStageIds.length > 0)
+		if (studyStageIds != null && studyStageIds.isNotEmpty)
 			filters[StoredWord.studyProgressFieldName] = studyStageIds;
 
 		return fetchInternally(skipCount: skipCount, takeCount: takeCount, 
@@ -50,9 +52,9 @@ class WordStorage extends BaseStorage<StoredWord> {
 	}
 
     Future<Map<int, int>> groupByParent([List<int> parentIds, String textFilter]) async {
-        final groups = (await connection.groupBy(entityName, 
+        final groups = await connection.groupBy(entityName, 
             groupField: StoredWord.packIdFieldName, groupValues: parentIds, 
-			filters: addTextFilterClause(textFilter: textFilter)));
+			filters: addTextFilterClause(textFilter: textFilter));
         return <int, int>{ for (var g in groups) g[StoredWord.packIdFieldName] as int: g.length }; 
     }
 
@@ -60,11 +62,11 @@ class WordStorage extends BaseStorage<StoredWord> {
         final groups = await connection.groupBySeveral(entityName, 
             groupFields: [_parentIdField, StoredWord.studyProgressFieldName]);
 
-        return groups.fold<Map<int, Map<int, int>>>(new Map<int, Map<int, int>>(),
+        return groups.fold<Map<int, Map<int, int>>>(<int, Map<int, int>>{},
             (res, gr) {
                 final packId = gr[_parentIdField] as int;
                 if (!res.containsKey(packId))
-                    res[packId] = new Map<int, int>();
+                    res[packId] = <int, int>{};
 
                 res[packId][gr[StoredWord.studyProgressFieldName] as int] = gr.length;
                 return res;

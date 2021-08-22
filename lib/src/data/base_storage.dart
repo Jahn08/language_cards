@@ -11,6 +11,8 @@ abstract class BaseStorage<T extends StoredEntity> {
 
 	static DataProvider _provider;
 
+	const BaseStorage();
+
     @protected
     String get entityName;
 
@@ -100,8 +102,8 @@ abstract class BaseStorage<T extends StoredEntity> {
 		if (groupValues != null && groupValues.isNotEmpty)
 			groupFields.addAll(groupValues.keys);
 
-		final groups = (await connection.groupBySeveral(entityName, 
-            groupFields: groupFields, groupValues: groupValues));
+		final groups = await connection.groupBySeveral(entityName, 
+            groupFields: groupFields, groupValues: groupValues);
         return new Map.fromEntries(
 			groups.map((g) => new MapEntry(g.fields[mainGroupFieldKey] as String, g.length)));
 	}

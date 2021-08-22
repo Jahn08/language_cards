@@ -16,7 +16,7 @@ class RootWidgetMock extends StatelessWidget {
 
     final bool _noBar;
 
-    RootWidgetMock({ Function(BuildContext) onBuilding, Widget child, bool noBar }):
+    const RootWidgetMock({ Function(BuildContext) onBuilding, Widget child, bool noBar }):
         _onBuildCallback = onBuilding,
         _child = child,
         _noBar = noBar ?? false;
@@ -28,7 +28,7 @@ class RootWidgetMock extends StatelessWidget {
 
         return _noBar ? _child: new Scaffold(
             appBar: new AppBar(
-                title: new Text('Test Widget'),
+                title: const Text('Test Widget'),
             ),
             body: new Container(
                 child: _child
@@ -51,7 +51,7 @@ class RootWidgetMock extends StatelessWidget {
 
     static Widget _buildAsAppHome(Route<dynamic> Function(RouteSettings) onGenerateRoute) => 
 		new MaterialApp(
-			localizationsDelegates: [
+			localizationsDelegates: const [
 				AppLocalizations.delegate,
 				GlobalMaterialLocalizations.delegate,
 				GlobalWidgetsLocalizations.delegate
@@ -72,7 +72,7 @@ class RootWidgetMock extends StatelessWidget {
 				settings: settings,
 				builder: (context) => new RootWidgetMock(
 					noBar: noBar,
-					child: new MainScreen()
+					child: const MainScreen()
 				)
 			);
 		if (route is CardListRoute)

@@ -213,7 +213,7 @@ class CardEditorState extends State<CardEditor> {
 									builder: (_, StoredPack pack, icon) => 
 										new TextButton.icon(
 											icon: icon,
-											label: new Container(
+											label: new SizedBox(
 												width: MediaQuery.of(context).size.width * 0.6,
 												child: new OneLineText(locale.cardEditorChoosingPackButtonLabel(
 													pack.getLocalisedName(context)))
@@ -299,7 +299,7 @@ class CardEditorState extends State<CardEditor> {
 			}
 
 		_prevSearchedLemmaLength = value.length;
-		return (_foundLemmas = await _dictionary.searchForLemmas(value));
+		return _foundLemmas = await _dictionary.searchForLemmas(value);
 	}
 
 	Future<void> _updateCardValues(String value, bool submitted) async {
@@ -312,6 +312,10 @@ class CardEditorState extends State<CardEditor> {
 			return;
 
 		final article = await _dictionary.lookUp(value);
+		
+		if (!mounted)
+			return;
+
 		final chosenWord = await new WordSelectorDialog(context)
 			.show(article?.words);
 
@@ -319,11 +323,17 @@ class CardEditorState extends State<CardEditor> {
 			_textNotifier.value = value;
 			return;
 		}
+		
+		if (!mounted)
+			return;
 
 		String translation;
 		if (chosenWord != null)
 			translation = await new TranslationSelectorDialog(context)
 				.show(chosenWord.translations);
+
+		if (!mounted)
+			return;
 
 		_textNotifier.value = chosenWord.text;
 		_partOfSpeechNotifier.value = chosenWord.partOfSpeech.present(
@@ -345,7 +355,7 @@ class CardEditorState extends State<CardEditor> {
 			_foundCard.packId != _packNotifier.value?.id));
 
     @override
-    dispose() {
+    void dispose() {
         _disposeDictionary();
 
 		_textNotifier.dispose();
@@ -367,7 +377,7 @@ class _BtnLink extends StatelessWidget {
 
 	final Widget child;
 
-	_BtnLink(this.child);
+	const _BtnLink(this.child);
 
 	@override
 	Widget build(BuildContext context) => 

@@ -4,7 +4,7 @@ import '../consts.dart';
 
 abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMixin<String>
     implements PreferredSizeWidget {
-    static const double _keyboard_height = 270;
+    static const double _keyboardHeight = 270;
 
     final List<String> _symbols;
     final double _symbolSize;
@@ -24,7 +24,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
     @override
     Widget build(BuildContext context) {
         const int rows = 4;
-        final height = _keyboard_height / (rows + 1) - 5;
+        const height = _keyboardHeight / (rows + 1) - 5;
 
         final itemsPerRow = ((_symbols.length + 4) / rows).ceil();
         final screenWidth = MediaQuery.of(context).size.width;
@@ -46,7 +46,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
         children.addAll([
 			new _Key(
 				symbol: new _Button(
-					child: new Icon(Icons.backspace), 
+					child: const Icon(Icons.backspace), 
 					color: backspaceColor, 
 					onTap: () {
 						final curValue = notifier.value ?? '';
@@ -63,7 +63,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 			),
 			new _Key(
 				symbol: new _Button(
-					child: new Icon(Icons.done), 
+					child: const Icon(Icons.done), 
 					color: doneColor,
 					onTap: () => FocusScope.of(context).unfocus()
 				), 
@@ -75,7 +75,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 
         return new Container(
             color: Colors.grey[300],
-            height: _keyboard_height,
+            height: _keyboardHeight,
             width: double.maxFinite,
             child: new Wrap(
                 alignment: WrapAlignment.spaceEvenly,
@@ -89,7 +89,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
     ValueNotifier<String> get notifier => _notifier;
 
     @override
-    Size get preferredSize => new Size.fromHeight(_keyboard_height);
+    Size get preferredSize => const Size.fromHeight(_keyboardHeight);
 }
 
 class _Key extends StatelessWidget {
@@ -102,20 +102,16 @@ class _Key extends StatelessWidget {
 	
 	final Color borderColor; 	
 
-	_Key({ @required this.symbol, @required this.height, @required this.width, this.borderColor });
+	const _Key({ @required this.symbol, @required this.height, @required this.width, this.borderColor });
 
 	@override
 	Widget build(BuildContext context) =>
         new Container(
-            margin: new EdgeInsets.all(2),
+            margin: const EdgeInsets.all(2),
             child: symbol,
             decoration: new BoxDecoration(
-                borderRadius: new BorderRadius.all(new Radius.circular(7)),
-                border: Border.all(
-                    color: borderColor ?? Colors.grey[300], 
-                    width: 1,
-                    style: BorderStyle.solid
-                ),
+                borderRadius: const BorderRadius.all(Radius.circular(7)),
+                border: Border.all(color: borderColor ?? Colors.grey[300]),
                 boxShadow: [
                     new BoxShadow(
                         color: Colors.grey[400], 
@@ -136,7 +132,7 @@ class _Button extends StatelessWidget {
 
 	final void Function() onTap;
 
-	_Button({ @required this.child, @required this.onTap, this.color });
+	const _Button({ @required this.child, @required this.onTap, this.color });
 
 	@override
 	Widget build(BuildContext context) =>
@@ -158,7 +154,7 @@ class _SymbolButton extends StatelessWidget {
 
 	final void Function() onTap;
 
-	_SymbolButton({ @required this.symbol, @required this.symbolSize, @required this.onTap });
+	const _SymbolButton({ @required this.symbol, @required this.symbolSize, @required this.onTap });
 
 	@override
 	Widget build(BuildContext context) =>

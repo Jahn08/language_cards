@@ -6,7 +6,7 @@ class NoTranslationSnackBar {
 	NoTranslationSnackBar._();
 	
 	static void show(BuildContext scaffoldContext, [AppLocalizations locale]) {
-		locale = locale ?? AppLocalizations.of(scaffoldContext);
+		locale ??= AppLocalizations.of(scaffoldContext);
 		ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
             content: new Text(locale.noTranslationSnackBarInfo)
         ));

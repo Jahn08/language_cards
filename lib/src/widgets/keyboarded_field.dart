@@ -14,7 +14,7 @@ class KeyboardedField extends StatelessWidget {
     final String _initialValue;
     final Function(String) _onChanged;
 
-    KeyboardedField(InputKeyboard keyboard, FocusNode focusNode, this.label,
+    const KeyboardedField(InputKeyboard keyboard, FocusNode focusNode, this.label,
         { Key key, Function(String) onChanged, String initialValue }): 
         _keyboard = keyboard,
         _initialValue = initialValue ?? '',
@@ -37,7 +37,7 @@ class KeyboardedField extends StatelessWidget {
                         builder: (BuildContext _context, String value, bool hasFocus) {
                             final curValue = isInitialBuilding ? _initialValue : (value ?? '');
                             if (!hasFocus && _initialValue != curValue)
-                                new Timer(new Duration(), () => _emitOnChangedEvent(curValue));
+                                new Timer(Duration.zero, () => _emitOnChangedEvent(curValue));
 
                             if (isInitialBuilding)
                                 isInitialBuilding = false;
@@ -66,9 +66,8 @@ class KeyboardedField extends StatelessWidget {
         );
     }
 
-    KeyboardActionsConfig _buildKeyboardConfig() {
-        return new KeyboardActionsConfig(
-            keyboardActionsPlatform: KeyboardActionsPlatform.ALL,
+    KeyboardActionsConfig _buildKeyboardConfig()  => 
+		new KeyboardActionsConfig(
             actions: <KeyboardActionsItem>[
                 new KeyboardActionsItem(
                     displayArrows: false,
@@ -78,7 +77,6 @@ class KeyboardedField extends StatelessWidget {
                 )
             ]
         );
-    }
 
     void _emitOnChangedEvent(String value) => _onChanged?.call(value);
 }

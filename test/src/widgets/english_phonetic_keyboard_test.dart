@@ -35,7 +35,7 @@ void main() {
 
             expectedSymbols.removeLast();
             input = expectedSymbols.join('');
-        } while (input.length > 0);
+        } while (input.isNotEmpty);
 
         await _tapIconKey(tester, Icons.backspace);
     });
@@ -47,8 +47,7 @@ void main() {
 
         await _tapIconKey(tester, Icons.done);
 
-        var input = expectedSymbols.join('');
-
+        final input = expectedSymbols.join('');
         final foundResult = _findEditableText(input);
         expect(foundResult, findsOneWidget);
 
@@ -91,7 +90,7 @@ Future<void> _tapIconKey(WidgetTester tester, IconData icon) async {
     expect(foundKey, findsOneWidget);
 
     await tester.tap(foundKey);
-    await tester.pump(new Duration(milliseconds: 200));
+    await tester.pump(const Duration(milliseconds: 200));
 }
 
 Finder _findEditableText(String input) => find.descendant(of: find.byType(EditableText), 

@@ -26,9 +26,8 @@ class ConfirmDialog extends CancellableDialog<bool> {
     ConfirmDialog.ok({ @required String title, @required String content }):
         this._(title: title, content: content, isCancellable: false);
 
-    Future<bool> show(BuildContext context) async {
-
-        return await showDialog<bool>(
+    Future<bool> show(BuildContext context) => 
+		showDialog<bool>(
             context: context, 
             builder: (buildContext) => new AlertDialog(
                 content: new Text(content),
@@ -44,5 +43,4 @@ class ConfirmDialog extends CancellableDialog<bool> {
 				]
             )
         );
-    }
 }

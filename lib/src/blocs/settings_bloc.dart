@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/user_params.dart';
 import '../data/preferences_provider.dart';
 
-typedef void OnSaveListener(UserParams params);
+typedef OnSaveListener = void Function(UserParams params);
 
 class SettingsBloc {
     final _listeners = <OnSaveListener>[];
@@ -12,9 +12,7 @@ class SettingsBloc {
     SettingsBloc._();
 
     Future<UserParams> get userParams async {
-        if (_params == null)
-            _params = await PreferencesProvider.fetch();
-
+		_params ??= await PreferencesProvider.fetch();
         return new UserParams(_params.toJson());
     }
 

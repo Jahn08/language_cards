@@ -15,7 +15,7 @@ import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
-main() {
+void main() {
 
 	testWidgets('Renders a form with empty fields for adding a new pack', (tester) async {
 		await _pumpScreen(tester);
@@ -213,7 +213,7 @@ main() {
 Future<PackStorageMock> _pumpScreen(WidgetTester tester, { 
 	DictionaryProvider provider, int packId, PackStorageMock storage 
 }) async {
-	storage = storage ?? new PackStorageMock();
+	storage ??= new PackStorageMock();
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
 		child: new PackScreen(storage, provider ?? new DictionaryProviderMock(), 
 			packId: packId)
@@ -259,14 +259,14 @@ Future<StoredPack> _findPack(WidgetTester tester, PackStorageMock storage, int i
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { 
 	PackStorageMock storage, String packName
 }) async {
-    storage = storage ?? new PackStorageMock();
+    storage ??= new PackStorageMock();
     await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithRouting(
 		storage: storage, 
 		noBar: true,
 		packListScreenBuilder: () => new PackListScreen(storage, storage.wordStorage)
 	));
 
-    await tester.pump(new Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
 	final finder = find.byIcon(Icons.library_books);
     await new WidgetAssistant(tester).tapWidget(finder);
@@ -296,8 +296,8 @@ Future<StoredPack> _testAddingPack(WidgetTester tester, {
 	@required bool shouldAdd,
 	PackStorageMock storage
 }) async {
-	storage = await _pumpScreenWithRouting(tester, storage: storage);
-	final initialPackNumber = (await _fetchPacks(tester, storage)).length;
+	final packStorage = await _pumpScreenWithRouting(tester, storage: storage);
+	final initialPackNumber = (await _fetchPacks(tester, packStorage)).length;
 
 	final assistant = new WidgetAssistant(tester);
 
@@ -314,7 +314,7 @@ Future<StoredPack> _testAddingPack(WidgetTester tester, {
 	
 	await assistant.tapWidget(saveBtnSearcher());
 	
-	final actualPacks = await _fetchPacks(tester, storage);
+	final actualPacks = await _fetchPacks(tester, packStorage);
 	expect(actualPacks.length, initialPackNumber + (shouldAdd ? 1: 0));
 
 	final storedPack = actualPacks.singleWhere((p) => p.name == packName, orElse: () => null);

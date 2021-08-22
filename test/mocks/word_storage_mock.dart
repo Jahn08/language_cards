@@ -1,3 +1,4 @@
+import 'package:language_cards/src/data/data_provider.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
@@ -32,10 +33,10 @@ class WordStorageMock extends WordStorage {
 		_sortWords(); 
 	}
 
-    _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
+    void _sortWords() => _words.sort((a, b) => a.text.compareTo(b.text));
 
 	@override
-	get connection => new _WordDataProvider(_words);
+	DataProvider get connection => new _WordDataProvider(_words);
 
     static List<StoredWord> _generateWords(int length, int parentsOverall, 
 		{ String Function(String, int) textGetter }) {
@@ -79,7 +80,7 @@ class WordStorageMock extends WordStorage {
     StoredWord getRandom() => Randomiser.nextElement(_words);
 
     Future<StoredWord> updateWordProgress(int id, int studyProgress) async {
-        final wordToUpdate = _words.firstWhere((w) => w.id == id, orElse: null);
+        final wordToUpdate = _words.firstWhere((w) => w.id == id, orElse: () => null);
         
         if (wordToUpdate == null)
             return null;

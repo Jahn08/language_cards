@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class ContextProvider {
-	static const MethodChannel channel = const MethodChannel('context_provider');
+	static const MethodChannel channel = MethodChannel('context_provider');
 
 	ContextProvider._();
 

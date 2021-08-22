@@ -104,5 +104,5 @@ void main() {
 TranslationSelectorDialog _buildDialog(BuildContext context) => 
     new TranslationSelectorDialog(context);
 
-Future<void> _pressDoneButton(WidgetTester tester) async => 
-    await new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');
+Future<void> _pressDoneButton(WidgetTester tester) => 
+    new WidgetAssistant(tester).pressButtonDirectlyByLabel('Done');

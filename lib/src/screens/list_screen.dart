@@ -19,17 +19,15 @@ class _BottomBar extends StatelessWidget {
 	
 	final List<Widget> Function(BuildContext) optionsBuilder;
 
-	_BottomBar(this.optionsBuilder);
+	const _BottomBar(this.optionsBuilder);
 
 	@override
-	Widget build(BuildContext context) {
-		
-        return new BottomAppBar(
+	Widget build(BuildContext context) => 
+		new BottomAppBar(
 			child: new Row(children: optionsBuilder(context),
 				mainAxisAlignment: MainAxisAlignment.spaceAround),
-			shape: CircularNotchedRectangle()
+			shape: const CircularNotchedRectangle()
 		);
-	}
 }
 
 abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
@@ -55,7 +53,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     final ScrollController _scrollController = new ScrollController();
     
     @override
-    initState() {
+    void initState() {
         super.initState();
         
         _isEditorMode = false;
@@ -84,13 +82,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
         _canFetch = true;
 
-        if (nextItems.length == 0)
+        if (nextItems.isEmpty)
             _isEndOfData = true;
         else
 			setState(() => _items.addAll(nextItems));
     }
 
-    _expandListOnScroll() {
+    void _expandListOnScroll() {
         if (_scrollController.position.extentAfter < 500 && !_isEndOfData && _canFetch)
             _fetchItems(_curFilterIndex);
     }
@@ -102,7 +100,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Future<List<TItem>> fetchNextItems(int skipCount, int takeCount, String text);
 
     @override
-    dispose() {
+    void dispose() {
         _scrollController.removeListener(_expandListOnScroll);
 
         super.dispose();
@@ -114,10 +112,29 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         return new BarScaffold(
 			title: title,
             barActions: <Widget>[
-				_isEditorMode ? _buildEditorDoneButton(): _buildEditorButton(),
-				
+				new IconButton(
+					onPressed: () => setState(() {
+						_isEditorMode = !_isEditorMode;
+						if (!_isEditorMode)
+							_itemsMarkedInEditor.clear();
+					}),
+					icon: new Icon(_isEditorMode ? Icons.edit_off: Icons.edit)
+				),
 				if (_isSearchMode || _isSearchModeAvailable)
-					(_isSearchMode ? _buildSearchDoneButton(): _buildSearchButton())
+					_isSearchMode ? 
+						new IconButton(
+							onPressed: () {
+								refetchItems();
+								setState(() => _isSearchMode = false);
+							},
+							icon: const Icon(Icons.search_off)
+						): 
+						new IconButton(
+							onPressed: _filterIndexes == null ? null: () {
+								setState(() => _isSearchMode = true);
+							},
+							icon: const Icon(Icons.search)
+						)
 			],
             onNavGoingBack: canGoBack ? 
                 () {
@@ -137,41 +154,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     String get title;
 
-    Widget _buildEditorButton() => 
-		new IconButton(
-			onPressed: () {
-				setState(() => _isEditorMode = true);
-			}, 
-			icon: new Icon(Icons.edit)
-		);
-
-    Widget _buildEditorDoneButton() => 
-		new IconButton(
-			onPressed: () {
-				setState(() { 
-					_itemsMarkedInEditor.clear();
-					_isEditorMode = false;
-				});
-			},
-			icon: new Icon(Icons.edit_off)
-		);
-
-	Widget _buildSearchButton() => new IconButton(
-			onPressed: _filterIndexes == null ? null: () {
-				setState(() => _isSearchMode = true);
-			},
-			icon: new Icon(Icons.search)
-		);
-
-	Widget _buildSearchDoneButton() => new IconButton(
-        onPressed: () {
-			refetchItems();
-
-            setState(() => _isSearchMode = false);
-        },
-		icon: new Icon(Icons.search_off)
-    );
-
     @protected
     bool get canGoBack;
 
@@ -183,7 +165,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	List<Widget> _buildBottomOptions(BuildContext scaffoldContext) {
 		final locale = AppLocalizations.of(scaffoldContext);
 
-		bool allSelected = _itemsMarkedInEditor.length == _removableItems.length;
+		final allSelected = _itemsMarkedInEditor.length == _removableItems.length;
 		final options = getBottomBarOptions(_itemsMarkedInEditor.values.map((e) => e.item).toList(), 
 			locale, scaffoldContext) ?? <Widget>[];
 		options.addAll(_buildBottomBarOptions(allSelected, locale, scaffoldContext));
@@ -201,10 +183,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	) {
         return [ 
 			new IconedButton(
-				icon: _deleteIcon,
+				icon: const _DeleteIcon(),
 				label: locale.constsRemovingItemButtonLabel,
 				onPressed: () async {
-					if (_itemsMarkedInEditor.length == 0 || 
+					if (_itemsMarkedInEditor.isEmpty || 
 						!(await shouldContinueRemoval(
 							_itemsMarkedInEditor.values.map((v) => v.item).toList()
 						)))
@@ -228,8 +210,8 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 				}
 			),
 			new IconedButton(
-				icon: new Icon(Icons.select_all),
-				label: getSelectorBtnLabel(allSelected, locale),
+				icon: const Icon(Icons.select_all),
+				label: getSelectorBtnLabel(allSelected: allSelected, locale: locale),
 				onPressed: () {
 					if (allSelected)
                         setState(() => _itemsMarkedInEditor.clear());
@@ -246,11 +228,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			)
 		];
     } 
-        
-	Icon get _deleteIcon => new Icon(Icons.delete);
 
 	@protected
-	String getSelectorBtnLabel(bool allSelected, AppLocalizations locale) {
+	String getSelectorBtnLabel({ bool allSelected, AppLocalizations locale }) {
 		final itemsOverall = _removableItems.length.toString();
 		return allSelected ? locale.constsUnselectAll(itemsOverall): 
 			locale.constsSelectAll(itemsOverall);
@@ -264,7 +244,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		@required List<int> itemIdsToRemove, @required AppLocalizations locale 
 	}) {
         final snackBar = ScaffoldMessenger.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
-			duration: new Duration(milliseconds: _removalTimeoutMs),
+			duration: const Duration(milliseconds: _removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(
                 label: locale.listScreenBottomSnackBarUndoingActionLabel,
@@ -317,24 +297,26 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	@protected
 	Future<void> refetchItems({ String text, bool isForceful, bool shouldInitIndices }) async {
-		if (!(isForceful ?? false) && _curFilterIndex == text) {
+		String newFilterIndex = text;
+
+		if (!(isForceful ?? false) && _curFilterIndex == newFilterIndex) {
 			if (_curFilterIndex == null)
 				return;
 
-			text = null;
+			newFilterIndex = null;
 		}
 
 		_deleteEmptyFilterIndex();
 
-		_curFilterIndex = text;
+		_curFilterIndex = newFilterIndex;
 
 		_pageIndex = 0;
 		_items.clear();
 		_itemsMarkedInEditor.clear();
 
-		await _fetchItems(text);
+		await _fetchItems(newFilterIndex);
 	
-		if ((shouldInitIndices ?? false))
+		if (shouldInitIndices ?? false)
 			_initFilterIndexes();
 	}
 
@@ -406,7 +388,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			key: new Key(item.id.toString()),
 			background: new Container(
 				color: Colors.deepOrange[300], 
-				child: _deleteIcon
+				child: const _DeleteIcon()
 			),
 			onDismissed: (_) async {
 				final itemToRemove = _items[itemIndex];
@@ -433,7 +415,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     @protected
     Widget getItemTrailing(TItem item) => null;
 
-    _recoverMarkedForRemoval(List<int> ids) {
+    void _recoverMarkedForRemoval(List<int> ids) {
         final entries = _getEntriesMarkedForRemoval(ids).toList();
         if (entries.isEmpty)
             return;
@@ -448,10 +430,10 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     List<MapEntry<int, _CachedItem<TItem>>> _getEntriesMarkedForRemoval(List<int> ids) =>
         _itemsMarkedForRemoval.entries.where((entry) => ids.contains(entry.key)).toList();
 
-    _deleteFromMarkedForRemoval(List<int> ids) => 
+    void _deleteFromMarkedForRemoval(List<int> ids) => 
         _itemsMarkedForRemoval.removeWhere((id, _) => ids.contains(id));
 
-    _deleteMarkedForRemoval(List<int> ids) {
+    void _deleteMarkedForRemoval(List<int> ids) {
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
@@ -504,7 +486,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			return;	
 		}
 
-		if (_removableItems.length == 0)
+		if (_removableItems.isEmpty)
 			_filterIndexToDelete = _curFilterIndex;
 	}
 
@@ -512,18 +494,16 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		BuildContext buildContext, AppLocalizations locale
 	) => new FloatingActionButton(
             onPressed: () => onGoingToItem(buildContext),
-            child: new Icon(Icons.add_circle), 
+            child: const Icon(Icons.add_circle), 
             mini: new Styler(buildContext).isDense,
             tooltip: locale.listScreenAddingNewItemButtonTooltip,
             backgroundColor: new Styler(buildContext).floatingActionButtonColor
         );
 
     @mustCallSuper
-    onGoingToItem(BuildContext buildContext, [TItem item]) {
-        _deleteAllMarkedForRemoval();
-    }
+    void onGoingToItem(BuildContext buildContext, [TItem item]) => _deleteAllMarkedForRemoval();
     
-    _deleteAllMarkedForRemoval() {
+    void _deleteAllMarkedForRemoval() {
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
@@ -532,10 +512,17 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 }
 
+class _DeleteIcon extends Icon {
+
+	const _DeleteIcon(): super(Icons.delete);
+}
+
 abstract class ListScreen<T extends StoredEntity> extends StatefulWidget {
 	static const int itemsPerPage = 100;
 
     static const int searcherModeItemsThreshold = 10;
+
+	const ListScreen();
 
 	BaseStorage<T> get storage;
 }

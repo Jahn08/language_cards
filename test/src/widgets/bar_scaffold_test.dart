@@ -33,7 +33,7 @@ void main() {
             final bottomNavBarKey = new Key(Randomiser.nextString());
             final floatingActionBtnKey = new Key(Randomiser.nextString());
             
-            final navBarItemIcon = new Icon(Icons.ac_unit);
+            const navBarItemIcon = Icon(Icons.ac_unit);
 
             await _buildInsideApp(tester, new BarScaffold(
 				title: expectedTitle, 
@@ -113,38 +113,40 @@ void main() {
         expect(tester.widgetList(iconOptionsFinder).length, 
             UserParams.interfaceLanguages.length + AppTheme.values.length);
 
-		final getLangOptionFinder = (bool isSelected) => find.descendant(
+		Finder getLangOptionFinder({ bool isSelected }) => find.descendant(
 			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
 			matching: find.byType(AssetIcon)
 		);
 
         UserParams.interfaceLanguages.forEach((lang) {
-            expect(tester.widget<AssetIcon>(getLangOptionFinder(expectedLang == lang)), 
+            expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: expectedLang == lang)), 
 				AssetIcon.getByLanguage(lang));
         });
 
 		final assistant = new WidgetAssistant(tester);
-		await assistant.tapWidget(getLangOptionFinder(false));
+		await assistant.tapWidget(getLangOptionFinder(isSelected: false));
 
 		final chosenLang = UserParams.interfaceLanguages.firstWhere((lang) => lang != expectedLang);
-		expect(tester.widget<AssetIcon>(getLangOptionFinder(true)), AssetIcon.getByLanguage(chosenLang));
+		expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: true)), 
+			AssetIcon.getByLanguage(chosenLang));
 
-		final getThemeColour = (AppTheme theme) => Colors.blueGrey[theme == AppTheme.dark ? 900: 100];
+		Color getThemeColour(AppTheme theme) => Colors.blueGrey[theme == AppTheme.dark ? 900: 100];
 
-		final getThemeOptionFinder = (bool isSelected) => find.descendant(
+		Finder getThemeOptionFinder({ bool isSelected }) => find.descendant(
 			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
 			matching: find.byWidgetPredicate((w) => w is Container && w.child == null)
 		);
 
         AppTheme.values.forEach((theme) {
-			expect(tester.widget<Container>(getThemeOptionFinder(expectedTheme == theme)).color, 
+			expect(tester.widget<Container>(getThemeOptionFinder(isSelected: expectedTheme == theme)).color, 
 				getThemeColour(theme));
         });
 
-		await assistant.tapWidget(getThemeOptionFinder(false));
+		await assistant.tapWidget(getThemeOptionFinder(isSelected: false));
 
 		final chosenTheme = AppTheme.values.firstWhere((theme) => theme != expectedTheme);
-		expect(tester.widget<Container>(getThemeOptionFinder(true)).color, getThemeColour(chosenTheme));
+		expect(tester.widget<Container>(getThemeOptionFinder(isSelected: true)).color, 
+			getThemeColour(chosenTheme));
 
 		final dropdowns = tester.widgetList<StyledDropdown>(
 			AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
@@ -165,7 +167,7 @@ void main() {
 
 		final studyParams = userParams.studyParams;
 		[studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
-			.every((p) => dropdownBtns.contains((d) => d.value == p));
+			.every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
     });
 
     testWidgets('Saves and hides settings after clicking the apply button on the panel', 
@@ -279,8 +281,8 @@ TextButton _buildBarAction(String label) => new TextButton(
 Finder _assureSettingsBtn(bool shouldFind) =>
     AssuredFinder.findOne(icon: Icons.settings, shouldFind: shouldFind);
 
-Future<void> _pumpScaffoldWithSettings(WidgetTester tester) async => 
-    await _buildInsideApp(tester, new SettingsBlocProvider(
+Future<void> _pumpScaffoldWithSettings(WidgetTester tester) => 
+    _buildInsideApp(tester, new SettingsBlocProvider(
         child: new BarScaffold.withSettings(Randomiser.nextString(), 
             body: new Text(Randomiser.nextString())
         )

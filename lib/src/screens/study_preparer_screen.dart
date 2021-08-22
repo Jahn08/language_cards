@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import '../data/study_storage.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
@@ -16,7 +17,7 @@ class _ListNotifier<T> extends ValueNotifier<List<T>> {
 	_ListNotifier(List<T> value) : super(value ?? <T>[]);
 
 	void clear() {
-		if (value == null || value.length == 0)
+		if (value == null || value.isEmpty)
 			return;
 
 		value.clear();
@@ -25,11 +26,11 @@ class _ListNotifier<T> extends ValueNotifier<List<T>> {
 
 	@override
 	set value(List<T> newValue) {
-		newValue = newValue ?? [];
-		if ((value.length + newValue.length) == 0)
+		final valueToSet = newValue ?? [];
+		if ((value.length + valueToSet.length) == 0)
 			return;
 			
-		super.value = newValue;
+		super.value = valueToSet;
 	}
 
 	void add(T item) {
@@ -89,7 +90,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 								else
 									_excludedPacksNotifier.clear();
 							},
-							icon: new Icon(Icons.select_all)
+							icon: const Icon(Icons.select_all)
 						)
 					],
 					onNavGoingBack: () => Router.goHome(context),
@@ -132,7 +133,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 							final pos = _scrollController.position;
 							await _scrollController.animateTo(
 								_shouldScrollUpNotifier.value ? pos.minScrollExtent : pos.maxScrollExtent, 
-								duration: new Duration(milliseconds: 500),
+								duration: const Duration(milliseconds: 500),
 								curve: Curves.easeOut
 							);
 						},
@@ -180,7 +181,7 @@ class _CheckListItem extends StatelessWidget {
 
 	final Widget secondary;
 
-	_CheckListItem({ 
+	const _CheckListItem({ 
 		@required this.isChecked, @required this.stPack, @required this.onChanged, @required this.secondary
 	});
 	
@@ -203,7 +204,7 @@ class _StudyLevelList extends StatelessWidget {
 
 	final List<int> excludedPackIds;
 
-	_StudyLevelList({ @required this.stPacks, @required this.excludedPackIds });
+	const _StudyLevelList({ @required this.stPacks, @required this.excludedPackIds });
 
 	@override
 	Widget build(BuildContext context) {
@@ -251,7 +252,8 @@ class StudyPreparerScreen extends StatefulWidget {
 
     final StudyStorage storage;
 
-    StudyPreparerScreen(this.storage);
+    const StudyPreparerScreen([StudyStorage storage]): 
+		storage = storage ?? const PackStorage();
 
     @override
     _StudyPreparerScreenState createState() {

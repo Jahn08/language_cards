@@ -33,7 +33,7 @@ class _PopupTextFieldState extends State<PopupTextField> {
 	@override
 	Widget build(BuildContext context) {
 		return CompositedTransformTarget(
-			link: this._layerLink,
+			link: _layerLink,
 			child: StyledTextField(widget.label, 
 				isRequired: true, 
 				onChanged: widget.onChanged,
@@ -67,7 +67,7 @@ class _PopupTextFieldState extends State<PopupTextField> {
 			)).toList();
 	}
 
-	_toggleOverlay(bool hasFocus) {
+	void _toggleOverlay(bool hasFocus) {
 		if (_isValueChosen)
 			return;
 
@@ -84,7 +84,7 @@ class _PopupTextFieldState extends State<PopupTextField> {
 			_overlayEntry = _createOverlayEntry();
 
 			if (_overlayEntry != null)
-				Overlay.of(context).insert(this._overlayEntry);
+				Overlay.of(context).insert(_overlayEntry);
 		}
 		else
 			_overlayEntry.markNeedsBuild();
@@ -100,7 +100,7 @@ class _PopupTextFieldState extends State<PopupTextField> {
 			builder: (context) => Positioned(
 				width: size.width,
 				child: CompositedTransformFollower(
-					link: this._layerLink,
+					link: _layerLink,
 					showWhenUnlinked: false,
 					offset: Offset(0.0, size.height + 5.0),
 					child: Material(
@@ -129,7 +129,7 @@ class PopupTextField extends StatefulWidget {
 
 	final Future<List<String>> Function(String value) popupItemsBuilder;
 
-	PopupTextField(this.label, { @required this.popupItemsBuilder, 
+	const PopupTextField(this.label, { @required this.popupItemsBuilder, 
 		this.onChanged, this.isRequired, this.initialValue });
 
 	@override

@@ -7,7 +7,7 @@ class PreferencesTester {
 
     PreferencesTester._();
 
-    static resetSharedPreferences() => SharedPreferences.setMockInitialValues({});
+    static void resetSharedPreferences() => SharedPreferences.setMockInitialValues({});
 
     static Future<UserParams> saveRandomUserParams() async {
         final params = new UserParams();

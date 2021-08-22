@@ -6,7 +6,7 @@ class TightFlexible extends StatelessWidget {
 
 	final Widget child;
 
-	TightFlexible({ this.flex, this.child });
+	const TightFlexible({ this.flex, this.child });
 
 	@override
 	Widget build(BuildContext context) =>

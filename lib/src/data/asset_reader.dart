@@ -12,24 +12,22 @@ class AssetReader {
 	AssetReader(BuildContext context):
 		assetBundle = DefaultAssetBundle.of(context);
 
-	Future<String> loadString(List<String> keyPaths) async {
-		return await _loadString((keyPaths..insert(0, rootPath)));
-	}
+	Future<String> loadString(List<String> keyPaths) => 
+		_loadString((keyPaths..insert(0, rootPath)));
 
-	Future<String> _loadString(List<String> keyPaths) async {
-		return await assetBundle.loadString(Path.combine(keyPaths));
-	}
+	Future<String> _loadString(List<String> keyPaths) => 
+		assetBundle.loadString(Path.combine(keyPaths));
 	
-	Future<ByteData> load(List<String> keyPaths) async {
-		return await assetBundle.load(Path.combine(keyPaths..insert(0, rootPath)));
-	}
+	Future<ByteData> load(List<String> keyPaths) => 
+		assetBundle.load(Path.combine(keyPaths..insert(0, rootPath)));
 
 	Future<List<String>> listAssetNames([String path]) async {
-		if (path != null)
-			path = Path.combine([rootPath, path]);
-
 		final paths = (json.decode(await _loadString(['AssetManifest.json'])) as Map<String, dynamic>).keys;
-		return (path == null ? paths: paths.where((f) => f.startsWith(path))
-			.map((f) => Path.getFileName(f))).toList();
+		if (path == null)
+			return paths.toList();
+
+		final assetPathPrefix = Path.combine([rootPath, path]);
+		return paths.where((f) => f.startsWith(assetPathPrefix))
+			.map((f) => Path.getFileName(f)).toList();
 	}
 }

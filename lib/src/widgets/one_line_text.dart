@@ -6,10 +6,10 @@ class OneLineText extends StatelessWidget {
 
 	final double textScaleFactor;
 
-    OneLineText(this.content, { this.textScaleFactor });
+    const OneLineText(this.content, { this.textScaleFactor });
 
     @override
     Widget build(BuildContext context) => 
-        new Text(this.content, textScaleFactor: textScaleFactor, maxLines: 1, 
+        new Text(content, textScaleFactor: textScaleFactor, maxLines: 1, 
 			overflow: TextOverflow.ellipsis);
 }

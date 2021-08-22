@@ -51,8 +51,8 @@ class PackScreenState extends State<PackScreen> {
 		final futurePack = _isNew || _initialised ? 
             Future.value(new StoredPack('')): _storage.find(widget.packId);
 		return new BarScaffold(
-            title: (_isNew ? locale.packScreenHeadBarAddingPackTitle:
-				locale.packScreenHeadBarChangingPackTitle),
+            title: _isNew ? locale.packScreenHeadBarAddingPackTitle:
+				locale.packScreenHeadBarChangingPackTitle,
             onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
                 Router.goBackToPackList(context),
             body: new Form(
@@ -61,7 +61,7 @@ class PackScreenState extends State<PackScreen> {
 					future: futurePack,
 					builder: (context, AsyncSnapshot<StoredPack> snapshot) {
 						if (!snapshot.hasData)
-							return new Loader();
+							return const Loader();
 
 						final foundPack = snapshot.data;
 						if (foundPack != null && !foundPack.isNew && !_initialised) {
@@ -187,7 +187,7 @@ class PackScreenState extends State<PackScreen> {
         from: _languages[_fromLangNotifier.value]
     );
 
-    Future<void> _onSave(void afterSaving(StoredPack pack)) async {
+    Future<void> _onSave(void Function(StoredPack pack) afterSaving) async {
 		final state = _key.currentState;
 		if (!state.validate())
 			return;
@@ -206,9 +206,9 @@ class PackScreen extends StatefulWidget {
     
     final DictionaryProvider _provider;
 
-    PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
+    const PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
         { this.packId, this.refreshed = false }): 
-        _storage = storage,
+        _storage = storage ?? const PackStorage(),
 		_provider = provider;
 
     @override

@@ -3,21 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
 class _KeyboardActionsStateBottomed extends KeyboardActionstate {
-    FocusNode _focusNode;
 
-    _KeyboardActionsStateBottomed(FocusNode focusNode): 
-        _focusNode = focusNode, super() {
-            assert(_focusNode != null);
-        }
+	FocusNode _focusNode;
+
+    _KeyboardActionsStateBottomed(): super();
 
     @override
     void initState() {
         super.initState();
 
-        _addFocusListener();
+        _addFocusListener(_setFocusNode());
     }
 
-    void _addFocusListener() => _focusNode.addListener(_stickToBottom);
+	FocusNode _setFocusNode() => _focusNode = (widget as KeyboardActionsBottomed).focusNode;
+
+    void _addFocusListener(FocusNode nodeToListen) => nodeToListen.addListener(_stickToBottom);
 
     void _stickToBottom() {
         final bottom = WidgetsBinding.instance.window.viewInsets.bottom;
@@ -26,27 +26,25 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
         if (mainFocusNode.hasFocus && bottom > 0) {
             mainFocusNode.unfocus();
 
-            new Timer(new Duration(milliseconds: 100), 
+            new Timer(const Duration(milliseconds: 100), 
                 () => _focusNode.requestFocus());
         }
     }
 
     @protected
 	@override
-    void didUpdateWidget(KeyboardActions oldWidget) {
+    void didUpdateWidget(KeyboardActionsBottomed oldWidget) {
         super.didUpdateWidget(oldWidget);
 
-        _removeFocusListener();
-
-        _focusNode = (widget as KeyboardActionsBottomed).focusNode;
-        _addFocusListener();
+        _removeFocusListener(_focusNode);
+        _addFocusListener(_setFocusNode());
     }
 
-    void _removeFocusListener() => _focusNode.removeListener(_stickToBottom);
+    void _removeFocusListener(FocusNode nodeToUnlisten) => nodeToUnlisten.removeListener(_stickToBottom);
 
     @override
     void dispose() {
-        _removeFocusListener();
+        _removeFocusListener(_focusNode);
 
         super.dispose();
     }
@@ -55,14 +53,12 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
 class KeyboardActionsBottomed extends KeyboardActions {
     final FocusNode focusNode;
 
-    KeyboardActionsBottomed({ 
+    const KeyboardActionsBottomed({ 
         @required this.focusNode,
         @required KeyboardActionsConfig config,
         Widget child
     }): super(child: child, config: config, disableScroll: true);
 
     @override
-    KeyboardActionstate createState() {
-        return new _KeyboardActionsStateBottomed(focusNode);
-    }
+    _KeyboardActionsStateBottomed createState() => new _KeyboardActionsStateBottomed();
 }

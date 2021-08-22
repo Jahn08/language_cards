@@ -20,7 +20,8 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
 		new Column(
 			crossAxisAlignment: CrossAxisAlignment.start,
 			children: [
-				item.isNone ? new TranslationIndicator.empty(): 
+    			// ignore: prefer_if_elements_to_conditional_expressions
+				item.isNone ? const TranslationIndicator.empty(): 
 					new TranslationIndicator(item.from, item.to),
 				new Text(item.getLocalisedName(context))
 			]
@@ -28,5 +29,5 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
 
     @override
     Widget getItemTrailing(StoredPack item) => item.id == chosenPackId ? 
-        new Icon(Icons.check): null;
+        const Icon(Icons.check): null;
 }

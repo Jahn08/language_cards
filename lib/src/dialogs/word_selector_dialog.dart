@@ -5,9 +5,7 @@ import '../models/word.dart';
 
 class WordSelectorDialog extends SingleSelectorDialog<Word> {
 
-	final BuildContext context;
-
-    WordSelectorDialog(this.context):
+    WordSelectorDialog(BuildContext context):
         super(context, AppLocalizations.of(context).wordSelectorDialogTitle, isShrunk: true);
    
     @override

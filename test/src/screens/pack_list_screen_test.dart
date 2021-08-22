@@ -210,8 +210,8 @@ void main() {
 			final packsToExport = (await _fetchPacks(storage, tester))
 				.where((p) => selectedPackDic.containsValue(p.name)).toList();
 
-			await ContextChannelMock.testWithChannel(() async =>
-				await PermissionChannelMock.testWithChannel(() async {
+			await ContextChannelMock.testWithChannel(() =>
+				PermissionChannelMock.testWithChannel(() async {
 					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 					await assistant.tapWidget(exportBtnFinder);
 
@@ -319,7 +319,7 @@ void main() {
 }
 
 PackListScreen _buildPackListScreen({ PackStorageMock storage, int packsNumber }) {
-	storage = storage ?? new PackStorageMock(packsNumber: packsNumber ?? 40, 
+	storage ??= new PackStorageMock(packsNumber: packsNumber ?? 40, 
 		textGetter: (text, id) => (id % 2).toString() + text);
 	return new PackListScreen(storage, storage.wordStorage);
 }
@@ -332,7 +332,7 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
 		cardWasAdded: cardWasAdded
 	));
 
-    await tester.pump(new Duration(milliseconds: 500));
+    await tester.pump(const Duration(milliseconds: 500));
 
     final finder = find.byIcon(Icons.library_books);
     await new WidgetAssistant(tester).tapWidget(finder);
@@ -445,8 +445,8 @@ Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage,
 	), findsOneWidget);
 
     await tester.runAsync(() async {
-		final actualPackWithCards = (pack.id == null ? (await storage.fetch()).first: 
-			await storage.find(pack.id));
+		final actualPackWithCards = pack.id == null ? 
+			(await storage.fetch()).first: await storage.find(pack.id);
         expect(actualPackWithCards?.cardsNumber, expectedNumber);
     });
 }

@@ -10,32 +10,31 @@ class TranslationIndicator extends StatelessWidget {
 
     final Language to;
 
-    TranslationIndicator(this.from, this.to) {
-        assert(this.from != null);
-        assert(this.to != null);
-        assert(this.from != this.to);
-    }
+    const TranslationIndicator(this.from, this.to):
+        assert(from != null),
+        assert(to != null),
+        assert(from != to);
 
-    TranslationIndicator.empty():
-        this.from = null,
-        this.to = null;
+    const TranslationIndicator.empty():
+        from = null,
+        to = null;
 
     @override
     Widget build(BuildContext context) {
 		final clipper = new _DiagonalClipper();
 		return new Container(
-			margin: new EdgeInsets.only(right: 5),
+			margin: const EdgeInsets.only(right: 5),
 			child: new Stack(
 				children: <Widget>[
-					new IconOption(icon: this.from == null ? new Container(): 
-						AssetIcon.getByLanguage(this.from)),
-					if (this.to != null)
+					new IconOption(icon: from == null ? new Container(): 
+						AssetIcon.getByLanguage(from)),
+					if (to != null)
 						new CustomPaint(
 							painter: new _ClippedBorderPainter(clipper, 
 								new Styler(context).dividerColor),
 							child: new ClipPath(
 								clipper: clipper,
-								child: IconOption(icon: AssetIcon.getByLanguage(this.to))
+								child: IconOption(icon: AssetIcon.getByLanguage(to))
 							)
 						)
 				]
@@ -54,10 +53,10 @@ class _ClippedBorderPainter extends CustomPainter {
 
 	@override
 	void paint(Canvas canvas, Size size) {
-		Paint paint = Paint()
+		final paint = Paint()
 			..style = PaintingStyle.stroke
 			..strokeWidth = 1.5
-			..color = this.color;
+			..color = color;
 	
 		canvas.drawPath(clipper.getClip(size), paint);
 	}

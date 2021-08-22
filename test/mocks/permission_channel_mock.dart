@@ -1,7 +1,7 @@
 import 'package:flutter/services.dart';
 
 class PermissionChannelMock {
-	static const _channel = const MethodChannel('flutter.baseflow.com/permissions/methods');
+	static const _channel = MethodChannel('flutter.baseflow.com/permissions/methods');
 
 	PermissionChannelMock._();
 

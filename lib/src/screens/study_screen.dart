@@ -254,8 +254,8 @@ class _StudyScreenState extends State<StudyScreen> {
     }
 
 	Widget _buildCard(BuildContext context, int index) {
-		index = _getIndexCard(index);
-		_setIndexCard(index);
+		final indexCard = _getIndexCard(index);
+		_setIndexCard(indexCard);
 		_orderCards(_isStudyOver);
 
 		if (_isStudyOver) {
@@ -266,7 +266,7 @@ class _StudyScreenState extends State<StudyScreen> {
 		return new ValueListenableBuilder(
 			valueListenable: _curCardUpdater,
 			builder: (_, __, ___) {
-				final card = _cards[index];
+				final card = _cards[indexCard];
 				return new Column(
 					children: [
 						new TightFlexible(child: _PackLabel(_packMap[card.packId])),
@@ -291,7 +291,7 @@ class _StudyScreenState extends State<StudyScreen> {
 	}
 
     void _setNextCard() => _controller.nextPage(curve: Curves.linear, 
-        duration: new Duration(milliseconds: 200));
+        duration: const Duration(milliseconds: 200));
 
     void _setIndexCard(int newIndex) {
 		if (_curCardIndexNotifier.value == newIndex)
@@ -319,7 +319,7 @@ class _StudyScreenState extends State<StudyScreen> {
             0: curValIndex + 1;
 
 	@override
-	dispose() {
+	void dispose() {
 		_controller?.dispose();
 
 		_curCardIndexNotifier.dispose();
@@ -336,7 +336,7 @@ class _PackLabel extends StatelessWidget {
 
 	final StoredPack pack;
 
-	_PackLabel(this.pack);
+	const _PackLabel(this.pack);
 
 	@override
 	Widget build(BuildContext context) {
@@ -346,12 +346,12 @@ class _PackLabel extends StatelessWidget {
             children: [
                 new Container(
                     child: new TranslationIndicator(pack.from, pack.to), 
-                    margin: EdgeInsets.only(left: 10, bottom: 5)
+                    margin: const EdgeInsets.only(left: 10, bottom: 5)
                 ),
                 new Container(
 					width: screenSize.width * 0.75,
                     child: new OneLineText(pack.name),
-                    margin: EdgeInsets.all(5)
+                    margin: const EdgeInsets.all(5)
                 )
             ]
         );
@@ -364,7 +364,7 @@ class _CardSideFrame extends StatelessWidget {
 
 	final bool isFront;
 	
-	_CardSideFrame({ @required this.card, @required this.isFront });
+	const _CardSideFrame({ @required this.card, @required this.isFront });
 	
 	@override
 	Widget build(BuildContext context) {
@@ -374,7 +374,7 @@ class _CardSideFrame extends StatelessWidget {
 		if (isFront) {
 			String subtext = (card.transcription ?? '').isEmpty ? '': '[${card.transcription}]\n';
 			if (card.partOfSpeech != null)
-				subtext += '${card.partOfSpeech.present(locale)}';
+				subtext += card.partOfSpeech.present(locale);
 
 			subtitle = _CenteredBigText(subtext);
 		}
@@ -382,28 +382,26 @@ class _CardSideFrame extends StatelessWidget {
 		const double spaceSize = 10;
 		return new Card(
 			elevation: 25,
-			margin: EdgeInsets.only(left: spaceSize, right: spaceSize, bottom: spaceSize),
+			margin: const EdgeInsets.only(left: spaceSize, right: spaceSize, bottom: spaceSize),
 			child: new InkWell(
-				child: new Container(
-					child: new Column(
-						children: [
-							new Row(children: [
-								new Container(
-									margin: EdgeInsets.all(5),
-									child: new Text(WordStudyStage.stringify(card.studyProgress, locale))
-								)
-							]),
-							TightFlexible(
-								child: new Center(
-									child: new ListTile(
-										title: new _CenteredBigText(isFront ? card.text: card.translation),
-										subtitle: subtitle
-									)
-								),
-								flex: 2
+				child: new Column(
+					children: [
+						new Row(children: [
+							new Container(
+								margin: const EdgeInsets.all(5),
+								child: new Text(WordStudyStage.stringify(card.studyProgress, locale))
 							)
-						]
-					)
+						]),
+						TightFlexible(
+							child: new Center(
+								child: new ListTile(
+									title: new _CenteredBigText(isFront ? card.text: card.translation),
+									subtitle: subtitle
+								)
+							),
+							flex: 2
+						)
+					]
 				)
 			)
 		);
@@ -421,7 +419,7 @@ class _ButtonPanel extends StatelessWidget {
 	_ButtonPanel({
 		@required this.onLearningPressed, @required this.onNextCardPressed, 
 		List<ElevatedButton> addButtons
-	}): this.addButtons = addButtons ?? <ElevatedButton>[];
+	}): addButtons = addButtons ?? <ElevatedButton>[];
 
 	@override
 	Widget build(BuildContext context) {
@@ -435,7 +433,9 @@ class _ButtonPanel extends StatelessWidget {
 			new ElevatedButton(
 				child: new _CenteredBigText(locale.studyScreenNextCardButtonLabel),
 				onPressed: onNextCardPressed
-			)]..addAll(addButtons);
+			), 
+			...addButtons
+		];
 		return new OrientationBuilder(builder: (_, orientation) {
 			final ratio = orientation == Orientation.landscape ? 6.25: 5.25;
 			return new GridView.count(
@@ -444,7 +444,7 @@ class _ButtonPanel extends StatelessWidget {
 				mainAxisSpacing: 10,
 				shrinkWrap: true,
 				childAspectRatio: screenSize.width / (screenSize.height / ratio),
-				padding: EdgeInsets.all(5),
+				padding: const EdgeInsets.all(5),
 				children: buttons
 			);
 		});
@@ -455,7 +455,7 @@ class _CenteredBigText extends StatelessWidget {
 	
 	final String data;
 
-	_CenteredBigText(this.data);
+	const _CenteredBigText(this.data);
 
 	@override
 	Widget build(BuildContext context) =>
@@ -477,7 +477,7 @@ class StudyScreen extends StatefulWidget {
 
     final ISpeaker defaultSpeaker;
 
-    StudyScreen(this.storage, { 
+    const StudyScreen(this.storage, { 
 		@required this.packs, @required this.packStorage, @required this.provider,
 		this.studyStageIds, this.defaultSpeaker 
 	});

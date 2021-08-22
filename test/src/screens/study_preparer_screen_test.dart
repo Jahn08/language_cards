@@ -197,8 +197,7 @@ Future<void> _assureNonConsecutivelyCheckedTiles(WidgetTester tester,
 
 	Finder packTileFinder = await _findPackTile(assistant, sortedPacks.first.name, searchUpwards: true);
 	for (final p in sortedPacks) {
-		if (packTileFinder == null)
-			packTileFinder = await _findPackTile(assistant, p.name);
+		packTileFinder ??= await _findPackTile(assistant, p.name);
 		
 		expect(tester.widget<CheckboxListTile>(packTileFinder).value, true);
 
@@ -217,8 +216,10 @@ Future<Finder> _findPackTile(WidgetAssistant assistant, String packName, { bool 
     return visibleFinder;
 }
 
-void _assureCardNumbersForStudyLevels(Iterable<StudyPack> stPacks, [List<int> includedPackIds]) {
+void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks, [List<int> includedPackIds]) {
     final studyStages = <int, int>{ for (var v in WordStudyStage.values) v: 0 };
+
+	Iterable<StudyPack> stPacks = studyPacks;
     if (includedPackIds != null)
         stPacks = stPacks.where((p) => includedPackIds.contains(p.pack.id));
 

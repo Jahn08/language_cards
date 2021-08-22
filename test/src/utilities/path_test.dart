@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/utilities/path.dart';
 import '../../utilities/randomiser.dart';
 
-main() {
+void main() {
 
 	test('Joins an array of strings into a path string', () {
 		final paths = [Randomiser.nextString(), Randomiser.nextString(), Randomiser.nextString()];
@@ -17,7 +17,7 @@ main() {
 	});
 
 	test('Gets a file name without its extension', () {
-		final fileExtension = '.txt';
+		const fileExtension = '.txt';
 		final expectedFileName = Randomiser.nextString();
 		final actualFileName = Path.stripFileExtension(expectedFileName + fileExtension);
 		expect(actualFileName, expectedFileName);

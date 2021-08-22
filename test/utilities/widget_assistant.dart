@@ -22,7 +22,7 @@ class WidgetAssistant {
     Future<void> tapWidget(Finder widgetFinder, { bool atCenter }) async {
         expect(widgetFinder, findsOneWidget);
         
-		if ((atCenter ?? false))
+		if (atCenter ?? false)
 			await tester.tap(widgetFinder);
 		else
 			await tester.tapAt(tester.getTopLeft(widgetFinder));
@@ -41,8 +41,7 @@ class WidgetAssistant {
         await pumpAndAnimate();
     }
 
-    Future<void> swipeWidgetLeft(Finder widgetFinder) =>
-        _swipeWidget(widgetFinder, toRight: false);
+    Future<void> swipeWidgetLeft(Finder widgetFinder) => _swipeWidget(widgetFinder);
 
     Future<void> _swipeWidget(Finder widgetFinder, { bool toRight = false }) async {
         expect(widgetFinder, findsOneWidget);
@@ -57,16 +56,13 @@ class WidgetAssistant {
 	Future<Finder> scrollUntilVisible(Finder finder, Type scrollableChildType, 
 		{ bool upwards }
 	) async {
-		try {
-			final delta = 100.0 * ((upwards ?? false) ? -1: 1);
-			if (findsNothing.matches(finder, {}))
-				await tester.scrollUntilVisible(finder, delta,
-					scrollable: find.ancestor(
-						of: find.byType(scrollableChildType),
-						matching: find.byType(Scrollable)
-					).first);
-		}
-		on StateError catch (_) { }
+		final delta = 100.0 * ((upwards ?? false) ? -1: 1);
+		if (findsNothing.matches(finder, {}))
+			await tester.scrollUntilVisible(finder, delta,
+				scrollable: find.ancestor(
+					of: find.byType(scrollableChildType),
+					matching: find.byType(Scrollable)
+				).first);
 
 		return finder;
 	}
@@ -87,9 +83,9 @@ class WidgetAssistant {
 		await tapWidget(find.text(toValue.present(Localizator.defaultLocalization)).hitTestable());
 	}
 
-	Future<String> enterChangedText(String initialText, { String changedText }) async {
-		changedText = changedText ?? initialText.substring(1);
-		return await enterText(find.widgetWithText(TextField, initialText), changedText);
+	Future<String> enterChangedText(String initialText, { String changedText }) {
+		changedText ??= initialText.substring(1);
+		return enterText(find.widgetWithText(TextField, initialText), changedText);
 	}
 
 	Future<String> enterText(Finder fieldFinder, String changedText) async {

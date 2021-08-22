@@ -46,7 +46,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 									setState(() => _expandedPanelIndex = isExpanded ? null: panelIndex);	
 								}
 							),
-							padding: EdgeInsets.only(top: 30)
+							padding: const EdgeInsets.only(top: 30)
 						)
 					]
 				)
@@ -179,6 +179,10 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 									child: label,
 									onPressed: isDirty ? () async {
 										await bloc.save(_params);
+										
+										if (!mounted)
+											return;
+										
 										Navigator.pop(context);
 									}: null
 								)
@@ -199,7 +203,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 		_directionParamNotifier.value = _params.studyParams.direction;
 	}
 
-	void _setDirtinessState() => _isStateDirtyNotifier.value = (_originalParams != _params.toJson());
+	void _setDirtinessState() => _isStateDirtyNotifier.value = _originalParams != _params.toJson();
 }
 
 class _SettingsSectionBody extends StatefulWidget {
@@ -218,7 +222,7 @@ class _StudySettingsSectionRow extends StatelessWidget {
 
 	final void Function(String) onValueChanged;
 
-	_StudySettingsSectionRow({ this.options, this.inintialValue, this.onValueChanged, this.label });
+	const _StudySettingsSectionRow({ this.options, this.inintialValue, this.onValueChanged, this.label });
 
 	@override
 	Widget build(BuildContext context) => 
@@ -230,7 +234,7 @@ class _StudySettingsSectionRow extends StatelessWidget {
 							initialValue: inintialValue,
 							onChanged: onValueChanged
 						),
-						margin: EdgeInsets.only(bottom: 5, top: 10)
+						margin: const EdgeInsets.only(bottom: 5, top: 10)
 					)
             	)
         ]);	
@@ -242,7 +246,7 @@ class _AppearanceSettingsSection extends StatelessWidget {
 
 	final void Function(AppTheme) onThemeChanged;
 
-	_AppearanceSettingsSection(this.theme, this.onThemeChanged);
+	const _AppearanceSettingsSection(this.theme, this.onThemeChanged);
 
 	@override
 	Widget build(BuildContext context) =>
@@ -262,7 +266,7 @@ class _AppearanceOption extends StatelessWidget {
 	
 	final void Function() onTap;
 
-	_AppearanceOption({ this.theme, this.isSelected, this.onTap });
+	const _AppearanceOption({ this.theme, this.isSelected, this.onTap });
 
 	@override
 	Widget build(BuildContext context) =>
@@ -290,7 +294,7 @@ class _LanguageSettingsSection extends StatelessWidget {
 
 	final void Function(Language) onLangChanged;
 
-	_LanguageSettingsSection(this.interfaceLang, this.onLangChanged);
+	const _LanguageSettingsSection(this.interfaceLang, this.onLangChanged);
 
 	@override
 	Widget build(BuildContext context) =>
@@ -310,7 +314,7 @@ class _LanguageOption extends StatelessWidget {
 	
 	final void Function() onTap;
 
-	_LanguageOption({ this.lang, this.isSelected, this.onTap });
+	const _LanguageOption({ this.lang, this.isSelected, this.onTap });
 
 	@override
 	Widget build(BuildContext context) =>
@@ -323,7 +327,7 @@ class _LanguageOption extends StatelessWidget {
                 if (isSelected)
                     return;
 
-				this.onTap();
+				onTap();
             }
         );
 }
@@ -360,23 +364,23 @@ class _ContactsSectionBody extends StatelessWidget {
 			return new Column(children: [
 				if (!isNullOrEmpty(contactsParams.fbUserId))
 					new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionFBLinkLabel, 
-						() async => await new FBLink(contactsParams.fbUserId).activate()),
+						() async => new FBLink(contactsParams.fbUserId).activate()),
 				new _TextButtonedRow(
 					locale.barScaffoldSettingsPanelContactsSectionSuggestionLinkLabel,
-					() async => await (await EmailLink.build(
+					() async => (await EmailLink.build(
 						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionSuggestionEmailSubject
 					)).activate()
 				),
 				new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionBugLinkLabel, 
-					() async => await (await EmailLink.build(
+					() async => (await EmailLink.build(
 						email: contactsParams.email, 
 						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
 					)).activate()),
 				new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
-					() async => await new AppStoreLink(contactsParams.appStoreId).activate())
+					() async => new AppStoreLink(contactsParams.appStoreId).activate())
 			]);
 		});
 }
@@ -399,14 +403,13 @@ class _SubSectionHeader extends StatelessWidget {
  	@override
   	Widget build(BuildContext context) => 
 		new Row(
-			mainAxisAlignment: MainAxisAlignment.start,
 			children: [
 				new Padding(
-					padding: EdgeInsets.only(left: 5, top: 10), 
+					padding: const EdgeInsets.only(left: 5, top: 10), 
 					child: new Text(
 						title,
 						textAlign: TextAlign.left,
-						style: new TextStyle(fontSize: Consts.biggerFontSize)
+						style: const TextStyle(fontSize: Consts.biggerFontSize)
 					)
 				)
 			]
@@ -437,12 +440,12 @@ class _TextButtonedRow extends StatelessWidget {
 
 	final String label;
 
-	_TextButtonedRow(this.label, this.onPressed);
+	const _TextButtonedRow(this.label, this.onPressed);
 
 	@override
 	Widget build(BuildContext context) => 
 		new Row(
-			children: <Widget>[new Flexible(child: new Container(
+			children: <Widget>[new Flexible(child: new SizedBox(
 				child: new TextButton(child: new Text(label), onPressed: onPressed),
 				height: 40.0
 			))]
@@ -486,14 +489,13 @@ class _SectionHeader extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) =>
 		new Row(
-			crossAxisAlignment: CrossAxisAlignment.center,
 			mainAxisAlignment: MainAxisAlignment.center,
 			children: [
 				new Padding(
-					padding: EdgeInsets.only(left: 5), 
+					padding: const EdgeInsets.only(left: 5), 
 					child: new Text(
 						title,
-						style: new TextStyle(fontSize: Consts.largeFontSize)
+						style: const TextStyle(fontSize: Consts.largeFontSize)
 					)
 				)
 			]
@@ -502,7 +504,7 @@ class _SectionHeader extends StatelessWidget {
 
 class _SettingsPanel extends StatefulWidget {
     
-	_SettingsPanel();
+	const _SettingsPanel();
 
     @override
     _SettingsPanelState createState() => new _SettingsPanelState();
@@ -512,7 +514,7 @@ class _SettingsOpenerButton extends StatelessWidget {
     @override
     Widget build(BuildContext context) {
         return new IconButton(
-            icon: new Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             onPressed: () => Scaffold.of(context).openDrawer()
         );
     }
@@ -540,7 +542,6 @@ class BarScaffold extends StatelessWidget {
         Widget bottomBar,
         FloatingActionButton floatingActionButton,
         List<Widget> barActions,
-		ContactsParams contactsParams,
         void Function() onNavGoingBack,
 		Widget titleWidget
     }): this._(
@@ -585,7 +586,7 @@ class BarScaffold extends StatelessWidget {
 	@override
 	Widget build(BuildContext context) =>
 		new Scaffold(
-			drawer: _settingsOpener == null ? null: new _SettingsPanel(),
+			drawer: _settingsOpener == null ? null: const _SettingsPanel(),
 			appBar: onNavGoingBack == null ? 
 				new AppBar(actions: barActions, leading: _settingsOpener, title: _title):
 				new NavigationBar(_title, actions: barActions, onGoingBack: onNavGoingBack, 

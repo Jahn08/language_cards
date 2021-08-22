@@ -9,6 +9,8 @@ export '../models/stored_pack.dart';
 
 class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
+	const PackStorage(): super();
+
     @override
     String get entityName => StoredPack.entityName;
 
@@ -34,7 +36,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         }
 
 	@protected
-	WordStorage buildWordStorage() => new WordStorage();
+	WordStorage buildWordStorage() => const WordStorage();
 
 	@override
     Future<List<StoredPack>> fetchInternally({ 
