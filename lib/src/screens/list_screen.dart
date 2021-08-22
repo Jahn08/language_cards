@@ -12,7 +12,7 @@ class _CachedItem<TItem> {
 
     final int index;
 
-    _CachedItem(this.item, this.index);
+    const _CachedItem(this.item, this.index);
 }
 
 class _BottomBar extends StatelessWidget {

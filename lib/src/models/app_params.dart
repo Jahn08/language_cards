@@ -5,7 +5,7 @@ class DictionaryParams {
 
     final String apiKey;
 
-    DictionaryParams({ this.apiKey });
+    const DictionaryParams({ this.apiKey });
 
     DictionaryParams.fromJson(Map<String, dynamic> json): 
         apiKey = json[_apiKeyPropName] as String;
@@ -53,7 +53,7 @@ class AppParams {
 
     final ContactsParams contacts;
 
-    AppParams({ this.dictionary, this.contacts});
+    const AppParams({ this.dictionary, this.contacts});
 
     AppParams.fromJson(Map<String, dynamic> json): 
         dictionary = new DictionaryParams.fromJson(

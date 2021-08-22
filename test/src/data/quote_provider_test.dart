@@ -16,12 +16,11 @@ void main() {
 		_assureTextIsInRussian(firstRusQuote.key);
 		_assureTextIsInRussian(firstRusQuote.value);
 
-		final secondRusQuote = QuoteProvider.getNextQuote(rusLocale);
+		MapEntry<String, String> secondRusQuote;
+		while ((secondRusQuote = QuoteProvider.getNextQuote(rusLocale)).key == firstRusQuote.key) {}
 		_assureTextIsInRussian(secondRusQuote.key);
 		_assureTextIsInRussian(secondRusQuote.value);
 
-		expect(firstRusQuote.key != secondRusQuote.key, true);
-		
 		final rusQuoteTexts = [firstRusQuote.key, secondRusQuote.key];
 		expect([firstQuote.key, secondQuote.key]
 			.every((q) => !rusQuoteTexts.contains(q)), true);

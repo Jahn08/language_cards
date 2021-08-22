@@ -11,7 +11,7 @@ class PackExporter {
 
 	final WordStorage storage;
 
-	PackExporter(this.storage);
+	const PackExporter(this.storage);
 
 	Future<String> export(List<StoredPack> packs, String filePostfix, AppLocalizations locale) async {
 		final packIds = packs.map((p) => p.id).toList();

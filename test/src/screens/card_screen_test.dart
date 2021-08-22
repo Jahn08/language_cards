@@ -352,7 +352,7 @@ Future<StoredWord> _displayWord(WidgetTester tester, {
 			wordStorage: wordStorage, packStorage: storage,
 			wordId: wordToShow.id, pack: pack, 
 			provider: provider, 
-			defaultSpeaker: speaker ?? new SpeakerMock()
+			defaultSpeaker: speaker ?? const SpeakerMock()
 		)));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 200));

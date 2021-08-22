@@ -193,10 +193,10 @@ void main() {
             await assistant.tapWidget(nonChosenOptionsFinder.last, atCenter: true);
 
 			final defStudyParams = defaultUserParams.studyParams;
-			final expectedCardSide = CardSide.back;
+			const expectedCardSide = CardSide.back;
 			await assistant.changeDropdownItem(defStudyParams.cardSide, expectedCardSide);		
 			
-			final expectedDirection = StudyDirection.random;
+			const expectedDirection = StudyDirection.random;
 			await assistant.changeDropdownItem(defStudyParams.direction, expectedDirection);		
 
             await _applySettings(assistant);

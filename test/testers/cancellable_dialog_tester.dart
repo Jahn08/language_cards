@@ -8,7 +8,7 @@ class CancellableDialogTester extends DialogTester {
 	@protected
 	final WidgetTester tester;
 	
-	CancellableDialogTester(this.tester);
+	const CancellableDialogTester(this.tester);
 
 	Future<void> assureCancellingDialog() async {
 		final assistant = new WidgetAssistant(tester);

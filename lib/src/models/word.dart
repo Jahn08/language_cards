@@ -12,10 +12,10 @@ class Word {
 
     final List<String> translations;
 
-    Word(this.text, { 
+    const Word(this.text, { 
 		this.id, this.partOfSpeech, String transcription, List<String> translations 
 	}): transcription = transcription ?? '',
-        translations = translations ?? [];
+        translations = translations ?? const [];
 
     Word.fromJson(Map<String, dynamic> json):
 		this(

@@ -5,6 +5,8 @@ import '../utilities/localizator.dart';
 
 class DialogTester {
 
+	const DialogTester();
+
 	Finder assureDialog({ bool shouldFind }) => 
 		AssuredFinder.findOne(type: AlertDialog, shouldFind: shouldFind);
 

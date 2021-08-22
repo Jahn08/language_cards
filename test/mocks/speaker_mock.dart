@@ -4,7 +4,7 @@ class SpeakerMock implements ISpeaker {
 
 	final void Function(String) onSpeak;
 
-	SpeakerMock({ this.onSpeak });
+	const SpeakerMock({ this.onSpeak });
 
 	@override
 	Future<void> speak(String text) {

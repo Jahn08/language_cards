@@ -4,6 +4,8 @@ import 'outcome_dialog.dart';
 
 abstract class CancellableDialog<TResult> extends OutcomeDialog<TResult> {
 
+	const CancellableDialog(): super();
+
     @protected
     ElevatedButton buildCancelBtn(BuildContext context, [TResult result]) {
 		return new ElevatedButton(

@@ -21,7 +21,7 @@ class Configuration {
 				stackTrace: stackTrace,
 			);
 
-			return new AppParams();
+			return const AppParams();
 		}
     }
 

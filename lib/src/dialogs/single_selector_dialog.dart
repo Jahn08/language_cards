@@ -13,7 +13,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
     
 	final bool isShrunk;
 
-    SingleSelectorDialog(this.context, String title, { this.isShrunk }):
+    const SingleSelectorDialog(this.context, String title, { this.isShrunk }):
         _title = title,
         super();
 

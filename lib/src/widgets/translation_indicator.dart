@@ -21,7 +21,7 @@ class TranslationIndicator extends StatelessWidget {
 
     @override
     Widget build(BuildContext context) {
-		final clipper = new _DiagonalClipper();
+		const clipper = _DiagonalClipper();
 		return new Container(
 			margin: const EdgeInsets.only(right: 5),
 			child: new Stack(
@@ -49,7 +49,7 @@ class _ClippedBorderPainter extends CustomPainter {
 
 	final Color color;
 
-	_ClippedBorderPainter(this.clipper, this.color);
+	const _ClippedBorderPainter(this.clipper, this.color);
 
 	@override
 	void paint(Canvas canvas, Size size) {
@@ -66,6 +66,8 @@ class _ClippedBorderPainter extends CustomPainter {
 }
 
 class _DiagonalClipper extends CustomClipper<Path> {
+
+	const _DiagonalClipper();
 
 	@override
 	Path getClip(Size size) {

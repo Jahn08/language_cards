@@ -5,7 +5,7 @@ abstract class Link {
 
 	final String url;
 
-	Link(this.url);
+	const Link(this.url);
 
 	Future<void> activate() async {
 		if (!(await canLaunch(url)))
@@ -17,12 +17,12 @@ abstract class Link {
 
 class FBLink extends Link {
 
-  	FBLink(String userId): super('https://www.facebook.com/$userId');
+  	const FBLink(String userId): super('https://www.facebook.com/$userId');
 }
 
 class EmailLink extends Link {
 
-  	EmailLink._(String url): super(url);
+  	const EmailLink._(String url): super(url);
 
 	static bool _isHtmlSupported;
 

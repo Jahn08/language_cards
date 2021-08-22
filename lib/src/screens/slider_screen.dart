@@ -133,7 +133,6 @@ abstract class _SliderScreen extends StatefulWidget {
 
 	final List<String> slideNames;
 
-
 	final String Function(int slideIndex, AppLocalizations locale) descriptor;
 
 	const _SliderScreen(this.slideNames, this.descriptor);

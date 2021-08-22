@@ -297,7 +297,7 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
 			child: new StudyScreen(packStorage.wordStorage, 
 				provider: new AssetDictionaryProvider(context),
 				packs: packs, packStorage: packStorage, 
-				defaultSpeaker: new SpeakerMock())
+				defaultSpeaker: const SpeakerMock())
 		)
 	));
     await tester.pump();

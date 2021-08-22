@@ -12,7 +12,7 @@ class ConfirmDialog extends CancellableDialog<bool> {
 
 	final bool isCancellable;
 
-    ConfirmDialog({ 
+    const ConfirmDialog({ 
 		@required String title, @required String content, @required String confirmationLabel 
 	}): this._(
 		title: title, 
@@ -21,7 +21,8 @@ class ConfirmDialog extends CancellableDialog<bool> {
 		confirmationLabel: confirmationLabel
 	);
 
-	ConfirmDialog._({ this.title, this.content, this.isCancellable, this.confirmationLabel });
+	const ConfirmDialog._({ this.title, this.content, this.isCancellable, this.confirmationLabel }): 
+		super();
 
     ConfirmDialog.ok({ @required String title, @required String content }):
         this._(title: title, content: content, isCancellable: false);

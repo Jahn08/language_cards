@@ -306,10 +306,10 @@ Future<StoredPack> _testAddingPack(WidgetTester tester, {
 
 	final langDropdownFinders = _findLanguageDropdowns();
 
-	final fromLang = Language.english;
+	const fromLang = Language.english;
 	await assistant.setDropdownItem(langDropdownFinders.first, fromLang);
 
-	final toLang = Language.german;
+	const toLang = Language.german;
 	await assistant.setDropdownItem(langDropdownFinders.last, toLang);
 	
 	await assistant.tapWidget(saveBtnSearcher());

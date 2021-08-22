@@ -18,7 +18,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
     
     final String screenName;
 
-    ListScreenTester(String screenName, ListScreen<TEntity> Function([int]) screenBuilder):
+    const ListScreenTester(String screenName, ListScreen<TEntity> Function([int]) screenBuilder):
         screenName = screenName + ' List Screen',
         _screenBuilder = screenBuilder;
 

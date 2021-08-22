@@ -5,9 +5,10 @@ import 'assured_finder.dart';
 import 'localizator.dart';
 
 class WidgetAssistant {
-    WidgetTester tester;
+    
+	final WidgetTester tester;
 
-    WidgetAssistant(this.tester);
+    const WidgetAssistant(this.tester);
     
     Future<void> pumpAndAnimate([int durationMs]) async {
 		final duration = new Duration(milliseconds: durationMs ?? 100);
@@ -58,11 +59,17 @@ class WidgetAssistant {
 	) async {
 		final delta = 100.0 * ((upwards ?? false) ? -1: 1);
 		if (findsNothing.matches(finder, {}))
-			await tester.scrollUntilVisible(finder, delta,
+			try {
+				await tester.scrollUntilVisible(finder, delta,
 				scrollable: find.ancestor(
 					of: find.byType(scrollableChildType),
 					matching: find.byType(Scrollable)
 				).first);
+			}
+			catch (_) {
+				if (findsNothing.matches(finder, {}))
+					throw new AssertionError('Nothing was found for the finder: ${finder.toString()}');
+			}
 
 		return finder;
 	}

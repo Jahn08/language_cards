@@ -36,7 +36,7 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 
     final BaseStorage<StoredPack> packStorage;
 
-	_CardEditorDialog({ @required this.card, @required this.pack, 
+	const _CardEditorDialog({ @required this.card, @required this.pack, 
 		@required this.wordStorage, @required this.packStorage,
 		this.provider, this.defaultSpeaker }): 
 		super();
@@ -416,10 +416,10 @@ class _ButtonPanel extends StatelessWidget {
 
 	final List<ElevatedButton> addButtons;
 
-	_ButtonPanel({
+	const _ButtonPanel({
 		@required this.onLearningPressed, @required this.onNextCardPressed, 
 		List<ElevatedButton> addButtons
-	}): addButtons = addButtons ?? <ElevatedButton>[];
+	}): addButtons = addButtons ?? const <ElevatedButton>[];
 
 	@override
 	Widget build(BuildContext context) {

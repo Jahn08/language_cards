@@ -31,7 +31,7 @@ class _SettingsPanelState extends State<_SettingsPanel> {
 								children: [
 									_buildPanel(0, 
 										header: const _SettingsSectionHeader(),
-										body: new _SettingsSectionBody()
+										body: const _SettingsSectionBody()
 									),
 									_buildPanel(1, 
 										header: const _ContactsSectionHeader(),
@@ -208,6 +208,8 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 
 class _SettingsSectionBody extends StatefulWidget {
 	
+	const _SettingsSectionBody();
+
 	@override
 	State<StatefulWidget> createState() => new _SettingsSectionBodyState();
 }
@@ -511,6 +513,9 @@ class _SettingsPanel extends StatefulWidget {
 }
 
 class _SettingsOpenerButton extends StatelessWidget {
+
+	const _SettingsOpenerButton();
+
     @override
     Widget build(BuildContext context) {
         return new IconButton(
@@ -581,7 +586,7 @@ class BarScaffold extends StatelessWidget {
 		bool hasSettings = false
     }): 
 		_title = titleWidget ?? new BarTitle(title),
-		_settingsOpener = (hasSettings ?? false) ? new _SettingsOpenerButton(): null;
+		_settingsOpener = (hasSettings ?? false) ? const _SettingsOpenerButton(): null;
 
 	@override
 	Widget build(BuildContext context) =>

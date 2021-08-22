@@ -10,9 +10,9 @@ import '../utilities/widget_assistant.dart';
 
 class CardEditorTester {
 
-	WidgetTester tester;
+	final WidgetTester tester;
 
-	CardEditorTester(this.tester);
+	const CardEditorTester(this.tester);
 
 	void assureRenderingCardFields(StoredWord card) {
 		AssuredFinder.findOne(type: TextField, label: card.text, shouldFind: true);

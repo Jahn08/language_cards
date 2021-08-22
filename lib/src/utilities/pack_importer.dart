@@ -16,7 +16,7 @@ class ImportException implements Exception {
 
 	final AppLocalizations locale;
 
-	ImportException(this.error, this.trace, {
+	const ImportException(this.error, this.trace, {
 		@required this.locale, @required this.importFilePath
 	});
 
@@ -33,7 +33,7 @@ class PackImporter {
 
 	final AppLocalizations locale;
 	
-	PackImporter(this.packStorage, this.cardStorage, this.locale);
+	const PackImporter(this.packStorage, this.cardStorage, this.locale);
 
 	Future<Map<StoredPack, List<StoredWord>>> import(String importFilePath) async {
 		try {

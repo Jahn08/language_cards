@@ -11,7 +11,7 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
 
     final SelectorDialog<T> Function(BuildContext) _dialogBuilder;
 
-    SelectorDialogTester(WidgetTester tester, 
+    const SelectorDialogTester(WidgetTester tester, 
         SelectorDialog<T> Function(BuildContext) dialogBuilder):
         _dialogBuilder = dialogBuilder, super(tester);
 

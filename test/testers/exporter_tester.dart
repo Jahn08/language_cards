@@ -14,7 +14,7 @@ class ExporterTester {
 
 	final String exportFilePath;
 
-	ExporterTester(this.exportFilePath);
+	const ExporterTester(this.exportFilePath);
 
 	void assertExportFileName(String expectedFilePostfix) =>
 		expect(exportFilePath.endsWith(expectedFilePostfix + '.json'), true);
