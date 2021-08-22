@@ -55,17 +55,20 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount, String text) async {
         final items = await widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
             parentIds: _parentIds, text: text);
-		_loadedItemsCount = skipCount + items.length;
-		_curTextIndex = text;
+			
+		if (items.isNotEmpty) {
+			_loadedItemsCount = skipCount + items.length;
+			_curTextIndex = text;
 
-		if (!_itemsByTextCount.containsKey(text)) {
-			if (_loadedItemsCount < takeCount)
-				_itemsByTextCount[text] = _loadedItemsCount;
-			else
-				_itemsByTextCount[text] = await widget.storage.count(
-					parentId: widget.pack?.id, 
-					textFilter: text
-				);
+			if (!_itemsByTextCount.containsKey(text)) {
+				if (_loadedItemsCount < takeCount)
+					_itemsByTextCount[text] = _loadedItemsCount;
+				else
+					_itemsByTextCount[text] = await widget.storage.count(
+						parentId: widget.pack?.id, 
+						textFilter: text
+					);
+			}
 		}
 
 		return items;

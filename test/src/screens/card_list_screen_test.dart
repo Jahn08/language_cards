@@ -143,6 +143,21 @@ void main() {
 			);
 			await _testSelectingOnPage(tester, packsStorage.wordStorage, packsStorage.getRandom());
         });
+
+	testWidgets('Scrolls down till the end of a short list of cards without changing the number of cards available for selection', 
+        (tester) async {
+			const int expectedCardsNumber = 15;
+			final packsStorage = new PackStorageMock(cardsNumber: expectedCardsNumber);
+			final inScreenTester = _buildScreenTester(packsStorage.wordStorage);
+			await inScreenTester.pumpScreen(tester);
+
+			final assistant = new WidgetAssistant(tester);
+			await inScreenTester.scrollDownListView(assistant, find.byType(ListTile), 5);
+			await inScreenTester.activateEditorMode(assistant);
+
+			expect(inScreenTester.getSelectorBtnLabel(tester), 
+				Localizator.defaultLocalization.constsSelectAll(expectedCardsNumber.toString()));
+        });
 }
 
 ListScreenTester<StoredWord> _buildScreenTester([WordStorageMock storage, StoredPack pack]) {
@@ -227,13 +242,13 @@ Future<void> _testSelectingOnPage(
 
 	final expectedCardNumberStr = (await tester.runAsync(() => 
 		pack == null ? storage.fetch(): storage.fetchFiltered(parentIds: [pack.id]))).length.toString();
+	final locale = Localizator.defaultLocalization;
 	expect(inScreenTester.getSelectorBtnLabel(tester),
-		Localizator.defaultLocalization.constsUnselectSome(
-			ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
+		locale.constsUnselectSome(ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
 
 	await inScreenTester.scrollDownListView(assistant, find.byType(CheckboxListTile), 25);
-	expect(inScreenTester.getSelectorBtnLabel(tester),
-		Localizator.defaultLocalization.constsSelectAll(expectedCardNumberStr));
+	expect(inScreenTester.getSelectorBtnLabel(tester), 
+		locale.constsSelectAll(expectedCardNumberStr));
 	inScreenTester.assureSelectionForAllTilesInEditor(tester, onlyForSomeItems: true);
 
 	await inScreenTester.selectAll(assistant);
