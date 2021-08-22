@@ -232,7 +232,7 @@ class CardEditorState extends State<CardEditor> {
 							new ValueListenableBuilder(
 								valueListenable: _studyProgressNotifier,
 								builder: (_, int studyProgress, __) => 
-									studyProgress == WordStudyStage.unknown ? new Container():
+									studyProgress == WordStudyStage.unknown ? const SizedBox():
 										new _BtnLink(new TextButton.icon(
 											icon: const Icon(Icons.restore),
 											label: new Text(

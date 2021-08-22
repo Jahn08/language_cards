@@ -6,13 +6,13 @@ class TightFlexible extends StatelessWidget {
 
 	final Widget child;
 
-	const TightFlexible({ this.flex, this.child });
+	const TightFlexible({ @required this.child, this.flex });
 
 	@override
 	Widget build(BuildContext context) =>
         new Flexible(
             fit: FlexFit.tight,
             flex: flex ?? 1,
-            child: child ?? Container()
+            child: child
         );
 }

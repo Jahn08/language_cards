@@ -26,7 +26,7 @@ class TranslationIndicator extends StatelessWidget {
 			margin: const EdgeInsets.only(right: 5),
 			child: new Stack(
 				children: <Widget>[
-					new IconOption(icon: from == null ? new Container(): 
+					new IconOption(icon: from == null ? const SizedBox(): 
 						AssetIcon.getByLanguage(from)),
 					if (to != null)
 						new CustomPaint(

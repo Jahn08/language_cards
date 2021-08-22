@@ -30,7 +30,7 @@ class RootWidgetMock extends StatelessWidget {
             appBar: new AppBar(
                 title: const Text('Test Widget'),
             ),
-            body: new Container(
+            body: new SizedBox(
                 child: _child
             )
         );
