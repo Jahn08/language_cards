@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'selector_dialog.dart';
 import '../utilities/styler.dart';
+import '../widgets/cancel_button.dart';
 import '../widgets/dialog_list_view.dart';
 import '../widgets/loader.dart';
 
@@ -46,7 +47,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 
     Widget _buildDialog(List<T> items) =>
 		_createDialogView(items.map((w) => _buildDialogOption(w)).toList(), 
-			[new Center(child: buildCancelBtn(context))]);
+			[new Center(child: new CancelButton(() => returnResult(context)))]);
 
     Widget _buildDialogOption(T item) => 
 		new ShrinkableSimpleDialogOption(

@@ -2,11 +2,11 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
+import '../dialogs/outcome_dialog.dart';
 import '../router.dart';
 import '../blocs/settings_bloc.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
-import '../dialogs/cancellable_dialog.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
@@ -15,6 +15,7 @@ import '../models/word_study_stage.dart';
 import '../utilities/speaker.dart';
 import '../utilities/styler.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/cancel_button.dart';
 import '../widgets/card_editor.dart';
 import '../widgets/flip_card.dart';
 import '../widgets/loader.dart';
@@ -22,7 +23,7 @@ import '../widgets/one_line_text.dart';
 import '../widgets/tight_flexible.dart';
 import '../widgets/translation_indicator.dart';
 
-class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPack>> {
+class _CardEditorDialog extends OutcomeDialog<MapEntry<StoredWord, StoredPack>> {
 
 	final StoredWord card;
     
@@ -54,7 +55,7 @@ class _CardEditorDialog extends CancellableDialog<MapEntry<StoredWord, StoredPac
 						afterSave: (card, pack, _) {
 							returnResult(buildContext, new MapEntry(card, pack));
 						}), 
-					new Center(child: buildCancelBtn(context))
+					new Center(child: new CancelButton(() => returnResult(context)))
 				],
                 title: new Text(locale.studyScreenEditingCardDialogTitle)
             )

@@ -1,6 +1,6 @@
-import './cancellable_dialog.dart';
+import 'outcome_dialog.dart';
 
-abstract class SelectorDialog<T> extends CancellableDialog<T> {
+abstract class SelectorDialog<T> extends OutcomeDialog<T> {
 
 	const SelectorDialog(): super();
 

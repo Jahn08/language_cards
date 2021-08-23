@@ -2,14 +2,15 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
+import 'outcome_dialog.dart';
 import '../data/base_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../utilities/context_provider.dart';
 import '../utilities/pack_importer.dart';
+import '../widgets/cancel_button.dart';
 import '../widgets/styled_text_field.dart';
-import 'cancellable_dialog.dart';
 
 class _ImportFormDialogState extends State<_ImportFormDialog> {
 	static const String _jsonExtension = 'json';
@@ -95,7 +96,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
 class _ImportFormDialog extends StatefulWidget {
 
-	final ElevatedButton cancelButton;
+	final Widget cancelButton;
 
 	final Function(String) fileProcessor;
 
@@ -114,7 +115,7 @@ class ImportDialogResult {
 	ImportDialogResult(this.filePath, this.packsWithCards);
 }
 
-class ImportDialog extends CancellableDialog<ImportDialogResult> {
+class ImportDialog extends OutcomeDialog<ImportDialogResult> {
 
 	final BaseStorage<StoredPack> packStorage;
 
@@ -126,7 +127,7 @@ class ImportDialog extends CancellableDialog<ImportDialogResult> {
         return showDialog<ImportDialogResult>(
             context: context, 
             builder: (buildContext) => new _ImportFormDialog(
-				buildCancelBtn(buildContext, null),
+				new CancelButton(() => returnResult(buildContext, null)),
 				(filePath) async {
 					Map<StoredPack, List<StoredWord>> outcome;
 					

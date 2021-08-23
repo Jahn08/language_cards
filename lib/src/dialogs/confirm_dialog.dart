@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'cancellable_dialog.dart';
+import 'outcome_dialog.dart';
+import '../widgets/cancel_button.dart';
 
-class ConfirmDialog extends CancellableDialog<bool> {
+class ConfirmDialog extends OutcomeDialog<bool> {
 
     final String title;
 
@@ -35,7 +36,7 @@ class ConfirmDialog extends CancellableDialog<bool> {
                 title: new Text(title),
                 actions: [
 					if (isCancellable)
-						buildCancelBtn(context, false),
+						new CancelButton(() => returnResult(context, false)),
 					ElevatedButton(
 						child: new Text(confirmationLabel ?? 
 							AppLocalizations.of(context).confirmDialogOkButtonLabel), 
