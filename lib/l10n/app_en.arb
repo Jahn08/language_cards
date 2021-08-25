@@ -173,7 +173,9 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Remove",
     "@constsRemovingItemButtonLabel": {},
-
+    "constsPackPluralForm": "packs",
+    "@constsPackPluralForm": {},
+    
     "helpScreenTitle": "About '{mainMenuItemLabel}'",
     "@helpScreenTitle": {
         "placeholders": {
@@ -404,7 +406,7 @@
 
     "packListScreenRemovingNonEmptyPacksDialogTitle": "Removing Packs with Cards",
     "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
-    "packListScreenRemovingNonEmptyPacksDialogContent": "All the cards from {packNames} will be moved to the {nonePackName} pack. Continue?",
+    "packListScreenRemovingNonEmptyPacksDialogContent": "All the cards from {packNames}\nwill be moved to the {nonePackName} pack. Continue?",
     "@packListScreenRemovingNonEmptyPacksDialogContent": {
         "placeholders": {
             "packNames": {

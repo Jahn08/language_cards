@@ -32,7 +32,12 @@ class ConfirmDialog extends OutcomeDialog<bool> {
 		showDialog<bool>(
             context: context, 
             builder: (buildContext) => new AlertDialog(
-                content: new Text(content),
+                content: new Scrollbar(
+					isAlwaysShown: true,
+					child: new SingleChildScrollView(
+						child: new Text(content)
+					)
+				),
                 title: new Text(title),
                 actions: [
 					if (isCancellable)

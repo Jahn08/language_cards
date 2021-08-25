@@ -167,9 +167,7 @@ void main() {
 			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 			await assistant.tapWidget(exportBtnFinder);
 
-			final dialog = DialogTester.findConfirmationDialog(tester);
-			final exportFilePath = (dialog.content as Text).data.split(' ').last;
-			
+			final exportFilePath = _findConfirmationDialogText(tester).split(' ').last;
 			final exporterTester = new ExporterTester(exportFilePath);
 			exporterTester.assertExportFileName('packs');
 			
@@ -215,9 +213,7 @@ void main() {
 					final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
 					await assistant.tapWidget(exportBtnFinder);
 
-					final dialog = DialogTester.findConfirmationDialog(tester);
-					final exportFilePath = (dialog.content as Text).data.split(' ').last;
-					
+					final exportFilePath = _findConfirmationDialogText(tester).split(' ').last;
 					final exporterTester = new ExporterTester(exportFilePath);
 					exporterTester.assertExportFileName('packs');
 					
@@ -535,7 +531,10 @@ Finder _findImportExportAction({ bool isExport, bool shouldFind }) {
 
 String _findConfirmationDialogText(WidgetTester tester) {
 	final dialog = DialogTester.findConfirmationDialog(tester);
-	return (dialog.content as Text).data;
+	return tester.widget<Text>(find.descendant(
+		of: find.byWidget(dialog.content), 
+		matching: find.byType(Text)
+	)).data;
 }
 
 ListScreenTester<StoredPack> _buildScreenTester(PackStorageMock storage) =>

@@ -63,10 +63,14 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		if (filledPackNames.isEmpty)
 			return true;
 
+		filledPackNames.sort((a, b) => a.compareTo(b));
 		final locale = AppLocalizations.of(context);
-		final jointNames = filledPackNames.join(', ');
+
+		const String newLine = '\n';
+		final joinedNames = '${filledPackNames.length > 1 ? locale.constsPackPluralForm: ''}$newLine' + 
+			filledPackNames.join(',$newLine');
 		final content = locale.packListScreenRemovingNonEmptyPacksDialogContent(
-			jointNames, locale.storedPackNonePackName);
+			joinedNames, locale.storedPackNonePackName);
 		final outcome = await new ConfirmDialog(
 			title: locale.packListScreenRemovingNonEmptyPacksDialogTitle, 
 			content: content, 

@@ -154,5 +154,9 @@ Future<MapEntry<String, String>> _assureInfoDialogRendering(WidgetAssistant assi
 
 MapEntry<String, String> _extractDialogData(WidgetTester tester) {
 	final dialog = DialogTester.findConfirmationDialog(tester);
-	return new MapEntry((dialog.title as Text).data, (dialog.content as Text).data);
+	final content = tester.widget<Text>(find.descendant(
+		of: find.byWidget(dialog.content), 
+		matching: find.byType(Text)
+	)).data;
+	return new MapEntry((dialog.title as Text).data, content);
 }

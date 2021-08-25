@@ -173,6 +173,8 @@
     "@constsSavingItemButtonLabel": {},
     "constsRemovingItemButtonLabel": "Удалить",
     "@constsRemovingItemButtonLabel": {},
+    "constsPackPluralForm": "наборов",
+    "@constsPackPluralForm": {},
     
     "helpScreenTitle": "О '{mainMenuItemLabel}'",
     "@helpScreenTitle": {
@@ -405,7 +407,7 @@
 
     "packListScreenRemovingNonEmptyPacksDialogTitle": "Удаление непустых наборов карточек",
     "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
-    "packListScreenRemovingNonEmptyPacksDialogContent": "Все карточки из наборов {packNames} будут перенесены в набор '{nonePackName}'. Продолжить?",
+    "packListScreenRemovingNonEmptyPacksDialogContent": "Все карточки из {packNames}\nбудут перенесены в набор \"{nonePackName}\". Продолжить?",
     "@packListScreenRemovingNonEmptyPacksDialogContent": {
         "placeholders": {
             "packNames": {
