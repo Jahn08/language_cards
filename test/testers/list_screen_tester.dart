@@ -30,7 +30,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
             _tryFindingEditorDoneButton();
             _tryFindingEditorRemoveButton();
             _tryFindingEditorSelectButton();
-            AssuredFinder.findSeveral(type: CheckboxListTile);
+			tryFindingListCheckTiles();
         
             tryFindingListItems(shouldFind: true);
             
@@ -53,7 +53,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
             _tryFindingEditorDoneButton();
             _tryFindingEditorRemoveButton();
             _tryFindingEditorSelectButton();
-            AssuredFinder.findSeveral(type: CheckboxListTile);
+			tryFindingListCheckTiles();
         });
 
         testWidgets(_buildDescription('selects and unselects all items in the editor mode'), 
@@ -83,7 +83,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
                 final assistant = new WidgetAssistant(tester);
                 await activateEditorMode(assistant);
 
-                final tilesFinder = AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true);
+                final tilesFinder = tryFindingListCheckTiles(shouldFind: true);
 
                 int index = 0;
                 final items = new Map.fromEntries(tester.widgetList<CheckboxListTile>(tilesFinder)
@@ -179,6 +179,9 @@ class ListScreenTester<TEntity extends StoredEntity> {
     Finder tryFindingListItems({ bool shouldFind }) => 
         AssuredFinder.findSeveral(type: Dismissible, shouldFind: shouldFind);
     
+	Finder tryFindingListCheckTiles({ bool shouldFind }) => 
+        AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: shouldFind);
+
     Finder _tryFindingEditorDoneButton({ bool shouldFind }) => 
         AssuredFinder.findOne(icon: Icons.edit_off, shouldFind: shouldFind);
 
@@ -249,7 +252,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		WidgetAssistant assistant, Map<int, String> expectedItems) async {
 		final tester = assistant.tester;
 		final checkTiles = tester.widgetList<CheckboxListTile>(
-			AssuredFinder.findSeveral(type: CheckboxListTile, shouldFind: true));
+			tryFindingListCheckTiles(shouldFind: true));
 		expect(checkTiles.every((t) => !t.value), true);
 
 		await deactivateEditorMode(assistant);
@@ -323,6 +326,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
         testWidgets(_buildDescription('removes items by dismissing'), (tester) async {
 			final storage = await pumpScreen(tester);
+			final itemsOverall = await tester.runAsync(() => storage.count());
 
 			final assistant = new WidgetAssistant(tester);
 
@@ -335,6 +339,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			});
 
 			await assertItemsRemoval(assistant, removedTitles, storage);
+			
+			await activateEditorMode(assistant);
+			final expectedCardsNumber = itemsOverall - removedTitles.length;
+			expect(getSelectorBtnLabel(tester).contains(expectedCardsNumber.toString()), true);
 		});
 
         testWidgets(_buildDescription('recovers an item from some of dismissed ones'), 
@@ -530,6 +538,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					.take(1).map((i) => i.textData).toList();
 				await selectItemsInEditor(assistant, titlesToDelete);
 				await deleteSelectedItems(assistant);
+
+				final leftItemsNumber = indexGroups.fold<int>(0, (sum, item) => sum + item.value) - 
+					titlesToDelete.length;
+				expect(getSelectorBtnLabel(tester),
+					Localizator.defaultLocalization.constsSelectAll(leftItemsNumber.toString()));
 
 				_findFilterIndex(filterIndexToDelete, shouldFind: true);
 			});

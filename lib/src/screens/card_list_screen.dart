@@ -10,7 +10,10 @@ import '../widgets/iconed_button.dart';
 import '../widgets/one_line_text.dart';
 
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
+
     bool _cardsWereRemoved = false;
+
+    bool _shouldChangeItemsCount = false;
 
 	int _loadedItemsCount;
 
@@ -22,27 +25,14 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
 		final translationText = new OneLineText(item.translation);
 		return (forCheckbox ?? false) ? 
-			_buildCardAdditionalInfo(item, CrossAxisAlignment.start, translationText) : translationText;
+			new _CardAdditionalInfo(item, CrossAxisAlignment.start, translationText) : translationText;
 	}
     
     @override
     Widget getItemTitle(StoredWord item) => new OneLineText(item.text);
     
     @override
-    Widget getItemTrailing(StoredWord item) => _buildCardAdditionalInfo(item, CrossAxisAlignment.end);
-
-	Widget _buildCardAdditionalInfo(StoredWord item, CrossAxisAlignment alignment, [Widget topItem]) {
-		return new Column(
-			crossAxisAlignment: alignment,
-			children: <Widget>[
-				if (topItem != null) 
-					topItem,
-				if (item.partOfSpeech != null)
-					new OneLineText(item.partOfSpeech.present(AppLocalizations.of(context))),
-				new OneLineText('${item.studyProgress}%')
-			]
-		);
-	}
+    Widget getItemTrailing(StoredWord item) => new _CardAdditionalInfo(item, CrossAxisAlignment.end);
 
     @override
     void onGoingToItem(BuildContext buildContext, [StoredWord item]) {
@@ -60,7 +50,11 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 			_loadedItemsCount = skipCount + items.length;
 			_curTextIndex = text;
 
-			if (!_itemsByTextCount.containsKey(text)) {
+			if (!_itemsByTextCount.containsKey(text) || _shouldChangeItemsCount) {
+				
+				if (_shouldChangeItemsCount)
+					_shouldChangeItemsCount = false;
+				
 				if (_loadedItemsCount < takeCount)
 					_itemsByTextCount[text] = _loadedItemsCount;
 				else
@@ -78,9 +72,15 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     @override
     void deleteItems(List<StoredWord> items) {
+		if (items.isEmpty)
+			return;
+			
         widget.storage.delete(items.map((i) => i.id).toList());
 
         _cardsWereRemoved = true;
+		_shouldChangeItemsCount = true;
+
+		refetchItems(text: _curTextIndex, isForceful: true);
     }
 
     @override
@@ -158,6 +158,30 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 			locale.constsUnselectSome(_loadedItemsCount.toString(), itemsOverall.toString()): 
 			locale.constsSelectSome(_loadedItemsCount.toString(), itemsOverall.toString()); 
 	}
+}
+
+class _CardAdditionalInfo extends StatelessWidget {
+
+	final StoredWord card;
+
+	final CrossAxisAlignment alignment;
+	
+	final Widget topItem;
+
+	const _CardAdditionalInfo(this.card, this.alignment, [this.topItem]);
+
+	@override
+	Widget build(BuildContext context) =>
+		new Column(
+			crossAxisAlignment: alignment,
+			children: <Widget>[
+				if (topItem != null) 
+					topItem,
+				if (card.partOfSpeech != null)
+					new OneLineText(card.partOfSpeech.present(AppLocalizations.of(context))),
+				new OneLineText('${card.studyProgress}%')
+			]
+		);
 }
 
 class CardListScreen extends ListScreen<StoredWord> {

@@ -45,6 +45,9 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   
     @override
     void deleteItems(List<StoredPack> items) {
+		if (items.isEmpty)
+			return;
+
 		widget.storage.delete(items.map((i) => i.id).toList()).then((res) {
 			final untiedCardsNumber = items.map((i) => i.cardsNumber)
 				.fold<int>(0, (prev, el) => prev + el);

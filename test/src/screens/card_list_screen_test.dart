@@ -135,6 +135,36 @@ void main() {
 			await _testSelectingOnPage(tester, packsStorage.wordStorage);
         });
 
+	testWidgets('Deletes all cards on a page and then deletes some of the left ones available on other pages', 
+        (tester) async {
+			final itemsOverall = (ListScreen.itemsPerPage * 1.5).toInt();
+			final packsStorage = new PackStorageMock(cardsNumber: itemsOverall);
+			final storage = packsStorage.wordStorage;
+			
+			final inScreenTester = _buildScreenTester(storage);
+			await inScreenTester.pumpScreen(tester);
+
+			final assistant = new WidgetAssistant(tester);
+			await inScreenTester.activateEditorMode(assistant);
+			
+			await inScreenTester.selectAll(assistant);
+			await inScreenTester.deleteSelectedItems(assistant);	
+			inScreenTester.tryFindingListCheckTiles(shouldFind: true);
+
+			final expectedCardsNumber = itemsOverall - ListScreen.itemsPerPage;
+			final locale = Localizator.defaultLocalization;
+			expect(inScreenTester.getSelectorBtnLabel(tester), 
+				locale.constsSelectAll(expectedCardsNumber.toString()));
+        
+			final deletedItems = await inScreenTester.selectSomeItemsInEditor(assistant);
+			await inScreenTester.deleteSelectedItems(assistant);	
+			inScreenTester.tryFindingListCheckTiles(shouldFind: true);
+
+			final finalCardsNumber = expectedCardsNumber - deletedItems.length;
+			expect(inScreenTester.getSelectorBtnLabel(tester), 
+				locale.constsSelectAll(finalCardsNumber.toString()));
+        });
+
 	testWidgets('Selects all grouped cards on a page and scrolls down until others get available to select them too', 
         (tester) async {
 			final packsStorage = new PackStorageMock(
@@ -240,8 +270,8 @@ Future<void> _testSelectingOnPage(
 	await inScreenTester.activateEditorMode(assistant);
 	await inScreenTester.selectAll(assistant);
 
-	final expectedCardNumberStr = (await tester.runAsync(() => 
-		pack == null ? storage.fetch(): storage.fetchFiltered(parentIds: [pack.id]))).length.toString();
+	final expectedCardNumberStr = 
+		(await tester.runAsync(() => storage.count(parentId: pack?.id))).toString();
 	final locale = Localizator.defaultLocalization;
 	expect(inScreenTester.getSelectorBtnLabel(tester),
 		locale.constsUnselectSome(ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
