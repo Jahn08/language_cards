@@ -100,10 +100,21 @@ class DbProvider extends DataProvider {
 	@override
     Future<int> delete(String tableName, List<dynamic> ids) {
         return _perform<int>(tableName, 
-            () => _db.delete(tableName, 
-                where: _composeInFilterClause(StoredEntity.idFieldName, ids),
-                whereArgs: ids
-            ));
+            () async {
+				const int recordsLimit = 999;
+				final iterationCount = (ids.length / recordsLimit).ceil();
+				
+				final batch = _db.batch();
+				final grouppedIds = new List.generate(iterationCount, 
+					(index) => ids.skip(index * recordsLimit).take(recordsLimit).toList());
+				for (final idGroup in grouppedIds)
+					batch.delete(tableName, 
+						where: _composeInFilterClause(StoredEntity.idFieldName, idGroup),
+						whereArgs: idGroup);
+
+				final results = await batch.commit(continueOnError: false);
+				return results.cast<int>().fold<int>(0, (sum, r) => sum + r);
+			});
     }
 
     String _composeInFilterClause(String fieldName, List<dynamic> values) {
