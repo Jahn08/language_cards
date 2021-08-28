@@ -381,8 +381,9 @@ class _ContactsSectionBody extends StatelessWidget {
 						body: locale.barScaffoldSettingsPanelContactsSectionBugEmailBody, 
 						subject: locale.barScaffoldSettingsPanelContactsSectionBugEmailSubject
 					)).activate()),
-				new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
-					() async => new AppStoreLink(contactsParams.appStoreId).activate())
+				if (!isNullOrEmpty(contactsParams.appStoreId))
+					new _TextButtonedRow(locale.barScaffoldSettingsPanelContactsSectionReviewLinkLabel, 
+						() async => new AppStoreLink(contactsParams.appStoreId).activate())
 			]);
 		});
 }

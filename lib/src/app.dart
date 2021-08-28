@@ -76,7 +76,13 @@ class _ThemedAppState extends State<_ThemedApp> {
                     if (route == null)
                         return const MainScreen();
                     else if (route is WordCardRoute)
-                        return _buildCardScreen(context, route);
+					{
+        				final params = route.params;
+						return new CardScreen(
+							provider: new AssetDictionaryProvider(context), 
+							wordStorage: params.storage, packStorage: params.packStorage,
+							wordId: params.wordId, pack: params.pack);
+					}
                     else if (route is CardListRoute) {
                         final params = route.params;
                         return new CardListScreen(params.storage, 
@@ -92,8 +98,13 @@ class _ThemedAppState extends State<_ThemedApp> {
                     else if (route is StudyPreparerRoute)
                         return route.params.storage == null ? 
 							const StudyPreparerScreen(): new StudyPreparerScreen(route.params.storage);
-                    else if (route is StudyModeRoute)
-                        return _buildStudyScreen(context, route);
+                    else if (route is StudyModeRoute) {
+						final params = route.params;
+						return new StudyScreen(
+							params.storage, provider: new AssetDictionaryProvider(context),
+							packStorage: params.packStorage, packs: params.packs, 
+							studyStageIds: params.studyStageIds);
+					}
 					else if (route is CardHelpRoute)
 						return const CardHelpScreen();
 					else if (route is PackHelpRoute)
@@ -124,22 +135,6 @@ class _ThemedAppState extends State<_ThemedApp> {
                 builder: (inContext) => builder(inContext, route)
             );
         }
-    
-	Widget _buildCardScreen(BuildContext context, WordCardRoute route) {
-        final params = route.params;
-        return new CardScreen(
-			provider: new AssetDictionaryProvider(context), 
-			wordStorage: params.storage, packStorage: params.packStorage,
-			wordId: params.wordId, pack: params.pack);
-    }
-
-	Widget _buildStudyScreen(BuildContext context, StudyModeRoute route) {
-        final params = route.params;
-        return new StudyScreen(
-			params.storage, provider: new AssetDictionaryProvider(context),
-			packStorage: params.packStorage, packs: params.packs, 
-			studyStageIds: params.studyStageIds);
-    }
 
     @override
     void dispose() {
