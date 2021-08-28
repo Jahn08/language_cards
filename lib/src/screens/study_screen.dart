@@ -82,8 +82,6 @@ class _StudyScreenState extends State<StudyScreen> {
 
     bool _shouldReorderCards;
 
-    bool _isStudyOver;
-
 	Future<UserParams> _futureParams;
 
 	AppLocalizations _locale;
@@ -92,8 +90,7 @@ class _StudyScreenState extends State<StudyScreen> {
     void initState() {
         super.initState();
 
-        _shouldReorderCards = true;
-        _isStudyOver = false;
+        _shouldReorderCards = false;
         
         _packMap = <int, StoredPack>{ for (var p in widget.packs) p.id: p };
         _futureCards = widget.storage.fetchFiltered(
@@ -119,11 +116,11 @@ class _StudyScreenState extends State<StudyScreen> {
 					shouldTakeAllCards = true;
 				}
 
-				_orderCards(shouldTakeAllCards);
+				_orderCards(0, shouldTakeAllCards);
 				return new BarScaffold(
 					titleWidget: new ValueListenableBuilder(
 						valueListenable: _curCardIndexNotifier,
-						builder: (_, curCardIndex, __) => 
+						builder: (_, int curCardIndex, __) => 
 							new Text(_locale.studyScreenTitle((curCardIndex + 1).toString(), 
 								cards.length.toString())),
 					),
@@ -159,6 +156,7 @@ class _StudyScreenState extends State<StudyScreen> {
 						children: [
 							new TightFlexible(
 								child: new PageView.builder(
+									onPageChanged: _setIndexCard,
 									controller: _controller,
 									itemBuilder: _buildCard
 								), 
@@ -225,15 +223,9 @@ class _StudyScreenState extends State<StudyScreen> {
 			).show(context));
 	}
 
-    void _orderCards(bool shouldTakeAllCards) {
-        if (!_shouldReorderCards)
-            return;
-
-        _shouldReorderCards = false;
-        
-        final startIndex = _curCardIndexNotifier.value + 1;
+    void _orderCards(int newIndex, bool shouldTakeAllCards) {
         final listToOrder = shouldTakeAllCards ? 
-            _cards: _cards.sublist(startIndex, _cards.length);
+            _cards: _cards.sublist(newIndex, _cards.length);
 
         if (listToOrder.length <= 1)
             return;
@@ -251,18 +243,19 @@ class _StudyScreenState extends State<StudyScreen> {
 			listToOrder.shuffle(new Random());
 
         if (!shouldTakeAllCards)
-            _cards.replaceRange(startIndex, _cards.length, listToOrder);
+            _cards.replaceRange(newIndex, _cards.length, listToOrder);
     }
 
-	Widget _buildCard(BuildContext context, int index) {
+	Widget _buildCard(_, int index) {
 		final indexCard = _getIndexCard(index);
-		_setIndexCard(indexCard);
-		_orderCards(_isStudyOver);
-
-		if (_isStudyOver) {
-			_showFinishStudyDialog();
-			_isStudyOver = false;
+		final isStudyOver = _isStudyOver(indexCard);
+		if (_shouldReorderCards || isStudyOver) {
+			_orderCards(indexCard, isStudyOver);
+	        _shouldReorderCards = false;
 		}
+
+		if (isStudyOver)
+			_showFinishStudyDialog();
 
 		return new ValueListenableBuilder(
 			valueListenable: _curCardUpdater,
@@ -295,16 +288,15 @@ class _StudyScreenState extends State<StudyScreen> {
         duration: const Duration(milliseconds: 200));
 
     void _setIndexCard(int newIndex) {
-		if (_curCardIndexNotifier.value == newIndex)
+		final indexCard = _getIndexCard(newIndex);
+		if (_curCardIndexNotifier.value == indexCard)
 			return;
-
-        _isStudyOver = newIndex == 0 && _curCardIndexNotifier.value == _cards.length - 1;
-		
-		if (_isStudyOver)
-			_shouldReorderCards = true;
 			
-		WidgetsBinding.instance.addPostFrameCallback((_) => _curCardIndexNotifier.value = newIndex);
+		_curCardIndexNotifier.value = indexCard;
     }
+
+	bool _isStudyOver(int newIndex) => 
+		newIndex == 0 && _curCardIndexNotifier.value == _cards.length - 1;
 
     int _getIndexCard(int newIndex) {
         final cardsLength = _cards.length;
