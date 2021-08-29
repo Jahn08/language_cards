@@ -254,9 +254,6 @@ class _StudyScreenState extends State<StudyScreen> {
 	        _shouldReorderCards = false;
 		}
 
-		if (isStudyOver)
-			_showFinishStudyDialog();
-
 		return new ValueListenableBuilder(
 			valueListenable: _curCardUpdater,
 			builder: (_, __, ___) {
@@ -291,6 +288,9 @@ class _StudyScreenState extends State<StudyScreen> {
 		final indexCard = _getIndexCard(newIndex);
 		if (_curCardIndexNotifier.value == indexCard)
 			return;
+
+		if (_isStudyOver(indexCard))
+			_showFinishStudyDialog();
 			
 		_curCardIndexNotifier.value = indexCard;
     }
