@@ -593,6 +593,14 @@
     "@studyPreparerScreenTitle": {},
     "studyPreparerScreenAllCardsCategoryName": "Все",
     "@studyPreparerScreenAllCardsCategoryName": {},
+    "studyPreparerScreenPackLastStudyDate": "Изучались {studyDate}",
+    "@studyPreparerScreenPackLastStudyDate": {
+        "placeholders": {
+            "studyDate": {
+                "type": "String"
+            }
+        }
+    },
 
     "studyScreenEditingCardDialogTitle": "Изменить карточку",
     "@studyScreenEditingCardDialogTitle": {},

@@ -10,7 +10,7 @@ class StoredPack extends StoredEntity {
     static const nameFieldName = 'name';
     static const fromFieldName = 'from_lang';
     static const toFieldName = 'to_lang';
-    static const cardsNumFieldName = 'cards_num';
+    static const studyDateFieldName = 'study_date';
 
     static const _cardsFieldName = 'cards';
 
@@ -24,21 +24,34 @@ class StoredPack extends StoredEntity {
 
     final Language to;
 
+    DateTime _studyDate;
+
     int _cardsNumber;
 
-    StoredPack(this.name, { int id, this.from, this.to, int cardsNumber }):
+    StoredPack(this.name, { int id, this.from, this.to, DateTime studyDate, int cardsNumber }):
 		assert(name != null),
 		assert(from == null || to == null || from != to),
         _cardsNumber = _getNonNegativeNumber(cardsNumber),
+		_studyDate = studyDate,
         super(id: id);
+
+	DateTime get studyDate => _studyDate;
+
+	void setNowAsStudyDate() => _studyDate = DateTime.now();
 
     static int _getNonNegativeNumber(int value) => (value ?? 0) > 0 ? value : 0;
 
     StoredPack.fromDbMap(Map<String, dynamic> values):
-        this(values[nameFieldName] as String, 
+        this(
+			values[nameFieldName] as String, 
             id: values[StoredEntity.idFieldName] as int, 
             from: Language.values[values[fromFieldName] as int],
-            to: Language.values[values[toFieldName] as int]);
+            to: Language.values[values[toFieldName] as int],
+			studyDate: _tryParseDate(values[studyDateFieldName] as int)
+		);
+
+	static DateTime _tryParseDate(int value) => 
+		value == null ? null: DateTime.fromMillisecondsSinceEpoch(value, isUtc: true).toLocal();
 
     int  get cardsNumber => _cardsNumber;
 
@@ -52,7 +65,8 @@ class StoredPack extends StoredEntity {
         map.addAll({
             nameFieldName: name,
             fromFieldName: from?.index,
-            toFieldName: to?.index
+            toFieldName: to?.index,
+			studyDateFieldName: studyDate?.toUtc()?.millisecondsSinceEpoch
         });
 
         return map;        
@@ -66,6 +80,16 @@ class StoredPack extends StoredEntity {
         """ $nameFieldName TEXT NOT NULL,
             $fromFieldName INTEGER NOT NULL,
             $toFieldName INTEGER NOT NULL""";
+
+	@override
+	List<String> getUpgradeExpr(int oldVersion) {
+		final clauses = <String>[];
+
+		if (oldVersion < 5)
+			clauses.add('ALTER TABLE $tableName ADD COLUMN $studyDateFieldName INT NULL');
+
+		return clauses;
+	}
 
 	@override
 	String get textData => name;

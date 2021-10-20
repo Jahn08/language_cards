@@ -37,42 +37,49 @@ class DbProvider extends DataProvider {
         final dbPath = Path.combine([docDir.path, 'language_cards6.db']);
 
         _db = await openDatabase(dbPath, 
-            version: 4,
+            version: 5,
 			onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
-            onUpgrade: (newDb, _, __) async {
-				final creationClauses = _compileCreationClauses(tableEntities);
-				final creationClausesLength = creationClauses.length;
-				for (int i = 0; i < creationClausesLength; ++i)
-					await newDb.execute(creationClauses[i]);
+            onUpgrade: (db, oldVer, _) async {
+				if (oldVer == 0)
+					await _executeClauses(db, _compileCreationClauses(tableEntities));
+				
+				await _executeClauses(db, _compileUpgradeClauses(oldVer));
             });
     }
 
-    List<String> _compileCreationClauses(List<StoredEntity> entities, 
-        [List<String> tableNames]) {
-            tableNames ??= <String>[];
+    List<String> _compileCreationClauses(List<StoredEntity> entities, [List<String> tableNames]) {
+		tableNames ??= <String>[];
 
-            final dependantEntitiesToCreate = <StoredEntity>[]; 
-            final creationCmds = <String>[];
-            
-            entities.forEach((ent) { 
-                if (tableNames.contains(ent.tableName))
-                    return;
+		final dependantEntitiesToCreate = <StoredEntity>[]; 
+		final creationCmds = <String>[];
+		
+		entities.forEach((ent) { 
+			if (tableNames.contains(ent.tableName))
+				return;
 
-                if (ent.foreignTableName == null || 
-                    tableNames.contains(ent.foreignTableName)) {
-                    creationCmds.add(ent.tableExpr);
-                    tableNames.add(ent.tableName);
-                }
+			if (ent.foreignTableName == null || tableNames.contains(ent.foreignTableName)) {
+				creationCmds.add(ent.tableExpr);
+				tableNames.add(ent.tableName);
+			}
 
-                dependantEntitiesToCreate.add(ent);
-            });
+			dependantEntitiesToCreate.add(ent);
+		});
 
-            if (dependantEntitiesToCreate.isNotEmpty)
-                creationCmds.addAll(
-                    _compileCreationClauses(dependantEntitiesToCreate, tableNames));
+		if (dependantEntitiesToCreate.isNotEmpty)
+			creationCmds.addAll(
+				_compileCreationClauses(dependantEntitiesToCreate, tableNames));
 
-            return creationCmds;
-        }
+		return creationCmds;
+	}
+
+	List<String> _compileUpgradeClauses(int oldVersion) =>
+		tableEntities.expand((ent) => ent.getUpgradeExpr(oldVersion)).toList();
+
+	Future<void> _executeClauses(Database db, List<String> clauses) async {
+		final clausesLength = clauses.length;
+		for (int i = 0; i < clausesLength; ++i)
+			await db.execute(clauses[i]);
+	}
 
 	@override
     Future<void> update(String tableName, List<Map<String, dynamic>> entities) =>

@@ -289,8 +289,14 @@ class _StudyScreenState extends State<StudyScreen> {
 		if (_curCardIndexNotifier.value == indexCard)
 			return;
 
-		if (_isStudyOver(indexCard))
+		if (_isStudyOver(indexCard)) {
 			_showFinishStudyDialog();
+
+			if ((widget.studyStageIds ?? []).isEmpty) {
+				widget.packs.forEach((p) => p.setNowAsStudyDate());
+				widget.packStorage.upsert(widget.packs);
+			}
+		}
 			
 		_curCardIndexNotifier.value = indexCard;
     }

@@ -38,6 +38,8 @@ abstract class StoredEntity {
         );""";
     }
 
+	List<String> getUpgradeExpr(int oldVersion) => [];
+
     String get columnsExpr;
 
 	String get textData;

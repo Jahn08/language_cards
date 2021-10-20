@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:intl/intl.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import '../data/study_storage.dart';
 import '../models/word_study_stage.dart';
@@ -187,13 +188,25 @@ class _CheckListItem extends StatelessWidget {
 	
 	@override
 	Widget build(BuildContext context) {
+		final locale = AppLocalizations.of(context);
 		final pack = stPack.pack;
+
+		final cardNumIndicator = new CardNumberIndicator(stPack.cardsOverall);
+		final isThreeLined = pack.studyDate != null;
         return new UnderlinedContainer(new CheckboxListTile(
             value: isChecked,
             onChanged: (isChecked) => onChanged(isChecked, pack.id),
             secondary: secondary,
             title: new OneLineText(pack.name),
-            subtitle: new CardNumberIndicator(stPack.cardsOverall)
+            subtitle: isThreeLined ? new Column(
+				crossAxisAlignment: CrossAxisAlignment.start,
+				children: [
+					cardNumIndicator,
+					new Text(locale.studyPreparerScreenPackLastStudyDate(
+						DateFormat.yMMMMd(locale.localeName).format(pack.studyDate)))
+				]
+			): cardNumIndicator,
+			isThreeLine: isThreeLined,
         ));
 	}
 }

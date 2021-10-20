@@ -592,6 +592,14 @@
     "@studyPreparerScreenTitle": {},
     "studyPreparerScreenAllCardsCategoryName": "All",
     "@studyPreparerScreenAllCardsCategoryName": {},
+    "studyPreparerScreenPackLastStudyDate": "Last Study on {studyDate}",
+    "@studyPreparerScreenPackLastStudyDate": {
+        "placeholders": {
+            "studyDate": {
+                "type": "String"
+            }
+        }
+    },
 
     "studyScreenEditingCardDialogTitle": "Change Card",
     "@studyScreenEditingCardDialogTitle": {},
