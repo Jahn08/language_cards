@@ -7,6 +7,8 @@
     "@barScaffoldSettingsPanelThemeSectionLabel": {},
     "barScaffoldSettingsPanelStudySectionLabel": "Учёба",
     "@barScaffoldSettingsPanelStudySectionLabel": {},
+    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Отображать дату изучения для наборов",
+    "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Сортировка карточек",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionCardSideOptionLabel": "Сторона карточки",

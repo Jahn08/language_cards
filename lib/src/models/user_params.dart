@@ -51,9 +51,11 @@ class StudyDirection extends PresentableEnum {
 class StudyParams {
     static const _defaultCardSide = CardSide.front;
     static const _defaultDirection = StudyDirection.forward;
+    static const _defaultStudyDateVisibility = true;
 
     static const _directionParam = 'direction';
     static const _cardSideParam = 'cardSide';
+    static const _studyDateVisibilityParam = 'showStudyDate';
 
     StudyDirection _direction;
     StudyDirection get direction => _direction;
@@ -62,6 +64,10 @@ class StudyParams {
     CardSide _cardSide;
     CardSide get cardSide => _cardSide;
     set cardSide(CardSide value) => _cardSide = value ?? _defaultCardSide;
+
+    bool _showStudyDate;
+    bool get showStudyDate => _showStudyDate;
+    set showStudyDate(bool value) => _showStudyDate = value ?? _defaultStudyDateVisibility;
 
     StudyParams([Map<String, dynamic> jsonMap]) {
         jsonMap = jsonMap ?? {};
@@ -73,11 +79,14 @@ class StudyParams {
         final cardSideIndex = jsonMap[_cardSideParam] as int;
         _cardSide = cardSideIndex == null ? _defaultCardSide: 
             CardSide.values[cardSideIndex];
+			
+        _showStudyDate = (jsonMap[_studyDateVisibilityParam] as bool) ?? _defaultStudyDateVisibility;
     }
 
     Map<String, dynamic> toMap() => {
         _directionParam: _direction.index,
-        _cardSideParam: _cardSide.index
+        _cardSideParam: _cardSide.index,
+		_studyDateVisibilityParam: _showStudyDate
     };
 }
 

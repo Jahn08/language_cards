@@ -2,7 +2,9 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
+import '../blocs/settings_bloc.dart';
 import '../data/study_storage.dart';
+import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
 import '../utilities/styler.dart';
@@ -54,6 +56,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
 	List<StudyPack> _packs;
 
+	Future<UserParams> _futureParams;
+
 	bool _hasScrollNavigator = false;
 
 	final _shouldScrollUpNotifier = new ValueNotifier(false);
@@ -74,10 +78,11 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     @override
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
+		_futureParams ??= SettingsBlocProvider.of(context).userParams;
 
         return new FutureLoader<List<StudyPack>>(
 			_packs == null ? widget.storage.fetchStudyPacks(): Future.value(_packs), 
-            (stPacks) {
+            (stPacks) => new FutureLoader(_futureParams, (UserParams userParams) {
 				_initPacks(stPacks);
 
 				final styler = new Styler(context);
@@ -119,7 +124,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 														else
 															_excludedPacksNotifier.add(packId);
 													}, 
-													secondary: child
+													secondary: child,
+													showStudyDate: userParams.studyParams.showStudyDate
 												)
 										)).toList(),
 										controller: _scrollController
@@ -149,7 +155,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						backgroundColor: styler.floatingActionButtonColor
 					): null
 				);
-			} );
+			}) 
+		);
     }
 
 	void _initPacks(List<StudyPack> stPacks) {
@@ -182,8 +189,11 @@ class _CheckListItem extends StatelessWidget {
 
 	final Widget secondary;
 
+	final bool showStudyDate;
+
 	const _CheckListItem({ 
-		@required this.isChecked, @required this.stPack, @required this.onChanged, @required this.secondary
+		@required this.isChecked, @required this.stPack, @required this.onChanged, 
+		@required this.secondary, @required this.showStudyDate
 	});
 	
 	@override
@@ -192,7 +202,7 @@ class _CheckListItem extends StatelessWidget {
 		final pack = stPack.pack;
 
 		final cardNumIndicator = new CardNumberIndicator(stPack.cardsOverall);
-		final isThreeLined = pack.studyDate != null;
+		final isThreeLined = showStudyDate && pack.studyDate != null;
         return new UnderlinedContainer(new CheckboxListTile(
             value: isChecked,
             onChanged: (isChecked) => onChanged(isChecked, pack.id),
@@ -265,7 +275,7 @@ class StudyPreparerScreen extends StatefulWidget {
 
     final StudyStorage storage;
 
-    const StudyPreparerScreen([StudyStorage storage]): 
+    const StudyPreparerScreen([StudyStorage storage]):
 		storage = storage ?? const PackStorage();
 
     @override

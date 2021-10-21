@@ -73,6 +73,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 	
 	final _cardSideParamNotifier = new ValueNotifier<CardSide>(null);
 	final _directionParamNotifier = new ValueNotifier<StudyDirection>(null);
+	final _studyDateVisibilityParamNotifier = new ValueNotifier<bool>(true);
 
 	final _isStateDirtyNotifier = new ValueNotifier<bool>(false);
 
@@ -83,6 +84,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 
 		_cardSideParamNotifier.dispose();
 		_directionParamNotifier.dispose();
+		_studyDateVisibilityParamNotifier.dispose();
 
 		_isStateDirtyNotifier.dispose();
 
@@ -129,6 +131,26 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 							})
 				),
 				const _SettingsSubSectionHeader(),
+				new ValueListenableBuilder(
+					valueListenable: _studyDateVisibilityParamNotifier,
+					builder: (_, bool showStudyDate, __) =>
+						new Row(children: <Widget>[
+								new Expanded(
+									child: new CheckboxListTile(
+										contentPadding: const EdgeInsets.only(left: 10.0, right: 5.0),
+										dense: true,
+										title: new Text(locale.barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel),
+										value: showStudyDate,
+										onChanged: (isChecked) {
+											_studyDateVisibilityParamNotifier.value = isChecked;
+											_params.studyParams.showStudyDate = isChecked;
+
+											_setDirtinessState();
+										}
+									),
+								)
+						])
+				),
 				new ValueListenableBuilder(
 					valueListenable: _directionParamNotifier,
 					builder: (_, StudyDirection direction, __) =>
@@ -201,6 +223,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
 
 		_cardSideParamNotifier.value = _params.studyParams.cardSide;
 		_directionParamNotifier.value = _params.studyParams.direction;
+		_studyDateVisibilityParamNotifier.value = _params.studyParams.showStudyDate;
 	}
 
 	void _setDirtinessState() => _isStateDirtyNotifier.value = _originalParams != _params.toJson();

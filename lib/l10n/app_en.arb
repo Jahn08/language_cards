@@ -7,6 +7,8 @@
     "@barScaffoldSettingsPanelThemeSectionLabel": {},
     "barScaffoldSettingsPanelStudySectionLabel": "Study",
     "@barScaffoldSettingsPanelStudySectionLabel": {},
+    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Show Last Study Date for Packs",
+    "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Card Sorting",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionCardSideOptionLabel": "Card Side",
