@@ -168,6 +168,9 @@ void main() {
 		final studyParams = userParams.studyParams;
 		[studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
 			.every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
+
+		final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
+		expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value, studyParams.showStudyDate);
     });
 
     testWidgets('Saves and hides settings after clicking the apply button on the panel', 
@@ -199,6 +202,9 @@ void main() {
 			const expectedDirection = StudyDirection.random;
 			await assistant.changeDropdownItem(defStudyParams.direction, expectedDirection);		
 
+			final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
+			await assistant.tapWidget(studyDateCheckFinder);
+
             await _applySettings(assistant);
 
             final savedUserParams = await PreferencesProvider.fetch();
@@ -211,6 +217,9 @@ void main() {
 
 			expect(studyParams.direction == defStudyParams.direction, false);
 			expect(studyParams.direction, expectedDirection);
+
+			expect(studyParams.showStudyDate == defStudyParams.showStudyDate, false);
+			expect(studyParams.showStudyDate, false);
         });
 
     testWidgets('Resets settings after clicking the reset button on the panel', (tester) async {
@@ -222,6 +231,7 @@ void main() {
 		final defStudyParams = defaultUserParams.studyParams;
 	    expect(userParams.studyParams.cardSide == defStudyParams.cardSide, false);
 		expect(userParams.studyParams.direction == defStudyParams.direction, false);
+		expect(userParams.studyParams.showStudyDate == defStudyParams.showStudyDate, false);
 
         await _pumpScaffoldWithSettings(tester);
 
@@ -240,6 +250,7 @@ void main() {
 		final curStudyParams = storedUserParams.studyParams;
 	    expect(curStudyParams.cardSide, defStudyParams.cardSide);
 		expect(curStudyParams.direction, defStudyParams.direction);
+		expect(curStudyParams.showStudyDate, defStudyParams.showStudyDate);
     });
 
 	testWidgets('Changes the interface language immediately after applying the setting', 

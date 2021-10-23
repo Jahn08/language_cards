@@ -15,6 +15,7 @@ class PreferencesTester {
 		params.theme = Randomiser.nextElement(AppTheme.values);
 		params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
 		params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
+		params.studyParams.showStudyDate = Randomiser.nextInt() % 2 == 0;
 		
 		await _saveParams(params);
 
@@ -36,7 +37,8 @@ class PreferencesTester {
 			params.studyParams.cardSide, CardSide.values);
 		params.studyParams.direction = _getFirstDistinctFrom(
 			params.studyParams.direction, StudyDirection.values);
-	   
+	   	params.studyParams.showStudyDate = !params.studyParams.showStudyDate;
+
 	    await _saveParams(params);
 
 		return params;

@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:language_cards/src/blocs/settings_bloc.dart';
+import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -7,11 +10,14 @@ import 'package:language_cards/src/screens/study_preparer_screen.dart';
 import 'package:language_cards/src/widgets/one_line_text.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../testers/preferences_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
+
+	setUp(() => PreferencesTester.resetSharedPreferences());
 
     testWidgets('Renders card packs as selected displaying their number of cards and study levels', 
         (tester) async {
@@ -36,6 +42,21 @@ void main() {
 
 			_findDownwardScrollBtn(shouldFind: false);
         });
+
+	testWidgets('Renders a last study date for card packs when it is available and the option is on', 
+        (tester) async {
+	        final userParams = await PreferencesProvider.fetch();
+            expect(userParams.studyParams.showStudyDate, true);
+			
+			await _testRenderingStudyDates(tester, shouldShowDates: true);
+        });
+
+	testWidgets('Renders no last study date for card packs when the option is off', (tester) async {
+		final userParams = await PreferencesTester.saveNonDefaultUserParams();
+		expect(userParams.studyParams.showStudyDate, false);
+		
+		await _testRenderingStudyDates(tester, shouldShowDates: false);
+	});
 
     testWidgets('Unselects/selects all card packs changing the summary of their study levels', 
         (tester) async {
@@ -142,7 +163,14 @@ Future<PackStorageMock> _pumpScreen(WidgetTester tester, { int packsNumber, int 
 	async {
 		final storage = new PackStorageMock(packsNumber: packsNumber, cardsNumber: cardsNumber);
 		await tester.pumpWidget(
-			RootWidgetMock.buildAsAppHome(child: new StudyPreparerScreen(storage), noBar: true));
+			RootWidgetMock.buildAsAppHome(
+				childBuilder: (context) => new SettingsBlocProvider(
+					child: new StudyPreparerScreen(storage)
+				),
+				noBar: true
+			)
+		);
+    	await tester.pump();
 		await tester.pump(const Duration(milliseconds: 700));
 
 		return storage;
@@ -249,3 +277,26 @@ void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks, [List<int>
 
 Finder _findDownwardScrollBtn({ bool shouldFind }) => 
 	AssuredFinder.findOne(icon: Icons.arrow_downward_rounded, shouldFind: shouldFind ?? false);
+
+Future<void> _testRenderingStudyDates(WidgetTester tester, { bool shouldShowDates }) async {
+	final isStudyDateVisible = shouldShowDates ?? false;
+	final storage = await _pumpScreen(tester);
+
+	final packs = await _fetchNamedPacks(tester, storage);
+	expect(_findCheckTiles(), findsNWidgets(packs.length));
+	
+	final locale = Localizator.defaultLocalization;
+	await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
+		if (p.studyDate == null)
+			expect(find.descendant(of: packTileFinder, matching: find.byType(Column)), 
+				findsNothing);
+		else
+			expect(find.descendant(
+				of: packTileFinder, 
+				matching: find.text(
+					locale.studyPreparerScreenPackLastStudyDate(
+						DateFormat.yMMMMd(locale.localeName).format(p.studyDate))
+				)
+			), isStudyDateVisible ? findsOneWidget: findsNothing);
+	});
+}
