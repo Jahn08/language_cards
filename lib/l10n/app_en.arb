@@ -7,7 +7,7 @@
     "@barScaffoldSettingsPanelThemeSectionLabel": {},
     "barScaffoldSettingsPanelStudySectionLabel": "Study",
     "@barScaffoldSettingsPanelStudySectionLabel": {},
-    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Show Last Study Date for Packs",
+    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Show the Last Study Date for Packs",
     "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Card Sorting",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
@@ -306,6 +306,14 @@
 
     "helpStudyScreenPreparationSlideDescription": "Before studying it is necessary to choose what cards will participate in the process: select presented non-empty packs and then opt for a category of cards with enough items@Study Preparation",
     "@helpStudyScreenPreparationSlideDescription": {},
+    "helpStudyScreenPreparationStudyDateSlideDescription": "Turning on an option '{studyDateVisibilityOptionLabel}' in the user settings displays when was the last time an entire pack was studied@Last Study Date",
+    "@helpStudyScreenPreparationStudyDateSlideDescription": {
+        "placeholders": {
+            "studyDateVisibilityOptionLabel": {
+                "type": "String"
+            }
+        }
+    },
     "helpStudyScreenOverviewSlideDescription": "The screen displays each of the selected cards: their text, pack, category of study progress. Clicking on a card shows its back side with its translation. Dragging the card left or clicking on '{nextCadBtnLabel}' leads to a next card. '{learningBtnLabel}' increases its category of study progress@Study Screen",
     "@helpStudyScreenOverviewSlideDescription": {
         "placeholders": {

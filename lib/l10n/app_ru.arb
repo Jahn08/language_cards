@@ -7,7 +7,7 @@
     "@barScaffoldSettingsPanelThemeSectionLabel": {},
     "barScaffoldSettingsPanelStudySectionLabel": "Учёба",
     "@barScaffoldSettingsPanelStudySectionLabel": {},
-    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Отображать дату изучения для наборов",
+    "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Отображать дату последнего изучения для наборов",
     "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Сортировка карточек",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
@@ -306,6 +306,14 @@
 
     "helpStudyScreenPreparationSlideDescription": "Перед обучением необходимо выбрать, какие словарные карточки будут участвовать в процессе: отметьте представленные непустые наборы и затем выберите категорию карточек с достаточным количеством записей@Подготовка обучения",
     "@helpStudyScreenPreparationSlideDescription": {},
+    "helpStudyScreenPreparationStudyDateSlideDescription": "Включенная в настройках пользователя опция '{studyDateVisibilityOptionLabel}' показывает, когда весь набор в последний раз участвовал в цикле обучения@Дата последнего изучения",
+    "@helpStudyScreenPreparationStudyDateSlideDescription": {
+        "placeholders": {
+            "studyDateVisibilityOptionLabel": {
+                "type": "String"
+            }
+        }
+    },
     "helpStudyScreenOverviewSlideDescription": "Экран отображает каждую выбранную карточку: её текст, набор, категорию прогресса обучения. Клик по карточке покажет её обратную сторону с переводом. Потянув карточку влево или кликнув '{nextCadBtnLabel}' можно отобразить следующую карточку. '{learningBtnLabel}' увеличивает прогресс обучения карточки@Экран обучения",
     "@helpStudyScreenOverviewSlideDescription": {
         "placeholders": {

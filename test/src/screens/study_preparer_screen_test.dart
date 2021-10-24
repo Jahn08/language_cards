@@ -43,7 +43,7 @@ void main() {
 			_findDownwardScrollBtn(shouldFind: false);
         });
 
-	testWidgets('Renders a last study date for card packs when it is available and the option is on', 
+	testWidgets('Renders the last study date for card packs when it is available and the option is on', 
         (tester) async {
 	        final userParams = await PreferencesProvider.fetch();
             expect(userParams.studyParams.showStudyDate, true);

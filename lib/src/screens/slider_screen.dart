@@ -242,8 +242,8 @@ class PackHelpScreen extends _SliderScreen {
 class StudyHelpScreen extends _SliderScreen {
 
 	const StudyHelpScreen(): super(const [
-		'help_study_preparation', 'help_study_screen', 'help_study_editor', 
-		'help_study_settings' 
+		'help_study_preparation', 'help_study_preparation_study_date', 'help_study_screen', 
+		'help_study_editor', 'help_study_settings' 
 	], _descriptor);
 
 	@override
@@ -255,14 +255,17 @@ class StudyHelpScreen extends _SliderScreen {
 			case 0:
 				return locale.helpStudyScreenPreparationSlideDescription;
 			case 1:
+				return locale.helpStudyScreenPreparationStudyDateSlideDescription(
+					locale.barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel);
+			case 2:
 				return locale.helpStudyScreenOverviewSlideDescription(
 					locale.studyScreenNextCardButtonLabel,
 					locale.studyScreenLearningCardButtonLabel
 				);
-			case 2:
+			case 3:
 				return locale.helpStudyEditorSlideDescription(
 					locale.constsSavingItemButtonLabel);
-			case 3:
+			case 4:
 				return locale.helpStudySettingsSlideDescription(
 					_stringifyEnumValues(StudyDirection.values, locale),
 					_stringifyEnumValues(CardSide.values, locale)
