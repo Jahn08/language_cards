@@ -6,9 +6,9 @@ import '../widgets/card_number_indicator.dart';
 import '../widgets/translation_indicator.dart';
 
 class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
-    int chosenPackId;
+    final int _chosenPackId;
 
-    PackSelectorDialog(BuildContext context, this.chosenPackId): 
+    PackSelectorDialog(BuildContext context, this._chosenPackId): 
         super(context, AppLocalizations.of(context).packSelectorDialogTitle);
 
     @override
@@ -28,6 +28,6 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
 		);
 
     @override
-    Widget getItemTrailing(StoredPack item) => item.id == chosenPackId ? 
+    Widget getItemTrailing(StoredPack item) => item.id == _chosenPackId ? 
         const Icon(Icons.check): null;
 }

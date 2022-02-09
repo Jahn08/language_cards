@@ -72,7 +72,25 @@
     },
     "cardEditorCardTextTextFieldLabel": "Text",
     "@cardEditorCardTextTextFieldLabel": {},
-
+    
+    "cardEditorDuplicatedCardDialogTitle": "Duplicated Card",
+    "@cardEditorDuplicatedCardDialogTitle": {},
+    "cardEditorDuplicatedCardDialogConfirmationButtonLabel": "Merge",
+    "@cardEditorDuplicatedCardDialogConfirmationButtonLabel": {},
+    "cardEditorDuplicatedCardDialogCancellationButtonLabel": "Save without Merge",
+    "@cardEditorDuplicatedCardDialogCancellationButtonLabel": {},
+    "cardEditorDuplicatedCardDialogSeveralItemsContent": "There are {numberOfCards} cards with the same text and part of speech. Would you like to merge their translations and leave this word without changes?",
+    "@cardEditorDuplicatedCardDialogSeveralItemsContent": {
+        "placeholders": {
+            "numberOfCards": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "cardEditorDuplicatedCardDialogSingleItemContent": "There is a word with the same text and part of speech. Would you like to merge their translations and leave this word without changes?",
+    "@cardEditorDuplicatedCardDialogSingleItemContent": {},
+    
     "cardListScreenWithoutPackTitle": "Cards",
     "@cardListScreenWithoutPackTitle": {},
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Unlearn",
@@ -410,6 +428,23 @@
     "@mainScreenWordCardsMenuItemLabel": {},
     "mainScreenWordPacksMenuItemLabel": "Word Packs",
     "@mainScreenWordPacksMenuItemLabel": {},
+
+    "mergeSelectorDialogTitle": "Choosing Translation for Merge",
+    "@mergeSelectorDialogTitle": {},
+    "mergeSelectorDialogWordTitle": "{text} ({partOfSpeech}) from the {packName} pack",
+    "@mergeSelectorDialogWordTitle": {
+        "placeholders": {
+            "text": {
+                "type": "String"
+            },
+            "partOfSpeech": {
+                "type": "String"
+            },
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
 
     "noTranslationSnackBarInfo": "No automatic translation is possible for the chosen language pair",
     "@noTranslationSnackBarInfo": {},

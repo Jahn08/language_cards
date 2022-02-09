@@ -16,6 +16,7 @@ import '../data/word_dictionary.dart';
 import '../data/word_storage.dart';
 import '../dialogs/pack_selector_dialog.dart';
 import '../dialogs/confirm_dialog.dart';
+import '../dialogs/merge_selector_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
 import '../models/part_of_speech.dart';
@@ -254,10 +255,8 @@ class CardEditorState extends State<CardEditor> {
 											if (!state.validate())
 												return;
 
-											state.save();
-
-											final pack = _packNotifier.value;
-											final wordToSave = new StoredWord(
+											StoredPack pack = _packNotifier.value;
+											final wordToSave = await _mergeIfDuplicated(new StoredWord(
 												_textNotifier.value, 
 												id: widget.wordId,
 												packId: pack.id,
@@ -265,12 +264,20 @@ class CardEditorState extends State<CardEditor> {
 												transcription: _transcriptionNotifier.value,
 												translation: _translationNotifier.value,
 												studyProgress: _studyProgressNotifier.value
-											);
-											final cardWasAdded = wordToSave.isNew || 
-												widget.pack?.id != pack.id;
-											widget.afterSave?.call(
-												(await widget._wordStorage.upsert([wordToSave])).first, pack, cardWasAdded
-											);
+											), pack, locale);
+
+											if (wordToSave == null)
+												return;
+
+											state.save();
+
+											if (pack.id != wordToSave.packId)
+												pack = (await _getFuturePacks())
+													.firstWhere((p) => p.id == wordToSave.packId);
+
+											final cardWasAdded = wordToSave.isNew || widget.pack?.id != pack.id;
+											widget.afterSave?.call((await widget._wordStorage.upsert([wordToSave])).first,
+												pack, cardWasAdded);
 										}: null
 									)
 							)
@@ -354,6 +361,61 @@ class CardEditorState extends State<CardEditor> {
 			_foundCard.studyProgress != _studyProgressNotifier.value || 
 			_foundCard.packId != _packNotifier.value?.id));
 
+	Future<StoredWord> _mergeIfDuplicated(StoredWord word, StoredPack pack, AppLocalizations locale) async {
+		final supposedDuplicates = await widget._wordStorage.findDuplicates(
+			text: word.text, 
+			pos: word.partOfSpeech, 
+			id: word.id
+		);
+
+		if (supposedDuplicates.isEmpty)
+			return word;
+
+		final allPacks = await _getFuturePacks();
+		final sameTranslationPacks = { 
+			for(final p in allPacks.where((p) => p.from == pack.from && p.to == pack.to)) p.id: p 
+		};
+		final duplicatedWords = supposedDuplicates.where(
+			(w) => w.packId == word.packId || sameTranslationPacks[w.packId] != null).toList();
+		if (!mounted || duplicatedWords.isEmpty)
+			return word;
+
+		final duplicatesNumber = duplicatedWords.length;
+		// ignore: use_build_context_synchronously
+		final shouldMerge = await new ConfirmDialog(
+			title: locale.cardEditorDuplicatedCardDialogTitle,
+			confirmationLabel: locale.cardEditorDuplicatedCardDialogConfirmationButtonLabel,
+			cancellationLabel: locale.cardEditorDuplicatedCardDialogCancellationButtonLabel,
+			content: duplicatesNumber > 1 ?
+				locale.cardEditorDuplicatedCardDialogSeveralItemsContent(duplicatesNumber):
+				locale.cardEditorDuplicatedCardDialogSingleItemContent
+		).show(context);
+
+		if (shouldMerge) {
+			StoredWord wordToMergeWith;
+			if (duplicatesNumber > 1 && mounted) {
+				final packNamesById = { for (final p in sameTranslationPacks.entries) p.key: p.value.name };
+				// ignore: use_build_context_synchronously
+				wordToMergeWith = await new MergeSelectorDialog(context, packNamesById)
+					.show(duplicatedWords);
+			}
+			else 
+				wordToMergeWith = duplicatedWords.first;
+
+			return wordToMergeWith == null ? null: new StoredWord(
+				wordToMergeWith.text, 
+				id: wordToMergeWith.id,
+				packId: wordToMergeWith.packId,
+				partOfSpeech: wordToMergeWith.partOfSpeech, 
+				transcription: wordToMergeWith.transcription,
+				translation: wordToMergeWith.translation + '; ' + word.translation,
+				studyProgress: wordToMergeWith.studyProgress		
+			);
+		}
+
+		return word;
+	}
+
     @override
     void dispose() {
         _disposeDictionary();
@@ -396,7 +458,7 @@ class CardEditor extends StatefulWidget {
 
     final ISpeaker _defaultSpeaker;
 
-    final BaseStorage<StoredWord> _wordStorage;
+    final WordStorage _wordStorage;
 
     final BaseStorage<StoredPack> _packStorage;
     
@@ -404,7 +466,7 @@ class CardEditor extends StatefulWidget {
 
 	final bool hideNonePack;
 
-    CardEditor({ @required BaseStorage<StoredWord> wordStorage, 
+    CardEditor({ @required WordStorage wordStorage, 
         @required BaseStorage<StoredPack> packStorage, @required this.afterSave,
 		@required DictionaryProvider provider, ISpeaker defaultSpeaker, int wordId, 
 		this.pack, this.card, this.hideNonePack }): 

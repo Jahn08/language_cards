@@ -33,7 +33,7 @@ class _CardEditorDialog extends OutcomeDialog<MapEntry<StoredWord, StoredPack>> 
 
     final ISpeaker defaultSpeaker;
 
-    final BaseStorage<StoredWord> wordStorage;
+    final WordStorage wordStorage;
 
     final BaseStorage<StoredPack> packStorage;
 

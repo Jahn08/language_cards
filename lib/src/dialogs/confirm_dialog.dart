@@ -11,19 +11,23 @@ class ConfirmDialog extends OutcomeDialog<bool> {
 	
 	final String confirmationLabel;
 
+	final String cancellationLabel;
+
 	final bool isCancellable;
 
     const ConfirmDialog({ 
-		@required String title, @required String content, @required String confirmationLabel 
+		@required String title, @required String content, @required String confirmationLabel,
+		String cancellationLabel
 	}): this._(
 		title: title, 
 		content: content, 
 		isCancellable: true,
-		confirmationLabel: confirmationLabel
+		confirmationLabel: confirmationLabel,
+		cancellationLabel: cancellationLabel
 	);
 
-	const ConfirmDialog._({ this.title, this.content, this.isCancellable, this.confirmationLabel }): 
-		super();
+	const ConfirmDialog._({ this.title, this.content, this.isCancellable, 
+		this.confirmationLabel, this.cancellationLabel }): super();
 
     ConfirmDialog.ok({ @required String title, @required String content }):
         this._(title: title, content: content, isCancellable: false);
@@ -41,7 +45,7 @@ class ConfirmDialog extends OutcomeDialog<bool> {
                 title: new Text(title),
                 actions: [
 					if (isCancellable)
-						new CancelButton(() => returnResult(context, false)),
+						new CancelButton(() => returnResult(context, false), cancellationLabel),
 					ElevatedButton(
 						child: new Text(confirmationLabel ?? 
 							AppLocalizations.of(context).confirmDialogOkButtonLabel), 

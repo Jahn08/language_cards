@@ -73,6 +73,24 @@
     "cardEditorCardTextTextFieldLabel": "Текст",
     "@cardEditorCardTextTextFieldLabel": {},
 
+    "cardEditorDuplicatedCardDialogTitle": "Дубликат карточки",
+    "@cardEditorDuplicatedCardDialogTitle": {},
+    "cardEditorDuplicatedCardDialogConfirmationButtonLabel": "Совместить",
+    "@cardEditorDuplicatedCardDialogConfirmationButtonLabel": {},
+    "cardEditorDuplicatedCardDialogCancellationButtonLabel": "Сохранить без совмещения",
+    "@cardEditorDuplicatedCardDialogCancellationButtonLabel": {},
+    "cardEditorDuplicatedCardDialogSeveralItemsContent": "Найдено карточек с таким же текстом и частью речи: {numberOfCards}. Совместить их переводы и оставить эту карточку без изменений?",
+    "@cardEditorDuplicatedCardDialogSeveralItemsContent": {
+        "placeholders": {
+            "numberOfCards": {
+                "type": "int",
+                "format": "compactLong"
+            }
+        }
+    },
+    "cardEditorDuplicatedCardDialogSingleItemContent": "Найдена карточка с таким же текстом и частью речи. Совместить их переводы и оставить эту карточку без изменений?",
+    "@cardEditorDuplicatedCardDialogSingleItemContent": {},
+
     "cardListScreenWithoutPackTitle": "Карточки",
     "@cardListScreenWithoutPackTitle": {},
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Разучить",
@@ -411,6 +429,23 @@
     "@mainScreenWordCardsMenuItemLabel": {},
     "mainScreenWordPacksMenuItemLabel": "Наборы карточек",
     "@mainScreenWordPacksMenuItemLabel": {},
+
+    "mergeSelectorDialogTitle": "Выбор перевода для совмещения",
+    "@mergeSelectorDialogTitle": {},
+    "mergeSelectorDialogWordTitle": "{text} ({partOfSpeech}) из набора \"{packName}\"",
+    "@mergeSelectorDialogWordTitle": {
+        "placeholders": {
+            "text": {
+                "type": "String"
+            },
+            "partOfSpeech": {
+                "type": "String"
+            },
+            "packName": {
+                "type": "String"
+            }
+        }
+    },
 
     "noTranslationSnackBarInfo": "Автоматический перевод недоступен для выбранной пары языков",
     "@noTranslationSnackBarInfo": {},

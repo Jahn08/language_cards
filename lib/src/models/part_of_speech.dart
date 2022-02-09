@@ -65,4 +65,7 @@ class PartOfSpeech extends PresentableEnum {
 	
 		return locale.partOfSpeechCollocationName;
 	}
+
+	@override
+	String toString() => valueList.first;
 }

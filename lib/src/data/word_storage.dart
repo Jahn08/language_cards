@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:language_cards/src/models/part_of_speech.dart';
 import '../data/base_storage.dart';
 import '../models/stored_word.dart';
 
@@ -11,6 +12,16 @@ class WordStorage extends BaseStorage<StoredWord> {
 
     @override
     String get entityName => StoredWord.entityName;
+
+	Future<List<StoredWord>> findDuplicates({ 
+		@required String text, @required PartOfSpeech pos, int id 
+	}) async {
+		final foundWords = await fetchInternally(filters: { 
+			StoredWord.textFieldName: [text], 
+			StoredWord.partOfSpeechFieldName: [pos.toString()] }
+		);
+		return id == null ? foundWords: foundWords.where((w) => w.id != id).toList();
+	}
 
     Future<List<StoredWord>> fetchFiltered({ 
 		List<int> parentIds, List<int> studyStageIds, String text, int skipCount, int takeCount 

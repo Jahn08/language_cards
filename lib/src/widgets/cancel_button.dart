@@ -5,14 +5,16 @@ class CancelButton extends StatelessWidget {
 
 	final void Function() onPressed;
 
-	const CancelButton(this.onPressed);
+	final String _label;
+
+	const CancelButton(this.onPressed, [this._label]);
 
 	@override
 	Widget build(BuildContext context) =>
 		new ElevatedButton(
 			onPressed: onPressed,
 			child: new Text(
-				AppLocalizations.of(context).cancellableDialogCancellationButtonLabel
+				_label ?? AppLocalizations.of(context).cancellableDialogCancellationButtonLabel
 			),
 			style: ElevatedButton.styleFrom(primary: Colors.deepOrange[300])
 		);
