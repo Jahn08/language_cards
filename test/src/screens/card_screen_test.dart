@@ -6,6 +6,7 @@ import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/data/word_storage.dart';
+import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
@@ -19,6 +20,7 @@ import '../../testers/dialog_tester.dart';
 import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/http_responder.dart';
+import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
@@ -221,18 +223,16 @@ void main() {
             expect(changedWord?.transcription == changedValue, false);
         });
     
-    testWidgets('Saves a new pack for a card', 
-        (tester) async {
-            final storage = new PackStorageMock();
-            await _testChangingPack(storage, tester, 
-                (word) => _fetchAnotherPack(storage, word.packId));
-        });
+    testWidgets('Saves a new pack for a card', (tester) async {
+		final storage = new PackStorageMock();
+		await _testChangingPack(storage, tester, 
+			(word) => _fetchAnotherPack(storage, word.packId));
+	});
     
-    testWidgets('Saves the none pack for a card', 
-        (tester) async {
-            await _testChangingPack(new PackStorageMock(), tester, 
-                (word) => Future.value(StoredPack.none));
-        });
+    testWidgets('Saves the none pack for a card', (tester) async {
+		await _testChangingPack(new PackStorageMock(), tester, 
+			(word) => Future.value(StoredPack.none));
+	});
 	
     testWidgets('Shows a warning for a card without a pack and turns off dictionaries', 
         (tester) => _testInitialDictionaryState(tester, hasPack: false));
@@ -335,6 +335,165 @@ void main() {
 
 		await _focusTextField(new WidgetAssistant(tester), shownWord.translation);
 		AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
+	});
+
+	testWidgets('Merges translations of a duplicate with only one given card', (tester) async {
+		final storage = new PackStorageMock();
+		final wordStorage = storage.wordStorage;
+		
+		final defaultPack = storage.getRandom();
+		final cards = await _getDuplicatedCards(defaultPack.id, wordStorage);
+		final cardToShow = cards.first;
+		
+		final duplicatedCard = cards.last;
+		final duplicateTranslation = duplicatedCard.translation;
+		await _updateCard(wordStorage, duplicatedCard, newPos: cardToShow.partOfSpeech);
+		
+		final pack = await storage.find(cardToShow.packId);
+		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+
+		final assistant = new WidgetAssistant(tester);
+		final initialText = cardToShow.text;
+		final initialTranslation = cardToShow.translation;
+
+		await _changeTextAndSave(assistant, cardToShow, duplicatedCard.text);
+
+		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
+			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
+		await assistant.tapWidget(mergeConfirmationBtnFinder);
+
+		final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
+		expect(nonChangedWord.text, initialText);
+		expect(nonChangedWord.translation, initialTranslation);
+
+		final mergedWord = await storage.wordStorage.find(duplicatedCard.id);
+		expect(mergedWord.translation.startsWith(duplicateTranslation), true);
+		expect(mergedWord.translation.endsWith(initialTranslation), true);
+	});
+
+	testWidgets('Merges translations of a duplicate with a chosen card', (tester) async {
+		final storage = new PackStorageMock();
+		final wordStorage = storage.wordStorage;
+		
+		final defaultPack = storage.getRandom();
+		final cards =  await _getDuplicatedCards(defaultPack.id, wordStorage, 3);
+		final cardToShow = cards.first;
+
+		final duplicatedCardA = cards.last;
+		final duplicatedText = duplicatedCardA.text;
+		final duplicateTranslationA = duplicatedCardA.translation;
+
+		final duplicatedCardB = cards.elementAt(1);
+		final duplicateTranslationB = duplicatedCardB.translation;
+		
+		final pack = await storage.find(cardToShow.packId);
+		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+
+		final assistant = new WidgetAssistant(tester);
+		final initialText = cardToShow.text;
+		final initialTranslation = cardToShow.translation;
+
+		await _changeTextAndSave(assistant, cardToShow, duplicatedText);
+
+		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
+			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
+		await assistant.tapWidget(mergeConfirmationBtnFinder);
+
+		final itemToMergeFinder = AssuredFinder.findOne(
+			label: duplicateTranslationA, shouldFind: true);
+		AssuredFinder.findOne(label: duplicateTranslationB, shouldFind: true);
+
+		await assistant.tapWidget(itemToMergeFinder);
+		await assistant.pumpAndAnimate(500);
+
+		final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
+		expect(nonChangedWord.text, initialText);
+		expect(nonChangedWord.translation, initialTranslation);
+
+		final mergedWord = await storage.wordStorage.find(duplicatedCardA.id);
+		expect(mergedWord.translation.startsWith(duplicateTranslationA), true);
+		expect(mergedWord.translation.endsWith(initialTranslation), true);
+		
+		final nonMergedWord = await storage.wordStorage.find(duplicatedCardB.id);
+		expect(nonMergedWord.translation, duplicateTranslationB);
+	});
+
+	testWidgets('Cancels merging and saving when clicking outside the dialog for merging translations', 
+		(tester) async {
+			final storage = new PackStorageMock();
+			final wordStorage = storage.wordStorage;
+			
+			final defaultPack = storage.getRandom();
+			final cards = await _getDuplicatedCards(defaultPack.id, wordStorage, 3);
+			final cardToShow = cards.first;
+
+			final duplicatedCardA = cards.last;
+			final duplicatedText = duplicatedCardA.text;
+			final duplicateTranslationA = duplicatedCardA.translation;
+
+			final duplicatedCardB = cards.elementAt(1);
+			final duplicateTranslationB = duplicatedCardB.translation;
+			
+			final pack = await storage.find(cardToShow.packId);
+			await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+
+			final assistant = new WidgetAssistant(tester);
+			final initialText = cardToShow.text;
+			final initialTranslation = cardToShow.translation;
+
+			await _changeTextAndSave(assistant, cardToShow, duplicatedText);
+
+			final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
+				Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
+			await assistant.tapWidget(mergeConfirmationBtnFinder);
+
+			await _focusTextField(new WidgetAssistant(assistant.tester), cardToShow.translation);
+			AssuredFinder.findOne(label: duplicateTranslationA, shouldFind: false);
+			AssuredFinder.findOne(label: duplicateTranslationB, shouldFind: false);
+
+			final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
+			expect(nonChangedWord.text, initialText);
+			expect(nonChangedWord.translation, initialTranslation);
+
+			final nonMergedWordA = await storage.wordStorage.find(duplicatedCardA.id);
+			expect(nonMergedWordA.translation, duplicateTranslationA);
+			
+			final nonMergedWordB = await storage.wordStorage.find(duplicatedCardB.id);
+			expect(nonMergedWordB.translation, duplicateTranslationB);
+		});
+
+	testWidgets('Desagrees to merge translations and saves a duplicated card', (tester) async {
+		final storage = new PackStorageMock();
+		final wordStorage = storage.wordStorage;
+
+		final defaultPack = storage.getRandom();
+		final cards = await _getDuplicatedCards(defaultPack.id, wordStorage);
+		final cardToShow = cards.first;
+
+		final duplicatedCard = cards.last;
+		final duplicateTranslation = duplicatedCard.translation;
+		final duplicatedText = duplicatedCard.text;
+		await _updateCard(wordStorage, duplicatedCard, newPos: cardToShow.partOfSpeech);
+
+		final pack = await storage.find(cardToShow.packId);
+		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+
+		final assistant = new WidgetAssistant(tester);
+		final initialTranslation = cardToShow.translation;
+
+		await _changeTextAndSave(assistant, cardToShow, duplicatedCard.text);
+
+		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
+			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogCancellationButtonLabel);
+		await assistant.tapWidget(mergeConfirmationBtnFinder);
+
+		final changedWord = await storage.wordStorage.find(cardToShow.id);
+		expect(changedWord.text, duplicatedText);
+		expect(changedWord.translation, initialTranslation);
+
+		final nonMergedWord = await storage.wordStorage.find(duplicatedCard.id);
+		expect(nonMergedWord.text, duplicatedText);
+		expect(nonMergedWord.translation, duplicateTranslation);
 	});
 }
 
@@ -542,4 +701,58 @@ Future<StoredWord> _displayWordWithPack(WidgetTester tester, {
 		pack: storage.getRandom(), 
 		wordToShow: wordToShow, speaker: speaker, 
 		shouldHideWarningDialog: shouldHideWarningDialog);
+}
+
+Future<List<StoredWord>> _getDuplicatedCards(
+	int packId, WordStorageMock storage, [int take = 2]
+) async {
+	final result = <StoredWord>[];
+
+	final cards = await storage.fetch();
+
+	String duplicatedText;
+	PartOfSpeech pos;
+	for (int i = 0; i < take; ++i) {
+		final card = cards[i];
+		pos ??= card.partOfSpeech;
+
+		if (i == 1)
+			duplicatedText = card.text;
+
+		result.add(await _updateCard(storage, card, 
+			newPackId: card.packId == StoredPack.none.id ? packId: card.packId, 
+			newText: duplicatedText, newPos: pos));
+	}
+
+	return result;	
+}
+
+Future<StoredWord> _updateCard(
+	WordStorageMock wordStorage, StoredWord card, { PartOfSpeech newPos, String newText, int newPackId }
+) async {
+	if (card.partOfSpeech == (newPos ?? card.partOfSpeech) && 
+		card.text == (newText ?? card.text) && card.packId == (newPackId ?? card.packId))
+		return card;
+
+	final updatedCard = new StoredWord(
+		newText ?? card.text,
+		id: card.id,
+		packId: newPackId ?? card.packId,
+		partOfSpeech: newPos ?? card.partOfSpeech,
+		studyProgress: card.studyProgress,
+		transcription: card.transcription,
+		translation: card.translation
+	);
+	await wordStorage.upsert([updatedCard]);
+
+	return updatedCard;
+} 
+
+Future<void> _changeTextAndSave(
+	WidgetAssistant assistant, StoredWord cardToChange, String newText
+) async {
+	await assistant.enterChangedText(cardToChange.text, changedText: newText);
+	await _focusTextField(new WidgetAssistant(assistant.tester), cardToChange.translation);
+	await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+	await assistant.pumpAndAnimate(700);
 }

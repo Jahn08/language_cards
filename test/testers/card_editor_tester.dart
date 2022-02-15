@@ -5,6 +5,7 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/speaker_button.dart';
 import '../utilities/assured_finder.dart';
+import '../utilities/localizator.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
@@ -52,7 +53,8 @@ class CardEditorTester {
 		AssuredFinder.findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
 
 	static Finder findSaveButton() => 
-		AssuredFinder.findOne(type: ElevatedButton, label: 'Save', shouldFind: true);
+		AssuredFinder.findOne(type: ElevatedButton, 
+			label: Localizator.defaultLocalization.constsSavingItemButtonLabel, shouldFind: true);
 
 	Future<void> changePack(StoredPack newPack) async {
 		final assistant = new WidgetAssistant(tester);
