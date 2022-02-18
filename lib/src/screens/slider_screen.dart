@@ -149,8 +149,8 @@ class CardHelpScreen extends _SliderScreen {
 	const CardHelpScreen(): super(const [
 		'help_card_screen', 'help_card_editor', 'help_card_unlearning', 
 		'help_card_removal', 'help_card_adding', 'help_card_word_text', 
-		'help_card_word_dictionary', 'help_card_word_translation', 
-		'help_card_saving', 'help_card_search'
+		'help_card_word_dictionary', 'help_card_word_translation', 'help_card_saving', 
+		'help_card_duplicate', 'help_card_translation_merge', 'help_card_search'
 	], _descriptor);
 
 	@override
@@ -185,6 +185,10 @@ class CardHelpScreen extends _SliderScreen {
 					locale.constsSavingItemButtonLabel
 				);
 			case 9:
+				return locale.helpCardScreenDuplicateDescription;
+			case 10:
+				return locale.helpCardScreenTranslationMergeDescription;
+			case 11:
 				return locale.helpCardScreenSearchSlideDescription;
 			default:
 				return '';

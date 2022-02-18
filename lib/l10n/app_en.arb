@@ -88,7 +88,7 @@
             }
         }
     },
-    "cardEditorDuplicatedCardDialogSingleItemContent": "There is a word with the same text and part of speech. Would you like to merge their translations and leave this word without changes?",
+    "cardEditorDuplicatedCardDialogSingleItemContent": "There is a card with the same text and part of speech. Would you like to merge their translations and leave this card without changes?",
     "@cardEditorDuplicatedCardDialogSingleItemContent": {},
     
     "cardListScreenWithoutPackTitle": "Cards",
@@ -266,6 +266,10 @@
             }
         }
     },
+    "helpCardScreenDuplicateDescription": "Duplicated cards have the same text, part of speech and pack languages. When saving such a card it is possible to add its translation to its other duplicates or save this one anyway. Clicking beyond the dialog returns editing the card@Duplicated Card",
+    "@helpCardScreenDuplicateDescription": {},
+    "helpCardScreenTranslationMergeDescription": "When there are several duplicated cards, a dialog appears to choose where a current translation should be added. Clicking beyond the dialog returns editing the card@Translation Merge",
+    "@helpCardScreenTranslationMergeDescription": {},
     "helpCardScreenSearchSlideDescription": "When there are enough cards on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter cards by the first letter of their text@Searching for Cards",
     "@helpCardScreenSearchSlideDescription": {},
     
