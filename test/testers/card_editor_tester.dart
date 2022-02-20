@@ -72,10 +72,13 @@ class CardEditorTester {
 		return tileFinder;
 	}
 
-	Future<List<String>> enterRandomTranscription() async {
-        final symbols = PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
-        final expectedSymbols = [Randomiser.nextElement(symbols),
-            Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
+	Future<List<String>> enterRandomTranscription({ List<String> symbols, String symbolToEnter }) async {
+        final inSymbols = symbols ?? PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
+		final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1);
+		final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1);
+        final expectedSymbols = [Randomiser.nextElement(inSymbols), doubleSymbolA,
+            Randomiser.nextElement(inSymbols), if (symbolToEnter != null) symbolToEnter,
+			doubleSymbolB, Randomiser.nextElement(inSymbols)]..shuffle();
 
 		final assistant = new WidgetAssistant(tester);
         for (final symbol in expectedSymbols)
@@ -83,6 +86,8 @@ class CardEditorTester {
 
         return expectedSymbols;
     }
+
+    Future<void> tapSymbolKey(String symbol) => _tapSymbolKey(symbol, new WidgetAssistant(tester));
 
     Future<void> _tapSymbolKey(String symbol, WidgetAssistant assistant) async {
         final foundKey = find.widgetWithText(InkWell, symbol);
