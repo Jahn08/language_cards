@@ -60,7 +60,7 @@ class WordStorageMock extends WordStorage {
 		int id, int packId, int parentsOverall, bool hasNoPack = false,
 		String Function(String, int) textGetter 
 	}) {
-        final phoneticSymbols = PhoneticKeyboard.getLanguageSpecific().symbols;
+        final phoneticSymbols = PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
 
         const studyStages = WordStudyStage.values;
 		final text = Randomiser.nextString();

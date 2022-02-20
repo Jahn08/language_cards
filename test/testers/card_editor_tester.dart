@@ -73,7 +73,7 @@ class CardEditorTester {
 	}
 
 	Future<List<String>> enterRandomTranscription() async {
-        final symbols = PhoneticKeyboard.getLanguageSpecific().symbols;
+        final symbols = PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
         final expectedSymbols = [Randomiser.nextElement(symbols),
             Randomiser.nextElement(symbols), Randomiser.nextElement(symbols)];
 

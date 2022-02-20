@@ -1,23 +1,25 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
-import './keyboard_actions_bottomed.dart';
-import './styled_input_decoration.dart';
+import 'package:language_cards/src/models/language.dart';
 import './input_keyboard.dart';
+import './keyboard_actions_bottomed.dart';
+import './phonetic_keyboard.dart';
+import './styled_input_decoration.dart';
 
 class KeyboardedField extends StatelessWidget {
     final String label;
 
     final FocusNode _focusNode;
-    final InputKeyboard _keyboard;
 
+	final Language _lang;
     final String _initialValue;
     final Function(String) _onChanged;
 
-    const KeyboardedField(InputKeyboard keyboard, FocusNode focusNode, this.label,
-        { Key key, Function(String) onChanged, String initialValue }): 
-        _keyboard = keyboard,
-        _initialValue = initialValue ?? '',
+    const KeyboardedField(Language lang, FocusNode focusNode, this.label,
+        { Key key, Function(String) onChanged, String initialValue }
+	): _lang = lang,
+		_initialValue = initialValue ?? '',
         _onChanged = onChanged,
         _focusNode = focusNode,
         super(key: key);
@@ -26,10 +28,37 @@ class KeyboardedField extends StatelessWidget {
     Widget build(BuildContext context) {
         bool isInitialBuilding = true;
         final textFieldFocusNode = new FocusNode();
-        
-        return new KeyboardActionsBottomed(
+
+		TextEditingController textController;
+		int newPosition;
+		RegExp lastSymbolRegExp;
+	  	final keyboard = PhoneticKeyboard.getLanguageSpecific(
+			(symbol) {
+				// TODO: Add behaviour for a selection of several symbols
+				final curPosition = textController.selection.start;
+				final text = textController.text;
+				
+				String newText;
+				if (symbol == null) {
+					if (text.isNotEmpty && curPosition > 0)
+						newText = text.substring(0, curPosition).replaceFirst(lastSymbolRegExp, '') + 
+							text.substring(curPosition);
+					else
+						newText = text;
+				}
+				else
+					newText = curPosition == text.length ? 
+						text + symbol:
+						text.substring(0, curPosition) + symbol + text.substring(curPosition);
+
+				newPosition = curPosition + (newText.length - text.length);
+				return newText;
+			}, initialValue: _initialValue, lang: _lang);
+		lastSymbolRegExp = new RegExp('(${keyboard.symbols.join('|')}|.)\$');
+		
+		return new KeyboardActionsBottomed(
             focusNode: _focusNode,
-            config: _buildKeyboardConfig(),
+            config: _buildKeyboardConfig(keyboard),
             child: new Column(
                 children: <Widget>[
                     new KeyboardCustomInput<String>(
@@ -45,35 +74,34 @@ class KeyboardedField extends StatelessWidget {
                             if (hasFocus)
                                 textFieldFocusNode.requestFocus();
 
-							final ctrl = new TextEditingController(text: curValue);
-							ctrl.selection = new TextSelection.fromPosition(
-								new TextPosition(offset: curValue.length));
+							textController = new TextEditingController(text: curValue);
+							textController.selection = new TextSelection.fromPosition(
+								new TextPosition(offset: newPosition ?? curValue.length));
                             return new TextFormField(
                                 decoration: new StyledInputDecoration(label),
                                 focusNode: textFieldFocusNode,
-                                controller: ctrl,
+                                controller: textController,
                                 readOnly: true,
-								enableInteractiveSelection: false,
 								showCursor: true,
                                 onSaved: (newValue) => _emitOnChangedEvent(newValue),
                                 onEditingComplete: () => _emitOnChangedEvent(curValue)
                             );
                         }, 
-                        notifier: _keyboard.notifier
+                        notifier: keyboard.notifier
                     )
                 ]
             )
         );
     }
 
-    KeyboardActionsConfig _buildKeyboardConfig()  => 
+    KeyboardActionsConfig _buildKeyboardConfig(InputKeyboard keyboard)  => 
 		new KeyboardActionsConfig(
             actions: <KeyboardActionsItem>[
                 new KeyboardActionsItem(
                     displayArrows: false,
                     displayActionBar: false,
                     focusNode: _focusNode, 
-                    footerBuilder: (context) => _keyboard
+                    footerBuilder: (context) => keyboard
                 )
             ]
         );

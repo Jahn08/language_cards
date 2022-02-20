@@ -6,35 +6,33 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
     implements PreferredSizeWidget {
     static const double _keyboardHeight = 270;
 
-    final List<String> _symbols;
     final double _symbolSize;
     final ValueNotifier<String> _notifier;
 
-    final RegExp _lastSymbolRegExp;
+    final List<String> symbols;
 
-    InputKeyboard(List<String> symbols, double symbolSize, { Key key, String initialValue }): 
-        _symbols = symbols,
-        _symbolSize = symbolSize,
-        _lastSymbolRegExp = new RegExp('(${symbols.join('|')})\$'),
-        _notifier = new ValueNotifier(initialValue ?? ''),
+	final String Function(String symbol) onSymbolTap;
+
+    InputKeyboard(this.symbols, { 
+		@required this.onSymbolTap, String initialValue, Key key, double symbolSize = 15 
+	}): _symbolSize = symbolSize,
+		_notifier = new ValueNotifier(initialValue ?? ''),
         super(key: key);
-
-	List<String> get symbols => _symbols.toList();
 
     @override
     Widget build(BuildContext context) {
         const int rows = 4;
         const height = _keyboardHeight / (rows + 1) - 5;
 
-        final itemsPerRow = ((_symbols.length + 4) / rows).ceil();
+        final itemsPerRow = ((symbols.length + 4) / rows).ceil();
         final screenWidth = MediaQuery.of(context).size.width;
         final width = screenWidth / itemsPerRow;
 
-        final children = _symbols.map((s) => new _Key(
+        final children = symbols.map((s) => new _Key(
 			symbol: new _SymbolButton(
 				symbol: s,
 				symbolSize: _symbolSize,
-				onTap: () => updateValue((notifier.value ?? '') + s)
+				onTap: () => updateValue(onSymbolTap(s))
 			), 
 			height: height, 
 			width: width
@@ -48,14 +46,7 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 				symbol: new _Button(
 					child: const Icon(Icons.backspace), 
 					color: backspaceColor, 
-					onTap: () {
-						final curValue = notifier.value ?? '';
-						if (curValue.isNotEmpty) {
-							final newValue = curValue.replaceFirst(_lastSymbolRegExp, '');
-							updateValue(newValue == curValue ? 
-								curValue.substring(0, curValue.length - 1): newValue);
-						}
-					}
+					onTap: () => updateValue(onSymbolTap(null))
 				), 
 				height: height, 
 				width: wideBtnWidth, 

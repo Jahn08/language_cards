@@ -11,8 +11,9 @@ class _EnglishPhoneticKeyboard extends InputKeyboard {
 		't', 'tʃ', 'θ', 'v', 'w', 'z', 'ʒ', 'ˈ', 'ˌ', '.'
     ];
 
-    _EnglishPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+    _EnglishPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class _FrenchPhoneticKeyboard extends InputKeyboard {
@@ -23,8 +24,9 @@ class _FrenchPhoneticKeyboard extends InputKeyboard {
 		'p', 'ʁ', 's', 'ʃ', 't', 'v', 'w', 'z', 'ʒ', '.', '‿'
     ];
 
-    _FrenchPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+    _FrenchPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class _SpanishPhoneticKeyboard extends InputKeyboard {
@@ -35,8 +37,9 @@ class _SpanishPhoneticKeyboard extends InputKeyboard {
 		'v', 'w', 'x', 'z', 'ˈ', '.'
     ];
 
-    _SpanishPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+    _SpanishPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class _ItalianPhoneticKeyboard extends InputKeyboard {
@@ -48,8 +51,9 @@ class _ItalianPhoneticKeyboard extends InputKeyboard {
 		'x', 'z', 'ˈ', 'ˌ', '.', ':'
     ];
 
-    _ItalianPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+	_ItalianPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class _GermanPhoneticKeyboard extends InputKeyboard {
@@ -62,8 +66,9 @@ class _GermanPhoneticKeyboard extends InputKeyboard {
 		't', 'ts', 'tʃ', 'θ', 'v', 'x', 'z', 'ʔ', ':', 'ˈ', 'ˌ'
     ];
 
-    _GermanPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+	_GermanPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class _RussianPhoneticKeyboard extends InputKeyboard {
@@ -73,33 +78,34 @@ class _RussianPhoneticKeyboard extends InputKeyboard {
 		'l', 'm', 'n', 'ʐ', 'p', 'r', 's', 'ʂ', 'ɕː', 't', 't͡s', 't͡ɕ', 
 		'v', 'x', 'ʐ', 'ʑː', 'z', 'ʲ', 'ˈ'
 	];
-
-    _RussianPhoneticKeyboard(String initialValue, { Key key }): 
-        super(_phoneticSymbols, 15, key: key, initialValue: initialValue);
+	
+	_RussianPhoneticKeyboard(
+		String initialValue, String Function(String symbol) onSymbolTap, { Key key }
+	): super(_phoneticSymbols, initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
 
 class PhoneticKeyboard {
 
 	PhoneticKeyboard._();
 
-	static InputKeyboard getLanguageSpecific({ 
+	static InputKeyboard getLanguageSpecific(String Function(String) onSymbolTap, { 
 		String initialValue, Key key, Language lang = Language.english 
 	}) {
 		switch (lang ?? Language.english) {
 			case Language.english:
-				return new _EnglishPhoneticKeyboard(initialValue, key: key);
+				return new _EnglishPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			case Language.spanish:
-				return new _SpanishPhoneticKeyboard(initialValue, key: key);
+				return new _SpanishPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			case Language.german:
-				return new _GermanPhoneticKeyboard(initialValue, key: key);
+				return new _GermanPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			case Language.russian:
-				return new _RussianPhoneticKeyboard(initialValue, key: key);
+				return new _RussianPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			case Language.french:
-				return new _FrenchPhoneticKeyboard(initialValue, key: key);
+				return new _FrenchPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			case Language.italian:
-				return new _ItalianPhoneticKeyboard(initialValue, key: key);
+				return new _ItalianPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 			default:
-				return new _EnglishPhoneticKeyboard(initialValue, key: key);
+				return new _EnglishPhoneticKeyboard(initialValue, onSymbolTap, key: key);
 		}
 	}
 }

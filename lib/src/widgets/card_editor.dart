@@ -2,7 +2,6 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'popup_text_field.dart';
-import 'phonetic_keyboard.dart';
 import './keyboarded_field.dart';
 import './loader.dart';
 import './no_translation_snack_bar.dart';
@@ -172,17 +171,14 @@ class CardEditorState extends State<CardEditor> {
 							new AnimatedBuilder(
 								animation: Listenable.merge([_transcriptionNotifier, _packNotifier]),
 								builder: (_, __) => 
-									new KeyboardedField(PhoneticKeyboard.getLanguageSpecific(
+									new KeyboardedField(_packNotifier.value?.from,
+										_transcriptionFocusNode,
+										locale.cardEditorTranscriptionTextFieldLabel,
 										initialValue: _transcriptionNotifier.value,
-										lang: _packNotifier.value?.from
-									), 
-									_transcriptionFocusNode,
-									locale.cardEditorTranscriptionTextFieldLabel,
-									initialValue: _transcriptionNotifier.value,
-									onChanged: (value) {
-										_transcriptionNotifier.value = value;
-										_setStateDirtiness();
-									})
+										onChanged: (value) {
+											_transcriptionNotifier.value = value;
+											_setStateDirtiness();
+										})
 							),
 							new ValueListenableBuilder(
 								valueListenable: _partOfSpeechNotifier,
