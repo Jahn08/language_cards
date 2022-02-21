@@ -34,24 +34,35 @@ class KeyboardedField extends StatelessWidget {
 		RegExp lastSymbolRegExp;
 	  	final keyboard = PhoneticKeyboard.getLanguageSpecific(
 			(symbol) {
-				// TODO: Add behaviour for a selection of several symbols
-				final curPosition = textController.selection.start;
+				final selection = textController.selection;
+				final isNormalized = selection.isNormalized;
+				final curPosition = isNormalized ? selection.start: selection.end;
+				final endPosition = isNormalized ? selection.end: selection.start;
+
 				final text = textController.text;
 				
 				String newText;
+				newPosition = curPosition;
 				if (symbol == null) {
-					if (text.isNotEmpty && curPosition > 0)
-						newText = text.substring(0, curPosition).replaceFirst(lastSymbolRegExp, '') + 
-							text.substring(curPosition);
-					else
-						newText = text;
+					if (text.isNotEmpty) {
+						if (!selection.isCollapsed)
+							newText = text.substring(0, curPosition) + text.substring(endPosition);
+						else if (curPosition > 0) {
+							newText = text.substring(0, curPosition).replaceFirst(lastSymbolRegExp, '') + 
+								text.substring(curPosition);
+							newPosition = curPosition + (newText.length - text.length);
+						}
+					}
+					
+					newText ??= text;
 				}
-				else
+				else {
 					newText = curPosition == text.length ? 
 						text + symbol:
-						text.substring(0, curPosition) + symbol + text.substring(curPosition);
-
-				newPosition = curPosition + (newText.length - text.length);
+						text.substring(0, curPosition) + symbol + text.substring(endPosition);
+					newPosition = curPosition + symbol.length;
+				}
+					
 				return newText;
 			}, initialValue: _initialValue, lang: _lang);
 		lastSymbolRegExp = new RegExp('(${keyboard.symbols.join('|')}|.)\$');
