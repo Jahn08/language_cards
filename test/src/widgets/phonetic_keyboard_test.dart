@@ -57,8 +57,11 @@ void main() {
 			new TextPosition(offset: offset));
 		
 		await _tapIconKey(tester, Icons.backspace);
+		
 		final expectedOutput = input.substring(0, doubleSymbolPosition) + input.substring(offset);
-		expect(_findEditableText(expectedOutput), findsOneWidget);
+		final changedTextFinder = _findEditableText(expectedOutput);
+		expect(changedTextFinder, findsOneWidget);
+		_assureTextPosition(tester, changedTextFinder, offset - doubleSymbol.length);
     });
 
 	testWidgets('Removes a symbol partially in the middle of transcription', (tester) async {
@@ -85,8 +88,11 @@ void main() {
 			new TextPosition(offset: offset));
 		
 		await _tapIconKey(tester, Icons.backspace);
+		
 		final expectedOutput = input.substring(0, complexSymbolPosition) + input.substring(offset);
-		expect(_findEditableText(expectedOutput), findsOneWidget);
+		final changedTextFinder = _findEditableText(expectedOutput);
+		expect(changedTextFinder, findsOneWidget);
+		_assureTextPosition(tester, changedTextFinder, offset - (complexSymbol.length - 1));
     });
 
 	testWidgets('Removes no previous symbols when the cursor is at the beginning of transcription', 
@@ -104,7 +110,9 @@ void main() {
 			for (int i = 0; i < 3; ++i)
 				await _tapIconKey(tester, Icons.backspace);
 
-			expect(_findEditableText(input), findsOneWidget);
+			final nonChangedTextFinder = _findEditableText(input);
+			expect(nonChangedTextFinder, findsOneWidget);
+			_assureTextPosition(tester, nonChangedTextFinder, 0);
 		});
 
     testWidgets('Enters a symbol in the middle of transcription', (tester) =>
@@ -192,5 +200,13 @@ Future<void> _testEnteringSymbol(WidgetTester tester, int Function(String) posit
 	await cardEditorTester.tapSymbolKey(symbolToEnter);
 
 	final expectedOutput = input.substring(0, offset) + symbolToEnter + input.substring(offset);
-	expect(_findEditableText(expectedOutput), findsOneWidget);
+	final changedTextFinder = _findEditableText(expectedOutput);
+	expect(changedTextFinder, findsOneWidget);
+	_assureTextPosition(tester, changedTextFinder, offset + symbolToEnter.length);
+}
+
+void _assureTextPosition(WidgetTester tester, Finder textFinder, int expectedPosition) {
+	final selection = tester.widget<EditableText>(textFinder).controller.selection;
+	expect(selection.isCollapsed, true);
+	expect(selection.start, expectedPosition);
 }
