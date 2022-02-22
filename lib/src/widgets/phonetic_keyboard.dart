@@ -19,9 +19,9 @@ class _EnglishPhoneticKeyboard extends InputKeyboard {
 class _FrenchPhoneticKeyboard extends InputKeyboard {
     static const _phoneticSymbols = <String>[
         'a', 'ɑ', 'ɑ̃', 'œ̃', 'e', 'ɛ', 'ɛː', 'ɛ̃', 'ə', 'i', 
-		'o', 'ɔ̃', 'ɔ', 'ø', 'œ', 'œ̃', 'u', 'ɥ', 'y', 'b', 
-		'd', 'f', 'g', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'ɲ',   
-		'p', 'ʁ', 's', 'ʃ', 't', 'v', 'w', 'z', 'ʒ', '.', '‿'
+		'o', 'ɔ̃', 'ɔ', 'ø', 'œ', 'u', 'ɥ', 'y', 'b', 'd',
+		'f', 'g', 'j', 'k', 'l', 'm', 'n', 'ŋ', 'ɲ', 'p',
+		'ʁ', 's', 'ʃ', 't', 'v', 'w', 'z', 'ʒ', '.', '‿'
     ];
 
     _FrenchPhoneticKeyboard(
@@ -76,7 +76,7 @@ class _RussianPhoneticKeyboard extends InputKeyboard {
 		'a', 'æ', 'ɐ', 'ə', 'e', 'ɛ', 'i', 'ɨ', 'ɪ', 'ᵻ', 'ɵ', 'o',  
 		'ʊ', 'u', 'ʉ', 'b', 'd', 'dz', 'dʑ', 'f', 'g', 'ɣ', 'j', 'k', 
 		'l', 'm', 'n', 'ʐ', 'p', 'r', 's', 'ʂ', 'ɕː', 't', 't͡s', 't͡ɕ', 
-		'v', 'x', 'ʐ', 'ʑː', 'z', 'ʲ', 'ˈ'
+		'v', 'x', 'ʑː', 'z', 'ʲ', 'ˈ'
 	];
 	
 	_RussianPhoneticKeyboard(

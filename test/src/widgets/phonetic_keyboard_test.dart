@@ -7,10 +7,25 @@ import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/keyboarded_field.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../testers/card_editor_tester.dart';
+import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
 void main() {
     
+	test('Assures that there are no duplicated symbols in all phonetic keyboards', () {
+        for (final lang in Language.values) {
+			final symbols = _getEmptyKeyboard(lang).symbols;
+
+			final countedSymbols = <String, int>{};
+			symbols.forEach((s) => countedSymbols[s] = (countedSymbols[s] ?? 0) + 1);
+
+			final duplicatedSymbols = countedSymbols.entries.where((e) => e.value > 1)
+				.map((s) => s.key).toList();
+			expect(duplicatedSymbols.isEmpty, true,
+				reason: 'Duplicated symbols are found for the ${lang.present(Localizator.defaultLocalization)} keyboard: ${duplicatedSymbols.join(', ')}');
+		}
+    });
+
     testWidgets('Shows a keyboard with English phonetic symbols', (tester) async {
         final foundResult = await _createKeyboard(tester);
         
