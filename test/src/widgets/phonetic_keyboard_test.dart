@@ -121,6 +121,30 @@ void main() {
     testWidgets('Enters a symbol at the end of transcription', (tester) =>
 		_testEnteringSymbol(tester, (input) => input.length));
 
+	testWidgets('Removes selected symbols in the middle of transcription', 
+		(tester) => _testRemovingSelection(tester, (input) => new MapEntry(1, input.length - 2)));
+
+	testWidgets('Removes selected symbols at the beginning of transcription', 
+		(tester) => _testRemovingSelection(tester, (input) => new MapEntry(0, input.length - 2)));
+		
+	testWidgets('Removes selected symbols at the end of transcription', 
+		(tester) => _testRemovingSelection(tester, (input) => new MapEntry(1, input.length)));
+
+	testWidgets('Removes everything when transcription selected wholy', 
+		(tester) => _testRemovingSelection(tester, (input) => new MapEntry(0, input.length)));
+
+	testWidgets('Enters a symbol replacing a selection in the middle of transcription', 
+		(tester) => _testReplacingSelectionWithSymbol(tester, (input) => new MapEntry(1, input.length - 2)));
+
+	testWidgets('Enters a symbol replacing a selection at the beginning of transcription', 
+		(tester) => _testReplacingSelectionWithSymbol(tester, (input) => new MapEntry(0, input.length - 2)));
+
+	testWidgets('Enters a symbol replacing a selection at the end of transcription', 
+		(tester) => _testReplacingSelectionWithSymbol(tester, (input) => new MapEntry(1, input.length)));
+
+	testWidgets('Enters a symbol replacing a selection of entire transcription', 
+		(tester) => _testReplacingSelectionWithSymbol(tester, (input) => new MapEntry(0, input.length)));
+
     testWidgets('Hides a keyboard by clicking on the done key', (tester) async {
         await _createKeyboard(tester, show: true);
 
@@ -195,9 +219,7 @@ Future<void> _testEnteringSymbol(WidgetTester tester, int Function(String) posit
 	final offset = positionGetter(input);
 	textCtrl.controller.selection = new TextSelection.fromPosition(new TextPosition(offset: offset));
 
-	final doubleSymbols = symbols.where((s) => s.length > 1).toList();
-	final symbolToEnter = Randomiser.nextElement(doubleSymbols);
-	await cardEditorTester.tapSymbolKey(symbolToEnter);
+	final symbolToEnter = await _enterDoubleSymbol(cardEditorTester, symbols);
 
 	final expectedOutput = input.substring(0, offset) + symbolToEnter + input.substring(offset);
 	final changedTextFinder = _findEditableText(expectedOutput);
@@ -205,8 +227,67 @@ Future<void> _testEnteringSymbol(WidgetTester tester, int Function(String) posit
 	_assureTextPosition(tester, changedTextFinder, offset + symbolToEnter.length);
 }
 
+Future<String> _enterDoubleSymbol(CardEditorTester cardEditorTester, List<String> symbols) async {
+	final doubleSymbols = symbols.where((s) => s.length > 1).toList();
+	final symbolToEnter = Randomiser.nextElement(doubleSymbols);
+	await cardEditorTester.tapSymbolKey(symbolToEnter);
+
+	return symbolToEnter;
+}
+
 void _assureTextPosition(WidgetTester tester, Finder textFinder, int expectedPosition) {
 	final selection = tester.widget<EditableText>(textFinder).controller.selection;
 	expect(selection.isCollapsed, true);
 	expect(selection.start, expectedPosition);
+}
+
+Future<void> _testRemovingSelection(
+	WidgetTester tester, MapEntry<int, int> Function(String) positionGetter
+) async {
+	await _createKeyboard(tester, show: true);
+	
+	final expectedSymbols = await new CardEditorTester(tester).enterRandomTranscription();
+	final input = expectedSymbols.join('');
+	
+	final textFinder = _findEditableText(input);
+	final textCtrl = tester.widget<EditableText>(textFinder);
+
+	final position = positionGetter(input);
+	final startPosition = position.key;
+	final endPosition = position.value;
+	textCtrl.controller.selection = new TextSelection(baseOffset: startPosition, extentOffset: endPosition);
+	
+	await _tapIconKey(tester, Icons.backspace);
+	
+	final expectedOutput = input.substring(0, startPosition) + input.substring(endPosition);
+	final changedTextFinder = _findEditableText(expectedOutput);
+	expect(changedTextFinder, findsOneWidget);
+	_assureTextPosition(tester, changedTextFinder, startPosition);
+}
+
+Future<void> _testReplacingSelectionWithSymbol(
+	WidgetTester tester, MapEntry<int, int> Function(String) positionGetter
+) async {
+	final language = Randomiser.nextElement(Language.values);
+	await _createKeyboard(tester, lang: language, show: true);
+	
+	final symbols = _getEmptyKeyboard(language).symbols;
+	final cardEditorTester = new CardEditorTester(tester);
+	final expectedSymbols = await cardEditorTester.enterRandomTranscription(symbols: symbols);
+	final input = expectedSymbols.join('');
+	
+	final textFinder = _findEditableText(input);
+	final textCtrl = tester.widget<EditableText>(textFinder);
+
+	final position = positionGetter(input);
+	final startPosition = position.key;
+	final endPosition = position.value;
+	textCtrl.controller.selection = new TextSelection(baseOffset: startPosition, extentOffset: endPosition);
+
+	final symbolToEnter = await _enterDoubleSymbol(cardEditorTester, symbols);
+
+	final expectedOutput = input.substring(0, startPosition) + symbolToEnter + input.substring(endPosition);
+	final changedTextFinder = _findEditableText(expectedOutput);
+	expect(changedTextFinder, findsOneWidget);
+	_assureTextPosition(tester, changedTextFinder, startPosition + symbolToEnter.length);
 }
