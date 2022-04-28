@@ -66,7 +66,7 @@ class PackStorageMock extends PackStorage with StudyStorage {
             id: id, 
             from: Language.english,
             to: Language.russian,
-			studyDate: id % 2 == 0 ? DateTime.now().add(new Duration(days: -Randomiser.nextInt(99))): null,
+			studyDate: id.isEven ? DateTime.now().add(new Duration(days: -Randomiser.nextInt(99))): null,
 			cardsNumber: 0
         );
 	}

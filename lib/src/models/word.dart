@@ -31,6 +31,7 @@ class Word {
     String get translationString => translations.join('; ');
 
     static List<String> _decodeTranslations(List<dynamic> translationJson) =>
+        // ignore: avoid_dynamic_calls
         translationJson.map((value) => value['text'] as String).toList();
 
 	@override

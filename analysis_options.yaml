@@ -19,3 +19,9 @@ linter:
     sort_pub_dependencies: false
 
     prefer_interpolation_to_compose_strings: false
+
+    always_use_package_imports: false
+
+    require_trailing_commas: false
+
+    depend_on_referenced_packages: false

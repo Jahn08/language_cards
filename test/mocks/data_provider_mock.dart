@@ -49,6 +49,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		var propItems = _getFilteredItemProps(filters);
 
 		if (orderBy != null && orderBy.isNotEmpty)
+			// ignore: avoid_dynamic_calls
 			propItems = propItems.toList()..sort((a, b) => a[orderBy].compareTo(b[orderBy]) as int);
 
 		if (skip != null)
