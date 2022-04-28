@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter/material.dart';
 import 'package:language_cards/src/models/language.dart';
@@ -80,7 +79,7 @@ void main() {
     });
 
 	testWidgets('Removes a symbol partially in the middle of transcription', (tester) async {
-		final language = Language.russian;
+		const language = Language.russian;
         await _createKeyboard(tester, lang: language, show: true);
         
 		final symbols = _getEmptyKeyboard(language).symbols;

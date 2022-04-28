@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/app.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
@@ -18,288 +18,269 @@ import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
+  testWidgets('Renders a scaffold with passed widgets and title for a non-navigational bar',
+      (tester) async {
+    final expectedTitle = Randomiser.nextString();
+    final expectedBodyText = Randomiser.nextString();
 
-    testWidgets('Renders a scaffold with passed widgets and title for a non-navigational bar',
-        (tester) async {
-            final expectedTitle = Randomiser.nextString();
-            final expectedBodyText = Randomiser.nextString();
+    final expectedBarActionText = Randomiser.nextString();
+    final expectedBarAction = _buildBarAction(expectedBarActionText);
 
-            final expectedBarActionText = Randomiser.nextString();
-            final expectedBarAction = _buildBarAction(expectedBarActionText);
+    final bottomNavBarFirstItemTitle = Randomiser.nextString();
+    final bottomNavBarSecondItemTitle = Randomiser.nextString();
 
-            final bottomNavBarFirstItemTitle = Randomiser.nextString();
-            final bottomNavBarSecondItemTitle = Randomiser.nextString();
+    final bottomNavBarKey = new Key(Randomiser.nextString());
+    final floatingActionBtnKey = new Key(Randomiser.nextString());
 
-            final bottomNavBarKey = new Key(Randomiser.nextString());
-            final floatingActionBtnKey = new Key(Randomiser.nextString());
-            
-            const navBarItemIcon = Icon(Icons.ac_unit);
+    const navBarItemIcon = Icon(Icons.ac_unit);
 
-            await _buildInsideApp(tester, new BarScaffold(
-				title: expectedTitle, 
-                bottomBar: new BottomNavigationBar(
-                    key: bottomNavBarKey,
-                    items: <BottomNavigationBarItem>[
-                        new BottomNavigationBarItem(
-                            icon: navBarItemIcon,
-                            label: bottomNavBarFirstItemTitle
-                        ),
-                        new BottomNavigationBarItem(
-                            icon: navBarItemIcon,
-                            label: bottomNavBarSecondItemTitle
-                        )
-                    ]
-                ),
-                body: new Text(expectedBodyText),
-                barActions: <Widget>[expectedBarAction],
-                floatingActionButton: new FloatingActionButton(
-                    key: floatingActionBtnKey,
-                    onPressed: null
-                )
-            ));
+    await _buildInsideApp(
+        tester,
+        new BarScaffold(
+            title: expectedTitle,
+            bottomBar:
+                new BottomNavigationBar(key: bottomNavBarKey, items: <BottomNavigationBarItem>[
+              new BottomNavigationBarItem(icon: navBarItemIcon, label: bottomNavBarFirstItemTitle),
+              new BottomNavigationBarItem(icon: navBarItemIcon, label: bottomNavBarSecondItemTitle)
+            ]),
+            body: new Text(expectedBodyText),
+            barActions: <Widget>[expectedBarAction],
+            floatingActionButton:
+                new FloatingActionButton(key: floatingActionBtnKey, onPressed: null)));
 
-            AssuredFinder.findOne(label: expectedTitle, shouldFind: true);
-            AssuredFinder.findOne(label: expectedBodyText, shouldFind: true);
+    AssuredFinder.findOne(label: expectedTitle, shouldFind: true);
+    AssuredFinder.findOne(label: expectedBodyText, shouldFind: true);
 
-            AssuredFinder.findOne(type: NavigationBar, shouldFind: false);
-            AssuredFinder.findOne(label: expectedBarActionText, shouldFind: true);
+    AssuredFinder.findOne(type: NavigationBar, shouldFind: false);
+    AssuredFinder.findOne(label: expectedBarActionText, shouldFind: true);
 
-            AssuredFinder.findOne(key: bottomNavBarKey, shouldFind: true);
-            AssuredFinder.findOne(label: bottomNavBarFirstItemTitle, shouldFind: true);
-            AssuredFinder.findOne(label: bottomNavBarSecondItemTitle, shouldFind: true);
+    AssuredFinder.findOne(key: bottomNavBarKey, shouldFind: true);
+    AssuredFinder.findOne(label: bottomNavBarFirstItemTitle, shouldFind: true);
+    AssuredFinder.findOne(label: bottomNavBarSecondItemTitle, shouldFind: true);
 
-            AssuredFinder.findOne(key: expectedBarAction.key, shouldFind: true);
-            AssuredFinder.findOne(key: floatingActionBtnKey, shouldFind: true);
-        });
+    AssuredFinder.findOne(key: expectedBarAction.key, shouldFind: true);
+    AssuredFinder.findOne(key: floatingActionBtnKey, shouldFind: true);
+  });
 
-    testWidgets('Renders a navigational bar with actions when a navigation callback is provided', 
-        (tester) async {
-            final expectedBarActionText = Randomiser.nextString();
-            final expectedBarAction = _buildBarAction(expectedBarActionText);
+  testWidgets('Renders a navigational bar with actions when a navigation callback is provided',
+      (tester) async {
+    final expectedBarActionText = Randomiser.nextString();
+    final expectedBarAction = _buildBarAction(expectedBarActionText);
 
-            await _buildInsideApp(tester, new BarScaffold(
-				title: Randomiser.nextString(), 
-                body: new Text(Randomiser.nextString()),
-                onNavGoingBack: () {},
-                barActions: <Widget>[expectedBarAction]
-            ));
+    await _buildInsideApp(
+        tester,
+        new BarScaffold(
+            title: Randomiser.nextString(),
+            body: new Text(Randomiser.nextString()),
+            onNavGoingBack: () {},
+            barActions: <Widget>[expectedBarAction]));
 
-            AssuredFinder.findOne(label: expectedBarActionText, type: NavigationBar,
-                shouldFind: true);
-            AssuredFinder.findOne(key: expectedBarAction.key, shouldFind: true);
-        });
+    AssuredFinder.findOne(label: expectedBarActionText, type: NavigationBar, shouldFind: true);
+    AssuredFinder.findOne(key: expectedBarAction.key, shouldFind: true);
+  });
 
-    testWidgets('Renders no button to open the settings panel by default', (tester) async {
-        await _buildInsideApp(tester, new BarScaffold(
-			title: Randomiser.nextString(), 
-            body: new Text(Randomiser.nextString())));
+  testWidgets('Renders no button to open the settings panel by default', (tester) async {
+    await _buildInsideApp(tester,
+        new BarScaffold(title: Randomiser.nextString(), body: new Text(Randomiser.nextString())));
 
-        _assureSettingsBtn(false);
+    _assureSettingsBtn(false);
+  });
+
+  testWidgets('Renders the settings panel with user preferences', (tester) async {
+    final userParams = await PreferencesTester.saveRandomUserParams();
+
+    final expectedLang = userParams.interfaceLang;
+    final expectedTheme = userParams.theme;
+
+    await _pumpScaffoldWithSettings(tester);
+
+    final settingsBtnFinder = _assureSettingsBtn(true);
+    await new WidgetAssistant(tester).tapWidget(settingsBtnFinder);
+
+    final iconOptionsFinder = AssuredFinder.findSeveral(type: IconOption, shouldFind: true);
+    expect(tester.widgetList(iconOptionsFinder).length,
+        UserParams.interfaceLanguages.length + AppTheme.values.length);
+
+    Finder getLangOptionFinder({bool isSelected}) => find.descendant(
+        of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
+        matching: find.byType(AssetIcon));
+
+    UserParams.interfaceLanguages.forEach((lang) {
+      expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: expectedLang == lang)),
+          AssetIcon.getByLanguage(lang));
     });
 
-    testWidgets('Renders the settings panel with user preferences', (tester) async {
-        final userParams = await PreferencesTester.saveRandomUserParams();
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(getLangOptionFinder(isSelected: false));
 
-        final expectedLang = userParams.interfaceLang;
-        final expectedTheme = userParams.theme;
+    final chosenLang = UserParams.interfaceLanguages.firstWhere((lang) => lang != expectedLang);
+    expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: true)),
+        AssetIcon.getByLanguage(chosenLang));
 
-        await _pumpScaffoldWithSettings(tester);
+    Color getThemeColour(AppTheme theme) => Colors.blueGrey[theme == AppTheme.dark ? 900 : 100];
 
-        final settingsBtnFinder = _assureSettingsBtn(true);
-        await new WidgetAssistant(tester).tapWidget(settingsBtnFinder);
+    Finder getThemeOptionFinder({bool isSelected}) => find.descendant(
+        of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
+        matching: find.byWidgetPredicate((w) => w is Container && w.child == null));
 
-        final iconOptionsFinder = AssuredFinder.findSeveral(type: IconOption, 
-            shouldFind: true);
-        expect(tester.widgetList(iconOptionsFinder).length, 
-            UserParams.interfaceLanguages.length + AppTheme.values.length);
-
-		Finder getLangOptionFinder({ bool isSelected }) => find.descendant(
-			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
-			matching: find.byType(AssetIcon)
-		);
-
-        UserParams.interfaceLanguages.forEach((lang) {
-            expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: expectedLang == lang)), 
-				AssetIcon.getByLanguage(lang));
-        });
-
-		final assistant = new WidgetAssistant(tester);
-		await assistant.tapWidget(getLangOptionFinder(isSelected: false));
-
-		final chosenLang = UserParams.interfaceLanguages.firstWhere((lang) => lang != expectedLang);
-		expect(tester.widget<AssetIcon>(getLangOptionFinder(isSelected: true)), 
-			AssetIcon.getByLanguage(chosenLang));
-
-		Color getThemeColour(AppTheme theme) => Colors.blueGrey[theme == AppTheme.dark ? 900: 100];
-
-		Finder getThemeOptionFinder({ bool isSelected }) => find.descendant(
-			of: find.byWidgetPredicate((w) => w is IconOption && w.isSelected == isSelected),
-			matching: find.byWidgetPredicate((w) => w is Container && w.child == null)
-		);
-
-        AppTheme.values.forEach((theme) {
-			expect(tester.widget<Container>(getThemeOptionFinder(isSelected: expectedTheme == theme)).color, 
-				getThemeColour(theme));
-        });
-
-		await assistant.tapWidget(getThemeOptionFinder(isSelected: false));
-
-		final chosenTheme = AppTheme.values.firstWhere((theme) => theme != expectedTheme);
-		expect(tester.widget<Container>(getThemeOptionFinder(isSelected: true)).color, 
-			getThemeColour(chosenTheme));
-
-		final dropdowns = tester.widgetList<StyledDropdown>(
-			AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
-		expect(dropdowns.length, 2);
-
-		final locale = Localizator.defaultLocalization;
-		final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys;
-		dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
-		
-		final studyDirections = PresentableEnum.mapStringValues(
-			StudyDirection.values, locale).keys;
-		dropdowns.singleWhere((d) => d.options.every((op) => studyDirections.contains(op)));
-
-		final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
-		final dropdownBtns = tester.widgetList<DropdownButton<String>>(
-			AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true));
-		expect(dropdownBtns.length, 2);
-
-		final studyParams = userParams.studyParams;
-		[studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
-			.every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
-
-		final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
-		expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value, studyParams.showStudyDate);
+    AppTheme.values.forEach((theme) {
+      expect(
+          tester.widget<Container>(getThemeOptionFinder(isSelected: expectedTheme == theme)).color,
+          getThemeColour(theme));
     });
 
-    testWidgets('Saves and hides settings after clicking the apply button on the panel', 
-        (tester) async {
-            PreferencesTester.resetSharedPreferences();
-            final defaultUserParams = await PreferencesProvider.fetch();
+    await assistant.tapWidget(getThemeOptionFinder(isSelected: false));
 
-            await _pumpScaffoldWithSettings(tester);
+    final chosenTheme = AppTheme.values.firstWhere((theme) => theme != expectedTheme);
+    expect(tester.widget<Container>(getThemeOptionFinder(isSelected: true)).color,
+        getThemeColour(chosenTheme));
 
-            final settingsBtnFinder = _assureSettingsBtn(true);
-            final assistant = new WidgetAssistant(tester);
-            await assistant.tapWidget(settingsBtnFinder);
+    final dropdowns = tester.widgetList<StyledDropdown>(
+        AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
+    expect(dropdowns.length, 2);
 
-            final iconOptionsFinder = AssuredFinder.findSeveral(type: IconOption, 
-                shouldFind: true);
+    final locale = Localizator.defaultLocalization;
+    final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys;
+    dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
 
-            final nonChosenOptionsFinder = find.descendant(
-                of: iconOptionsFinder, matchRoot: true,
-                matching: find.byWidgetPredicate((w) => w is IconOption && !w.isSelected));
-            expect(nonChosenOptionsFinder, findsWidgets);
-            
-            await assistant.tapWidget(nonChosenOptionsFinder.first, atCenter: true);
-            await assistant.tapWidget(nonChosenOptionsFinder.last, atCenter: true);
+    final studyDirections = PresentableEnum.mapStringValues(StudyDirection.values, locale).keys;
+    dropdowns.singleWhere((d) => d.options.every((op) => studyDirections.contains(op)));
 
-			final defStudyParams = defaultUserParams.studyParams;
-			const expectedCardSide = CardSide.back;
-			await assistant.changeDropdownItem(defStudyParams.cardSide, expectedCardSide);		
-			
-			const expectedDirection = StudyDirection.random;
-			await assistant.changeDropdownItem(defStudyParams.direction, expectedDirection);		
+    final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
+    final dropdownBtns = tester.widgetList<DropdownButton<String>>(
+        AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true));
+    expect(dropdownBtns.length, 2);
 
-			final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
-			await assistant.tapWidget(studyDateCheckFinder);
+    final studyParams = userParams.studyParams;
+    [studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
+        .every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
 
-            await _applySettings(assistant);
+    final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
+    expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value, studyParams.showStudyDate);
+  });
 
-            final savedUserParams = await PreferencesProvider.fetch();
-            expect(savedUserParams.theme == defaultUserParams.theme, false);
-            expect(savedUserParams.interfaceLang == defaultUserParams.interfaceLang, false);
-            
-			final studyParams = savedUserParams.studyParams;
-			expect(studyParams.cardSide == defStudyParams.cardSide, false);
-			expect(studyParams.cardSide, expectedCardSide);
+  testWidgets('Saves and hides settings after clicking the apply button on the panel',
+      (tester) async {
+    PreferencesTester.resetSharedPreferences();
+    final defaultUserParams = await PreferencesProvider.fetch();
 
-			expect(studyParams.direction == defStudyParams.direction, false);
-			expect(studyParams.direction, expectedDirection);
+    await _pumpScaffoldWithSettings(tester);
 
-			expect(studyParams.showStudyDate == defStudyParams.showStudyDate, false);
-			expect(studyParams.showStudyDate, false);
-        });
+    final settingsBtnFinder = _assureSettingsBtn(true);
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(settingsBtnFinder);
 
-    testWidgets('Resets settings after clicking the reset button on the panel', (tester) async {
-        final userParams = await PreferencesTester.saveNonDefaultUserParams();
-        final defaultUserParams = new UserParams();
-        expect(userParams.theme == defaultUserParams.theme, false);
-        expect(userParams.interfaceLang == defaultUserParams.interfaceLang, false);
+    final iconOptionsFinder = AssuredFinder.findSeveral(type: IconOption, shouldFind: true);
 
-		final defStudyParams = defaultUserParams.studyParams;
-	    expect(userParams.studyParams.cardSide == defStudyParams.cardSide, false);
-		expect(userParams.studyParams.direction == defStudyParams.direction, false);
-		expect(userParams.studyParams.showStudyDate == defStudyParams.showStudyDate, false);
+    final nonChosenOptionsFinder = find.descendant(
+        of: iconOptionsFinder,
+        matchRoot: true,
+        matching: find.byWidgetPredicate((w) => w is IconOption && !w.isSelected));
+    expect(nonChosenOptionsFinder, findsWidgets);
 
-        await _pumpScaffoldWithSettings(tester);
+    await assistant.tapWidget(nonChosenOptionsFinder.first, atCenter: true);
+    await assistant.tapWidget(nonChosenOptionsFinder.last, atCenter: true);
 
-        final settingsBtnFinder = _assureSettingsBtn(true);
-        final assistant = new WidgetAssistant(tester);
-        await assistant.tapWidget(settingsBtnFinder);
+    final defStudyParams = defaultUserParams.studyParams;
+    const expectedCardSide = CardSide.back;
+    await assistant.changeDropdownItem(defStudyParams.cardSide, expectedCardSide);
 
-        await assistant.pressButtonDirectlyByLabel('Reset');
+    const expectedDirection = StudyDirection.random;
+    await assistant.changeDropdownItem(defStudyParams.direction, expectedDirection);
 
-        await _applySettings(assistant);
+    final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
+    await assistant.tapWidget(studyDateCheckFinder);
 
-        final storedUserParams = await PreferencesProvider.fetch();
-        expect(storedUserParams.theme, defaultUserParams.theme);
-        expect(storedUserParams.interfaceLang, defaultUserParams.interfaceLang);
-		
-		final curStudyParams = storedUserParams.studyParams;
-	    expect(curStudyParams.cardSide, defStudyParams.cardSide);
-		expect(curStudyParams.direction, defStudyParams.direction);
-		expect(curStudyParams.showStudyDate, defStudyParams.showStudyDate);
-    });
+    await _applySettings(assistant);
 
-	testWidgets('Changes the interface language immediately after applying the setting', 
-        (tester) async {
-            PreferencesTester.resetSharedPreferences();
-			await tester.pumpWidget(new App());
-            await tester.pump();
-            await tester.pump();
-			
-            final settingsBtnFinder = _assureSettingsBtn(true);
-            final assistant = new WidgetAssistant(tester);
-            await assistant.tapWidget(settingsBtnFinder);
+    final savedUserParams = await PreferencesProvider.fetch();
+    expect(savedUserParams.theme == defaultUserParams.theme, false);
+    expect(savedUserParams.interfaceLang == defaultUserParams.interfaceLang, false);
 
-            final iconOptionFinder = find.byWidgetPredicate((w) => w == AssetIcon.russianFlag);
-			expect(iconOptionFinder, findsOneWidget);
-            
-            await assistant.tapWidget(iconOptionFinder);
+    final studyParams = savedUserParams.studyParams;
+    expect(studyParams.cardSide == defStudyParams.cardSide, false);
+    expect(studyParams.cardSide, expectedCardSide);
 
-			await _applySettings(assistant);
+    expect(studyParams.direction == defStudyParams.direction, false);
+    expect(studyParams.direction, expectedDirection);
 
-			await assistant.tapWidget(settingsBtnFinder);
+    expect(studyParams.showStudyDate == defStudyParams.showStudyDate, false);
+    expect(studyParams.showStudyDate, false);
+  });
 
-            final allTexts = tester.widgetList<Text>(
-				AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
-			expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 1, 
-				reason: 'There are not enough English labels in [${allTexts.join(',')}]');
-        });
+  testWidgets('Resets settings after clicking the reset button on the panel', (tester) async {
+    final userParams = await PreferencesTester.saveNonDefaultUserParams();
+    final defaultUserParams = new UserParams();
+    expect(userParams.theme == defaultUserParams.theme, false);
+    expect(userParams.interfaceLang == defaultUserParams.interfaceLang, false);
+
+    final defStudyParams = defaultUserParams.studyParams;
+    expect(userParams.studyParams.cardSide == defStudyParams.cardSide, false);
+    expect(userParams.studyParams.direction == defStudyParams.direction, false);
+    expect(userParams.studyParams.showStudyDate == defStudyParams.showStudyDate, false);
+
+    await _pumpScaffoldWithSettings(tester);
+
+    final settingsBtnFinder = _assureSettingsBtn(true);
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(settingsBtnFinder);
+
+    await assistant.pressButtonDirectlyByLabel('Reset');
+
+    await _applySettings(assistant);
+
+    final storedUserParams = await PreferencesProvider.fetch();
+    expect(storedUserParams.theme, defaultUserParams.theme);
+    expect(storedUserParams.interfaceLang, defaultUserParams.interfaceLang);
+
+    final curStudyParams = storedUserParams.studyParams;
+    expect(curStudyParams.cardSide, defStudyParams.cardSide);
+    expect(curStudyParams.direction, defStudyParams.direction);
+    expect(curStudyParams.showStudyDate, defStudyParams.showStudyDate);
+  });
+
+  testWidgets('Changes the interface language immediately after applying the setting',
+      (tester) async {
+    PreferencesTester.resetSharedPreferences();
+    await tester.pumpWidget(new App());
+    await tester.pump();
+    await tester.pump();
+
+    final settingsBtnFinder = _assureSettingsBtn(true);
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(settingsBtnFinder);
+
+    final iconOptionFinder = find.byWidgetPredicate((w) => w == AssetIcon.russianFlag);
+    expect(iconOptionFinder, findsOneWidget);
+
+    await assistant.tapWidget(iconOptionFinder);
+
+    await _applySettings(assistant);
+
+    await assistant.tapWidget(settingsBtnFinder);
+
+    final allTexts =
+        tester.widgetList<Text>(AssuredFinder.findSeveral(type: Text, shouldFind: true)).toList();
+    expect(allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length, 1,
+        reason: 'There are not enough English labels in [${allTexts.join(',')}]');
+  });
 }
 
-Future<void> _buildInsideApp(WidgetTester tester, Widget child) => 
+Future<void> _buildInsideApp(WidgetTester tester, Widget child) =>
     tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: child));
 
-TextButton _buildBarAction(String label) => new TextButton(
-    key: new Key(Randomiser.nextString()),
-    child: new Text(label),
-    onPressed: null
-);
+TextButton _buildBarAction(String label) =>
+    new TextButton(key: new Key(Randomiser.nextString()), child: new Text(label), onPressed: null);
 
 Finder _assureSettingsBtn(bool shouldFind) =>
     AssuredFinder.findOne(icon: Icons.settings, shouldFind: shouldFind);
 
-Future<void> _pumpScaffoldWithSettings(WidgetTester tester) => 
-    _buildInsideApp(tester, new SettingsBlocProvider(
-        child: new BarScaffold.withSettings(Randomiser.nextString(), 
-            body: new Text(Randomiser.nextString())
-        )
-    ));
+Future<void> _pumpScaffoldWithSettings(WidgetTester tester) => _buildInsideApp(
+    tester,
+    new SettingsBlocProvider(
+        child: new BarScaffold.withSettings(Randomiser.nextString(),
+            body: new Text(Randomiser.nextString()))));
 
 Future<void> _applySettings(WidgetAssistant assistant) async =>
-	assistant.pressButtonDirectlyByLabel(
-		Localizator.defaultLocalization.barScaffoldSettingsPanelApplyingButtonLabel
-	);
+    assistant.pressButtonDirectlyByLabel(
+        Localizator.defaultLocalization.barScaffoldSettingsPanelApplyingButtonLabel);

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/configuration.dart';
-import 'package:language_cards/src/models/app_params.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/asset_bundle_mock.dart';
 import '../../utilities/randomiser.dart';

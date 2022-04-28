@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart' hide Router;
-import 'package:flutter/widgets.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'popup_text_field.dart';
 import './keyboarded_field.dart';

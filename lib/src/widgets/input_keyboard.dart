@@ -39,8 +39,8 @@ abstract class InputKeyboard extends StatelessWidget with KeyboardCustomPanelMix
 		)).toList();
         
         final wideBtnWidth = width * 2;
-        final backspaceColor = Colors.grey;
-        final doneColor = Colors.blue;
+        const backspaceColor = Colors.grey;
+        const doneColor = Colors.blue;
         children.addAll([
 			new _Key(
 				symbol: new _Button(

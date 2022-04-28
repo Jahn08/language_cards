@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import './src/app.dart';
+import 'package:language_cards/src/app.dart';
 
 void main() {
 	runZonedGuarded(

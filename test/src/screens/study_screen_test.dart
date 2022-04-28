@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
