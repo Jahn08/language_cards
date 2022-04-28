@@ -66,7 +66,8 @@ class _ThemedAppState extends State<_ThemedApp> {
 				localizationsDelegates: const [
 					AppLocalizations.delegate,
 					GlobalMaterialLocalizations.delegate,
-					GlobalWidgetsLocalizations.delegate
+					GlobalWidgetsLocalizations.delegate,
+					GlobalCupertinoLocalizations.delegate
 				],
 				locale: params.getLocale(),
 				supportedLocales: AppLocalizations.supportedLocales,

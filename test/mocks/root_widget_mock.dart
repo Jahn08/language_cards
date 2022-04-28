@@ -54,7 +54,8 @@ class RootWidgetMock extends StatelessWidget {
 			localizationsDelegates: const [
 				AppLocalizations.delegate,
 				GlobalMaterialLocalizations.delegate,
-				GlobalWidgetsLocalizations.delegate
+				GlobalWidgetsLocalizations.delegate,
+				GlobalCupertinoLocalizations.delegate
 			],
 			initialRoute: Router.initialRouteName,
 			onGenerateRoute: onGenerateRoute
