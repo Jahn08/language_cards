@@ -307,9 +307,6 @@ Future<StoredPack> _testAddingPack(WidgetTester tester,
 
   final assistant = new WidgetAssistant(tester);
 
-  final packName = Randomiser.nextString();
-  await assistant.enterText(find.byType(TextFormField), packName);
-
   final langDropdownFinders = _findLanguageDropdowns();
 
   const fromLang = Language.english;
@@ -317,6 +314,9 @@ Future<StoredPack> _testAddingPack(WidgetTester tester,
 
   const toLang = Language.german;
   await assistant.setDropdownItem(langDropdownFinders.last, toLang);
+
+  final packName = Randomiser.nextString();
+  await assistant.enterText(find.byType(TextFormField), packName);
 
   await assistant.tapWidget(saveBtnSearcher());
 
