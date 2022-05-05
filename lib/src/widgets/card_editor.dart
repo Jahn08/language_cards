@@ -194,7 +194,7 @@ class CardEditorState extends State<CardEditor> {
 								valueListenable: _translationNotifier,
 								builder: (_, String translation, __) => new StyledTextField(
 									locale.cardEditorTranslationTextFieldLabel, 
-									isRequired: true, 
+									isRequired: true,
 									initialValue: translation, 
 									onChanged: (value, _) {
 										_translationNotifier.value = value;
@@ -245,35 +245,7 @@ class CardEditorState extends State<CardEditor> {
 								builder: (_, bool isStateDirty, __) =>
 									new ElevatedButton(
 										child: new Text(locale.constsSavingItemButtonLabel),
-										onPressed: isStateDirty ? () async {
-											final state = _key.currentState;
-											if (!state.validate())
-												return;
-
-											StoredPack pack = _packNotifier.value;
-											final wordToSave = await _mergeIfDuplicated(new StoredWord(
-												_textNotifier.value, 
-												id: widget.wordId,
-												packId: pack.id,
-												partOfSpeech: _partOfSpeechDic[_partOfSpeechNotifier.value], 
-												transcription: _transcriptionNotifier.value,
-												translation: _translationNotifier.value,
-												studyProgress: _studyProgressNotifier.value
-											), pack, locale);
-
-											if (wordToSave == null)
-												return;
-
-											state.save();
-
-											if (pack.id != wordToSave.packId)
-												pack = (await _getFuturePacks())
-													.firstWhere((p) => p.id == wordToSave.packId);
-
-											final cardWasAdded = wordToSave.isNew || widget.pack?.id != pack.id;
-											widget.afterSave?.call((await widget._wordStorage.upsert([wordToSave])).first,
-												pack, cardWasAdded);
-										}: null
+										onPressed: isStateDirty ? () => onSave(locale): null
 									)
 							)
 							
@@ -283,6 +255,36 @@ class CardEditorState extends State<CardEditor> {
 			)
 		);
     }
+
+	Future<void> onSave(AppLocalizations locale) async {
+		final state = _key.currentState;
+		if (!state.validate())
+			return;
+
+		state.save();
+
+		StoredPack pack = _packNotifier.value;
+		final wordToSave = await _mergeIfDuplicated(new StoredWord(
+			_textNotifier.value, 
+			id: widget.wordId,
+			packId: pack.id,
+			partOfSpeech: _partOfSpeechDic[_partOfSpeechNotifier.value], 
+			transcription: _transcriptionNotifier.value,
+			translation: _translationNotifier.value,
+			studyProgress: _studyProgressNotifier.value
+		), pack, locale);
+
+		if (wordToSave == null)
+			return;
+
+		if (pack.id != wordToSave.packId)
+			pack = (await _getFuturePacks())
+				.firstWhere((p) => p.id == wordToSave.packId);
+
+		final cardWasAdded = wordToSave.isNew || widget.pack?.id != pack.id;
+		widget.afterSave?.call((await widget._wordStorage.upsert([wordToSave])).first,
+			pack, cardWasAdded);
+	}
 
     bool get _isNew => widget.wordId == null;
 

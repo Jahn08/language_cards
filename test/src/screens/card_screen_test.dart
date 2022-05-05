@@ -10,6 +10,7 @@ import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
+import 'package:language_cards/src/widgets/styled_text_field.dart';
 import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
@@ -28,7 +29,7 @@ void main() {
 
     testWidgets('Builds a screen displaying fields for a word from a storage', 
         (tester) async {
-            final wordToShow = await _displayWord(tester);
+            final wordToShow = await _displayFilledWord(tester);
 			new CardEditorTester(tester).assureRenderingCardFields(wordToShow);
         });
 
@@ -36,7 +37,7 @@ void main() {
         (tester) async {
             final expectedPack = PackStorageMock.generatePack(
                 Randomiser.nextInt(PackStorageMock.namedPacksNumber));
-            await _displayWord(tester, pack: expectedPack);
+            await _displayFilledWord(tester, pack: expectedPack);
 
             await _testDisplayingPackName(tester, expectedPack);
         });
@@ -48,7 +49,7 @@ void main() {
             if (wordWithoutProgress.studyProgress != WordStudyStage.unknown)
                 wordWithoutProgress.resetStudyProgress();
 
-            await _displayWord(tester, storage: storage, wordToShow: wordWithoutProgress);
+            await _displayFilledWord(tester, storage: storage, wordToShow: wordWithoutProgress);
 
             CardEditorTester.findStudyProgressButton(shouldFind: false);
         });
@@ -67,7 +68,7 @@ void main() {
                         WordStudyStage.learned);
             });
 
-            await _displayWord(tester, storage: storage, wordToShow: wordWithProgress);
+            await _displayFilledWord(tester, storage: storage, wordToShow: wordWithProgress);
 
 			new CardEditorTester(tester).assureNonZeroStudyProgress(
 				wordWithProgress.studyProgress);
@@ -93,7 +94,7 @@ void main() {
         (tester) async {
             final storage = new PackStorageMock();
             final expectedPack = storage.getRandom();
-            await _displayWord(tester, storage: storage, pack: expectedPack);
+            await _displayFilledWord(tester, storage: storage, pack: expectedPack);
             
             final assistant = new WidgetAssistant(tester);
             final packBtnFinder = CardEditorTester.findPackButton();
@@ -116,7 +117,7 @@ void main() {
 
 	testWidgets('Displays all named packs in the pack selector dialog', (tester) async {
 		final storage = new PackStorageMock(packsNumber: 30);
-		await _displayWord(tester, storage: storage, pack: storage.getRandom());
+		await _displayFilledWord(tester, storage: storage, pack: storage.getRandom());
 		
 		final assistant = new WidgetAssistant(tester);
 		final packBtnFinder = CardEditorTester.findPackButton();
@@ -133,7 +134,7 @@ void main() {
 
 	testWidgets('Displays no button to pronounce card text if there is no pack', 
         (tester) async {
-            await _displayWord(tester, pack: StoredPack.none);
+            await _displayFilledWord(tester, pack: StoredPack.none);
 
 			CardEditorTester.findSpeakerButton(shouldFind: false);
 		});
@@ -142,7 +143,7 @@ void main() {
         (tester) async {
 			final storage = new PackStorageMock();
 			final pack = storage.getRandom();
-			await _displayWord(tester, storage: storage, pack: pack,
+			await _displayFilledWord(tester, storage: storage, pack: pack,
 				wordToShow: WordStorageMock.generateWord(packId: pack.id));
 
 			CardEditorTester.findSpeakerButton(shouldFind: false);
@@ -155,7 +156,7 @@ void main() {
 			final card = storage.wordStorage.getRandom();
 
 			String spokenText;
-			await _displayWord(tester, storage: storage, pack: pack, wordToShow: card,
+			await _displayFilledWord(tester, storage: storage, pack: pack, wordToShow: card,
 				speaker: new SpeakerMock(onSpeak: (text) => spokenText = text));
 
 			await new WidgetAssistant(tester).tapWidget(
@@ -165,25 +166,25 @@ void main() {
 	
     testWidgets('Switches focus to the translation field after changes in the word text field', 
         (tester) async {
-            final wordToShow = await _displayWord(tester);
+            final wordToShow = await _displayFilledWord(tester);
             await _testRefocusingChangedValues(tester, wordToShow.text, wordToShow.translation);
         });
 
     testWidgets('Switches focus to the word text after changes in the translation field', 
         (tester) async {
-            final wordToShow = await _displayWord(tester);
+            final wordToShow = await _displayFilledWord(tester);
             await _testRefocusingChangedValues(tester, wordToShow.translation, wordToShow.text);
         });
 
     testWidgets('Switches focus to the transcription field after changes in another text field', 
         (tester) async {
-            final wordToShow = await _displayWord(tester);
+            final wordToShow = await _displayFilledWord(tester);
             await _testRefocusingChangedValues(tester, wordToShow.text, wordToShow.transcription);
         });
 
     testWidgets('Switches focus to another text field after changes in the transcription field', 
         (tester) async {
-            final wordToShow = await _displayWord(tester);
+            final wordToShow = await _displayFilledWord(tester);
 
             final assistant = new WidgetAssistant(tester);
             await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
@@ -199,6 +200,27 @@ void main() {
             expect(refocusedField.focusNode.hasFocus, true);
         });
 
+	testWidgets('Saves a new card', (tester) async {
+		final storage = new PackStorageMock();
+
+		await _displayWord(tester, storage, shouldHideWarningDialog: false);
+
+		final assistant = new WidgetAssistant(tester);
+
+		final textFields = AssuredFinder.findSeveral(type: StyledTextField, shouldFind: true);
+		final cardText = Randomiser.nextString();
+		await assistant.enterText(textFields.first, cardText);
+
+		final translation = Randomiser.nextString();
+		await assistant.enterText(textFields.last, translation);
+
+		await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+
+		final cards = await storage.wordStorage.fetch(textFilter: cardText);
+		expect(cards.length, 1);
+		expect(cards.first.translation, translation);
+	});
+
     testWidgets('Saves nothing when changes to the word text field have not been accepted yet', 
         (tester) => _testSavingChangedValue(tester, (word) => word.text));
     
@@ -208,7 +230,7 @@ void main() {
     testWidgets('Saves nothing when changes to the word transcription field have not been accepted yet', 
         (tester) async {
             final storage = new PackStorageMock();
-            final wordToShow = await _displayWord(tester, storage: storage);
+            final wordToShow = await _displayFilledWord(tester, storage: storage);
 
             final assistant = new WidgetAssistant(tester);
 			final initialValue = wordToShow.transcription;
@@ -259,7 +281,7 @@ void main() {
 		final dicProviderMock = new DictionaryProviderMock(
 			onSearchForLemmas: (text) => Randomiser.nextStringList());
 		final wordText = (
-			await _displayWord(tester, provider: dicProviderMock, pack: StoredPack.none)
+			await _displayFilledWord(tester, provider: dicProviderMock, pack: StoredPack.none)
 		).text;
 		await new WidgetAssistant(tester).enterChangedText(wordText);
 
@@ -350,7 +372,7 @@ void main() {
 		await _updateCard(wordStorage, duplicatedCard, newPos: cardToShow.partOfSpeech);
 		
 		final pack = await storage.find(cardToShow.packId);
-		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+		await _displayFilledWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
 
 		final assistant = new WidgetAssistant(tester);
 		final initialText = cardToShow.text;
@@ -387,7 +409,7 @@ void main() {
 		final duplicateTranslationB = duplicatedCardB.translation;
 		
 		final pack = await storage.find(cardToShow.packId);
-		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+		await _displayFilledWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
 
 		final assistant = new WidgetAssistant(tester);
 		final initialText = cardToShow.text;
@@ -435,7 +457,7 @@ void main() {
 			final duplicateTranslationB = duplicatedCardB.translation;
 			
 			final pack = await storage.find(cardToShow.packId);
-			await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+			await _displayFilledWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
 
 			final assistant = new WidgetAssistant(tester);
 			final initialText = cardToShow.text;
@@ -476,7 +498,7 @@ void main() {
 		await _updateCard(wordStorage, duplicatedCard, newPos: cardToShow.partOfSpeech);
 
 		final pack = await storage.find(cardToShow.packId);
-		await _displayWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
+		await _displayFilledWord(tester, storage: storage, wordToShow: cardToShow, pack: pack);
 
 		final assistant = new WidgetAssistant(tester);
 		final initialTranslation = cardToShow.translation;
@@ -497,19 +519,30 @@ void main() {
 	});
 }
 
-Future<StoredWord> _displayWord(WidgetTester tester, { 
-		DictionaryProvider provider, 
-        PackStorageMock storage, StoredPack pack, 
-        StoredWord wordToShow, SpeakerMock speaker,
-		bool shouldHideWarningDialog = true }) async {
+Future<StoredWord> _displayFilledWord(WidgetTester tester, { 
+	DictionaryProvider provider, 
+	PackStorageMock storage, StoredPack pack, 
+	StoredWord wordToShow, SpeakerMock speaker,
+	bool shouldHideWarningDialog = true 
+}) async {
     storage ??= new PackStorageMock();
     final wordStorage = storage.wordStorage;
     wordToShow ??= wordStorage.getRandom();
 
+	return _displayWord(tester, storage, provider: provider, pack: pack,
+		wordToShow: wordToShow, speaker: speaker, shouldHideWarningDialog: shouldHideWarningDialog);
+}
+
+Future<StoredWord> _displayWord(WidgetTester tester, PackStorageMock storage, { 
+	DictionaryProvider provider, StoredPack pack, 
+	StoredWord wordToShow, SpeakerMock speaker,
+	bool shouldHideWarningDialog = true
+}) async {
+
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
         childBuilder: (context) => new CardScreen(
-			wordStorage: wordStorage, packStorage: storage,
-			wordId: wordToShow.id, pack: pack, 
+			wordStorage: storage.wordStorage, packStorage: storage,
+			wordId: wordToShow?.id, pack: pack, 
 			provider: provider, 
 			defaultSpeaker: speaker ?? const SpeakerMock()
 		)));
@@ -518,7 +551,7 @@ Future<StoredWord> _displayWord(WidgetTester tester, {
 
     if (shouldHideWarningDialog) {
 		final nonePack = StoredPack.none;
-		final warningIsExpected = pack == nonePack || (pack == null && wordToShow.packId == nonePack.id);
+		final warningIsExpected = pack == nonePack || (pack == null && wordToShow?.packId == nonePack.id);
         final emptyPackWarnDialogBtnFinder = _findWarningDialogButton(shouldFind: warningIsExpected);
         if (warningIsExpected)
             await new WidgetAssistant(tester).tapWidget(emptyPackWarnDialogBtnFinder);
@@ -558,7 +591,7 @@ Future<Finder> _focusTextField(WidgetAssistant assistant, String textToFocus) as
 Future<void> _testSavingChangedValue(WidgetTester tester, 
     String Function(StoredWord) valueToChangeGetter) async {
     final storage = new PackStorageMock();
-    final wordToShow = await _displayWord(tester, storage: storage);
+    final wordToShow = await _displayFilledWord(tester, storage: storage);
 
 	final assistant = new WidgetAssistant(tester);
 
@@ -586,7 +619,7 @@ Future<String> _changeTranscription(WidgetTester tester, String curTranscription
 }
 
 Future<void> _testDisplayingPackName(WidgetTester tester, [StoredPack expectedPack]) async {
-    await _displayWord(tester, pack: expectedPack);
+    await _displayFilledWord(tester, pack: expectedPack);
 
 	new CardEditorTester(tester).assureRenderingPack(expectedPack);
 }
@@ -598,7 +631,7 @@ Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId,
 
 Future<void> _testChangingPack(PackStorageMock storage, WidgetTester tester, 
     Future<StoredPack> Function(StoredWord) newPackGetter) async {
-    final wordToShow = await _displayWord(tester, storage: storage);
+    final wordToShow = await _displayFilledWord(tester, storage: storage);
 
     final expectedPack = await _changePack(tester, () => newPackGetter(wordToShow));
 
@@ -632,7 +665,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester, { @required bool h
 			return _respondWithEmptyResponse(request);
 		});
 
-		final wordToShow = await _displayWord(tester, 
+		final wordToShow = await _displayFilledWord(tester, 
 			provider: new WebDictionaryProvider('', client: client),
 			shouldHideWarningDialog: false,
 			pack: hasPack ? PackStorageMock.generatePack(
@@ -676,7 +709,7 @@ Future<void> _testChangingDictionaryState(WidgetTester tester, { @required bool 
 		});
 		
 		final storage = new PackStorageMock();
-		final wordToShow = await _displayWord(tester, storage: storage,
+		final wordToShow = await _displayFilledWord(tester, storage: storage,
 			provider: new WebDictionaryProvider('', client: client),
 			pack: nullifyPack ? PackStorageMock.generatePack(
 				Randomiser.nextInt(PackStorageMock.namedPacksNumber)): null);
@@ -697,7 +730,7 @@ Future<StoredWord> _displayWordWithPack(WidgetTester tester, {
 }) {
 	storage ??= new PackStorageMock();
 
-	return _displayWord(tester, provider: provider, storage: storage, 
+	return _displayFilledWord(tester, provider: provider, storage: storage, 
 		pack: storage.getRandom(), 
 		wordToShow: wordToShow, speaker: speaker, 
 		shouldHideWarningDialog: shouldHideWarningDialog);

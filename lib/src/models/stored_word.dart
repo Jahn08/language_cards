@@ -26,10 +26,9 @@ class StoredWord extends StoredEntity {
     int _studyProgress;
 
     StoredWord(this.text, { int id, int packId, String transcription, 
-        int studyProgress, String translation, this.partOfSpeech }):
+        int studyProgress, this.translation, this.partOfSpeech }):
         _packId = packId,
         transcription = transcription ?? '',
-		translation = translation ?? '',
         _studyProgress = studyProgress ?? WordStudyStage.unknown,
         super(id: id);
 
