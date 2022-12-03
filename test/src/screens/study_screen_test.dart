@@ -124,6 +124,26 @@ void main() {
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
         });
 
+	testWidgets('Updates a study date for each studied pack after finishing a study cycle', 
+        (tester) async {
+            final packStorage = new PackStorageMock();
+
+            final packsToStudy = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
+            await _pumpScreen(tester, packStorage, packsToStudy);
+
+            final cards = _sortCards(
+                await _fetchPackedCards(tester, packsToStudy, packStorage.wordStorage));
+
+            await _goThroughCardList(tester, cards.length);
+
+			final updatedPacks = await _fetchNamedPacks(tester, packStorage);
+			final packsToStudyIds = packsToStudy.map((p) => p.id);
+
+			final now = DateTime.now();
+			final studiedPacks = updatedPacks.where((p) => packsToStudyIds.contains(p.id) && p.studyDate.difference(now).inSeconds < 1);
+			expect(studiedPacks.length, packsToStudy.length);
+        });
+
     testWidgets('Increases study progress for a card after clicking the Learn button, updates it visually and moves next', 
 		(tester) async {
           	final packStorage = new PackStorageMock();

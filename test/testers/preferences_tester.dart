@@ -18,12 +18,12 @@ class PreferencesTester {
 		params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
 		params.studyParams.showStudyDate = Randomiser.nextInt().isEven;
 		
-		await _saveParams(params);
+		await saveParams(params);
 
 		return params;
     }
 
-    static Future<void> _saveParams(UserParams params) async {
+    static Future<void> saveParams(UserParams params) async {
         resetSharedPreferences();
         await PreferencesProvider.save(params);
     }
@@ -42,7 +42,7 @@ class PreferencesTester {
 			params.studyParams.direction, StudyDirection.values);
 	   	params.studyParams.showStudyDate = !params.studyParams.showStudyDate;
 
-	    await _saveParams(params);
+	    await saveParams(params);
 
 		return params;
     }

@@ -5,6 +5,7 @@ import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/data/study_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
 import 'package:language_cards/src/widgets/one_line_text.dart';
@@ -57,6 +58,30 @@ void main() {
 		
 		await _testRenderingStudyDates(tester, shouldShowDates: false);
 	});
+
+	testWidgets('Renders the list of packs by their name in ascending order by default', 
+        (tester) => _assureRenderingPackOrder(tester, PackOrder.byNameAsc));
+
+	testWidgets('Renders the list of packs by their name in descending order', 
+        (tester) async {
+			const exprectedOrder = PackOrder.byNameDesc;
+			await _setPackOrderPreference(exprectedOrder);
+			await _assureRenderingPackOrder(tester, exprectedOrder);
+		});
+
+	testWidgets('Renders the list of packs by their study date in ascending order according to the respective setting', 
+        (tester) async {
+			const exprectedOrder = PackOrder.byDateAsc;
+			await _setPackOrderPreference(exprectedOrder);
+			await _assureRenderingPackOrder(tester, exprectedOrder);
+		});
+
+	testWidgets('Renders the list of packs by their study date in descending order according to the respective setting', 
+        (tester) async {
+			const exprectedOrder = PackOrder.byDateDesc;
+			await _setPackOrderPreference(exprectedOrder);
+			await _assureRenderingPackOrder(tester, exprectedOrder);
+		});
 
     testWidgets('Unselects/selects all card packs changing the summary of their study levels', 
         (tester) async {
@@ -113,7 +138,7 @@ void main() {
                 checkedPacks.map((p) => p.id).toList());
         });
 
-		testWidgets('Scrolls down to the end of the list of study packs and back up by clicking the floating button', 
+		testWidgets('Scrolls down to the end of the list of study packs and back upwards by clicking the floating button', 
 			(tester) async {
 				final storage = await _pumpScreen(tester, packsNumber: 15, cardsNumber: 50);
 				final downwardScrollBtnFinder = _findDownwardScrollBtn(shouldFind: true);
@@ -156,8 +181,22 @@ void main() {
 			});
 }
 
-List<StoredPack> _sortPacksByName(List<StoredPack> packs) => 
-	packs..sort((a, b) => a.name.compareTo(b.name));
+List<StoredPack> _sortPacksByName(List<StoredPack> packs) => _sortPacks(packs, PackOrder.byNameAsc);
+
+List<StoredPack>  _sortPacks(List<StoredPack> packs, PackOrder order) {
+	switch (order) {
+		case PackOrder.byDateDesc: case PackOrder.byDateAsc:
+			final direction = order == PackOrder.byDateDesc ? -1: 1;
+			final minDate = new DateTime(1);
+			return packs..sort((a, b) { 
+					final order = direction * (a.studyDate ?? minDate).compareTo(b.studyDate ?? minDate);
+					return order == 0 ? a.name.compareTo(b.name): order;
+				});
+		default:
+			final direction = order == PackOrder.byNameDesc ? -1: 1;
+			return packs..sort((a, b) => direction * a.name.compareTo(b.name));
+	}
+}
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester, { int packsNumber, int cardsNumber }) 
 	async {
@@ -191,7 +230,8 @@ Finder _findCheckTiles() {
 }
 
 Future<void> _assureConsecutivelyCheckedTiles(WidgetTester tester, 
-    [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker]) async {
+    [List<StoredPack> checkedPacks, void Function(StoredPack, Finder) tileChecker,
+	PackOrder packOrder = PackOrder.byNameAsc]) async {
 
     if (checkedPacks == null || checkedPacks.isEmpty) {
 		expect(tester.widgetList<CheckboxListTile>(_findCheckTiles()).every((t) => t.value), 
@@ -199,7 +239,7 @@ Future<void> _assureConsecutivelyCheckedTiles(WidgetTester tester,
 		return;
 	}
         
-	final sortedPacks = _sortPacksByName(checkedPacks);
+	final sortedPacks = _sortPacks(checkedPacks, packOrder);
 
 	final checkTiles = _findCheckTiles();
 	int index = 0;
@@ -299,4 +339,22 @@ Future<void> _testRenderingStudyDates(WidgetTester tester, { bool shouldShowDate
 				)
 			), isStudyDateVisible ? findsOneWidget: findsNothing);
 	});
+}
+
+Future<void> _setPackOrderPreference(PackOrder order) async {
+	final userParams = await PreferencesProvider.fetch();
+	userParams.studyParams.packOrder = order;
+	await PreferencesTester.saveParams(userParams);
+}
+
+Future<void> _assureRenderingPackOrder(WidgetTester tester, PackOrder order) async {
+	final storage = await _pumpScreen(tester);
+	final packs = await _fetchNamedPacks(tester, storage);
+	
+	await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
+		expect(find.descendant(
+			of: packTileFinder, 
+			matching: find.text(p.name)
+		), findsOneWidget);
+	}, order);
 }
