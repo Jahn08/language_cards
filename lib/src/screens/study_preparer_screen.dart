@@ -183,8 +183,10 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 			case PackOrder.byDateDesc: case PackOrder.byDateAsc:
 				final direction = order == PackOrder.byDateDesc ? -1: 1;
 				final minDate = new DateTime(1);
-				return stPacks..sort(
-					(a, b) => direction * (a.pack.studyDate ?? minDate).compareTo(b.pack.studyDate ?? minDate));
+				return stPacks..sort((a, b) { 
+					final order = direction * (a.pack.studyDate ?? minDate).compareTo(b.pack.studyDate ?? minDate);
+					return order == 0 ? a.pack.name.compareTo(b.pack.name): order;
+				});
 			default:
 				final direction = order == PackOrder.byNameDesc ? -1: 1;
 				return stPacks..sort((a, b) => direction * a.pack.name.compareTo(b.pack.name));
