@@ -13,6 +13,35 @@ enum AppTheme {
     dark
 }
 
+class PackOrder extends PresentableEnum {
+
+	static const PackOrder byNameAsc = PackOrder._(0);
+
+	static const PackOrder byNameDesc = PackOrder._(1);
+
+    static const PackOrder byDateAsc = PackOrder._(2);
+
+	static const PackOrder byDateDesc = PackOrder._(3);
+
+	static List<PackOrder> get values => [byNameAsc, byNameDesc, byDateAsc, byDateDesc];
+
+	const PackOrder._(int index): super(index);
+
+	@override
+	String present(AppLocalizations locale) {
+		switch (this) {
+			case byNameAsc:
+				return locale.packOrderByNameAscName;
+			case byNameDesc:
+				return locale.packOrderByNameDescName;
+			case byDateDesc:
+				return locale.packOrderByDateDescName;
+			default:
+				return locale.packOrderByDateAscName;
+		}
+	}
+}
+
 class CardSide extends PresentableEnum {
 
 	static const CardSide front = CardSide._(0);
@@ -51,13 +80,19 @@ class StudyDirection extends PresentableEnum {
 }
 
 class StudyParams {
+    static const _defaultPackOrder = PackOrder.byNameAsc;
     static const _defaultCardSide = CardSide.front;
     static const _defaultDirection = StudyDirection.forward;
     static const _defaultStudyDateVisibility = true;
 
+    static const _packOrderParam = 'packOrder';
     static const _directionParam = 'direction';
     static const _cardSideParam = 'cardSide';
     static const _studyDateVisibilityParam = 'showStudyDate';
+
+	PackOrder _packOrder;
+    PackOrder get packOrder => _packOrder;
+    set packOrder(PackOrder value) => _packOrder = value ?? _defaultPackOrder;
 
     StudyDirection _direction;
     StudyDirection get direction => _direction;
@@ -81,6 +116,10 @@ class StudyParams {
         final cardSideIndex = jsonMap[_cardSideParam] as int;
         _cardSide = cardSideIndex == null ? _defaultCardSide: 
             CardSide.values[cardSideIndex];
+
+        final packOrderIndex = jsonMap[_packOrderParam] as int;
+        _packOrder = packOrderIndex == null ? _defaultPackOrder: 
+            PackOrder.values[packOrderIndex];
 			
         _showStudyDate = (jsonMap[_studyDateVisibilityParam] as bool) ?? _defaultStudyDateVisibility;
     }
@@ -88,7 +127,8 @@ class StudyParams {
     Map<String, dynamic> toMap() => {
         _directionParam: _direction.index,
         _cardSideParam: _cardSide.index,
-		_studyDateVisibilityParam: _showStudyDate
+		_studyDateVisibilityParam: _showStudyDate,
+		_packOrderParam: _packOrder.index
     };
 }
 

@@ -9,7 +9,9 @@
     "@barScaffoldSettingsPanelStudySectionLabel": {},
     "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Show the Last Study Date for Packs",
     "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
-    "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Card Sorting",
+    "barScaffoldSettingsPanelStudySectionSortingPackOptionLabel": "Pack Order",
+    "@barScaffoldSettingsPanelStudySectionSortingPackOptionLabel": {},
+    "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Card Order",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionCardSideOptionLabel": "Card Side",
     "@barScaffoldSettingsPanelStudySectionCardSideOptionLabel": {},
@@ -507,7 +509,16 @@
                 "type": "String"
             }
         }
-    }, 
+    },
+    
+    "packOrderByNameAscName": "by name asc",
+    "@packOrderByNameAscName": {},
+    "packOrderByNameDescName": "by name desc",
+    "@packOrderByNameDescName": {},
+    "packOrderByDateAscName": "by study date asc",
+    "@packOrderByDateAscName": {},
+    "packOrderByDateDescName": "by study date desc",
+    "@packOrderByDateDescName": {},
   
     "packScreenHeadBarAddingPackTitle": "Add Pack",
     "@packScreenHeadBarAddingPackTitle": {},

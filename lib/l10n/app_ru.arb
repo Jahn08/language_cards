@@ -9,6 +9,8 @@
     "@barScaffoldSettingsPanelStudySectionLabel": {},
     "barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": "Отображать дату последнего изучения для наборов",
     "@barScaffoldSettingsPanelStudySectionStudyDateVisibilityOptionLabel": {},
+    "barScaffoldSettingsPanelStudySectionSortingPackOptionLabel": "Сортировка наборов",
+    "@barScaffoldSettingsPanelStudySectionSortingPackOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": "Сортировка карточек",
     "@barScaffoldSettingsPanelStudySectionSortingCardOptionLabel": {},
     "barScaffoldSettingsPanelStudySectionCardSideOptionLabel": "Сторона карточки",
@@ -509,6 +511,15 @@
             }
         }
     },
+    
+    "packOrderByNameAscName": "по имени возр.",
+    "@packOrderByNameAscName": {},
+    "packOrderByNameDescName": "по имени убыв.",
+    "@packOrderByNameDescName": {},
+    "packOrderByDateAscName": "по дате изучения возр.",
+    "@packOrderByDateAscName": {},
+    "packOrderByDateDescName": "по дате изучения убыв.",
+    "@packOrderByDateDescName": {},
 
     "packScreenHeadBarAddingPackTitle": "Добавить набор",
     "@packScreenHeadBarAddingPackTitle": {},

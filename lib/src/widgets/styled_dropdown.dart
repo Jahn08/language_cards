@@ -22,6 +22,7 @@ class StyledDropdown extends StatelessWidget {
     Widget build(BuildContext context) {
 		final locale = AppLocalizations.of(context);
         return new DropdownButtonFormField<String>(
+			isExpanded: true,
             items: options.map((v) => 
                 new DropdownMenuItem(child: new Text(v), value: v)).toList(), 
             onChanged: onChanged,

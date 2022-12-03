@@ -87,7 +87,7 @@ void main() {
   });
 
   testWidgets('Renders the settings panel with user preferences', (tester) async {
-    final userParams = await PreferencesTester.saveRandomUserParams();
+	final userParams = await PreferencesTester.saveRandomUserParams();
 
     final expectedLang = userParams.interfaceLang;
     final expectedTheme = userParams.theme;
@@ -135,11 +135,15 @@ void main() {
     expect(tester.widget<Container>(getThemeOptionFinder(isSelected: true)).color,
         getThemeColour(chosenTheme));
 
+	const expectedDropdownNumber = 3;
     final dropdowns = tester.widgetList<StyledDropdown>(
         AssuredFinder.findSeveral(type: StyledDropdown, shouldFind: true));
-    expect(dropdowns.length, 2);
+    expect(dropdowns.length, expectedDropdownNumber);
 
     final locale = Localizator.defaultLocalization;
+    final packOrders = PresentableEnum.mapStringValues(PackOrder.values, locale).keys;
+    dropdowns.singleWhere((d) => d.options.every((op) => packOrders.contains(op)));
+
     final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys;
     dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
 
@@ -149,11 +153,11 @@ void main() {
     final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
     final dropdownBtns = tester.widgetList<DropdownButton<String>>(
         AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true));
-    expect(dropdownBtns.length, 2);
+    expect(dropdownBtns.length, expectedDropdownNumber);
 
     final studyParams = userParams.studyParams;
-    [studyParams.cardSide.present(locale), studyParams.direction.present(locale)]
-        .every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
+    [studyParams.cardSide.present(locale), studyParams.direction.present(locale), studyParams.packOrder.present(locale)]
+		.every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
 
     final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
     expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value, studyParams.showStudyDate);
@@ -182,7 +186,10 @@ void main() {
     await assistant.tapWidget(nonChosenOptionsFinder.last, atCenter: true);
 
     final defStudyParams = defaultUserParams.studyParams;
-    const expectedCardSide = CardSide.back;
+    const expectedPackOrder = PackOrder.byDateAsc;
+    await assistant.changeDropdownItem(defStudyParams.packOrder, expectedPackOrder);
+	
+	const expectedCardSide = CardSide.back;
     await assistant.changeDropdownItem(defStudyParams.cardSide, expectedCardSide);
 
     const expectedDirection = StudyDirection.random;
@@ -198,6 +205,9 @@ void main() {
     expect(savedUserParams.interfaceLang == defaultUserParams.interfaceLang, false);
 
     final studyParams = savedUserParams.studyParams;
+    expect(studyParams.packOrder == defStudyParams.packOrder, false);
+    expect(studyParams.packOrder, expectedPackOrder);
+
     expect(studyParams.cardSide == defStudyParams.cardSide, false);
     expect(studyParams.cardSide, expectedCardSide);
 
@@ -215,6 +225,7 @@ void main() {
     expect(userParams.interfaceLang == defaultUserParams.interfaceLang, false);
 
     final defStudyParams = defaultUserParams.studyParams;
+    expect(userParams.studyParams.packOrder == defStudyParams.packOrder, false);
     expect(userParams.studyParams.cardSide == defStudyParams.cardSide, false);
     expect(userParams.studyParams.direction == defStudyParams.direction, false);
     expect(userParams.studyParams.showStudyDate == defStudyParams.showStudyDate, false);

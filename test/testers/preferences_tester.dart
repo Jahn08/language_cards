@@ -13,6 +13,7 @@ class PreferencesTester {
         final params = new UserParams();
 		params.interfaceLang = Randomiser.nextElement(UserParams.interfaceLanguages);
 		params.theme = Randomiser.nextElement(AppTheme.values);
+		params.studyParams.packOrder = Randomiser.nextElement(PackOrder.values);
 		params.studyParams.cardSide = Randomiser.nextElement(CardSide.values);
 		params.studyParams.direction = Randomiser.nextElement(StudyDirection.values);
 		params.studyParams.showStudyDate = Randomiser.nextInt().isEven;
@@ -33,6 +34,8 @@ class PreferencesTester {
 			params.interfaceLang, UserParams.interfaceLanguages);
 		params.theme = _getFirstDistinctFrom(
 			params.theme, AppTheme.values);
+		params.studyParams.packOrder = _getFirstDistinctFrom(
+			params.studyParams.packOrder, PackOrder.values);
 		params.studyParams.cardSide = _getFirstDistinctFrom(
 			params.studyParams.cardSide, CardSide.values);
 		params.studyParams.direction = _getFirstDistinctFrom(

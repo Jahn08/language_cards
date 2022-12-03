@@ -18,11 +18,13 @@ void main() {
         final expectedLang = expectedParams.interfaceLang;
         final expectedTheme = expectedParams.theme;
         final expectedCardSide = expectedParams.studyParams.cardSide;
+        final expectedPackOrder = expectedParams.studyParams.packOrder;
         
         final userParams = await PreferencesProvider.fetch();
         expect(userParams != null, true);
         expect(userParams.theme, expectedTheme);
         expect(userParams.interfaceLang, expectedLang);
-        expect(userParams.studyParams?.cardSide, expectedCardSide);
+        expect(userParams.studyParams.cardSide, expectedCardSide);
+        expect(userParams.studyParams.packOrder, expectedPackOrder);
     });
 }

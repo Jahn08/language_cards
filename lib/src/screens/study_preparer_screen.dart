@@ -83,7 +83,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
         return new FutureLoader<List<StudyPack>>(
 			_packs == null ? widget.storage.fetchStudyPacks(): Future.value(_packs), 
             (stPacks) => new FutureLoader(_futureParams, (UserParams userParams) {
-				_initPacks(stPacks);
+				_initPacks(stPacks, userParams.studyParams.packOrder);
 
 				final styler = new Styler(context);
 				return new BarScaffold(
@@ -159,11 +159,11 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 		);
     }
 
-	void _initPacks(List<StudyPack> stPacks) {
+	void _initPacks(List<StudyPack> stPacks, PackOrder order) {
 		if (_packs != null)
 			return;
 
-		_packs = stPacks..sort((a, b) => a.pack.name.compareTo(b.pack.name));
+		_packs = _sortPacks(stPacks, order);
 		_hasScrollNavigator = _packs.length > 10;
 
 		if (_hasScrollNavigator)
@@ -176,6 +176,19 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 					_shouldScrollUpNotifier.value = !_shouldScrollUpNotifier.value;
 				});
 			});
+	}
+
+	List<StudyPack>  _sortPacks(List<StudyPack> stPacks, PackOrder order) {
+		switch (order) {
+			case PackOrder.byDateDesc: case PackOrder.byDateAsc:
+				final direction = order == PackOrder.byDateDesc ? -1: 1;
+				final minDate = new DateTime(1);
+				return stPacks..sort(
+					(a, b) => direction * (a.pack.studyDate ?? minDate).compareTo(b.pack.studyDate ?? minDate));
+			default:
+				final direction = order == PackOrder.byNameDesc ? -1: 1;
+				return stPacks..sort((a, b) => direction * a.pack.name.compareTo(b.pack.name));
+		}
 	}
 }
 

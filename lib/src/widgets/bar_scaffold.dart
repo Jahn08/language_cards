@@ -53,6 +53,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
   final _langParamNotifier = new ValueNotifier<Language>(null);
   final _themeParamNotifier = new ValueNotifier<AppTheme>(null);
 
+  final _packOrderParamNotifier = new ValueNotifier<PackOrder>(null);
   final _cardSideParamNotifier = new ValueNotifier<CardSide>(null);
   final _directionParamNotifier = new ValueNotifier<StudyDirection>(null);
   final _studyDateVisibilityParamNotifier = new ValueNotifier<bool>(true);
@@ -67,6 +68,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
     _cardSideParamNotifier.dispose();
     _directionParamNotifier.dispose();
     _studyDateVisibilityParamNotifier.dispose();
+	_packOrderParamNotifier.dispose();
 
     _isStateDirtyNotifier.dispose();
 
@@ -84,6 +86,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
         _originalParams = _params.toJson();
       }
 
+      final packOrderDic = PresentableEnum.mapStringValues(PackOrder.values, locale);
       final directionDic = PresentableEnum.mapStringValues(StudyDirection.values, locale);
       final sideDic = PresentableEnum.mapStringValues(CardSide.values, locale);
 
@@ -126,6 +129,19 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
                         }),
                   )
                 ])),
+		new ValueListenableBuilder(
+			valueListenable: _packOrderParamNotifier, 
+			builder: (_, PackOrder order, __) => new _StudySettingsSectionRow(
+				options: packOrderDic.keys,
+				inintialValue: order.present(locale),
+				label: locale.barScaffoldSettingsPanelStudySectionSortingPackOptionLabel,
+				onValueChanged: (newValue) {
+                  final newOrder = packOrderDic[newValue];
+                  _params.studyParams.packOrder = newOrder;
+                  _packOrderParamNotifier.value = newOrder;
+
+                  _setDirtinessState();
+                })),
         new ValueListenableBuilder(
             valueListenable: _directionParamNotifier,
             builder: (_, StudyDirection direction, __) => new _StudySettingsSectionRow(
@@ -184,6 +200,7 @@ class _SettingsSectionBodyState extends State<_SettingsSectionBody> {
     _langParamNotifier.value = _params.interfaceLang;
     _themeParamNotifier.value = _params.theme;
 
+    _packOrderParamNotifier.value = _params.studyParams.packOrder;
     _cardSideParamNotifier.value = _params.studyParams.cardSide;
     _directionParamNotifier.value = _params.studyParams.direction;
     _studyDateVisibilityParamNotifier.value = _params.studyParams.showStudyDate;
