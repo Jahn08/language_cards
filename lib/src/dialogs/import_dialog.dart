@@ -1,14 +1,10 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:file_picker/file_picker.dart';
 import 'outcome_dialog.dart';
-import '../data/base_storage.dart';
-import '../dialogs/confirm_dialog.dart';
 import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../utilities/context_provider.dart';
-import '../utilities/pack_importer.dart';
 import '../widgets/cancel_button.dart';
 import '../widgets/styled_text_field.dart';
 
@@ -79,7 +75,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
 						state.save();
 
-						widget.fileProcessor?.call(_importFilePathNotifier.value);
+						widget.onPathChosen?.call(_importFilePathNotifier.value);
 					}
 				)
 			]
@@ -98,9 +94,9 @@ class _ImportFormDialog extends StatefulWidget {
 
 	final Widget cancelButton;
 
-	final Function(String) fileProcessor;
+	final void Function(String) onPathChosen;
 
-	const _ImportFormDialog(this.cancelButton, this.fileProcessor);
+	const _ImportFormDialog(this.cancelButton, this.onPathChosen);
 
 	@override
 	_ImportFormDialogState createState() => new _ImportFormDialogState();
@@ -115,40 +111,16 @@ class ImportDialogResult {
 	ImportDialogResult(this.filePath, this.packsWithCards);
 }
 
-class ImportDialog extends OutcomeDialog<ImportDialogResult> {
+class ImportDialog extends OutcomeDialog<String> {
 
-	final BaseStorage<StoredPack> packStorage;
+	const ImportDialog();
 
-	final BaseStorage<StoredWord> cardStorage;
-
-	ImportDialog(this.packStorage, this.cardStorage);
-
-    Future<ImportDialogResult> show(BuildContext context) {
-        return showDialog<ImportDialogResult>(
+    Future<String> show(BuildContext context) {
+        return showDialog<String>(
             context: context, 
             builder: (buildContext) => new _ImportFormDialog(
 				new CancelButton(() => returnResult(buildContext, null)),
-				(filePath) async {
-					Map<StoredPack, List<StoredWord>> outcome;
-					
-					final locale = AppLocalizations.of(buildContext);
-					try {
-						outcome = await new PackImporter(packStorage, cardStorage, locale)
-							.import(filePath);
-					}
-					catch (ex) {
-						await new ConfirmDialog.ok(
-							title: locale.importExportWarningDialogTitle, 
-							content: locale.packListScreenImportDialogWrongFormatContent(filePath)
-						).show(buildContext);
-
-						if (!Platform.environment.containsKey('FLUTTER_TEST'))
-							rethrow;
-					}
-
-     				// ignore: use_build_context_synchronously
-					returnResult(buildContext, new ImportDialogResult(filePath, outcome));
-				}
+				(filePath) => returnResult(buildContext, filePath)
 			)
         );
     }

@@ -428,6 +428,8 @@
     },
     "listScreenAddingNewItemButtonTooltip": "Новая запись",
     "@listScreenAddingNewItemButtonTooltip": {},
+    "loaderDialogLabel": "Пожалуйста, подождите...",
+    "@loaderDialogLabel": {},
 
     "mainScreenStudyModeMenuItemLabel": "Режим обучения",
     "@mainScreenStudyModeMenuItemLabel": {},
@@ -498,6 +500,14 @@
             "cardsNumber": {
                 "type": "String"
             },
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
+    "packListScreenImportDialogFileNotFoundContent": "Файл '{filePath}' не найден",
+    "@packListScreenImportDialogFileNotFoundContent": {
+        "placeholders": {
             "filePath": {
                 "type": "String"
             }

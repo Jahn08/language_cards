@@ -427,6 +427,8 @@
     },
     "listScreenAddingNewItemButtonTooltip": "New Item",
     "@listScreenAddingNewItemButtonTooltip": {},
+    "loaderDialogLabel": "Please, wait...",
+    "@loaderDialogLabel": {},
 
     "mainScreenStudyModeMenuItemLabel": "Study Mode",
     "@mainScreenStudyModeMenuItemLabel": {},
@@ -497,6 +499,14 @@
             "cardsNumber": {
                 "type": "String"
             },
+            "filePath": {
+                "type": "String"
+            }
+        }
+    },
+    "packListScreenImportDialogFileNotFoundContent": "A file '{filePath}' is not found",
+    "@packListScreenImportDialogFileNotFoundContent": {
+        "placeholders": {
             "filePath": {
                 "type": "String"
             }

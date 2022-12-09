@@ -124,7 +124,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 						confirmationLabel: 
 							locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
 					.show(scaffoldContext)) ?? false)
-					return false;
+					return;
 
 				setState(() {
 					itemsToReset.forEach((w) => w.resetStudyProgress());
@@ -132,7 +132,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 				});
 
 				if (!mounted)
-					return false;
+					return;
 
 				ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
 					content: new Text(locale.cardListScreenBottomSnackBarResettingProgressInfo(

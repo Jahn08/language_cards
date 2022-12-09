@@ -1,11 +1,14 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
-import 'package:language_cards/src/data/word_storage.dart';
+import '../utilities/pack_importer.dart';
 import './list_screen.dart';
 import '../data/pack_storage.dart';
+import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import '../dialogs/import_dialog.dart';
+import '../dialogs/loader_dialog.dart';
 import '../router.dart';
 import '../utilities/pack_exporter.dart';
 import '../widgets/card_number_indicator.dart';
@@ -108,44 +111,44 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 			onPressed: () async {
 				try {
 					if (markedItems.isEmpty) {
-						final outcome = await new ImportDialog(widget.storage, widget.cardStorage)
-							.show(scaffoldContext);
+						final filePath = await const ImportDialog().show(scaffoldContext);
+						if (!mounted) 
+							return;
+						
+						if (filePath == null) 
+							return;
 
-						if (!mounted)
-							return false;
+						final importState = await LoaderDialog.showAsync<Map<StoredPack, List<StoredWord>>>(
+							scaffoldContext, 
+							() => new PackImporter(widget.storage, widget.cardStorage, locale).import(filePath), locale);
+						if (!mounted) 
+							return;
+						
+						if (importState.error != null)
+							throw importState.error;
 
-						if (outcome == null)
-							return true;
-						else if (outcome.packsWithCards == null) {
-							await new ConfirmDialog.ok(
-								title: locale.packListScreenImportDialogTitle,
-								content: locale.packListScreenImportDialogWrongFormatContent(outcome.filePath)
-							).show(scaffoldContext);
-							return true;
-						}
-
-						if (!mounted)
-							return false;
-
-						final packsWithCards = outcome.packsWithCards;
+						final packsWithCards = importState.value;
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenImportDialogTitle,
 							content: locale.packListScreenImportDialogContent(
 								packsWithCards.keys.length.toString(), 
 								packsWithCards.values.expand((c) => c).length.toString(), 
-								outcome.filePath
+								filePath
 							)
 						).show(scaffoldContext);
 
 						super.refetchItems(isForceful: true, shouldInitIndices: true);
 					}
 					else {
-						final exportFilePath = await new PackExporter(widget.cardStorage)
-							.export(markedItems.toList(), 'packs', locale);
-
+						final exportState = await LoaderDialog.showAsync<String>(scaffoldContext, 
+							() => new PackExporter(widget.cardStorage).export(markedItems.toList(), 'packs', locale), locale);
 						if (!mounted)
-							return false;
+							return;
 
+						if (exportState.error != null)
+							throw exportState.error;
+
+						final exportFilePath = exportState.value;
 						await new ConfirmDialog.ok(
 							title: locale.packListScreenExportDialogTitle,
 							content: locale.packListScreenExportDialogContent(
@@ -154,12 +157,21 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 					}
 				}
 				catch (error) {
+					String errMessage;
+					if (error is ImportException)
+						errMessage = locale.packListScreenImportDialogWrongFormatContent(error.importFilePath);
+					else if (error is FileSystemException)
+						errMessage = error.message;
+					else
+						errMessage = error.toString();
+
 					await new ConfirmDialog.ok(
 						title: locale.importExportWarningDialogTitle, 
-						content: error is FileSystemException ? error.message: error.toString()
+						content: errMessage
 					).show(context);
 
-					rethrow;
+					if (!Platform.environment.containsKey('FLUTTER_TEST'))
+						rethrow;
 				}
 			}
         ));

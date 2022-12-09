@@ -1,4 +1,7 @@
+import 'dart:io';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
+import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/utilities/pack_importer.dart';
 import '../../mocks/pack_storage_mock.dart';
@@ -36,9 +39,19 @@ void main() {
 
 	test('Imports nothing from a non-existent file', () async {
 		final packStorage = new PackStorageMock();
-		final outcome = await new PackImporter(packStorage, packStorage.wordStorage, 
-			Localizator.defaultLocalization).import(Randomiser.nextString());
+		
+		FileSystemException err;
+		Map<StoredPack, List<StoredWord>> outcome;
+		try {
+			outcome = await new PackImporter(packStorage, packStorage.wordStorage, 
+				Localizator.defaultLocalization).import(Randomiser.nextString());
+		}
+		on ImportException catch (ex) {
+			err = ex.error as FileSystemException;
+		}
+
 		expect(outcome, null);
+		expect(err == null, false);
 	});
 
 	testWidgets('Imports nothing from a JSON-file with a wrong format', (_) async { 

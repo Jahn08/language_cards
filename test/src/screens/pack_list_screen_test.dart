@@ -233,7 +233,7 @@ void main() {
 
 		final importInfo = _findConfirmationDialogText(tester);
 		final locale = Localizator.defaultLocalization;
-		expect(importInfo, locale.packListScreenImportDialogWrongFormatContent(importFilePath));
+		expect(importInfo.contains(locale.packListScreenImportDialogWrongFormatContent(importFilePath)), true);
 	});
 
 	testWidgets("Warns about a file of an incorrect format when trying to import packs from it", 
@@ -250,7 +250,7 @@ void main() {
 
 				final importInfo = _findConfirmationDialogText(tester);
 				final locale = Localizator.defaultLocalization;
-				expect(importInfo, locale.packListScreenImportDialogWrongFormatContent(importFilePath));
+				expect(importInfo.contains(locale.packListScreenImportDialogWrongFormatContent(importFilePath)), true);
 			});
 		});
 
@@ -463,7 +463,7 @@ Future<List<StoredPack>> _testImportingPacks(
 				.export(packsToExport, Randomiser.nextString(), Localizator.defaultLocalization));
 
 		await screenTester.activateEditorMode(assistant);
-		
+
 		await _activateImport(assistant, importFilePath);
 
 		final importInfo = _findConfirmationDialogText(tester);

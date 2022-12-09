@@ -38,12 +38,11 @@ class PackImporter {
 	Future<Map<StoredPack, List<StoredWord>>> import(String importFilePath) async {
 		try {
 			if (isNullOrEmpty(importFilePath))
-				return null;
+				throw new FileSystemException(locale.packListScreenImportDialogFileNotFoundContent(importFilePath));
 
 			final file = new File(importFilePath);
-
 			if (!file.existsSync())
-				return null;
+				throw new FileSystemException(locale.packListScreenImportDialogFileNotFoundContent(importFilePath), importFilePath);
 			
 			final packDic = new Map.fromEntries((jsonDecode(file.readAsStringSync()) as List<dynamic>)
 				.map<MapEntry<StoredPack, List<StoredWord>>>((pObj) {

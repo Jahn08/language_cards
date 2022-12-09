@@ -6,7 +6,7 @@ class IconedButton extends StatelessWidget {
 
 	final Icon icon;
 
-	final Function() onPressed;
+	final void Function() onPressed;
 
 	const IconedButton({ @required this.label, @required this.icon, @required this.onPressed });
 
