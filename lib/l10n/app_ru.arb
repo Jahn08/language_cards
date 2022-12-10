@@ -330,7 +330,7 @@
 
     "helpStudyScreenPreparationSlideDescription": "Перед обучением необходимо выбрать, какие словарные карточки будут участвовать в процессе: отметьте представленные непустые наборы и затем выберите категорию карточек с достаточным количеством записей@Подготовка обучения",
     "@helpStudyScreenPreparationSlideDescription": {},
-    "helpStudyScreenPreparationStudyDateSlideDescription": "Включенная в настройках пользователя опция '{studyDateVisibilityOptionLabel}' показывает, когда весь набор в последний раз участвовал в цикле обучения@Дата последнего изучения",
+    "helpStudyScreenPreparationStudyDateSlideDescription": "Включенная в настройках опция '{studyDateVisibilityOptionLabel}' показывает, когда весь набор в последний раз участвовал в цикле обучения. В настройках можно выбрать сортировку наборов по этой дате@Дата последнего изучения",
     "@helpStudyScreenPreparationStudyDateSlideDescription": {
         "placeholders": {
             "studyDateVisibilityOptionLabel": {

@@ -330,7 +330,7 @@
 
     "helpStudyScreenPreparationSlideDescription": "Before studying it is necessary to choose what cards will participate in the process: select presented non-empty packs and then opt for a category of cards with enough items@Study Preparation",
     "@helpStudyScreenPreparationSlideDescription": {},
-    "helpStudyScreenPreparationStudyDateSlideDescription": "Turning on an option '{studyDateVisibilityOptionLabel}' in the user settings displays when was the last time an entire pack was studied@Last Study Date",
+    "helpStudyScreenPreparationStudyDateSlideDescription": "Turning on an option '{studyDateVisibilityOptionLabel}' in the settings displays when was the last time a pack was studied. Sorting packs by the date can be chosen in the settings@Last Study Date",
     "@helpStudyScreenPreparationStudyDateSlideDescription": {
         "placeholders": {
             "studyDateVisibilityOptionLabel": {
@@ -357,7 +357,7 @@
             }
         }
     },
-    "helpStudySettingsSlideDescription": "How the cards are presented depends on how they are sorted ({sortingDirections}), and which of their sides is shown ({cardSides}). It is possible to change the settings by the respective buttons below. Their default values can be set up in user preferences@Study Settings",
+    "helpStudySettingsSlideDescription": "How the cards are presented depends on how they are sorted ({sortingDirections}), and which of their sides is shown ({cardSides}). It is possible to change the settings by the respective buttons below. Their default values can be set up in the settings@Study Settings",
     "@helpStudySettingsSlideDescription": {
         "placeholders": {
             "sortingDirections": {
