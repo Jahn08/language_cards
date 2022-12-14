@@ -23,7 +23,7 @@ Since the project is developed with the Flutter framework its environment must b
 * [Flutter 2.2.2](https://flutter.dev/docs/get-started/install)
 * [Open JDK 15](http://jdk.java.net/java-se-ri/15)
 * [Android command line tools](https://developer.android.com/studio#downloads) with some packages installed by its utility *sdkmanger*:
-  * platforms, system-images and build-tools - their particular versions depend on what Android OS the application is supposed to be emulated on: the target version is 30, the minimal one is 21
+  * platforms, system-images and build-tools - their particular versions depend on what Android OS the application is supposed to be emulated on: the target version is 31, the minimal one is 21
   * emulator
   * platform-tools
   * ndk;22.1.7171670
