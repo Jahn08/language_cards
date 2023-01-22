@@ -35,7 +35,9 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 	Future<void> close() => Future.value();
 
 	@override
-	Future<int> delete(String tableName, List<int> ids) {
+	Future<int> delete(String tableName, List<int> ids) => _remove(ids);
+
+	Future<int> _remove(List<int> ids) {
 		final prevLength = items.length;
 		final newLength = (items..removeWhere((p) => ids.contains(p.id))).length;
 
@@ -147,7 +149,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		final updatedItems = entities.map((e) => buildFromDbMap(e)).toList();
 
 		final idsToDelete = updatedItems.map((p) => p.id).toList();
-		await delete(tableName, idsToDelete);
+		await _remove(idsToDelete);
 		
 		items.addAll(updatedItems);
 	}

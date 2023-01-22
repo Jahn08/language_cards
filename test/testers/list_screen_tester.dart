@@ -436,7 +436,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
 				final tileFinders = filteredTilesAssurer();
 				
-				await scrollDownListView(assistant, tileFinders);
+				await assistant.scrollDownListView(tileFinders);
 				
 				filteredTilesAssurer();
 
@@ -630,17 +630,17 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await chooseFilterIndex(assistant, indexGroups.first.key);
 
 				final tilesFinder = AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
-				await scrollDownListView(assistant, tilesFinder);
+				await assistant.scrollDownListView(tilesFinder);
 				
 				await chooseFilterIndex(assistant, indexGroups.last.key);
 
-				ScrollController scroller = _retrieveListViewScroller(tester, tilesFinder);
+				ScrollController scroller = assistant.retrieveListViewScroller(tilesFinder);
 				expect(scroller.offset, scroller.position.minScrollExtent);
 				
-				await scrollDownListView(assistant, tilesFinder);
+				await assistant.scrollDownListView(tilesFinder);
 				await deactivateSearcherMode(assistant);
 
-				scroller = _retrieveListViewScroller(tester, tilesFinder);
+				scroller = assistant.retrieveListViewScroller(tilesFinder);
 				expect(scroller.offset, scroller.position.minScrollExtent);
 			});
 
@@ -867,31 +867,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 		final topTiles = tester.widgetList<ListTile>(tileFinders);
 		final titles = topTiles.map((t) => _extractTitle(tester, t.title)).toList();
 		
-		await scrollDownListView(new WidgetAssistant(tester), tileFinders);
+		await new WidgetAssistant(tester).scrollDownListView(tileFinders);
 		final bottomTiles = tester.widgetList<ListTile>(tileFinders);
 		titles.addAll(bottomTiles.map((t) => _extractTitle(tester, t.title)));
 		
 		expect(titles.any((t) => !t.startsWith(filterIndex)), true);
-	}
-
-	Future<void> scrollDownListView(WidgetAssistant assistant, Finder childFinder, [int iterations]) 
-		async {
-			iterations ??= 5;
-			int tries = 0;
-			while (++tries < iterations) {
-				final ctrl = _retrieveListViewScroller(assistant.tester, childFinder);
-				final position = ctrl.position;
-				final newPosition = position.pixels + 300;
-				ctrl.jumpTo(newPosition > position.maxScrollExtent ? 
-					position.maxScrollExtent : newPosition);
-
-				await assistant.pumpAndAnimate(1500);
-			}
-		}
-
-	ScrollController _retrieveListViewScroller(WidgetTester tester, Finder childFinder) {
-		final listView = tester.widget<ListView>(
-			find.ancestor(of: childFinder.first, matching: find.byType(ListView)));
-		return listView.controller;
 	}
 }

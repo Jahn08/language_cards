@@ -306,7 +306,7 @@ void main() {
 			final selectorLabel = inScreenTester.getSelectorBtnLabel(tester);
 			expect(selectorLabel, Localizator.defaultLocalization.constsUnselectAll(itemsOverall.toString()));
 
-			await inScreenTester.scrollDownListView(assistant, find.byType(CheckboxListTile), 25);
+			await assistant.scrollDownListView(find.byType(CheckboxListTile), iterations: 25);
 			final updatedSelectorLabel = inScreenTester.getSelectorBtnLabel(tester);
 			expect(selectorLabel, updatedSelectorLabel);
 
@@ -322,7 +322,7 @@ PackListScreen _buildPackListScreen({ PackStorageMock storage, int packsNumber }
     
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardWasAdded }) async {
     final storage = new PackStorageMock();
-	await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithRouting(
+	await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
 		storage: storage, 
 		packListScreenBuilder: () => _buildPackListScreen(storage: storage),
 		cardWasAdded: cardWasAdded
@@ -412,19 +412,12 @@ Finder _findPackTileByName(String name) {
 }
 
 Future<void> _goBackToPackList(WidgetAssistant assistant, String packName) async {
-    await _goBack(assistant);
+    await assistant.navigateBack();
 
     if (packName == _nonePackName) 
         return;
 
-    await _goBack(assistant);
-}
-
-Future<void> _goBack(WidgetAssistant assistant) async {
-    final backBtnFinders = find.byType(BackButton);
-    assistant.tester.widget<BackButton>(backBtnFinders.first).onPressed.call();
-
-    await assistant.pumpAndAnimate();
+    await assistant.navigateBack();
 }
 
 Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage, 

@@ -11,9 +11,12 @@ import 'package:language_cards/src/screens/study_preparer_screen.dart';
 import 'package:language_cards/src/widgets/one_line_text.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../testers/dialog_tester.dart';
 import '../../testers/preferences_tester.dart';
+import '../../testers/study_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
+import '../../utilities/storage_fetcher.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
@@ -60,28 +63,34 @@ void main() {
 	});
 
 	testWidgets('Renders the list of packs by their name in ascending order by default', 
-        (tester) => _assureRenderingPackOrder(tester, PackOrder.byNameAsc));
+        (tester) => _testRenderingPackOrder(tester, PackOrder.byNameAsc));
 
 	testWidgets('Renders the list of packs by their name in descending order', 
         (tester) async {
 			const exprectedOrder = PackOrder.byNameDesc;
 			await _setPackOrderPreference(exprectedOrder);
-			await _assureRenderingPackOrder(tester, exprectedOrder);
+			await _testRenderingPackOrder(tester, exprectedOrder);
 		});
 
 	testWidgets('Renders the list of packs by their study date in ascending order according to the respective setting', 
         (tester) async {
 			const exprectedOrder = PackOrder.byDateAsc;
 			await _setPackOrderPreference(exprectedOrder);
-			await _assureRenderingPackOrder(tester, exprectedOrder);
+			await _testRenderingPackOrder(tester, exprectedOrder);
 		});
 
 	testWidgets('Renders the list of packs by their study date in descending order according to the respective setting', 
         (tester) async {
 			const exprectedOrder = PackOrder.byDateDesc;
 			await _setPackOrderPreference(exprectedOrder);
-			await _assureRenderingPackOrder(tester, exprectedOrder);
+			await _testRenderingPackOrder(tester, exprectedOrder);
 		});
+
+	testWidgets('Keeps packs ordered by their study date in ascending order after finishing a study cycle updates the dates', 
+        (tester) => _testPackOrderAfterFinishingStudy(tester, PackOrder.byDateAsc));
+
+	testWidgets('Keeps packs ordered by their study date in descending order after finishing a study cycle updates the dates', 
+        (tester) => _testPackOrderAfterFinishingStudy(tester, PackOrder.byDateDesc));
 
     testWidgets('Unselects/selects all card packs changing the summary of their study levels', 
         (tester) async {
@@ -215,9 +224,8 @@ Future<PackStorageMock> _pumpScreen(WidgetTester tester, { int packsNumber, int 
 		return storage;
 	}
 
-Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock storage) async =>
-    (await tester.runAsync<List<StoredPack>>(() => storage.fetch()))
-        .where((p) => !p.isNone).toList();
+Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock storage) =>
+    StorageFetcher.fetchNamedPacks(storage);
 
 Future<List<StudyPack>> _fetchStudyPacks(WidgetTester tester, PackStorageMock storage) =>
     tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks());
@@ -347,7 +355,7 @@ Future<void> _setPackOrderPreference(PackOrder order) async {
 	await PreferencesTester.saveParams(userParams);
 }
 
-Future<void> _assureRenderingPackOrder(WidgetTester tester, PackOrder order) async {
+Future<void> _testRenderingPackOrder(WidgetTester tester, PackOrder order) async {
 	final storage = await _pumpScreen(tester);
 	final packs = await _fetchNamedPacks(tester, storage);
 	
@@ -357,4 +365,47 @@ Future<void> _assureRenderingPackOrder(WidgetTester tester, PackOrder order) asy
 			matching: find.text(p.name)
 		), findsOneWidget);
 	}, order);
+}
+
+Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester, PackOrder packOrder) async {
+	await _setPackOrderPreference(packOrder);
+
+	final storage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
+	final assistant = new WidgetAssistant(tester);
+	final studyTester = new StudyScreenTester(assistant);
+	
+	final packs = await _fetchNamedPacks(tester, storage);
+	final packsToStudy = studyTester.takeEnoughCards(packs);
+
+	await tester.pumpWidget(
+		RootWidgetMock.buildAsAppHomeWithStudyRouting(
+			storage: storage,
+			packsToStudy: packsToStudy,
+			noBar: true
+		)
+	);
+	await tester.pump();
+	await tester.pump(const Duration(milliseconds: 700));
+	await assistant.tapWidget(
+		find.widgetWithText(ListTile, Localizator.defaultLocalization.studyPreparerScreenAllCardsCategoryName));
+
+	final cardsToStudy = await StorageFetcher.fetchPackedCards(packsToStudy, storage.wordStorage);
+	await studyTester.goThroughCardList(cardsToStudy.length, byClickingButton: true);
+
+	await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
+	await assistant.navigateBack();
+
+	final tiles = <CheckboxListTile>{};
+	await assistant.scrollDownListView(find.byType(CheckboxListTile), 
+		onIteration: () => tiles.addAll(
+			assistant.tester.widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
+		)
+	);
+
+	expect(tiles.length, packs.length);
+	int index = 0;
+	_sortPacks(packs, packOrder).forEach((pack) {
+		final checkTile = tiles.elementAt(index++);
+		expect((checkTile.title as OneLineText).content, pack.name);
+	});
 }

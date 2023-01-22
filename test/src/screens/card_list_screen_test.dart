@@ -182,7 +182,7 @@ void main() {
 			await inScreenTester.pumpScreen(tester);
 
 			final assistant = new WidgetAssistant(tester);
-			await inScreenTester.scrollDownListView(assistant, find.byType(ListTile), 5);
+			await assistant.scrollDownListView(find.byType(ListTile), iterations: 5);
 			await inScreenTester.activateEditorMode(assistant);
 
 			expect(inScreenTester.getSelectorBtnLabel(tester), 
@@ -276,7 +276,7 @@ Future<void> _testSelectingOnPage(
 	expect(inScreenTester.getSelectorBtnLabel(tester),
 		locale.constsUnselectSome(ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
 
-	await inScreenTester.scrollDownListView(assistant, find.byType(CheckboxListTile), 25);
+	await assistant.scrollDownListView(find.byType(CheckboxListTile), iterations: 25);
 	expect(inScreenTester.getSelectorBtnLabel(tester), 
 		locale.constsSelectAll(expectedCardNumberStr));
 	inScreenTester.assureSelectionForAllTilesInEditor(tester, onlyForSomeItems: true);

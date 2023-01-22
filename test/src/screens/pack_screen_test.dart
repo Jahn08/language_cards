@@ -271,7 +271,7 @@ Future<StoredPack> _findPack(WidgetTester tester, PackStorageMock storage, int i
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester,
     {PackStorageMock storage, String packName}) async {
   storage ??= new PackStorageMock();
-  await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithRouting(
+  await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
       storage: storage,
       noBar: true,
       packListScreenBuilder: () => new PackListScreen(storage, storage.wordStorage)));

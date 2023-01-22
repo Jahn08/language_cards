@@ -1,13 +1,19 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart' hide Router;
+import 'package:language_cards/src/blocs/settings_bloc.dart';
+import 'package:language_cards/src/data/asset_dictionary_provider.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
+import 'package:language_cards/src/screens/study_preparer_screen.dart';
+import 'package:language_cards/src/screens/study_screen.dart';
 import 'dictionary_provider_mock.dart';
 import 'pack_storage_mock.dart';
+import 'speaker_mock.dart';
 
 class RootWidgetMock extends StatelessWidget {
     final Widget _child;
@@ -61,7 +67,7 @@ class RootWidgetMock extends StatelessWidget {
 			onGenerateRoute: onGenerateRoute
 		);
 
-	static Widget buildAsAppHomeWithRouting({ 
+	static Widget buildAsAppHomeWithNonStudyRouting({ 
 		@required PackStorageMock storage, 
 		@required PackListScreen Function() packListScreenBuilder, 
 		String packName, bool cardWasAdded, bool noBar
@@ -98,6 +104,38 @@ class RootWidgetMock extends StatelessWidget {
 			builder: (context) => new RootWidgetMock(
 				noBar: noBar,
 				child: packListScreenBuilder.call()
+			)
+		);
+	});
+
+	static Widget buildAsAppHomeWithStudyRouting({ 
+		@required PackStorageMock storage,
+		@required List<StoredPack> packsToStudy, 
+		bool noBar
+	}) => RootWidgetMock._buildAsAppHome((settings) {
+		final route = Router.getRoute(settings);
+
+		if (route is StudyModeRoute)
+			return new MaterialPageRoute(
+				settings: settings,
+				builder: (context) => new RootWidgetMock(
+					noBar: noBar,
+					child: new SettingsBlocProvider(
+						child: new StudyScreen(storage.wordStorage, 
+							provider: new AssetDictionaryProvider(context),
+							packs: packsToStudy,
+							packStorage: storage, 
+							defaultSpeaker: const SpeakerMock()
+						)
+					)
+				)
+			);
+
+		return new MaterialPageRoute(
+			settings: settings,
+			builder: (context) => new RootWidgetMock(
+				noBar: noBar,
+				child: new SettingsBlocProvider(child: new StudyPreparerScreen(storage))
 			)
 		);
 	});

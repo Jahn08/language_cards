@@ -17,8 +17,10 @@ import '../../testers/cancellable_dialog_tester.dart';
 import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/preferences_tester.dart';
+import '../../testers/study_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
+import '../../utilities/storage_fetcher.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
@@ -87,16 +89,18 @@ void main() {
         (tester) async {
             final packStorage = new PackStorageMock();
 
-            final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
+            final assistant = new WidgetAssistant(tester);
+			final screenTester = new StudyScreenTester(assistant);
+            final packs = screenTester.takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
             await _pumpScreen(tester, packStorage, packs);
 
             final cards = _sortCards(
                 await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
-            await _goThroughCardList(tester, cards.length);
+            await screenTester.goThroughCardList(cards.length);
 
             final dialogBtnFinder = _assureDialogBtnExistence(true);
-            await new WidgetAssistant(tester).tapWidget(dialogBtnFinder);
+            await assistant.tapWidget(dialogBtnFinder);
 
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
 
@@ -107,18 +111,19 @@ void main() {
         (tester) async {
             final packStorage = new PackStorageMock();
 
-            final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
+			final assistant = new WidgetAssistant(tester);
+			final screenTester = new StudyScreenTester(assistant);
+            final packs = screenTester.takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
             await _pumpScreen(tester, packStorage, packs);
 
             final cards = _sortCards(
                 await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-            await _goThroughCardList(tester, cards.length);
+            await screenTester.goThroughCardList(cards.length);
             final dialogBtnFinder = _assureDialogBtnExistence(true);
 
-            final assistant = new WidgetAssistant(tester);
             await assistant.tapWidget(dialogBtnFinder);
 
-		    await _goToPreviousCard(assistant);
+		    await screenTester.goToPreviousCard();
 
             _assureDialogBtnExistence(false);
             _assureFrontSideRendering(tester, packs, cards, expectedIndex: cards.length - 1);
@@ -128,13 +133,14 @@ void main() {
         (tester) async {
             final packStorage = new PackStorageMock();
 
-            final packsToStudy = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
+			final screenTester = new StudyScreenTester(new WidgetAssistant(tester));
+            final packsToStudy = screenTester.takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
             await _pumpScreen(tester, packStorage, packsToStudy);
 
             final cards = _sortCards(
                 await _fetchPackedCards(tester, packsToStudy, packStorage.wordStorage));
 
-            await _goThroughCardList(tester, cards.length);
+            await screenTester.goThroughCardList(cards.length);
 
 			final updatedPacks = await _fetchNamedPacks(tester, packStorage);
 			final packsToStudyIds = packsToStudy.map((p) => p.id);
@@ -148,7 +154,8 @@ void main() {
 		(tester) async {
           	final packStorage = new PackStorageMock();
 
-			final packs = _takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
+			final assistant = new WidgetAssistant(tester);
+			final packs = new StudyScreenTester(assistant).takeEnoughCards(await _fetchNamedPacks(tester, packStorage));
 			final cards = _sortCards(
 				await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 			var cardToLearn = cards.first;
@@ -161,7 +168,6 @@ void main() {
 
 			await _pumpScreen(tester, packStorage, packs);
 
-			final assistant = new WidgetAssistant(tester);
 			await assistant.tapWidget(AssuredFinder.findOne(
 				label: Localizator.defaultLocalization.studyScreenLearningCardButtonLabel,
 				 type: ElevatedButton, 
@@ -173,7 +179,7 @@ void main() {
 			cardToLearn = await tester.runAsync(() => packStorage.wordStorage.find(cardToLearn.id));
 			expect(cardToLearn.studyProgress - curStudyProgress, 25);
 
-			await _goToPreviousCard(assistant);
+			await new StudyScreenTester(assistant).goToPreviousCard();
 			_assureFrontSideRendering(tester, packs, cards, card: cardToLearn);
       });
 
@@ -326,15 +332,12 @@ Future<List<StoredPack>> _pumpScreen(WidgetTester tester, PackStorageMock packSt
     return packs;
 }
 
-Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock packStorage) async =>
-    (await tester.runAsync(() => packStorage.fetch()))
-        .where((p) => !p.isNone).toList();
+Future<List<StoredPack>> _fetchNamedPacks(WidgetTester tester, PackStorageMock packStorage) =>
+    tester.runAsync(() => StorageFetcher.fetchNamedPacks(packStorage));
 
-Future<List<StoredWord>> _fetchPackedCards(WidgetTester tester, List<StoredPack> packs, 
-    WordStorageMock wordStorage) {
-    return tester.runAsync(() => 
-    	wordStorage.fetchFiltered(parentIds: packs.map((p) => p.id).toList()));
-}
+Future<List<StoredWord>> _fetchPackedCards(
+	WidgetTester tester, List<StoredPack> packs, WordStorageMock wordStorage
+) => tester.runAsync(() => StorageFetcher.fetchPackedCards(packs, wordStorage));
 
 List<StoredWord> _sortCards(List<StoredWord> cards, [bool isBackward = false]) {
     if (isBackward) {
@@ -405,8 +408,6 @@ Future<void> _testChangingStudyModes(WidgetTester tester, List<PresentableEnum> 
     } while (++i < modeValues.length);
 }
 
-Finder _findCardWidget() => find.byType(PageView);
-
 Future<void> _pressButtonEndingWithText(WidgetAssistant assistant, String text) => 
 	assistant.pressButtonDirectly(_findButtonEndingWithText(text));
 
@@ -423,18 +424,23 @@ Future<void> _testForwardSorting(WidgetTester tester, { bool shouldSwipe }) asyn
         await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
     final assistant = new WidgetAssistant(tester);
-    await _goToNextCard(assistant, shouldSwipe);
+	final screenTester = new StudyScreenTester(assistant);
+	await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
     
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-	await _goToPreviousCard(assistant);
+	await screenTester.goToPreviousCard();
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
 
 	final shownCards = <StoredWord>[cards.first];
-	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+	await screenTester.goThroughCardList(cards.length - 1, byClickingButton: !shouldSwipe,
 		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
 
 	expect(cards.length, new Set.from(shownCards).length);
+}
+
+Future<void> _goToNextCard(StudyScreenTester tester, { bool shouldSwipe }) async {
+	await (shouldSwipe ? tester.goToNextCardBySwipe() : tester.goToNextCardByClick());
 }
 
 Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) async {
@@ -448,14 +454,15 @@ Future<void> _testBackwardSorting(WidgetTester tester, { bool shouldSwipe }) asy
     await _pressButtonEndingWithText(assistant, 
         StudyDirection.forward.present(Localizator.defaultLocalization));
 
-    await _goToNextCard(assistant, shouldSwipe);
+	final screenTester = new StudyScreenTester(assistant);
+	await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 
-	await _goToPreviousCard(assistant);
+	await screenTester.goToPreviousCard();
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: 0);
 
 	final shownCards = <StoredWord>[cards.first];
-	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+	await screenTester.goThroughCardList(cards.length - 1, byClickingButton: !shouldSwipe,
 		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
 
 	expect(cards.length, new Set.from(shownCards).length);
@@ -477,17 +484,18 @@ Future<void> _testRandomSorting(WidgetTester tester, { bool shouldSwipe }) async
     final firstCard = _getShownCard(tester, cards);
 	shownCards.add(firstCard);
 
-    await _goToNextCard(assistant, shouldSwipe);
-    
+	final screenTester = new StudyScreenTester(assistant);
+	await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
+	
     final nextCard = _getShownCard(tester, cards);
     
 	_assureFrontSideRendering(tester, packs, cards, card: nextCard, expectedIndex: 1);
 
-    await _goToPreviousCard(assistant);
+	await screenTester.goToPreviousCard();
 
     _assureFrontSideRendering(tester, packs, cards, card: firstCard, expectedIndex: 0);
 
-	await _goThroughCardList(tester, cards.length - 1, byClickingButton: !shouldSwipe,
+	await screenTester.goThroughCardList(cards.length - 1, byClickingButton: !shouldSwipe,
 		onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
 
 	expect(cards.length, new Set.from(shownCards).length);
@@ -516,27 +524,6 @@ Finder _assureDialogBtnExistence(bool shouldFind) {
 
 	return dialogBtnFinder;
 }
-
-List<StoredPack> _takeEnoughCards(List<StoredPack> packs) {
-    int cardsNumber = 0;
-    return packs.takeWhile((p) {
-        if (cardsNumber > 3)
-            return false;
-
-        cardsNumber += p.cardsNumber;
-        return true;
-    }).toList();
-}
-
-Future<void> _goToNextCard(WidgetAssistant assistant, bool bySwiping) async {
-    if (bySwiping)
-        await assistant.swipeWidgetLeft(_findCardWidget());
-    else
-        await assistant.tapWidget(find.widgetWithText(ElevatedButton, 'Next'));
-}
-
-Future<void> _goToPreviousCard(WidgetAssistant assistant) =>
-	assistant.swipeWidgetRight(_findCardWidget());
 
 void _assureBackSideRendering(WidgetTester tester, List<StoredPack> packs,
     List<StoredWord> cards, { int expectedIndex, StoredWord card, bool isReversed }) {
@@ -568,12 +555,14 @@ Future<void> _testReversingFrontCardSide(WidgetTester tester, { bool shouldSwipe
     
     _assureBackSideRendering(tester, packs, cards, expectedIndex: 0, isReversed: true);
 
-    await _goToNextCard(assistant, shouldSwipe);
-    _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+	final screenTester = new StudyScreenTester(assistant);
+	await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
+    
+	_assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
 }
 
 Future<void> _reverseCardSide(WidgetAssistant assistant) => 
-    assistant.tapWidget(_findCardWidget(), atCenter: true);
+    assistant.tapWidget(StudyScreenTester.findCardWidget(), atCenter: true);
 
 Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe }) async {
     final packStorage = new PackStorageMock();
@@ -589,7 +578,8 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
     const firstIndex = 0;
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
     
-    await _goToNextCard(assistant, shouldSwipe);
+	final screenTester = new StudyScreenTester(assistant);
+	await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
 
     const nextIndex = 1;
     _assureBackSideRendering(tester, packs, cards, expectedIndex: nextIndex);
@@ -597,7 +587,7 @@ Future<void> _testReversingBackCardSide(WidgetTester tester, { bool shouldSwipe 
     await _reverseCardSide(assistant);
     _assureFrontSideRendering(tester, packs, cards, expectedIndex: nextIndex, isReversed: true);
 
-	await _goToPreviousCard(assistant);
+	await screenTester.goToPreviousCard();
     _assureBackSideRendering(tester, packs, cards, expectedIndex: firstIndex);
 }
 
@@ -617,7 +607,7 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
     int curIndex = 0;
     do {
         if (curIndex > 0)
-            await _goToNextCard(assistant, shouldSwipe);
+			await _goToNextCard(new StudyScreenTester(assistant), shouldSwipe: shouldSwipe);
 
         final cardText = _getShownCardText(tester);
         final curCard = cards[curIndex];
@@ -639,19 +629,6 @@ Future<void> _testReversingRandomCardSide(WidgetTester tester, { bool shouldSwip
                 expectedIndex: curIndex, isReversed: true);
 
     } while (++curIndex < 2);
-}
-
-Future<void> _goThroughCardList(WidgetTester tester, int listLength, 
-	{ bool byClickingButton, void Function() onNextCard }
-) async {
-	final assistant = new WidgetAssistant(tester);
-	
-	int index = 0;
-	do {
-		await _goToNextCard(assistant, !(byClickingButton ?? false));
-
-		onNextCard?.call();
-	} while (++index < listLength);
 }
 
 Future<void> _openEditorMode(WidgetTester tester) => 

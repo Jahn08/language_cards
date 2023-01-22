@@ -102,4 +102,37 @@ class WidgetAssistant {
 
 		return changedText;
 	}
+
+	Future<void> navigateBack() async {
+		final backBtnFinders = find.byType(BackButton);
+		tester.widget<BackButton>(backBtnFinders.first).onPressed.call();
+
+		await pumpAndAnimate();
+	}
+
+	Future<void> scrollDownListView(Finder childFinder, { int iterations, void Function() onIteration }) 
+		async {
+			iterations ??= 5;
+			int tries = 0;
+
+			while (++tries < iterations) {
+				onIteration?.call();
+	
+				final ctrl = retrieveListViewScroller(childFinder);
+				final position = ctrl.position;
+				final newPosition = position.pixels + 300;
+				ctrl.jumpTo(newPosition > position.maxScrollExtent ? 
+					position.maxScrollExtent : newPosition);
+
+				await pumpAndAnimate(1500);
+			}
+
+			onIteration?.call();
+		}
+
+	ScrollController retrieveListViewScroller(Finder childFinder) {
+		final listView = tester.widget<ListView>(
+			find.ancestor(of: childFinder.first, matching: find.byType(ListView)));
+		return listView.controller;
+	}
 }
