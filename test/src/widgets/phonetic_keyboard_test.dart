@@ -105,7 +105,8 @@ void main() {
 		
 		final expectedOutput = input.substring(0, complexSymbolPosition) + input.substring(offset);
 		final changedTextFinder = _findEditableText(expectedOutput);
-		expect(changedTextFinder, findsOneWidget);
+		expect(changedTextFinder, findsOneWidget, 
+			reason: 'Expected input "$expectedOutput" is not found. Initial input: "$input", a symbol for partial deletion: "$complexSymbol"');
 		_assureTextPosition(tester, changedTextFinder, offset - (complexSymbol.length - 1));
     });
 
