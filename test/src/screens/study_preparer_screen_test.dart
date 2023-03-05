@@ -87,10 +87,13 @@ void main() {
 		});
 
 	testWidgets('Keeps packs ordered by their study date in ascending order after finishing a study cycle updates the dates', 
-        (tester) => _testPackOrderAfterFinishingStudy(tester, PackOrder.byDateAsc));
+        (tester) => _testPackOrderAfterFinishingStudy(tester, packOrder: PackOrder.byDateAsc));
 
 	testWidgets('Keeps packs ordered by their study date in descending order after finishing a study cycle updates the dates', 
-        (tester) => _testPackOrderAfterFinishingStudy(tester, PackOrder.byDateDesc));
+        (tester) => _testPackOrderAfterFinishingStudy(tester, packOrder: PackOrder.byDateDesc));
+
+	testWidgets('Keeps packs ordered by their study date in order after finishing a study and going back by the OS button', 
+        (tester) => _testPackOrderAfterFinishingStudy(tester, packOrder: PackOrder.byDateAsc, goBackByOSButton: true));
 
     testWidgets('Unselects/selects all card packs changing the summary of their study levels', 
         (tester) async {
@@ -367,7 +370,9 @@ Future<void> _testRenderingPackOrder(WidgetTester tester, PackOrder order) async
 	}, order);
 }
 
-Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester, PackOrder packOrder) async {
+Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester, { 
+	PackOrder packOrder, bool goBackByOSButton = false 
+}) async {
 	await _setPackOrderPreference(packOrder);
 
 	final storage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
@@ -393,7 +398,7 @@ Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester, PackOrder pa
 	await studyTester.goThroughCardList(cardsToStudy.length, byClickingButton: true);
 
 	await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
-	await assistant.navigateBack();
+	await (goBackByOSButton ? assistant.navigateBackByOSButton(): assistant.navigateBack());
 
 	final tiles = <CheckboxListTile>{};
 	await assistant.scrollDownListView(find.byType(CheckboxListTile), 

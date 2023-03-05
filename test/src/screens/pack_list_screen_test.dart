@@ -34,6 +34,14 @@ void main() {
         await _testShowingCardsWithoutChanging(tester, storage, packWithCards);
     });
 
+	testWidgets("Doesn't update a number of cards for a pack without changes in it when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester);
+
+			final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
+			await _testShowingCardsWithoutChanging(tester, storage, packWithCards, goBackByOSButton: true);
+		});
+
     testWidgets("Decreases a number of cards for a pack after deleting one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
@@ -41,12 +49,28 @@ void main() {
         await _testDecreasingNumberOfCards(tester, storage, packWithCards);
     });
 
+	testWidgets("Decreases a number of cards for a pack after deleting one when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester);
+
+			final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
+			await _testDecreasingNumberOfCards(tester, storage, packWithCards, goBackByOSButton: true);
+		});
+
     testWidgets("Increases a number of cards for a pack after adding one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
 
         final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
         await _testIncreasingNumberOfCards(tester, storage, packWithCards);
     });
+	
+    testWidgets("Increases a number of cards for a pack after adding one when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
+
+			final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
+			await _testIncreasingNumberOfCards(tester, storage, packWithCards, goBackByOSButton: true);
+		});
 
     testWidgets("Renders an unremovable link for a list of cards without a pack", (tester) async {
         await screenTester.pumpScreen(tester);
@@ -63,12 +87,28 @@ void main() {
         await _testShowingCardsWithoutChanging(tester, storage, nonePack);
     });
 
+	testWidgets("Doesn't update a number of cards for the none pack without changes in it when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester);
+
+			final nonePack = await _getNonePack(storage, tester);
+			await _testShowingCardsWithoutChanging(tester, storage, nonePack, goBackByOSButton: true);
+		});
+
     testWidgets("Decreases a number of cards for the none pack after deleting one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester);
 
         final nonePack = await _getNonePack(storage, tester);
         await _testDecreasingNumberOfCards(tester, storage, nonePack);
     });
+	
+    testWidgets("Decreases a number of cards for the none pack after deleting one when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester);
+
+			final nonePack = await _getNonePack(storage, tester);
+			await _testDecreasingNumberOfCards(tester, storage, nonePack, goBackByOSButton: true);
+		});
 
     testWidgets("Increases a number of cards for the none pack after adding one", (tester) async {
         final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
@@ -76,6 +116,14 @@ void main() {
         final nonePack = await _getNonePack(storage, tester);
         await _testIncreasingNumberOfCards(tester, storage, nonePack);
     });
+
+    testWidgets("Increases a number of cards for the none pack after adding one when going back by the OS button", 
+		(tester) async {
+			final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
+
+			final nonePack = await _getNonePack(storage, tester);
+			await _testIncreasingNumberOfCards(tester, storage, nonePack, goBackByOSButton: true);
+		});
 
 	testWidgets("Deletes packs with cards and increases the number of cards without a pack", 
 		(tester) async {
@@ -343,8 +391,8 @@ Future<StoredPack> _getFirstPackWithEnoughCards(PackStorageMock storage, WidgetT
 Future<List<StoredPack>> _fetchPacks(PackStorageMock storage, WidgetTester tester) =>    
 	tester.runAsync<List<StoredPack>>(() => storage.fetch());
 
-Future<void> _testShowingCardsWithoutChanging(WidgetTester tester, 
-    PackStorageMock storage, StoredPack pack) async {
+Future<void> _testShowingCardsWithoutChanging(
+	WidgetTester tester, PackStorageMock storage, StoredPack pack, { bool goBackByOSButton }) async {
     final expectedNumberOfCards = pack.cardsNumber;
         
     final assistant = new WidgetAssistant(tester);
@@ -354,13 +402,13 @@ Future<void> _testShowingCardsWithoutChanging(WidgetTester tester,
 
     expect(find.byType(Dismissible), findsNWidgets(expectedNumberOfCards));
 
-    await _goBackToPackList(assistant, packName);
+    await _goBackToPackList(assistant, packName, goBackByOSButton);
 
     await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
 }
 
-Future<void> _testDecreasingNumberOfCards(WidgetTester tester, 
-    PackStorageMock storage, StoredPack pack) async {
+Future<void> _testDecreasingNumberOfCards(
+	WidgetTester tester, PackStorageMock storage, StoredPack pack, { bool goBackByOSButton }) async {
     final expectedNumberOfCards = pack.cardsNumber - 1;
     
     final assistant = new WidgetAssistant(tester);
@@ -368,13 +416,13 @@ Future<void> _testDecreasingNumberOfCards(WidgetTester tester,
 
 	await assistant.swipeWidgetLeft(find.byType(Dismissible).first);
     
-    await _goBackToPackList(assistant, pack.name);
+    await _goBackToPackList(assistant, pack.name, goBackByOSButton);
 
     await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
 }
 
-Future<void> _testIncreasingNumberOfCards(WidgetTester tester, 
-    PackStorageMock storage, StoredPack pack) async {
+Future<void> _testIncreasingNumberOfCards(
+	WidgetTester tester, PackStorageMock storage, StoredPack pack, { bool goBackByOSButton }) async {
     final expectedNumberOfCards = pack.cardsNumber + 1;
 
     final assistant = new WidgetAssistant(tester);
@@ -385,7 +433,7 @@ Future<void> _testIncreasingNumberOfCards(WidgetTester tester,
         await storage.wordStorage.upsert([randomWord]);
     });
 
-    await _goBackToPackList(assistant, pack.name);
+    await _goBackToPackList(assistant, pack.name, goBackByOSButton);
 
     await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
 }
@@ -411,14 +459,17 @@ Finder _findPackTileByName(String name) {
     return nonePackTileFinder;
 }
 
-Future<void> _goBackToPackList(WidgetAssistant assistant, String packName) async {
-    await assistant.navigateBack();
+Future<void> _goBackToPackList(WidgetAssistant assistant, String packName, [bool byOSButton]) async {
+    await _goBack(assistant, byOSButton);
 
     if (packName == _nonePackName) 
         return;
 
-    await assistant.navigateBack();
+    await _goBack(assistant, byOSButton);
 }
+
+Future<void> _goBack(WidgetAssistant assistant, [bool byOSButton]) => 
+	(byOSButton ?? false) ? assistant.navigateBackByOSButton(): assistant.navigateBack();
 
 Future<void> _assertPackCardNumber(WidgetTester tester, PackStorageMock storage, 
     StoredPack pack, int expectedNumber) async {

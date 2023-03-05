@@ -110,6 +110,12 @@ class WidgetAssistant {
 		await pumpAndAnimate();
 	}
 
+	Future<void> navigateBackByOSButton() async {
+		final widgetsAppState = tester.state(find.byType(WidgetsApp)) as WidgetsBindingObserver;
+		await widgetsAppState.didPopRoute();
+		await pumpAndAnimate();
+	}
+
 	Future<void> scrollDownListView(Finder childFinder, { int iterations, void Function() onIteration }) 
 		async {
 			iterations ??= 5;

@@ -23,7 +23,7 @@ import '../widgets/tight_flexible.dart';
 import '../widgets/translation_indicator.dart';
 
 class _CardEditorDialog extends OutcomeDialog<MapEntry<StoredWord, StoredPack>> {
-
+	
 	final StoredWord card;
     
     final StoredPack pack;
@@ -84,6 +84,8 @@ class _StudyScreenState extends State<StudyScreen> {
 	Future<UserParams> _futureParams;
 
 	AppLocalizations _locale;
+
+	bool _packStorageChanged = false;
 
     @override
     void initState() {
@@ -208,7 +210,12 @@ class _StudyScreenState extends State<StudyScreen> {
 							)
 						]
 					),
-					onNavGoingBack: () => Router.goToStudyPreparation(context)
+					onNavGoingBack: () { 
+						if (_packStorageChanged)
+							Router.goToStudyPreparation(context);
+						else
+							Router.goBackToStudyPreparation(context);
+					}
 				);
 			})
 		);
@@ -294,6 +301,7 @@ class _StudyScreenState extends State<StudyScreen> {
 			if ((widget.studyStageIds ?? []).isEmpty) {
 				widget.packs.forEach((p) => p.setNowAsStudyDate());
 				widget.packStorage.upsert(widget.packs);
+				_packStorageChanged = true;
 			}
 		}
 			
