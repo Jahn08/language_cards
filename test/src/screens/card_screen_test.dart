@@ -79,7 +79,7 @@ void main() {
 				CardEditorTester.findStudyProgressButton(shouldFind: true));
             CardEditorTester.findStudyProgressButton(shouldFind: false);
 
-            await assistant.tapWidget(CardEditorTester.findSaveButton(), atCenter: true);
+			await _saveCard(assistant);
 
             final changedWord = await storage.wordStorage.find(wordWithProgress.id);
             expect(changedWord.studyProgress, WordStudyStage.unknown);
@@ -117,7 +117,7 @@ void main() {
 
 	testWidgets('Displays all named packs in the pack selector dialog', (tester) async {
 		final storage = new PackStorageMock(packsNumber: 30);
-		await _displayFilledWord(tester, storage: storage, pack: storage.getRandom());
+		await _displayFilledWord(tester, storage: storage, pack: storage.getRandom(), speaker: const SpeakerMock());
 		
 		final assistant = new WidgetAssistant(tester);
 		final packBtnFinder = CardEditorTester.findPackButton();
@@ -132,37 +132,49 @@ void main() {
 		});
 	});
 
-	testWidgets('Displays no button to pronounce card text if there is no pack', 
+	testWidgets('Displays no button to pronounce card text if there is no pack and shows it otherwise', 
         (tester) async {
-            await _displayFilledWord(tester, pack: StoredPack.none);
+			final storage = new PackStorageMock();
+            await _displayFilledWord(tester, storage: storage, pack: StoredPack.none, speaker: const SpeakerMock());
+			CardEditorTester.findSpeakerButton(shouldFind: false);
 
+			await _changePack(tester, () => _fetchAnotherPack(storage, StoredPack.none.id));
+			CardEditorTester.findSpeakerButton(shouldFind: true);
+
+			await _changePack(tester, () => Future.value(StoredPack.none));
 			CardEditorTester.findSpeakerButton(shouldFind: false);
 		});
 	
-	testWidgets('Displays no button to pronounce card text with empty text', 
+	testWidgets('Displays no button to pronounce card text with empty text and shows it otherwise', 
         (tester) async {
 			final storage = new PackStorageMock();
 			final pack = storage.getRandom();
 			await _displayFilledWord(tester, storage: storage, pack: pack,
-				wordToShow: WordStorageMock.generateWord(packId: pack.id));
+				wordToShow: WordStorageMock.generateWord(packId: pack.id), speaker: const SpeakerMock());
+			CardEditorTester.findSpeakerButton(shouldFind: false);
 
+			final assistant = new WidgetAssistant(tester);
+			final newText = Randomiser.nextString();
+			await _changeCardText(assistant, '', newText);
+			CardEditorTester.findSpeakerButton(shouldFind: true);
+
+			await _changeCardText(assistant, newText, '');
 			CardEditorTester.findSpeakerButton(shouldFind: false);
 		});
 
-	testWidgets('Displays a button to pronounce card text', 
-        (tester) async {
-			final storage = new PackStorageMock();
-			final pack = storage.getRandom();
-			final card = storage.wordStorage.getRandom();
+	testWidgets('Pronounces card text when clicking the speaker button', (tester) async {
+		final storage = new PackStorageMock();
+		final pack = storage.getRandom();
+		final card = storage.wordStorage.getRandom();
 
-			String spokenText;
-			await _displayFilledWord(tester, storage: storage, pack: pack, wordToShow: card,
-				speaker: new SpeakerMock(onSpeak: (text) => spokenText = text));
+		String spokenText;
+		await _displayFilledWord(tester, storage: storage, pack: pack, wordToShow: card,
+			speaker: new SpeakerMock(onSpeak: (text) => spokenText = text));
 
-			await new WidgetAssistant(tester).tapWidget(
-				CardEditorTester.findSpeakerButton(shouldFind: true));
-			expect(spokenText, card.text);
-		});
+		await new WidgetAssistant(tester).tapWidget(
+			CardEditorTester.findSpeakerButton(shouldFind: true));
+		expect(spokenText, card.text);
+	});
 	
     testWidgets('Switches focus to the translation field after changes in the word text field', 
         (tester) async {
@@ -213,8 +225,7 @@ void main() {
 
 		final translation = Randomiser.nextString();
 		await assistant.enterText(textFields.last, translation);
-
-		await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+		await _saveCard(assistant);
 
 		final cards = await storage.wordStorage.fetch(textFilter: cardText);
 		expect(cards.length, 1);
@@ -237,8 +248,7 @@ void main() {
             await _showTranscriptionKeyboard(assistant, initialValue);
 
             final changedValue = await _changeTranscription(tester, initialValue);
-
-            await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+			await _saveCard(assistant);
 
             final changedWord = await storage.wordStorage.find(wordToShow.id);
             expect(changedWord?.transcription, initialValue);
@@ -378,7 +388,8 @@ void main() {
 		final initialText = cardToShow.text;
 		final initialTranslation = cardToShow.translation;
 
-		await _changeTextAndSave(assistant, cardToShow, duplicatedCard.text);
+		await _changeCardText(assistant, cardToShow.text, duplicatedCard.text);
+		await _saveCard(assistant);
 
 		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
 			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
@@ -415,7 +426,8 @@ void main() {
 		final initialText = cardToShow.text;
 		final initialTranslation = cardToShow.translation;
 
-		await _changeTextAndSave(assistant, cardToShow, duplicatedText);
+		await _changeCardText(assistant, cardToShow.text, duplicatedText);
+		await _saveCard(assistant);
 
 		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
 			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
@@ -463,7 +475,8 @@ void main() {
 			final initialText = cardToShow.text;
 			final initialTranslation = cardToShow.translation;
 
-			await _changeTextAndSave(assistant, cardToShow, duplicatedText);
+			await _changeCardText(assistant, cardToShow.text, duplicatedText);
+			await _saveCard(assistant);
 
 			final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
 				Localizator.defaultLocalization.cardEditorDuplicatedCardDialogConfirmationButtonLabel);
@@ -503,7 +516,8 @@ void main() {
 		final assistant = new WidgetAssistant(tester);
 		final initialTranslation = cardToShow.translation;
 
-		await _changeTextAndSave(assistant, cardToShow, duplicatedCard.text);
+		await _changeCardText(assistant, cardToShow.text, duplicatedCard.text);
+		await _saveCard(assistant);
 
 		final mergeConfirmationBtnFinder = DialogTester.findConfirmationDialogBtn(
 			Localizator.defaultLocalization.cardEditorDuplicatedCardDialogCancellationButtonLabel);
@@ -781,11 +795,13 @@ Future<StoredWord> _updateCard(
 	return updatedCard;
 } 
 
-Future<void> _changeTextAndSave(
-	WidgetAssistant assistant, StoredWord cardToChange, String newText
+Future<void> _saveCard(WidgetAssistant assistant) => assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+
+Future<void> _changeCardText(
+	WidgetAssistant assistant, String currentText, String newText
 ) async {
-	await assistant.enterChangedText(cardToChange.text, changedText: newText);
-	await _focusTextField(new WidgetAssistant(assistant.tester), cardToChange.translation);
-	await assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
-	await assistant.pumpAndAnimate(700);
+	await assistant.enterChangedText(currentText, changedText: newText);
+	
+	final anotherTextField = find.byType(TextField).last;
+	await assistant.tapWidget(anotherTextField);
 }

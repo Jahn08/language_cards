@@ -152,10 +152,10 @@ class CardEditorState extends State<CardEditor> {
 										initialValue: text
 									);
 
-									return _isNonePack || text == null || text.isEmpty ? textField: 
-										new ValueListenableBuilder(
-											valueListenable: _packNotifier,
-											builder: (_, StoredPack pack, __) => 
+									return new ValueListenableBuilder(
+										valueListenable: _packNotifier,
+										builder: (_, StoredPack pack, __) => 
+											_isNonePack || text == null || text.isEmpty ? textField : 
 												new Row(children: [
 													new Expanded(child: textField), 
 														new SpeakerButton(
@@ -163,8 +163,8 @@ class CardEditorState extends State<CardEditor> {
 															(speaker) => speaker.speak(text), 
 															defaultSpeaker: widget._defaultSpeaker
 														)
-													]),
-										);
+													])
+									);
 								}
 							),
 							new AnimatedBuilder(

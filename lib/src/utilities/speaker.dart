@@ -55,6 +55,9 @@ class Speaker implements ISpeaker {
 	}
 
 	static Future<ISpeaker> getSpeaker(Language lang) async {
+		if (lang == null)
+			return null;
+			
 		_instance ??= new Speaker._();
 
 		if (!(await _instance._setLanguage(lang)))
