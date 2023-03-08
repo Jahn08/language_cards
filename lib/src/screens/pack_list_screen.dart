@@ -90,7 +90,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     bool get canGoBack => true;
 
     @override
-    void onGoingBack(BuildContext context) => Router.goHome(context);
+    void onGoingBack(BuildContext context) => Router.returnHome(context);
 
     @override
     bool isRemovableItem(StoredPack item) => !item.isNone;

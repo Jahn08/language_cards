@@ -98,12 +98,11 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
         final shouldRefreshPack = _cardsWereRemoved || widget.cardWasAdded || widget.packWasAdded;
 
         if (widget.pack == null)
-            Router.goHome(context);
+            Router.returnHome(context);
         else if (widget.pack.isNone)
-            shouldRefreshPack ? Router.goToPackList(context) : 
-                Router.goBackToPackList(context);
+			Router.goBackToPackList(context, refreshed: shouldRefreshPack);
         else
-			Router.goToPack(context, pack: widget.pack, refreshed: shouldRefreshPack); 
+			Router.goBackToPack(context, pack: widget.pack, refreshed: shouldRefreshPack);
     }
 
     @override

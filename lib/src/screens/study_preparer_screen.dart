@@ -99,7 +99,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 							icon: const Icon(Icons.select_all)
 						)
 					],
-					onNavGoingBack: () => Router.goHome(context),
+					onNavGoingBack: () => Router.returnHome(context),
 					body: new Column(
 						children: [
 							new Flexible(child: new ValueListenableBuilder(

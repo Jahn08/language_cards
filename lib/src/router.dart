@@ -149,18 +149,6 @@ class Router {
 
 	static String get initialRouteName => _mainMenuRouteName;
 
-	static void goToCard(BuildContext context, {WordStorage storage, int wordId, StoredPack pack}) {
-		Navigator.pushNamed(context, _cardRouteName,
-			arguments: new _WordCardRouteArgs(storage: storage, wordId: wordId, pack: pack));
-	}
-
-	static void goToCardList(BuildContext context,
-		{WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded}) {
-		Navigator.pushNamed(context, _cardListRouteName,
-			arguments: new _CardListRouteArgs(
-				storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
-	}
-
 	static dynamic getRoute(RouteSettings settings) {
 		switch (settings.name) {
 			case _cardRouteName:
@@ -186,32 +174,64 @@ class Router {
 		}
 	}
 
-	static void goHome(BuildContext context) => Navigator.pushNamed(context, initialRouteName);
+	static void goToCard(BuildContext context, { WordStorage storage, int wordId, StoredPack pack }) =>
+		Navigator.pushNamed(context, _cardRouteName,
+			arguments: new _WordCardRouteArgs(storage: storage, wordId: wordId, pack: pack));
+
+	static void goToCardList(BuildContext context, { 
+		WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded 
+	}) {
+		Navigator.pushNamed(context, _cardListRouteName,
+		arguments: new _CardListRouteArgs(
+			storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
+	}
+		
+	static void goBackToCardList(BuildContext context, { 
+		WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded 
+	}) {
+		Navigator.pushNamedAndRemoveUntil(context, _cardListRouteName, ModalRoute.withName(_packRouteName), 
+			arguments: new _CardListRouteArgs(
+				storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
+	}
+	
+	static void returnHome(BuildContext context) => _goBackUntil(context, initialRouteName);
 
 	static void goToStudyPreparation(BuildContext context, [StudyStorage storage]) =>
-		Navigator.pushNamed(context, _studyPreparerRouteName,
+		Navigator.pushNamedAndRemoveUntil(context, _studyPreparerRouteName, ModalRoute.withName(initialRouteName), 
 			arguments: new _StudyStorageRouteArgs(storage));
-
-	static void goBackToStudyPreparation(BuildContext context) => _goBackUntil(context, _studyPreparerRouteName);
-
-	static void goToStudyMode(BuildContext context,
-		{@required List<StoredPack> packs, List<int> studyStageIds, WordStorage storage}) => 
-		Navigator.pushNamed(context, _studyModeRouteName,
-			arguments: new _StudyModeRouteArgs(packs, studyStageIds: studyStageIds, storage: storage));
-
-	static void goToPack(BuildContext context,
-		{PackStorage storage, StoredPack pack, bool refreshed}) {
-		Navigator.pushNamed(context, _packRouteName,
-			arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
-	}
 
 	static void _goBackUntil(BuildContext context, String routeName) =>
 		Navigator.popUntil(context, ModalRoute.withName(routeName));
+		
+	static void goBackToStudyPreparation(BuildContext context) => 
+		_goBackUntil(context, _studyPreparerRouteName);
 
-	static void goToPackList(BuildContext context) =>
-		Navigator.pushNamed(context, _packListRouteName);
+	static void goToStudyMode(BuildContext context, { 
+		@required List<StoredPack> packs, List<int> studyStageIds, WordStorage storage 
+	}) {
+		Navigator.pushNamed(context, _studyModeRouteName,
+			arguments: new _StudyModeRouteArgs(packs, studyStageIds: studyStageIds, storage: storage));
+	}
 
-	static void goBackToPackList(BuildContext context) => _goBackUntil(context, _packListRouteName);
+	static void goToPack(BuildContext context, { PackStorage storage, StoredPack pack }) =>
+		Navigator.pushNamed(context, _packRouteName, arguments: new _PackRouteArgs(storage: storage, pack: pack));
+
+	static void goBackToPack(BuildContext context, { PackStorage storage, StoredPack pack, bool refreshed }) {
+		if (refreshed)
+			Navigator.pushNamedAndRemoveUntil(context, _packRouteName, ModalRoute.withName(_packListRouteName), 
+				arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
+		else
+			_goBackUntil(context, _packRouteName);
+	}
+
+	static void goToPackList(BuildContext context) => Navigator.pushNamed(context, _packListRouteName);
+
+	static void goBackToPackList(BuildContext context, { bool refreshed }) {
+		if (refreshed)
+			Navigator.pushNamedAndRemoveUntil(context, _packListRouteName, ModalRoute.withName(initialRouteName));
+		else
+			_goBackUntil(context, _packListRouteName);
+	}
 
 	static void goToCardHelp(BuildContext context) =>
 		Navigator.pushNamed(context, _cardHelpRouteName);

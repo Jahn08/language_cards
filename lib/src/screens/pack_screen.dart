@@ -52,8 +52,7 @@ class PackScreenState extends State<PackScreen> {
 		return new BarScaffold(
             title: _isNew ? locale.packScreenHeadBarAddingPackTitle:
 				locale.packScreenHeadBarChangingPackTitle,
-            onNavGoingBack: () => widget.refreshed ? Router.goToPackList(context) : 
-                Router.goBackToPackList(context),
+            onNavGoingBack: () => Router.goBackToPackList(context, refreshed: widget.refreshed),
             body: new Form(
                 key: _key,
                 child: new FutureBuilder(
@@ -134,7 +133,7 @@ class PackScreenState extends State<PackScreen> {
 										new ElevatedButton(
 											child: label,
 											onPressed: !isStateDirty ? null: 
-												() => _onSave((_) => Router.goToPackList(context))
+												() => _onSave((_) => Router.goBackToPackList(context, refreshed: true))
 										)
 								),
 								new ValueListenableBuilder(
