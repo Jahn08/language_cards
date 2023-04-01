@@ -13,13 +13,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     bool _cardsWereRemoved = false;
 
-    bool _shouldChangeItemsCount = false;
-
 	int _loadedItemsCount;
-
-	String _curTextIndex;
-
-	final Map<String, int> _itemsByTextCount = {};
 
     @override
     Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
@@ -46,25 +40,9 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
         final items = await widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
             parentIds: _parentIds, text: text);
 			
-		if (items.isNotEmpty) {
+		if (items.isNotEmpty)
 			_loadedItemsCount = skipCount + items.length;
-			_curTextIndex = text;
-
-			if (!_itemsByTextCount.containsKey(text) || _shouldChangeItemsCount) {
-				
-				if (_shouldChangeItemsCount)
-					_shouldChangeItemsCount = false;
-				
-				if (_loadedItemsCount < takeCount)
-					_itemsByTextCount[text] = _loadedItemsCount;
-				else
-					_itemsByTextCount[text] = await widget.storage.count(
-						parentId: widget.pack?.id, 
-						textFilter: text
-					);
-			}
-		}
-
+		
 		return items;
 	}
 
@@ -76,12 +54,17 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 			return;
 			
         widget.storage.delete(items.map((i) => i.id).toList());
-
         _cardsWereRemoved = true;
-		_shouldChangeItemsCount = true;
-
-		refetchItems(text: _curTextIndex, isForceful: true);
     }
+
+	@override
+	Future<void> updateStateAfterDeletion({ bool shallUpdate }) async {
+		_loadedItemsCount = 0;
+		await refetchItems(text: super.curFilterIndex, isForceful: true);
+
+		if (_loadedItemsCount == 0)
+			super.updateStateAfterDeletion(shallUpdate: shallUpdate);
+	}
 
     @override
     String get title {
@@ -149,7 +132,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
 	@override
 	String getSelectorBtnLabel({ bool allSelected, AppLocalizations locale }) {
-		final itemsOverall = _itemsByTextCount[_curTextIndex];
+		final itemsOverall = super.filterIndexLength;
 		if (_loadedItemsCount == itemsOverall)
 			return super.getSelectorBtnLabel(allSelected: allSelected, locale: locale);
 

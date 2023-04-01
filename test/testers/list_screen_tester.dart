@@ -447,8 +447,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				
 				await _assureTilesDistinctFromFilterIndex(tester, filterIndex);
 			});
-			
-		testWidgets(_buildDescription('deletes a previously acitve index filter after clicking on another when the search mode is active'), 
+
+		testWidgets(_buildDescription('deactivates index filter and deletes it when its items are deleted with the active search mode'), 
 			(tester) async {
 				final storage = await _pumpScreenWithEnoughItems(tester, 
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
@@ -457,24 +457,18 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await _activateSearchMode(assistant);
 				
 				final indexGroups = await _getIndexGroups(tester, storage);
-				final filterGroup = indexGroups.first;
-				final filterIndex = filterGroup.key;
-				await chooseFilterIndex(assistant, filterIndex);
+				final filterGroupToDelete = indexGroups.first;
+				final filterIndexToDelete = filterGroupToDelete.key;
+				await chooseFilterIndex(assistant, filterIndexToDelete);
 
 				await activateEditorMode(assistant);
 				await _deleteAllItemsInEditor(assistant);
 
-				assureFilterIndexActiveness(tester, filterIndex, isActive: true);
-
-				indexGroups.remove(filterGroup);
-				final newFilterGroup = indexGroups.first;
-				final newFilterIndex = newFilterGroup.key;
-				await chooseFilterIndex(assistant, newFilterIndex);
-
-				assureFilterIndexActiveness(tester, newFilterIndex, isActive: true);
-				_findFilterIndex(filterIndex, shouldFind: false);
-			
-				assureFilterIndexes(indexGroups.map((g) => g.key).toList(), shouldFind: true);
+				_findFilterIndex(filterIndexToDelete, shouldFind: false);
+		 		indexGroups.remove(filterGroupToDelete);
+				indexGroups.map((g) => g.key).forEach((i) {
+					assureFilterIndexActiveness(tester, i, isActive: false);
+				});
 			});
 
 		testWidgets(_buildDescription('deletes an index filter when its items are deleted and the search mode is active'), 
@@ -496,6 +490,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				await deleteSelectedItems(assistant);
 
 				_findFilterIndex(filterIndexToDelete, shouldFind: false);
+		 		indexGroups.remove(filterGroupToDelete);
+		 		assureFilterIndexes(indexGroups.map((g) => g.key).toList(), shouldFind: true);
 			});
 
 		testWidgets(_buildDescription('deletes an index filter when its items are deleted with the search mode turned off'), 
@@ -520,31 +516,29 @@ class ListScreenTester<TEntity extends StoredEntity> {
 				_findFilterIndex(filterIndexToDelete, shouldFind: false);
 			});
 
-		testWidgets(_buildDescription('keeps an index filter when it still has items left after deletion in the active search mode'), 
+		testWidgets(
+			_buildDescription('keeps an index filter active when it still has items left after deletion in the active search mode'), 
 			(tester) async {
 				final storage = await _pumpScreenWithEnoughItems(tester, 
 					newEntityGetter: newEntityGetter, searcherModeThreshold: _searcherModeThreshold);
 
 				final assistant = new WidgetAssistant(tester);
 				await _activateSearchMode(assistant);
+				final indexGroup = (await _getIndexGroups(tester, storage)).firstWhere((e) => e.value > 1);
+				final filterIndex = indexGroup.key;
+				await chooseFilterIndex(assistant, filterIndex);
 				
-				final indexGroups = await _getIndexGroups(tester, storage);
-				final filterGroupToDelete = indexGroups.firstWhere((e) => e.value > 1);
-				final filterIndexToDelete = filterGroupToDelete.key;
-
 				await activateEditorMode(assistant);
-				final titlesToDelete = (await tester.runAsync(() => 
-					storage.fetch(textFilter: filterIndexToDelete)))
+				final titlesToDelete = (await tester.runAsync(() => storage.fetch(textFilter: filterIndex)))
 					.take(1).map((i) => i.textData).toList();
 				await selectItemsInEditor(assistant, titlesToDelete);
 				await deleteSelectedItems(assistant);
 
-				final leftItemsNumber = indexGroups.fold<int>(0, (sum, item) => sum + item.value) - 
-					titlesToDelete.length;
+		 		assureFilterIndexActiveness(tester, filterIndex, isActive: true);
+
+				final leftItemsNumber = indexGroup.value - titlesToDelete.length;
 				expect(getSelectorBtnLabel(tester),
 					Localizator.defaultLocalization.constsSelectAll(leftItemsNumber.toString()));
-
-				_findFilterIndex(filterIndexToDelete, shouldFind: true);
 			});
 
 		testWidgets(_buildDescription('hides the search mode button when the mode is inactive, and the list has got too short'), 

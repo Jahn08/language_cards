@@ -44,7 +44,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
 	Map<String, int> _filterIndexes;
 	String _curFilterIndex;
-	String _filterIndexToDelete;
 
     final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
     final Map<int, _CachedItem<TItem>> _itemsMarkedInEditor = {};
@@ -120,7 +119,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 					}),
 					icon: new Icon(_isEditorMode ? Icons.edit_off: Icons.edit)
 				),
-				if (_isSearchMode || _isSearchModeAvailable)
+				if (_isSearchMode || _getIsSearchModeAvailable(_items.length))
 					_isSearchMode ? 
 						new IconButton(
 							onPressed: () {
@@ -148,14 +147,24 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         );
     }
 
-	bool get _isSearchModeAvailable => 
-		_curFilterIndex != null ||  _items.length > ListScreen.searcherModeItemsThreshold;
+	bool _getIsSearchModeAvailable(int itemsLength) => 
+		_curFilterIndex != null ||  itemsLength > ListScreen.searcherModeItemsThreshold;
 
     @protected
     String get title;
 
     @protected
     bool get canGoBack;
+
+    @protected
+	String get curFilterIndex => _curFilterIndex;
+	
+    @protected
+	int get filterIndexLength => 
+		curFilterIndex == null ? _itemsLengthFromIndexes : _filterIndexes[curFilterIndex];
+
+	int get _itemsLengthFromIndexes => 
+		_filterIndexes.values.fold<int>(0, (prevLength, curLength) => prevLength + curLength);
 
     @protected
     void onGoingBack(BuildContext context);
@@ -306,8 +315,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			newFilterIndex = null;
 		}
 
-		_deleteEmptyFilterIndex();
-
 		_curFilterIndex = newFilterIndex;
 
 		_pageIndex = 0;
@@ -318,14 +325,6 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	
 		if (shouldInitIndices ?? false)
 			_initFilterIndexes();
-	}
-
-	void _deleteEmptyFilterIndex() {
-		if (_filterIndexToDelete == null)
-			return;
-		
-		_filterIndexes.remove(_filterIndexToDelete);
-		_filterIndexToDelete = null;
 	}
 
     Widget _buildList(AppLocalizations locale) => 
@@ -433,16 +432,26 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void _deleteFromMarkedForRemoval(List<int> ids) => 
         _itemsMarkedForRemoval.removeWhere((id, _) => ids.contains(id));
 
-    void _deleteMarkedForRemoval(List<int> ids) {
+    Future<void> _deleteMarkedForRemoval(List<int> ids) async {
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
 		final entriesForRemoval = new Map.fromEntries(_getEntriesMarkedForRemoval(ids));
-        deleteItems(_extractItemsForDeletion(entriesForRemoval.values));
-		_deleteFilterIndexes(entriesForRemoval.values.map(
-			(v) => v.item.textData[0]).toList());
 
+		final removedIndexes = entriesForRemoval.values.map((v) => v.item.textData[0]).toList();
+		final indexesDeleted = _deleteFilterIndexes(removedIndexes);
+		
         _deleteFromMarkedForRemoval(ids);
+		deleteItems(_extractItemsForDeletion(entriesForRemoval.values));
+
+		final isSearchOff = _isSearchMode && !_getIsSearchModeAvailable(_itemsLengthFromIndexes);
+		if (isSearchOff)
+			_isSearchMode = false;
+
+		if (_curFilterIndex != null && !_filterIndexes.containsKey(_curFilterIndex))
+			await refetchItems();
+		else
+    		await updateStateAfterDeletion(shallUpdate: indexesDeleted || isSearchOff);		
     }
 	
     @protected
@@ -454,40 +463,38 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     @protected
     void deleteItems(List<TItem> ids);
+	
+    @protected
+    Future<void> updateStateAfterDeletion({ bool shallUpdate }) async {
+		if (shallUpdate ?? false)
+			setState(() {});
+	}
 
-	void _deleteFilterIndexes(List<String> removedIndexes) {
-		if (_curFilterIndex == null) {
-			final grouppedIndexes = removedIndexes.fold<Map<String, int>>({}, (res, val) {
-				final index = val[0].toUpperCase();
-				res[index] = (res[index] ?? 0) + 1;
-				return res;
-			});
+	bool _deleteFilterIndexes(List<String> removedIndexes) {
+		final grouppedIndexes = removedIndexes.fold<Map<String, int>>({}, (res, val) {
+			final index = val[0].toUpperCase();
+			res[index] = (res[index] ?? 0) + 1;
+			return res;
+		});
 
-			final indexesToRemove = <String>[];
-			grouppedIndexes.forEach((ind, length) {
-				final indexLength = _filterIndexes[ind];
-				if (indexLength == null)
-					return;
-				
-				if (indexLength == length)
-					indexesToRemove.add(ind);
-				else
-					_filterIndexes[ind] -= length;
-			});
+		final indexesToRemove = <String>[];
+		grouppedIndexes.forEach((ind, length) {
+			final indexLength = _filterIndexes[ind];
+			if (indexLength == null)
+				return;
+			
+			if (indexLength == length)
+				indexesToRemove.add(ind);
+			else
+				_filterIndexes[ind] -= length;
+		});
 
-			if (indexesToRemove.isNotEmpty)
-				setState(() {
-					indexesToRemove.forEach((ind) => _filterIndexes.remove(ind));
-
-					if (_isSearchMode && !_isSearchModeAvailable)
-						_isSearchMode = false;
-				});
-
-			return;	
+		if (indexesToRemove.isNotEmpty) {
+			indexesToRemove.forEach((ind) => _filterIndexes.remove(ind));
+			return true;
 		}
 
-		if (_removableItems.isEmpty)
-			_filterIndexToDelete = _curFilterIndex;
+		return false;
 	}
 
     FloatingActionButton _buildNewItemButton(
