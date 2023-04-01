@@ -21,7 +21,7 @@ class LoaderDialog {
 									snapshot.hasData ? new LoaderState<T>(value: snapshot.data): 
 										new LoaderState<T>(error: snapshot.error));
 							});
-							return new Container();
+							return const SizedBox.shrink();
 						}
 
 						return new AlertDialog(
