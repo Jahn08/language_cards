@@ -110,7 +110,7 @@ void main() {
             await widgetAssistant.tapWidget(selectorBtnFinder);
 
             await _assureConsecutivelyCheckedTiles(tester);
-            _assureCardNumbersForStudyLevels(studyPacks, []);
+            _assureCardNumbersForStudyLevels(studyPacks, <int>{});
 
             await widgetAssistant.tapWidget(selectorBtnFinder);
             
@@ -134,11 +134,10 @@ void main() {
                 await assistant.tapWidget(packTileFinder);
             }
 
-            final uncheckedPackIds = packsToUncheck.map((p) => p.id).toList();
+            final uncheckedPackIds = packsToUncheck.map((p) => p.id).toSet();
             final checkedPacks = packs.where((p) => !uncheckedPackIds.contains(p.id)).toList();
             await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
-            _assureCardNumbersForStudyLevels(studyPacks, 
-                checkedPacks.map((p) => p.id).toList());
+            _assureCardNumbersForStudyLevels(studyPacks, checkedPacks.map((p) => p.id).toSet());
 
             final packToCheck = packsToUncheck.last;
             final packTileFinder = await _findPackTile(assistant, packToCheck.name);
@@ -146,8 +145,7 @@ void main() {
 
             checkedPacks.add(packToCheck);
             await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
-            _assureCardNumbersForStudyLevels(studyPacks, 
-                checkedPacks.map((p) => p.id).toList());
+            _assureCardNumbersForStudyLevels(studyPacks, checkedPacks.map((p) => p.id).toSet());
         });
 
 		testWidgets('Scrolls down to the end of the list of study packs and back upwards by clicking the floating button', 
@@ -295,7 +293,7 @@ Future<Finder> _findPackTile(WidgetAssistant assistant, String packName, { bool 
     return visibleFinder;
 }
 
-void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks, [List<int> includedPackIds]) {
+void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks, [Set<int> includedPackIds]) {
     final studyStages = <int, int>{ for (var v in WordStudyStage.values) v: 0 };
 
 	Iterable<StudyPack> stPacks = studyPacks;

@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -15,9 +16,9 @@ import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 import '../widgets/underlined_container.dart';
 
-class _ListNotifier<T> extends ValueNotifier<List<T>> {
+class _HashSetNotifier<T> extends ValueNotifier<HashSet<T>> {
 	  
-	_ListNotifier(List<T> value) : super(value ?? <T>[]);
+	_HashSetNotifier([HashSet<T> value]) : super(value ?? new HashSet<T>());
 
 	void clear() {
 		if (value == null || value.isEmpty)
@@ -28,8 +29,8 @@ class _ListNotifier<T> extends ValueNotifier<List<T>> {
 	}
 
 	@override
-	set value(List<T> newValue) {
-		final valueToSet = newValue ?? [];
+	set value(HashSet<T> newValue) {
+		final valueToSet = newValue ?? new HashSet();
 		if ((value.length + valueToSet.length) == 0)
 			return;
 			
@@ -61,7 +62,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 	bool _hasScrollNavigator = false;
 
 	final _shouldScrollUpNotifier = new ValueNotifier(false);
-	final _excludedPacksNotifier = new _ListNotifier<int>([]);
+	final _excludedPacksNotifier = new _HashSetNotifier<int>();
 
     final ScrollController _scrollController = new ScrollController();
 
@@ -104,7 +105,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 						children: [
 							new Flexible(child: new ValueListenableBuilder(
 								valueListenable: _excludedPacksNotifier,
-								builder: (_, List<int> excludedPacks, __) => 
+								builder: (_, HashSet<int> excludedPacks, __) => 
 									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excludedPacks)
 							), flex: 4, fit: FlexFit.tight),
 							const Divider(thickness: 2, height: 0),
@@ -114,7 +115,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 										children: _packs.map((p) => new ValueListenableBuilder(
 											valueListenable: _excludedPacksNotifier,
 											child: new TranslationIndicator(p.pack.from, p.pack.to),
-											builder: (_, List<int> excludedPacks, child) => 
+											builder: (_, HashSet<int> excludedPacks, child) => 
 												_CheckListItem(
 													stPack: p,
 													isChecked: !excludedPacks.contains(p.pack.id),
@@ -240,7 +241,7 @@ class _StudyLevelList extends StatelessWidget {
 
 	final List<StudyPack> stPacks;
 
-	final List<int> excludedPackIds;
+	final HashSet<int> excludedPackIds;
 
 	const _StudyLevelList({ @required this.stPacks, @required this.excludedPackIds });
 

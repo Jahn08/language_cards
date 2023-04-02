@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/data_group.dart';
@@ -8,7 +9,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	final List<T> items;
 
-	List<String> _intFields;
+	HashSet<String> _intFieldNames;
 
 	DataProviderMock(this.items): assert(items != null);
 
@@ -39,7 +40,8 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
 	Future<int> _remove(List<int> ids) {
 		final prevLength = items.length;
-		final newLength = (items..removeWhere((p) => ids.contains(p.id))).length;
+		final hashedIds = new HashSet<int>.from(ids);
+		final newLength = (items..removeWhere((p) => hashedIds.contains(p.id))).length;
 
 		return Future.value(prevLength - newLength);
 	}
@@ -101,7 +103,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 	}) {
 		groupValues ??= {};
 			
-		final intFields = _getIntFields();
+		final intFields = intFieldNames;
 		final groupFieldsOverall = groupFields.length;
 		const valSeparator = '|';
 		return Future.value(_getFilteredItemProps(filters).fold<Map<String, int>>({}, 
@@ -136,10 +138,8 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 		@required List<String> groupFields, Map<String, List<dynamic>> groupValues
 	}) => _groupBySeveral(tableName, groupFields: groupFields, groupValues: groupValues);
 
-	List<String> _getIntFields() => _intFields ??= intFieldNames;
-
 	@protected
-	List<String> get intFieldNames => [StoredEntity.idFieldName];
+	HashSet<String> get intFieldNames => _intFieldNames ??= new HashSet<String>.from([StoredEntity.idFieldName]);
 
 	@protected
 	String get indexFieldName;

@@ -14,14 +14,13 @@ class WordDictionaryTester {
 		text ??= Randomiser.nextString();
 		partOfSpeech ??= Randomiser.nextElement(PartOfSpeech.values);
 
-		final usedPos = <PartOfSpeech>[partOfSpeech];
+		final usedPos = <PartOfSpeech>{ partOfSpeech };
 		return _buildArticle(List.generate(Randomiser.nextInt(3) + 2, (index) {
 			PartOfSpeech articlePos; 
 			if (index > 0) {
 				do {
 					articlePos = Randomiser.nextElement(PartOfSpeech.values);
-				} while (usedPos.contains(articlePos));
-				usedPos.add(articlePos);
+				} while (!usedPos.add(articlePos));
 			}
 			else
 				articlePos = partOfSpeech;

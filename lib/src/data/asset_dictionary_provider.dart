@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert';
 import 'dart:io' as io;
 import 'package:flutter/material.dart';
@@ -9,7 +10,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
 
 	static final Map<String, Map<String, dynamic>> _cache = {};
 
-	static Map<String, String> _dicNamesCache;
+	static Map<String, String> _dicNames;
 
 	final AssetReader _reader;
 
@@ -54,28 +55,28 @@ class AssetDictionaryProvider extends DictionaryProvider {
 	}
 
 	Future<Map<String, String>> _getDicNames() async {
-		if (_dicNamesCache == null) {
+		if (_dicNames == null) {
 			final filePaths = await _reader.listAssetNames('dictionaries');
-			_dicNamesCache = <String, String>{
+			_dicNames = <String, String>{
 				for (final p in filePaths)
 					p.split('.').first: p
 			};
 		}
 
-		return _dicNamesCache;
+		return _dicNames;
 	}
 	
 	@override
-	Future<Iterable<String>> searchForLemmas(String langParam, String text) async {
+	Future<Set<String>> searchForLemmas(String langParam, String text) async {
 		final dic = await _getCachedDictionary(langParam);
 		if (dic == null)
-			return [];
+			return <String>{};
 
 		final key = text.toLowerCase();
-		return dic.keys.where((k) => k.startsWith(key));
+		return dic.keys.where((k) => k.startsWith(key)).toSet();
 	}
 
   	@override
-  	Future<List<String>> getAcceptedLanguages() async => 
-		(await _getDicNames()).keys.toList();
+  	Future<HashSet<String>> getAcceptedLanguages() async => 
+		new HashSet.from((await _getDicNames()).keys);
 }

@@ -17,17 +17,17 @@ class WordDictionary {
 		_from = DictionaryProvider.representLanguage(from),
 		_to = DictionaryProvider.representLanguage(to ?? from);
 
-	Future<List<String>> searchForLemmas(String text) async {
+	Future<Set<String>> searchForLemmas(String text) async {
 		if (provider == null)
-			return [];
+			return <String>{};
 
 		final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
 		
 		if (await provider.isTranslationPossible(directLangPair))
 			return (await provider.searchForLemmas(directLangPair, text))
-				.take(searcheableLemmaMaxNumber).toList();
+				.take(searcheableLemmaMaxNumber).toSet();
 		
-		return [];
+		return <String>{};
     }
 
     Future<BaseArticle> lookUp(String word) async {

@@ -143,7 +143,7 @@ void main() {
             await screenTester.goThroughCardList(cards.length);
 
 			final updatedPacks = await _fetchNamedPacks(tester, packStorage);
-			final packsToStudyIds = packsToStudy.map((p) => p.id);
+			final packsToStudyIds = packsToStudy.map((p) => p.id).toSet();
 
 			final now = DateTime.now();
 			final studiedPacks = updatedPacks.where((p) => packsToStudyIds.contains(p.id) && p.studyDate.difference(now).inSeconds < 1);

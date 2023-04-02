@@ -27,7 +27,7 @@ void main() {
 	});
 
 	test('Splits a string into several by the @ symbol', () {
-		final expectedStrings = [Randomiser.nextString(), Randomiser.nextString(), Randomiser.nextString()];
+		final expectedStrings = <String>{ Randomiser.nextString(), Randomiser.nextString(), Randomiser.nextString() };
 		final actualStrings = splitLocalizedText(expectedStrings.join('@'));
 		expect(actualStrings.length, expectedStrings.length);
 		expect(actualStrings.every((s) => expectedStrings.contains(s)), true);

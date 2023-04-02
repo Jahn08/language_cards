@@ -286,19 +286,19 @@ class ListScreenTester<TEntity extends StoredEntity> {
                 chosenIndex == lastTileIndex ? (lastTileIndex / 2).round(): chosenIndex;
 			
 			final tileIndexesToSelect = [0, middleTileIndex, lastTileIndex];
-            final itemsToRemove = <int, String>{};
+            final resultItems = <int, String>{};
             for (final indexToSelect in tileIndexesToSelect) {
 				final index = indexToSelect + indexLag;
-				if (itemsToRemove.containsKey(index))
+				if (resultItems.containsKey(index))
 					continue;
 				
 				final finder = tilesFinder.at(indexToSelect);
-				itemsToRemove[index] = _extractTitle(tester, 
+				resultItems[index] = _extractTitle(tester, 
                     tester.widget<CheckboxListTile>(finder).title);
                 await assistant.tapWidget(finder);
             }
 
-            return itemsToRemove;
+            return resultItems;
         }
 
 	void testDismissingItems() {

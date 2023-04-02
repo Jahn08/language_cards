@@ -204,8 +204,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
                     _itemsMarkedForRemoval.addAll(_itemsMarkedInEditor);
 
                     setState(() {
-                        final idsMarkedForRemoval = _itemsMarkedInEditor.keys;
-                        _items.removeWhere((w) => idsMarkedForRemoval.contains(w.id));
+                        _items.removeWhere((w) => _itemsMarkedInEditor.containsKey(w.id));
 
                         _showItemRemovalInfoSnackBar(
 							scaffoldContext: scaffoldContext,
@@ -415,34 +414,33 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     Widget getItemTrailing(TItem item) => null;
 
     void _recoverMarkedForRemoval(List<int> ids) {
-        final entries = _getEntriesMarkedForRemoval(ids).toList();
-        if (entries.isEmpty)
+        final itemsToRecover = _getCachedItemsMarkedForRemoval(ids).toList();
+        if (itemsToRecover.isEmpty)
             return;
 
         setState(() {
-            entries.sort((a, b) => a.value.index.compareTo(b.value.index));
-            entries.forEach((entry) => _items.insert(entry.value.index, entry.value.item));
+            itemsToRecover.forEach((i) => _items.insert(i.index, i.item));
             _deleteFromMarkedForRemoval(ids);
         });
     }
 
-    List<MapEntry<int, _CachedItem<TItem>>> _getEntriesMarkedForRemoval(List<int> ids) =>
-        _itemsMarkedForRemoval.entries.where((entry) => ids.contains(entry.key)).toList();
+    List<_CachedItem<TItem>> _getCachedItemsMarkedForRemoval(List<int> ids) {
+		return ids.map((id) => _itemsMarkedForRemoval[id]).toList();
+	}
 
     void _deleteFromMarkedForRemoval(List<int> ids) => 
-        _itemsMarkedForRemoval.removeWhere((id, _) => ids.contains(id));
+		ids.forEach((id) => _itemsMarkedForRemoval.remove(id));
 
     Future<void> _deleteMarkedForRemoval(List<int> ids) async {
         if (_itemsMarkedForRemoval.isEmpty)
             return;
 
-		final entriesForRemoval = new Map.fromEntries(_getEntriesMarkedForRemoval(ids));
-
-		final removedIndexes = entriesForRemoval.values.map((v) => v.item.textData[0]).toList();
+		final itemsToDelete = _getCachedItemsMarkedForRemoval(ids);
+		final removedIndexes = itemsToDelete.map((i) => i.item.textData[0]).toList();
 		final indexesDeleted = _deleteFilterIndexes(removedIndexes);
 		
         _deleteFromMarkedForRemoval(ids);
-		deleteItems(_extractItemsForDeletion(entriesForRemoval.values));
+		deleteItems(_extractItemsForDeletion(itemsToDelete));
 
 		final isSearchOff = _isSearchMode && !_getIsSearchModeAvailable(_itemsLengthFromIndexes);
 		if (isSearchOff)

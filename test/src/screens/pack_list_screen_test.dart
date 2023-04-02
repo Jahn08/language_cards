@@ -133,7 +133,7 @@ void main() {
 			await screenTester.activateEditorMode(assistant);
 			
 			final tilesToDelete = await screenTester.selectSomeItemsInEditor(assistant);
-			final packToDeleteNames = tilesToDelete.values;
+			final packToDeleteNames = tilesToDelete.values.toSet();
 
 			final packs = await _fetchPacks(storage, tester);
 			final packsToDelete = packs.where((p) => packToDeleteNames.contains(p.name));
@@ -206,10 +206,9 @@ void main() {
 
 		final assistant = new WidgetAssistant(tester);
 		await screenTester.activateEditorMode(assistant);
-		final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
-
+		final selectedPackNames = (await screenTester.selectSomeItemsInEditor(assistant)).values.toSet();
 		final packsToExport = (await _fetchPacks(storage, tester))
-			.where((p) => selectedPackDic.containsValue(p.name)).toList();
+			.where((p) => selectedPackNames.contains(p.name)).toList();
 
 		await ContextChannelMock.testWithChannel(() async {
 			final exportBtnFinder = _findImportExportAction(isExport: true, shouldFind: true);
@@ -229,10 +228,9 @@ void main() {
 
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
-			final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
-
+			final selectedPacNames = (await screenTester.selectSomeItemsInEditor(assistant)).values.toSet();
 			(await _fetchPacks(storage, tester))
-				.where((p) => selectedPackDic.containsValue(p.name)).toList();
+				.where((p) => selectedPacNames.contains(p.name)).toList();
 
 			await ContextChannelMock.testWithChannel(() async =>
 				PermissionChannelMock.testWithChannel(() async {
@@ -251,10 +249,9 @@ void main() {
 
 			final assistant = new WidgetAssistant(tester);
 			await screenTester.activateEditorMode(assistant);
-			final selectedPackDic = await screenTester.selectSomeItemsInEditor(assistant);
-
+			final selectedPackNames = (await screenTester.selectSomeItemsInEditor(assistant)).values.toSet();
 			final packsToExport = (await _fetchPacks(storage, tester))
-				.where((p) => selectedPackDic.containsValue(p.name)).toList();
+				.where((p) => selectedPackNames.contains(p.name)).toList();
 
 			await ContextChannelMock.testWithChannel(() =>
 				PermissionChannelMock.testWithChannel(() async {
@@ -499,7 +496,7 @@ Future<List<StoredPack>> _testImportingPacks(
 ) async {
 	final tester = assistant.tester;
 	final packsToExport = ExporterTester.getPacksForExport(storage);
-	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toList();
+	final existentPackIds = (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toSet();
 
 	await ContextChannelMock.testWithChannel(() async {
 		final importFilePath = await tester.runAsync(() =>

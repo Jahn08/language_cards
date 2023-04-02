@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:language_cards/src/data/data_provider.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
@@ -9,6 +10,8 @@ import '../utilities/randomiser.dart';
 
 class _WordDataProvider extends DataProviderMock<StoredWord> {
 
+	HashSet<String> _intFieldNames;
+
 	_WordDataProvider(List<StoredWord> cards): super(cards);
 
 	@override
@@ -19,8 +22,8 @@ class _WordDataProvider extends DataProviderMock<StoredWord> {
 	String get indexFieldName => StoredWord.textFieldName;
 	
 	@override
-	List<String> get intFieldNames => 
-		super.intFieldNames..addAll([StoredWord.packIdFieldName, StoredWord.studyProgressFieldName]);
+	HashSet<String> get intFieldNames => 
+		_intFieldNames ??= super.intFieldNames..addAll([StoredWord.packIdFieldName, StoredWord.studyProgressFieldName]);
 }
 
 class WordStorageMock extends WordStorage {

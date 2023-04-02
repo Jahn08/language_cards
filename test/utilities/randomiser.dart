@@ -13,5 +13,5 @@ class Randomiser {
             (_) => nextString());
     }
 
-    static T nextElement<T>(List<T> list) => list[new Random().nextInt(list.length)];
+    static T nextElement<T>(Iterable<T> list) => list.elementAt(new Random().nextInt(list.length));
 }

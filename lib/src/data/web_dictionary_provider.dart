@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:convert' show jsonDecode;
 import 'package:http/http.dart';
 import 'dictionary_provider.dart';
@@ -32,7 +33,7 @@ class WebDictionaryProvider extends DictionaryProvider {
     }
 
 	@override
-	Future<List<String>> getAcceptedLanguages() async {
+	Future<HashSet<String>> getAcceptedLanguages() async {
 		if (_acceptedLangs == null) {
 			final langListUri = _buildRootUri('getLangs');
 
@@ -41,7 +42,7 @@ class WebDictionaryProvider extends DictionaryProvider {
 			_acceptedLangs = (jsonDecode(response.body) as List).cast<String>();
 		}
 
-		return _acceptedLangs;
+		return new HashSet.from(_acceptedLangs);
 	}
 
 	Uri _buildSearchUri(String langPair) => _buildRootUri('lookup', { 'lang': langPair });

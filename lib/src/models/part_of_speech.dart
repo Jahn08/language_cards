@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'presentable_enum.dart';
 
@@ -27,8 +28,9 @@ class PartOfSpeech extends PresentableEnum {
 	static PartOfSpeech retrieve(String value) => 
 		values.firstWhere((p) => p.valueList.contains(value), orElse: () => null);
 
-	static List<PartOfSpeech> get values => [adjective, adverb, collocation,
-		conjunction, idiom, interjection, noun, participle, preposition, pronoun, verb]; 
+	static HashSet<PartOfSpeech> get values => 
+		new HashSet.from([adjective, adverb, collocation,
+		conjunction, idiom, interjection, noun, participle, preposition, pronoun, verb]); 
 
 	@override
 	String present(AppLocalizations locale) {

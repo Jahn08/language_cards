@@ -47,7 +47,7 @@ class CardEditorState extends State<CardEditor> {
     Future<StoredWord> _futureCard;
 	StoredWord _foundCard;
 
-	List<String> _foundLemmas = [];
+	Set<String> _foundLemmas = <String>{};
 	int _prevSearchedLemmaLength = 0;
 
     @override
@@ -288,7 +288,7 @@ class CardEditorState extends State<CardEditor> {
 
     bool get _isNew => widget.wordId == null;
 
-	Future<List<String>> _buildPopupValues(String value) async {
+	Future<Iterable<String>> _buildPopupValues(String value) async {
 		if (_dictionary == null || (value ?? '').trim().isEmpty)
 			return [];
 

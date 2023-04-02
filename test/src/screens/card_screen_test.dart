@@ -334,7 +334,7 @@ void main() {
 			
 			final foundTiles = tester.widgetList<ListTile>(
 				AssuredFinder.findSeveral(type: ListTile, shouldFind: true))
-				.map((t) => (t.title as Text).data).toList();
+				.map((t) => (t.title as Text).data).toSet();
 			expect(foundTiles.length, lemmaLimit);
 			expect(popupValues.where((v) => foundTiles.contains(v)).length, lemmaLimit);
 		});

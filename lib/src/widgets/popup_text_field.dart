@@ -53,7 +53,8 @@ class _PopupTextFieldState extends State<PopupTextField> {
 
 	Future<void> _setTiles(BuildContext context, String value) async {
 		final isDense = new Styler(context).isDense;
-		_tiles = (await (widget.popupItemsBuilder?.call(value) ?? Future.value([])))
+		final popupItems = await widget.popupItemsBuilder?.call(value);
+		_tiles = (popupItems ?? [])
 			.map((t) => new ListTile(
 				title: new Text(t), 
 				dense: isDense,
@@ -127,7 +128,7 @@ class PopupTextField extends StatefulWidget {
 
 	final Function(String value, bool submitted) onChanged;
 
-	final Future<List<String>> Function(String value) popupItemsBuilder;
+	final Future<Iterable<String>> Function(String value) popupItemsBuilder;
 
 	const PopupTextField(this.label, { @required this.popupItemsBuilder, 
 		this.onChanged, this.isRequired, this.initialValue });

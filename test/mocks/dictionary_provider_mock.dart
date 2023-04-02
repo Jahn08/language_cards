@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/models/word.dart';
 import 'package:language_cards/src/models/article.dart';
@@ -5,7 +6,7 @@ import '../testers/word_dictionary_tester.dart';
 
 class DictionaryProviderMock implements DictionaryProvider {
 
-	static List<String> _acceptedLanguages;
+	static HashSet<String> _acceptedLanguages;
 
 	final BaseArticle<Word> Function(String text) onLookUp;
 
@@ -14,9 +15,9 @@ class DictionaryProviderMock implements DictionaryProvider {
 	DictionaryProviderMock({ this.onLookUp, this.onSearchForLemmas });
 
 	@override
-	Future<List<String>> getAcceptedLanguages() {
-		return Future.value(_acceptedLanguages ?? 
-			(_acceptedLanguages = WordDictionaryTester.buildAcceptedLanguagesResponse()));
+	Future<HashSet<String>> getAcceptedLanguages() {
+		_acceptedLanguages ??= new HashSet.from(WordDictionaryTester.buildAcceptedLanguagesResponse());
+		return Future.value(_acceptedLanguages);
 	}
 
 	@override

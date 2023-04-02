@@ -164,7 +164,7 @@ class UserParams {
 
         final langIndex = jsonMap[_interfaceLangParam] as int;
 		if (langIndex == null) {
-			final supportedLangs = [_enLocale, _ruLocale].map((loc) => loc.languageCode).toList();
+			final supportedLangs = [_enLocale, _ruLocale].map((loc) => loc.languageCode).toSet();
 			final allLocs = WidgetsBinding.instance.window.locales;
 			final firstLoc = allLocs.firstWhere((loc) => supportedLangs.contains(loc.languageCode), 
 				orElse: () => allLocs.first);

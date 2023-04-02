@@ -71,8 +71,8 @@ void main() {
             final assistant = new WidgetAssistant(tester);
             await screenTester.activateEditorMode(assistant);
             
-            final selectedItems = (await screenTester.selectSomeItemsInEditor(assistant, 
-                wordWithProgressIndex)).values;
+            final selectedItems = (await screenTester.selectSomeItemsInEditor(assistant, wordWithProgressIndex))
+				.values.toSet();
             final selectedWords = (await _fetchWords(tester, wordStorage))
                 .where((w) => selectedItems.contains(w.text));
             final selectedWordsWithProgress = <String, int> {
@@ -96,14 +96,11 @@ void main() {
         final assistant = new WidgetAssistant(tester);
         await screenTester.activateEditorMode(assistant);
 
-        final selectedItems = await screenTester.selectSomeItemsInEditor(assistant, 
-            wordWithProgressIndex);
-        
+        final selectedItems = await screenTester.selectSomeItemsInEditor(assistant, wordWithProgressIndex);
         await _operateResettingProgressDialog(assistant, shouldConfirm: true);
 
         await screenTester.deactivateEditorMode(assistant);
-        final assuredWords = await _assureStudyProgressForWords(tester, screenTester, 
-            wordStorage);
+        final assuredWords = await _assureStudyProgressForWords(tester, screenTester, wordStorage);
         expect(selectedItems.values.every((text) => 
             assuredWords.any((word) => word.text == text && 
                 word.studyProgress == WordStudyStage.unknown)), true);

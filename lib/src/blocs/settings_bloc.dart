@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:flutter/material.dart';
 import '../models/user_params.dart';
 import '../data/preferences_provider.dart';
@@ -5,7 +6,7 @@ import '../data/preferences_provider.dart';
 typedef OnSaveListener = void Function(UserParams params);
 
 class SettingsBloc {
-    final _listeners = <OnSaveListener>[];
+    final _listeners = new HashSet<OnSaveListener>();
 
     UserParams _params;
 
@@ -23,10 +24,8 @@ class SettingsBloc {
         _listeners.forEach((listener) => listener?.call(params));
     }
 
-    void addOnSaveListener(OnSaveListener listener) {
-        if (!_listeners.contains(listener))
-            _listeners.add(listener);
-    }
+    void addOnSaveListener(OnSaveListener listener) =>
+		_listeners.add(listener);
 
     bool removeOnSaveListener(OnSaveListener listener) =>
         _listeners.remove(listener);

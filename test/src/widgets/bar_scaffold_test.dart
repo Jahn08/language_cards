@@ -141,23 +141,24 @@ void main() {
     expect(dropdowns.length, expectedDropdownNumber);
 
     final locale = Localizator.defaultLocalization;
-    final packOrders = PresentableEnum.mapStringValues(PackOrder.values, locale).keys;
+    final packOrders = PresentableEnum.mapStringValues(PackOrder.values, locale).keys.toSet();
     dropdowns.singleWhere((d) => d.options.every((op) => packOrders.contains(op)));
 
-    final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys;
+    final cardSides = PresentableEnum.mapStringValues(CardSide.values, locale).keys.toSet();
     dropdowns.singleWhere((d) => d.options.every((op) => cardSides.contains(op)));
 
-    final studyDirections = PresentableEnum.mapStringValues(StudyDirection.values, locale).keys;
+    final studyDirections = PresentableEnum.mapStringValues(StudyDirection.values, locale).keys.toSet();
     dropdowns.singleWhere((d) => d.options.every((op) => studyDirections.contains(op)));
 
     final dropDownBtnType = AssuredFinder.typify<DropdownButton<String>>();
-    final dropdownBtns = tester.widgetList<DropdownButton<String>>(
-        AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true));
-    expect(dropdownBtns.length, expectedDropdownNumber);
+    final dropdownBtnValues = tester.widgetList<DropdownButton<String>>(
+        AssuredFinder.findSeveral(type: dropDownBtnType, shouldFind: true)).map((e) => e.value).toList();
+    expect(dropdownBtnValues.length, expectedDropdownNumber);
 
     final studyParams = userParams.studyParams;
+	final dropdownBtnValuesSet = dropdownBtnValues.toSet();
     [studyParams.cardSide.present(locale), studyParams.direction.present(locale), studyParams.packOrder.present(locale)]
-		.every((p) => dropdownBtns.where((d) => d.value == p).isNotEmpty);
+		.every((p) => dropdownBtnValuesSet.contains(p));
 
     final studyDateCheckFinder = AssuredFinder.findOne(type: CheckboxListTile, shouldFind: true);
     expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value, studyParams.showStudyDate);

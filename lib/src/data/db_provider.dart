@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
@@ -47,8 +48,8 @@ class DbProvider extends DataProvider {
             });
     }
 
-    List<String> _compileCreationClauses(List<StoredEntity> entities, [List<String> tableNames]) {
-		tableNames ??= <String>[];
+    List<String> _compileCreationClauses(List<StoredEntity> entities, [HashSet<String> tableNames]) {
+		tableNames ??= HashSet<String>();
 
 		final dependantEntitiesToCreate = <StoredEntity>[]; 
 		final creationCmds = <String>[];
