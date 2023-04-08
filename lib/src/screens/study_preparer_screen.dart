@@ -62,7 +62,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 	bool _hasScrollNavigator = false;
 
 	final _shouldScrollUpNotifier = new ValueNotifier(false);
-	final _excludedPacksNotifier = new _HashSetNotifier<int>();
+	final _excludedPackIdsNotifier = new _HashSetNotifier<int>();
 
     final ScrollController _scrollController = new ScrollController();
 
@@ -71,7 +71,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 		_scrollController.dispose();
 
 		_shouldScrollUpNotifier.dispose();
-		_excludedPacksNotifier.dispose();
+		_excludedPackIdsNotifier.dispose();
 
 		super.dispose();
 	}
@@ -92,10 +92,10 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 					barActions: <Widget>[
 						new IconButton(
 							onPressed: () {
-								if (_excludedPacksNotifier.value.isEmpty)
-									_excludedPacksNotifier.addAll(stPacks.map((p) => p.pack.id));
+								if (_excludedPackIdsNotifier.value.isEmpty)
+									_excludedPackIdsNotifier.addAll(stPacks.map((p) => p.pack.id));
 								else
-									_excludedPacksNotifier.clear();
+									_excludedPackIdsNotifier.clear();
 							},
 							icon: const Icon(Icons.select_all)
 						)
@@ -104,7 +104,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 					body: new Column(
 						children: [
 							new Flexible(child: new ValueListenableBuilder(
-								valueListenable: _excludedPacksNotifier,
+								valueListenable: _excludedPackIdsNotifier,
 								builder: (_, HashSet<int> excludedPacks, __) => 
 									new _StudyLevelList(stPacks: stPacks, excludedPackIds: excludedPacks)
 							), flex: 4, fit: FlexFit.tight),
@@ -113,7 +113,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 								child: new Scrollbar(
 									child: new ListView(
 										children: _packs.map((p) => new ValueListenableBuilder(
-											valueListenable: _excludedPacksNotifier,
+											valueListenable: _excludedPackIdsNotifier,
 											child: new TranslationIndicator(p.pack.from, p.pack.to),
 											builder: (_, HashSet<int> excludedPacks, child) => 
 												_CheckListItem(
@@ -121,9 +121,9 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 													isChecked: !excludedPacks.contains(p.pack.id),
 													onChanged: (isChecked, packId) {
 														if (isChecked)
-															_excludedPacksNotifier.remove(packId);
+															_excludedPackIdsNotifier.remove(packId);
 														else
-															_excludedPacksNotifier.add(packId);
+															_excludedPackIdsNotifier.add(packId);
 													}, 
 													secondary: child,
 													showStudyDate: userParams.studyParams.showStudyDate
