@@ -25,3 +25,5 @@ linter:
     require_trailing_commas: false
 
     depend_on_referenced_packages: false
+
+    unawaited_futures: true

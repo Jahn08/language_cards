@@ -162,7 +162,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 							)
 						).show(scaffoldContext);
 
-						super.refetchItems(isForceful: true, shouldInitIndices: true);
+						await super.refetchItems(isForceful: true, shouldInitIndices: true);
 					}
 					else {
 						final exportState = await LoaderDialog.showAsync<String>(scaffoldContext, 

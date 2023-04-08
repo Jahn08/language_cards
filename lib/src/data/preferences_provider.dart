@@ -13,6 +13,6 @@ class PreferencesProvider {
 
     static Future<void> save(UserParams params) async {
         final prefs = await SharedPreferences.getInstance();
-        prefs.setString(_userParamsKey, params.toJson());
+        await prefs.setString(_userParamsKey, params.toJson());
     }
 }

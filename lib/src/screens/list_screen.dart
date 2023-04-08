@@ -469,7 +469,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		await _fetchItems(newFilterIndex);
 	
 		if (shouldInitIndices ?? false)
-			_initFilterIndexes();
+			await _initFilterIndexes();
 	}
 
     Widget _buildList(AppLocalizations locale) => 
