@@ -6,7 +6,7 @@ import '../widgets/cancel_button.dart';
 import '../widgets/dialog_list_view.dart';
 
 class _CheckboxListState extends State<_CheckboxList> {
-    final _chosenItems = <String>[];
+    final _chosenItems = <String>{};
 
     @override
     Widget build(BuildContext context) {
@@ -66,7 +66,7 @@ class _CheckboxList extends StatefulWidget {
     final String title;
     final List<String> items;
     final List<Widget> buttons;
-    final Function(List<String>) onChange;
+    final Function(Set<String>) onChange;
 
     const _CheckboxList(this.title, this.items, 
         { @required this.onChange, @required this.buttons }): super();
@@ -78,7 +78,7 @@ class _CheckboxList extends StatefulWidget {
 }
 
 class TranslationSelectorDialog extends SelectorDialog<String> {
-    List<String> _chosenTranslations;
+    Set<String> _chosenTranslations;
 
     final BuildContext _context;
 
