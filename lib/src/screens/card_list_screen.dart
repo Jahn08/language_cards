@@ -58,12 +58,12 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     }
 
 	@override
-	Future<void> updateStateAfterDeletion({ bool shallUpdate }) async {
+	Future<void> updateStateAfterDeletion() async {
 		_loadedItemsCount = 0;
 		await refetchItems(text: super.curFilterIndex, isForceful: true);
 
 		if (_loadedItemsCount == 0)
-			super.updateStateAfterDeletion(shallUpdate: shallUpdate);
+			await super.updateStateAfterDeletion();
 	}
 
     @override
@@ -108,10 +108,10 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 					.show(scaffoldContext)) ?? false)
 					return;
 
-				setState(() {
-					itemsToReset.forEach((w) => w.resetStudyProgress());
-					widget.storage.upsert(itemsToReset);
-				});
+				itemsToReset.forEach((w) => w.resetStudyProgress());
+				await widget.storage.upsert(itemsToReset);
+
+				await refetchItems(isForceful: true);
 
 				if (!mounted)
 					return;

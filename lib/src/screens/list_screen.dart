@@ -30,33 +30,124 @@ class _BottomBar extends StatelessWidget {
 		);
 }
 
+class _ListNotifier<T> extends ValueNotifier<List<T>> {
+	  
+	_ListNotifier([List<T> value]) : super(value ?? <T>[]);
+
+	void clear() {
+		if (value == null || value.isEmpty)
+			return;
+
+		value.clear();
+		notifyListeners();
+	}
+
+	@override
+	set value(List<T> newValue) {
+		final valueToSet = newValue ?? <T>[];
+		if ((value.length + valueToSet.length) == 0)
+			return;
+			
+		super.value = valueToSet;
+	}
+
+	void add(T item) {
+		value.add(item);
+		notifyListeners();
+	}
+	
+	void addAll(Iterable<T> items) {
+		value.addAll(items);
+		notifyListeners();
+	}
+
+	void removeWhere(bool Function(T) test) {
+		value.removeWhere(test);
+		notifyListeners();
+	}
+
+	void remove(T item) {
+		value.remove(item);
+		notifyListeners();
+	}
+}
+
+class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
+	  
+	_MapNotifier([Map<TKey, TValue> value]) : super(value ?? {});
+
+	void clear() {
+		if (value == null || value.isEmpty)
+			return;
+
+		value.clear();
+		notifyListeners();	
+	}
+
+	@override
+	set value(Map<TKey, TValue> newValue) {
+		final valueToSet = newValue ?? {};
+		if ((value.length + valueToSet.length) == 0)
+			return;
+			
+		super.value = valueToSet;
+	}
+
+	void upsert(TKey key, TValue item) {
+		value[key] = item;
+		notifyListeners();
+	}
+
+	void upsertAll(Iterable<MapEntry<TKey, TValue>> entries) {
+		final inEntries = entries ?? {};
+		if (inEntries.isEmpty)
+			return;
+
+		value.addEntries(entries);
+		notifyListeners();
+	}
+
+	void remove(TKey key) {
+		if (value.remove(key) == null)
+			return;
+
+		notifyListeners();
+	}
+
+	void removeAll(Iterable<TKey> keys) {
+		final inKeys = keys ?? <TKey>[];
+		if (inKeys.isEmpty)
+			return;
+
+		value.removeWhere((k, v) => keys.contains(k));
+		notifyListeners();
+	}
+}
+
 abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
     extends State<TWidget> {
     static const int _removalTimeoutMs = 2000;
 
-    bool _isEndOfData = false;
     bool _canFetch = false;
     
-    bool _isEditorMode;
-    bool _isSearchMode;
+    final _isEditorModeNotifier = new ValueNotifier(false);
+    final _isSearchModeNotifier = new ValueNotifier(false);
 
     int _pageIndex = 0;
 
-	Map<String, int> _filterIndexes;
-	String _curFilterIndex;
+	final _filterIndexesNotifier = new _MapNotifier<String, int>();
+	final _curFilterIndexNotifier = new ValueNotifier<String>(null);
 
-    final Map<int, _CachedItem<TItem>> _itemsMarkedForRemoval = {};
-    final Map<int, _CachedItem<TItem>> _itemsMarkedInEditor = {};
+    final Map<int, _CachedItem<TItem>> _itemsToRemove = {};
 
-    final List<TItem> _items = [];
+    final _markedItemsNotifier = new _MapNotifier<int, _CachedItem<TItem>>();
+
+	final _itemsNotifier = new _ListNotifier<TItem>();
     final ScrollController _scrollController = new ScrollController();
     
     @override
     void initState() {
         super.initState();
-        
-        _isEditorMode = false;
-		_isSearchMode = false;
 
 		_initFilterIndexes();
 
@@ -66,10 +157,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     }
 
 	Future<void> _initFilterIndexes() async {
-		final filterIndexes = await getFilterIndexes();
-		
-		WidgetsBinding.instance.addPostFrameCallback((_) => 
-			setState(() => _filterIndexes = filterIndexes));
+		_filterIndexesNotifier.value = await getFilterIndexes();
 	}
 
 	@protected
@@ -79,17 +167,15 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         _canFetch = false;
         final nextItems = await _fetchNextItems(text);
 
-        _canFetch = true;
-
-        if (nextItems.isEmpty)
-            _isEndOfData = true;
-        else
-			setState(() => _items.addAll(nextItems));
+        if (nextItems.isNotEmpty) {
+        	_canFetch = true;
+			_itemsNotifier.addAll(nextItems);
+		}
     }
 
     void _expandListOnScroll() {
-        if (_scrollController.position.extentAfter < 500 && !_isEndOfData && _canFetch)
-            _fetchItems(_curFilterIndex);
+        if (_scrollController.position.extentAfter < 500 && _canFetch)
+            _fetchItems(curFilterIndex);
     }
 
     Future<List<TItem>> _fetchNextItems([String text]) => 
@@ -102,7 +188,14 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void dispose() {
         _scrollController.removeListener(_expandListOnScroll);
 
-        super.dispose();
+		_isEditorModeNotifier.dispose();
+		_isSearchModeNotifier.dispose();
+		_filterIndexesNotifier.dispose();
+		_markedItemsNotifier.dispose();
+		_itemsNotifier.dispose();
+        _curFilterIndexNotifier.dispose();
+
+		super.dispose();
     }
 
     @override
@@ -112,43 +205,72 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			title: title,
             barActions: <Widget>[
 				new IconButton(
-					onPressed: () => setState(() {
-						_isEditorMode = !_isEditorMode;
-						if (!_isEditorMode)
-							_itemsMarkedInEditor.clear();
-					}),
-					icon: new Icon(_isEditorMode ? Icons.edit_off: Icons.edit)
+					onPressed: () {
+						_isEditorModeNotifier.value = !_isEditorModeNotifier.value;
+						if (!_isEditorModeNotifier.value)
+							_markedItemsNotifier.value.clear();
+					},
+					icon: new ValueListenableBuilder(
+						valueListenable: _isEditorModeNotifier, 
+						builder: (_, bool isEditorMode, __) => new Icon(isEditorMode ? Icons.edit_off: Icons.edit)
+					)
 				),
-				if (_isSearchMode || _getIsSearchModeAvailable(_items.length))
-					_isSearchMode ? 
-						new IconButton(
-							onPressed: () {
-								refetchItems();
-								setState(() => _isSearchMode = false);
-							},
-							icon: const Icon(Icons.search_off)
-						): 
-						new IconButton(
-							onPressed: _filterIndexes == null ? null: () {
-								setState(() => _isSearchMode = true);
-							},
-							icon: const Icon(Icons.search)
-						)
+				new ValueListenableBuilder(
+					valueListenable: _isSearchModeNotifier, 
+					builder: (_, bool isSearchMode, __) {
+						if (isSearchMode)
+							return new IconButton(
+								onPressed: () {
+									refetchItems();
+									_isSearchModeNotifier.value = false;
+								},
+								icon: const Icon(Icons.search_off)
+							);
+						
+							return new ValueListenableBuilder(
+								valueListenable: _filterIndexesNotifier, 
+								builder: (_, Map<String, int> filterIndexes, __) {
+									if (_getIsSearchModeAvailable(filterIndexLength))
+										return new IconButton(
+											onPressed: filterIndexes == null ? null: () {
+												_isSearchModeNotifier.value = true;
+											},
+											icon: const Icon(Icons.search)
+										);
+
+									return const SizedBox.shrink();
+								}
+							);
+					}
+				)
 			],
             onNavGoingBack: canGoBack ? 
                 () {
                     _deleteAllMarkedForRemoval();
                     onGoingBack(buildContext);
                 }: null,
-            bottomBar: _isEditorMode ? 
-				new _BottomBar((scaffoldContext) => _buildBottomOptions(scaffoldContext)): null,
+            bottomBar: new ValueListenableBuilder(
+				valueListenable: _isEditorModeNotifier, 
+				builder: (_, bool isEditorMode, __) {
+					if (isEditorMode)
+						return new ValueListenableBuilder(
+							valueListenable: _markedItemsNotifier, 
+							builder: (_, Map<int, _CachedItem<TItem>> markedItems, __) {
+								final items = markedItems.values.map((e) => e.item).toList();
+								return new _BottomBar((scaffoldContext) => _buildBottomOptions(scaffoldContext, items));
+							}
+						);
+
+					return const SizedBox.shrink();
+				}
+			),
             body: _buildListView(buildContext, locale),
             floatingActionButton: _buildNewItemButton(buildContext, locale)
         );
     }
 
 	bool _getIsSearchModeAvailable(int itemsLength) => 
-		_curFilterIndex != null ||  itemsLength > ListScreen.searcherModeItemsThreshold;
+		curFilterIndex != null ||  itemsLength >= ListScreen.searcherModeItemsThreshold;
 
     @protected
     String get title;
@@ -157,27 +279,30 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     bool get canGoBack;
 
     @protected
-	String get curFilterIndex => _curFilterIndex;
+	String get curFilterIndex => _curFilterIndexNotifier.value;
 	
     @protected
 	int get filterIndexLength => 
-		curFilterIndex == null ? _itemsLengthFromIndexes : _filterIndexes[curFilterIndex];
+		curFilterIndex == null ? _itemsLengthFromIndexes : _filterIndexesNotifier.value[curFilterIndex];
 
 	int get _itemsLengthFromIndexes => 
-		_filterIndexes.values.fold<int>(0, (prevLength, curLength) => prevLength + curLength);
+		_filterIndexesNotifier.value.values.fold<int>(0, (prevLength, curLength) => prevLength + curLength);
 
     @protected
     void onGoingBack(BuildContext context);
-	
-	Iterable<TItem> get _removableItems => _items.where((w) => isRemovableItem(w));
 
-	List<Widget> _buildBottomOptions(BuildContext scaffoldContext) {
+	@protected
+	int get removableItemsLength => _itemsNotifier.value.length;
+
+    @protected
+	Set<int> get nonRemovableItemIds => <int>{};
+
+    bool _isRemovableItem(TItem item) => !nonRemovableItemIds.contains(item.id);
+
+	List<Widget> _buildBottomOptions(BuildContext scaffoldContext, List<TItem> markedItems) {
 		final locale = AppLocalizations.of(scaffoldContext);
-
-		final allSelected = _itemsMarkedInEditor.length == _removableItems.length;
-		final options = getBottomBarOptions(_itemsMarkedInEditor.values.map((e) => e.item).toList(), 
-			locale, scaffoldContext) ?? <Widget>[];
-		options.addAll(_buildBottomBarOptions(allSelected, locale, scaffoldContext));
+		final options = getBottomBarOptions(markedItems, locale, scaffoldContext) ?? <Widget>[];
+		options.addAll(_buildBottomBarOptions(locale, scaffoldContext));
 	
 		return options;
 	}
@@ -187,65 +312,70 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		List<TItem> markedItems, AppLocalizations locale, BuildContext scaffoldContext
 	) => <Widget>[];
 
-    List<Widget> _buildBottomBarOptions(
-		bool allSelected, AppLocalizations locale, BuildContext scaffoldContext
-	) {
-        return [ 
-			new IconedButton(
-				icon: const _DeleteIcon(),
-				label: locale.constsRemovingItemButtonLabel,
-				onPressed: () async {
-					if (_itemsMarkedInEditor.isEmpty || 
-						!(await shouldContinueRemoval(
-							_itemsMarkedInEditor.values.map((v) => v.item).toList()
-						)))
-						return;
+    List<Widget> _buildBottomBarOptions(AppLocalizations locale, BuildContext scaffoldContext) => [ 
+		new IconedButton(
+			icon: const _DeleteIcon(),
+			label: locale.constsRemovingItemButtonLabel,
+			onPressed: () async {
+				final markedItems = _markedItemsNotifier.value;
+				if (markedItems.isEmpty)
+					return;
 
-                    _itemsMarkedForRemoval.addAll(_itemsMarkedInEditor);
+				final continueRemoval = await shouldContinueRemoval(markedItems.values.map((v) => v.item).toList());
+				if (!continueRemoval)
+					return;
 
-                    setState(() {
-                        _items.removeWhere((w) => _itemsMarkedInEditor.containsKey(w.id));
+				_itemsToRemove.addAll(markedItems);
+				_itemsNotifier.removeWhere((w) => markedItems.containsKey(w.id));
 
-                        _showItemRemovalInfoSnackBar(
-							scaffoldContext: scaffoldContext,
-							message: locale.listScreenBottomSnackBarRemovedItemsInfo(
-								_itemsMarkedInEditor.length.toString()),
-                            itemIdsToRemove: _itemsMarkedInEditor.keys.toList(), 
-							locale: locale);
+				_showItemRemovalInfoSnackBar(
+					scaffoldContext: scaffoldContext,
+					message: locale.listScreenBottomSnackBarRemovedItemsInfo(markedItems.length.toString()),
+					itemIdsToRemove: markedItems.keys.toList(), 
+					locale: locale
+				);
 
-                        _itemsMarkedInEditor.clear();
-                    });
-				}
+				_markedItemsNotifier.clear();
+			}
+		),
+		new IconedButton.labelWidget(
+			icon: const Icon(Icons.select_all),
+			labelWidget: new ValueListenableBuilder(
+				valueListenable: _itemsNotifier, 
+				builder: (_, __, ___) => 
+					new Text(getSelectorBtnLabel(
+						allSelected: removableItemsLength == _markedItemsNotifier.value.length, 
+						locale: locale
+					))
 			),
-			new IconedButton(
-				icon: const Icon(Icons.select_all),
-				label: getSelectorBtnLabel(allSelected: allSelected, locale: locale),
-				onPressed: () {
-					if (allSelected)
-                        setState(() => _itemsMarkedInEditor.clear());
-                    else {
-                        setState(() {
-							final itemsToMark = _removableItems.toList();
-                            int index = _items.length - itemsToMark.length;
-
-                            itemsToMark.forEach((w) =>
-                                _itemsMarkedInEditor[w.id] = new _CachedItem(w, index++));
-                        });
-                    }
+			onPressed: () {
+				final allSelected = removableItemsLength == _markedItemsNotifier.value.length;
+				if (allSelected) {
+					clearItemsMarkedInEditor();
+					return;
 				}
-			)
-		];
-    } 
+				
+				final items = _itemsNotifier.value;
+				int index = items.length - removableItemsLength;
+				
+				final nonRemovableIds = nonRemovableItemIds.toSet();
+				_markedItemsNotifier.upsertAll(
+					items.where((i) => !nonRemovableIds.contains(i.id))
+						.map((i) => new MapEntry(i.id, new _CachedItem(i, index++)))
+				);
+			}
+		)
+	];
 
 	@protected
 	String getSelectorBtnLabel({ bool allSelected, AppLocalizations locale }) {
-		final itemsOverall = _removableItems.length.toString();
+		final itemsOverall = removableItemsLength.toString();
 		return allSelected ? locale.constsUnselectAll(itemsOverall): 
 			locale.constsSelectAll(itemsOverall);
 	}
 
 	@protected
-	void clearItemsMarkedInEditor() => _itemsMarkedInEditor.clear();
+	void clearItemsMarkedInEditor() => _markedItemsNotifier.clear();
 
     void _showItemRemovalInfoSnackBar({ 
 		@required BuildContext scaffoldContext, @required String message, 
@@ -272,27 +402,43 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			children: [
 				new Flexible(child: _buildList(locale), flex: 8, fit: FlexFit.tight),
 				
-				if (_isSearchMode)
-					new Flexible(child: 
-						new Scrollbar(
-							child: new ListView(
-								shrinkWrap: true,
-								children: (_filterIndexes.keys.toList()..sort())
-									.map((i) => _buildFilterIndex(context, i)).toList()
-							)
-						)
-					)
+				new ValueListenableBuilder(
+					valueListenable: _isSearchModeNotifier, 
+					builder: (_, bool isSearchMode, __) {
+						if (isSearchMode)
+							return new Flexible(child: 
+								new Scrollbar(
+									child: new ValueListenableBuilder(
+										valueListenable: _filterIndexesNotifier, 
+										builder: (_, Map<String, int> filterIndexes, __) =>
+
+											new ValueListenableBuilder(
+												valueListenable: _curFilterIndexNotifier, 
+												builder: (_, String curIndex, __) => 
+													new ListView(
+														shrinkWrap: true,
+														children: (filterIndexes.keys.toList()..sort())
+															.map((i) => _buildFilterIndex(context, i, curIndex)).toList()
+													)
+											)
+									)
+								)
+							);
+
+						return const SizedBox.shrink();
+					}
+				)
 			]
 		);
     }
 
-    Widget _buildFilterIndex(BuildContext context, String index) {
+    Widget _buildFilterIndex(BuildContext context, String index, String curIndex) {
 		final textBtn = new TextButton(
 			onPressed: () => refetchItems(text: index), 
 			child: new Text(index)
 		);
 
-		if (index == _curFilterIndex)
+		if (index == curIndex)
 			return new Container(
 				child: textBtn, 
 				decoration: new BoxDecoration(
@@ -307,18 +453,18 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 	Future<void> refetchItems({ String text, bool isForceful, bool shouldInitIndices }) async {
 		String newFilterIndex = text;
 
-		if (!(isForceful ?? false) && _curFilterIndex == newFilterIndex) {
-			if (_curFilterIndex == null)
+		if (!(isForceful ?? false) && curFilterIndex == newFilterIndex) {
+			if (curFilterIndex == null)
 				return;
 
 			newFilterIndex = null;
 		}
 
-		_curFilterIndex = newFilterIndex;
+		_curFilterIndexNotifier.value = newFilterIndex;
 
 		_pageIndex = 0;
-		_items.clear();
-		_itemsMarkedInEditor.clear();
+		_itemsNotifier.value.clear();
+		_markedItemsNotifier.value.clear();
 
 		await _fetchItems(newFilterIndex);
 	
@@ -328,35 +474,57 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 
     Widget _buildList(AppLocalizations locale) => 
 		new Scrollbar(
-			child: new ListView.builder(
-				key: new ObjectKey(_curFilterIndex),
-				itemCount: _items.length,
-				itemBuilder: _isEditorMode ? _buildCheckListItem: 
-					(context, index) => _buildDismissibleListItem(context, index, locale),
-				controller: _scrollController
+			child: new ValueListenableBuilder(
+				valueListenable: _isEditorModeNotifier, 
+				builder: (_, bool isEditorMode, __) {
+
+					return new ValueListenableBuilder(
+						valueListenable: _itemsNotifier, 
+						builder: (_, List<TItem> items, __) {
+							if (isEditorMode)
+								return new ListView.builder(
+									key: new ObjectKey(curFilterIndex),
+									itemCount: items.length,
+									itemBuilder: (BuildContext context, int index) {
+										
+										return new ValueListenableBuilder(
+											valueListenable: _markedItemsNotifier, 
+											builder: (_, Map<int, _CachedItem<TItem>> markedItems, __) => 
+												_buildCheckListItem(context, index, items[index], markedItems.keys.toSet())
+										);
+									},
+									controller: _scrollController
+								);
+					
+							return new ListView.builder(
+								key: new ObjectKey(curFilterIndex),
+								itemCount: items.length,
+								itemBuilder: (context, index) => _buildDismissibleListItem(context, index, locale, items[index]),
+								controller: _scrollController
+							);
+						}
+					);
+				}
 			)
 		);
 
-    Widget _buildCheckListItem(BuildContext buildContext, int itemIndex) {
-        final item = _items[itemIndex];
-        return new UnderlinedContainer(new CheckboxListTile(
-            value: _itemsMarkedInEditor.containsKey(item.id),
-            onChanged: isRemovableItem(item) ? (isChecked) {
-                setState(() {
-                    if (isChecked)
-                        _itemsMarkedInEditor[item.id] = new _CachedItem(item, itemIndex);
-                    else
-                        _itemsMarkedInEditor.remove(item.id);
-                });
-            }: null,
-			secondary: getItemLeading(item),
-            title: getItemTitle(item),
-            subtitle: getItemSubtitle(item, forCheckbox: true)
-        ));
+    Widget _buildCheckListItem(BuildContext buildContext, int itemIndex, TItem item, Set<int> markedIds) {
+        return new UnderlinedContainer(
+			new CheckboxListTile(
+				value: markedIds.contains(item.id),
+				onChanged: _isRemovableItem(item) ? 
+					(isChecked) {
+						if (isChecked)
+							_markedItemsNotifier.upsert(item.id, new _CachedItem(item, itemIndex));
+						else
+							_markedItemsNotifier.remove(item.id);
+					}: null,
+				secondary: getItemLeading(item),
+				title: getItemTitle(item),
+				subtitle: getItemSubtitle(item, forCheckbox: true)
+			)
+		);
     }
-	
-    @protected
-    bool isRemovableItem(TItem item) => true;
 
     @protected
     Widget getItemLeading(TItem item) => null;
@@ -377,36 +545,36 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         );
 
     Widget _buildDismissibleListItem(
-		BuildContext buildContext, int itemIndex, AppLocalizations locale
+		BuildContext buildContext, int itemIndex, AppLocalizations locale, TItem item
 	) {
-        final item = _items[itemIndex];
+        return new UnderlinedContainer(_isRemovableItem(item) ? 
+			new Dismissible(
+				direction: DismissDirection.endToStart,
+				key: new Key(item.id.toString()),
+				background: new Container(
+					color: Colors.deepOrange[300], 
+					child: const _DeleteIcon()
+				),
+				onDismissed: (_) async {
+					final itemToRemove = item;
+					_itemsToRemove[itemToRemove.id] = 
+						new _CachedItem(itemToRemove, itemIndex);
 
-        return new UnderlinedContainer(isRemovableItem(item) ? new Dismissible(
-			direction: DismissDirection.endToStart,
-			key: new Key(item.id.toString()),
-			background: new Container(
-				color: Colors.deepOrange[300], 
-				child: const _DeleteIcon()
-			),
-			onDismissed: (_) async {
-				final itemToRemove = _items[itemIndex];
-				_itemsMarkedForRemoval[itemToRemove.id] = 
-					new _CachedItem(itemToRemove, itemIndex);
+					_itemsNotifier.remove(itemToRemove);
 
-				setState(() => _items.remove(itemToRemove));
-
-				if (await shouldContinueRemoval([itemToRemove]))
-					_showItemRemovalInfoSnackBar(
-						scaffoldContext: buildContext,
-						message: locale.listScreenBottomSnackBarDismissedItemInfo(
-							itemToRemove.textData),
-						itemIdsToRemove: [itemToRemove.id],
-						locale: locale
-					);
-				else
-					_recoverMarkedForRemoval([itemToRemove.id]);
-			},
-			child: _buildListTile(buildContext, item)): _buildListTile(buildContext, item)
+					if (await shouldContinueRemoval([itemToRemove]))
+						_showItemRemovalInfoSnackBar(
+							scaffoldContext: buildContext,
+							message: locale.listScreenBottomSnackBarDismissedItemInfo(
+								itemToRemove.textData),
+							itemIdsToRemove: [itemToRemove.id],
+							locale: locale
+						);
+					else
+						_recoverMarkedForRemoval([itemToRemove.id]);
+				},
+				child: _buildListTile(buildContext, item)
+			): _buildListTile(buildContext, item)
 		);
     }
 
@@ -418,38 +586,39 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
         if (itemsToRecover.isEmpty)
             return;
 
-        setState(() {
-            itemsToRecover.forEach((i) => _items.insert(i.index, i.item));
-            _deleteFromMarkedForRemoval(ids);
-        });
+		final items = new List<TItem>.from(_itemsNotifier.value);
+		itemsToRecover.forEach((i) => items.insert(i.index, i.item));
+		_itemsNotifier.value = items;
+
+		_deleteFromMarkedForRemoval(ids);
     }
 
     List<_CachedItem<TItem>> _getCachedItemsMarkedForRemoval(List<int> ids) {
-		return ids.map((id) => _itemsMarkedForRemoval[id]).toList();
+		return ids.map((id) => _itemsToRemove[id]).toList();
 	}
 
     void _deleteFromMarkedForRemoval(List<int> ids) => 
-		ids.forEach((id) => _itemsMarkedForRemoval.remove(id));
+		ids.forEach((id) => _itemsToRemove.remove(id));
 
     Future<void> _deleteMarkedForRemoval(List<int> ids) async {
-        if (_itemsMarkedForRemoval.isEmpty)
+        if (_itemsToRemove.isEmpty)
             return;
 
 		final itemsToDelete = _getCachedItemsMarkedForRemoval(ids);
 		final removedIndexes = itemsToDelete.map((i) => i.item.textData[0]).toList();
-		final indexesDeleted = _deleteFilterIndexes(removedIndexes);
+		_deleteFilterIndexes(removedIndexes);
 		
         _deleteFromMarkedForRemoval(ids);
 		deleteItems(_extractItemsForDeletion(itemsToDelete));
 
-		final isSearchOff = _isSearchMode && !_getIsSearchModeAvailable(_itemsLengthFromIndexes);
+		final isSearchOff = _isSearchModeNotifier.value && !_getIsSearchModeAvailable(_itemsLengthFromIndexes);
 		if (isSearchOff)
-			_isSearchMode = false;
+			_isSearchModeNotifier.value = false;
 
-		if (_curFilterIndex != null && !_filterIndexes.containsKey(_curFilterIndex))
+		if (curFilterIndex != null && !_filterIndexesNotifier.value.containsKey(curFilterIndex))
 			await refetchItems();
 		else
-    		await updateStateAfterDeletion(shallUpdate: indexesDeleted || isSearchOff);		
+    		await updateStateAfterDeletion();
     }
 	
     @protected
@@ -463,12 +632,9 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void deleteItems(List<TItem> ids);
 	
     @protected
-    Future<void> updateStateAfterDeletion({ bool shallUpdate }) async {
-		if (shallUpdate ?? false)
-			setState(() {});
-	}
+    Future<void> updateStateAfterDeletion() async { }
 
-	bool _deleteFilterIndexes(List<String> removedIndexes) {
+	void _deleteFilterIndexes(List<String> removedIndexes) {
 		final grouppedIndexes = removedIndexes.fold<Map<String, int>>({}, (res, val) {
 			final index = val[0].toUpperCase();
 			res[index] = (res[index] ?? 0) + 1;
@@ -476,23 +642,20 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		});
 
 		final indexesToRemove = <String>[];
+		final filterIndexes = _filterIndexesNotifier.value;
 		grouppedIndexes.forEach((ind, length) {
-			final indexLength = _filterIndexes[ind];
+			final indexLength = filterIndexes[ind];
 			if (indexLength == null)
 				return;
 			
 			if (indexLength == length)
 				indexesToRemove.add(ind);
 			else
-				_filterIndexes[ind] -= length;
+				filterIndexes[ind] -= length;
 		});
 
-		if (indexesToRemove.isNotEmpty) {
-			indexesToRemove.forEach((ind) => _filterIndexes.remove(ind));
-			return true;
-		}
-
-		return false;
+		if (indexesToRemove.isNotEmpty)
+			_filterIndexesNotifier.removeAll(indexesToRemove);
 	}
 
     FloatingActionButton _buildNewItemButton(
@@ -509,11 +672,11 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
     void onGoingToItem(BuildContext buildContext, [TItem item]) => _deleteAllMarkedForRemoval();
     
     void _deleteAllMarkedForRemoval() {
-        if (_itemsMarkedForRemoval.isEmpty)
+        if (_itemsToRemove.isEmpty)
             return;
 
-        deleteItems(_extractItemsForDeletion(_itemsMarkedForRemoval.values));
-        _itemsMarkedForRemoval.clear();
+        deleteItems(_extractItemsForDeletion(_itemsToRemove.values));
+        _itemsToRemove.clear();
     }
 }
 

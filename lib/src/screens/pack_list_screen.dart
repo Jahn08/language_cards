@@ -18,14 +18,34 @@ import '../widgets/translation_indicator.dart';
 
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
+	Set<int> _nonRemovableItemIds;
+
+	final _nonPackCardsNumberNotifier = new ValueNotifier<int>(null);
+
+	@override
+	void dispose() {
+		_nonPackCardsNumberNotifier.dispose();
+		
+		super.dispose();
+	}
+
     @override
     Widget getItemLeading(StoredPack item) => 
         item.isNone ? const TranslationIndicator.empty():
             new TranslationIndicator(item.from, item.to);
 
     @override
-    Widget getItemSubtitle(StoredPack item, { bool forCheckbox }) => 
-        new CardNumberIndicator(item.cardsNumber);
+    Widget getItemSubtitle(StoredPack item, { bool forCheckbox }) {
+		if (item.isNone) {
+			_nonPackCardsNumberNotifier.value ??= item.cardsNumber;
+			return new ValueListenableBuilder(
+				valueListenable: _nonPackCardsNumberNotifier, 
+				builder: (_, int nonPackCardsNumber, __) => new CardNumberIndicator(nonPackCardsNumber)
+			);
+		}
+			
+		return new CardNumberIndicator(item.cardsNumber);
+	}
     
     @override
     Widget getItemTitle(StoredPack item) => new OneLineText(item.getLocalisedName(context));
@@ -43,7 +63,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		if (skipCount > 0)
 			return Future.value([]);
 
-        return widget.storage.fetch(textFilter: text);
+		return widget.storage.fetch(textFilter: text);
 	} 
   
     @override
@@ -54,8 +74,10 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 		widget.storage.delete(items.map((i) => i.id).toList()).then((res) {
 			final untiedCardsNumber = items.map((i) => i.cardsNumber)
 				.fold<int>(0, (prev, el) => prev + el);
-			if (untiedCardsNumber > 0)
-				setState(() => StoredPack.none.cardsNumber += untiedCardsNumber);
+			if (untiedCardsNumber > 0) {
+				StoredPack.none.cardsNumber += untiedCardsNumber;
+				_nonPackCardsNumberNotifier.value = StoredPack.none.cardsNumber;
+			}
 		});
 	}
 
@@ -91,9 +113,12 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     @override
     void onGoingBack(BuildContext context) => Router.returnHome(context);
+	
+	@override
+	int get removableItemsLength => super.removableItemsLength - (super.curFilterIndex == null ? nonRemovableItemIds.length: 0);
 
-    @override
-    bool isRemovableItem(StoredPack item) => !item.isNone;
+	@override
+  	Set<int> get nonRemovableItemIds => _nonRemovableItemIds ??= super.nonRemovableItemIds..add(StoredPack.none.id);
 
 	@override
 	Future<Map<String, int>> getFilterIndexes() => widget.storage.groupByTextIndex();

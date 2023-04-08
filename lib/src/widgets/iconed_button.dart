@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 
 class IconedButton extends StatelessWidget {
 
-	final String label;
+	final Widget labelWidget;
 
 	final Icon icon;
 
 	final void Function() onPressed;
+	
+	IconedButton({ @required String label, @required Icon icon, @required void Function() onPressed }): 
+		this.labelWidget(labelWidget: new Text(label), icon: icon, onPressed: onPressed);
 
-	const IconedButton({ @required this.label, @required this.icon, @required this.onPressed });
+	const IconedButton.labelWidget({ @required this.labelWidget, @required this.icon, @required this.onPressed });
 
 	@override
 	Widget build(BuildContext context) {
@@ -17,7 +20,7 @@ class IconedButton extends StatelessWidget {
 			child: Column(
 				mainAxisAlignment: MainAxisAlignment.spaceBetween,
 				mainAxisSize: MainAxisSize.min,
-				children: <Widget>[icon, new Text(label)]
+				children: <Widget>[icon, labelWidget]
         	)
       	);
 	}

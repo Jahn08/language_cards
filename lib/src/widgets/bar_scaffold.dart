@@ -17,32 +17,57 @@ import '../widgets/one_line_text.dart';
 import '../widgets/styled_dropdown.dart';
 
 class _SettingsPanelState extends State<_SettingsPanel> {
-	int _expandedPanelIndex = 0;
+	final _expandedPanelIndexNotifier = new ValueNotifier<int>(0);
 
 	@override
-	Widget build(BuildContext context) => new Drawer(
-			child: new SingleChildScrollView(
-				child: new Column(children: [
-			new Padding(
-				child: new ExpansionPanelList(
-					children: [
-					_buildPanel(0,
-						header: const _SettingsSectionHeader(), body: const _SettingsSectionBody()),
-					_buildPanel(1,
-						header: const _ContactsSectionHeader(), body: const _ContactsSectionBody()),
-					_buildPanel(2, header: const _HelpSectionHeader(), body: const _HelpSectionBody())
-					],
-					expansionCallback: (panelIndex, isExpanded) {
-					setState(() => _expandedPanelIndex = isExpanded ? null : panelIndex);
-					}),
-				padding: const EdgeInsets.only(top: 30))
-		])));
+	void dispose() {
+		_expandedPanelIndexNotifier.dispose();
 
-	ExpansionPanel _buildPanel(int index, {Widget header, Widget body}) => new ExpansionPanel(
-		headerBuilder: (context, _) => header,
-		body: body,
-		canTapOnHeader: true,
-		isExpanded: _expandedPanelIndex == index);
+		super.dispose();
+	}
+
+	@override
+	Widget build(BuildContext context) => 
+		new Drawer(
+			child: new SingleChildScrollView(
+				child: new Column(
+					children: [
+						new Padding(
+							child: new ValueListenableBuilder(
+								valueListenable: _expandedPanelIndexNotifier, 
+								builder: (_, int expandedPanelIndex, __) {
+
+									return new ExpansionPanelList(
+										children: [
+											_buildPanel(0,
+												header: const _SettingsSectionHeader(), body: const _SettingsSectionBody()
+											),
+											_buildPanel(1,
+												header: const _ContactsSectionHeader(), body: const _ContactsSectionBody()
+											),
+											_buildPanel(2, 
+												header: const _HelpSectionHeader(), body: const _HelpSectionBody()
+											)
+										],
+										expansionCallback: (panelIndex, isExpanded) {
+											_expandedPanelIndexNotifier.value = isExpanded ? null : panelIndex;
+										}
+									);
+								}
+							),
+							padding: const EdgeInsets.only(top: 30))
+					]
+				)
+			)
+		);
+
+	ExpansionPanel _buildPanel(int index, {Widget header, Widget body}) => 
+		new ExpansionPanel(
+			headerBuilder: (context, _) => header,
+			body: body,
+			canTapOnHeader: true,
+			isExpanded: _expandedPanelIndexNotifier.value == index
+		);
 }
 
 class _SettingsSectionBodyState extends State<_SettingsSectionBody> {

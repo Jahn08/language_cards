@@ -39,21 +39,18 @@ class _FlipCardState extends State<FlipCard>
 
     Animation<double> _backRotation;
 
-    bool _isFront;
+	final _isFrontNotifier = new ValueNotifier(true);
 
     @override
     void didUpdateWidget(FlipCard oldWidget) {
         super.didUpdateWidget(oldWidget);
 
         _controller.reset();
-        _isFront = true;
     }
 
     @override
     void initState() {
         super.initState();
-
-        _isFront = true;
 
         _controller = new AnimationController(
             duration: const Duration(milliseconds: 600), vsync: this);
@@ -91,31 +88,36 @@ class _FlipCardState extends State<FlipCard>
 
     @override
     Widget build(BuildContext context) {
+
         return GestureDetector(
             behavior: HitTestBehavior.translucent,
             onTap: () {
-                if (_isFront)
+                if (_isFrontNotifier.value)
                     _controller.forward();
                 else
                     _controller.reverse();
 
-                setState(() => _isFront = !_isFront);
+				_isFrontNotifier.value = !_isFrontNotifier.value;
             },
-            child: Stack(
-                fit: StackFit.passthrough,
-                children: <Widget>[
-					new _FlipCardSide(
-						animation: _frontRotation,
-						child: widget.front,
-						isHittable: _isFront
-					),
-					new _FlipCardSide(
-						animation: _backRotation,
-						child: widget.back,
-						isHittable: !_isFront
-					)
-                ]
-            )
+            child: new ValueListenableBuilder(
+				valueListenable: _isFrontNotifier, 
+				builder: (_, bool isFront, __) =>
+					Stack(
+						fit: StackFit.passthrough,
+						children: <Widget>[
+							new _FlipCardSide(
+								animation: _frontRotation,
+								child: widget.front,
+								isHittable: isFront
+							),
+							new _FlipCardSide(
+								animation: _backRotation,
+								child: widget.back,
+								isHittable: !isFront
+							)
+						]
+					) 
+			)
         );
     }
 
