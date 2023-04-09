@@ -108,6 +108,16 @@ class ListScreenTester<TEntity extends StoredEntity> {
                 AssuredFinder.findOne(type: ListTile, label: item.value);
         });
 
+		testWidgets(_buildDescription('keeps selection made right after removal'), (tester) async {
+            await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
+
+			final assistant = new WidgetAssistant(tester);
+			await selectSomeItemsInEditor(assistant);
+			await assistant.pumpAndAnimate(ListScreen.removalTimeoutMs);
+
+            assureSelectionForAllTilesInEditor(tester, selected: true, onlyForSomeItems: true);
+        });
+
         testWidgets(_buildDescription('recovers removed items in their previous order'), (tester) async {
             final itemsToRemove = await _testRemovingItemsInEditor(tester, selectSomeItemsInEditor);
 
@@ -334,7 +344,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 			await forEachDismissible(2, (dismissible) async {
 				final title = await _removeByDismissing(assistant, dismissible);
 			
-				await assistant.pumpAndAnimate(2000);
+				await assistant.pumpAndAnimate(ListScreen.removalTimeoutMs);
 				removedTitles.add(title);			
 			});
 
@@ -359,7 +369,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 					if (removedTitles.isEmpty || recoveredTitle != null) {
 						removedTitles.add(title);
 
-						await assistant.pumpAndAnimate(2000);
+						await assistant.pumpAndAnimate(ListScreen.removalTimeoutMs);
 					}
 					else {
 						recoveredTitle = title;

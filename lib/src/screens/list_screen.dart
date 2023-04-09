@@ -126,7 +126,6 @@ class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
 
 abstract class ListScreenState<TItem extends StoredEntity, TWidget extends StatefulWidget> 
     extends State<TWidget> {
-    static const int _removalTimeoutMs = 2000;
 
     bool _canFetch = false;
     
@@ -382,7 +381,7 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 		@required List<int> itemIdsToRemove, @required AppLocalizations locale 
 	}) {
         final snackBar = ScaffoldMessenger.of(scaffoldContext ?? context).showSnackBar(new SnackBar(
-			duration: const Duration(milliseconds: _removalTimeoutMs),
+			duration: const Duration(milliseconds: ListScreen.removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(
                 label: locale.listScreenBottomSnackBarUndoingActionLabel,
@@ -460,11 +459,13 @@ abstract class ListScreenState<TItem extends StoredEntity, TWidget extends State
 			newFilterIndex = null;
 		}
 
-		_curFilterIndexNotifier.value = newFilterIndex;
+		if (curFilterIndex != newFilterIndex) {
+			_curFilterIndexNotifier.value = newFilterIndex;
+			_markedItemsNotifier.value.clear();
+		}
 
 		_pageIndex = 0;
 		_itemsNotifier.value.clear();
-		_markedItemsNotifier.value.clear();
 
 		await _fetchItems(newFilterIndex);
 	
@@ -689,6 +690,8 @@ abstract class ListScreen<T extends StoredEntity> extends StatefulWidget {
 	static const int itemsPerPage = 100;
 
     static const int searcherModeItemsThreshold = 10;
+
+    static const int removalTimeoutMs = 2000;
 
 	const ListScreen();
 
