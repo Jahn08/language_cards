@@ -189,9 +189,16 @@ class Router {
 	static void goBackToCardList(BuildContext context, { 
 		WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded 
 	}) {
-		Navigator.pushNamedAndRemoveUntil(context, _cardListRouteName, ModalRoute.withName(_packRouteName), 
+		Navigator.pushNamedAndRemoveUntil(context, _cardListRouteName, 
+			_withNames(<String>{ _packRouteName, _packListRouteName, initialRouteName }), 
 			arguments: new _CardListRouteArgs(
 				storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
+	}
+	
+	static RoutePredicate _withNames(Set<String> names) {
+		return (Route<dynamic> route) {
+			return !route.willHandlePopInternally && route is ModalRoute && names.contains(route.settings.name);
+		};
 	}
 	
 	static void returnHome(BuildContext context) => _goBackUntil(context, initialRouteName);
@@ -218,7 +225,8 @@ class Router {
 
 	static void goBackToPack(BuildContext context, { PackStorage storage, StoredPack pack, bool refreshed }) {
 		if (refreshed)
-			Navigator.pushNamedAndRemoveUntil(context, _packRouteName, ModalRoute.withName(_packListRouteName), 
+			Navigator.pushNamedAndRemoveUntil(context, _packRouteName, 
+				_withNames(<String>{ _packListRouteName, initialRouteName }),
 				arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
 		else
 			_goBackUntil(context, _packRouteName);
