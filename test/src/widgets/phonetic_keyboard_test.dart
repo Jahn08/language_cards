@@ -79,17 +79,12 @@ void main() {
     });
 
 	testWidgets('Removes a symbol partially in the middle of transcription', (tester) async {
-		const language = Language.russian;
-        await _createKeyboard(tester, lang: language, show: true);
+        await _createKeyboard(tester, lang: Language.russian, show: true);
         
-		final symbols = _getEmptyKeyboard(language).symbols;
-		final singleSymbols = symbols.where((s) => s.length == 1 && s != '.');
-		final singleSymbolsPattern = new RegExp('[${singleSymbols.join('|')}]');
-		
-		final complexSymbols = symbols.where((s) => s.length > 1 && !s.contains(singleSymbolsPattern)).toList();
-		final complexSymbol = Randomiser.nextElement(complexSymbols);
+		final singleSymbols = <String>['ə', 'e', 'ɛ', 'i', 'ɨ', 'f', 'g', 'ɣ', 'j', 'k'];
+		const complexSymbol = 'ʑː';
         final expectedSymbols = await new CardEditorTester(tester).enterRandomTranscription(
-			symbols: symbols, symbolToEnter: complexSymbol
+			symbols: singleSymbols, symbolToEnter: complexSymbol
 		);
         final input = expectedSymbols.join('');
 		

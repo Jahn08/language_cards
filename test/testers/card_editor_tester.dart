@@ -74,8 +74,8 @@ class CardEditorTester {
 
 	Future<List<String>> enterRandomTranscription({ List<String> symbols, String symbolToEnter }) async {
         final inSymbols = symbols ?? PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
-		final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1);
-		final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1);
+		final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1, orElse: () => Randomiser.nextElement(inSymbols));
+		final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1, orElse: () => Randomiser.nextElement(inSymbols));
         final expectedSymbols = [Randomiser.nextElement(inSymbols), doubleSymbolA,
             Randomiser.nextElement(inSymbols), if (symbolToEnter != null) symbolToEnter,
 			doubleSymbolB, Randomiser.nextElement(inSymbols)]..shuffle();
