@@ -6,6 +6,7 @@ import 'package:language_cards/src/data/asset_dictionary_provider.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/screens/card_list_screen.dart';
+import 'package:language_cards/src/screens/card_screen.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
@@ -69,7 +70,7 @@ class RootWidgetMock extends StatelessWidget {
 
 	static Widget buildAsAppHomeWithNonStudyRouting({ 
 		@required PackStorageMock storage, 
-		@required PackListScreen Function() packListScreenBuilder, 
+		PackListScreen Function() packListScreenBuilder, 
 		String packName, bool noBar, bool cardWasAdded
 	}) => RootWidgetMock._buildAsAppHome((settings) {
 		final route = Router.getRoute(settings);
@@ -102,12 +103,27 @@ class RootWidgetMock extends StatelessWidget {
 					child: new PackScreen(storage, new DictionaryProviderMock(), 
 						packId: route.params.packId, refresh: route.params.refresh))
 			);
+		else if (route is WordCardRoute)
+			return new MaterialPageRoute(
+				settings: settings,
+				builder: (context) => new RootWidgetMock(
+					noBar: noBar,
+					child: new CardScreen(
+						provider: new AssetDictionaryProvider(context),
+						packStorage: storage,
+						wordStorage: storage.wordStorage,
+						wordId: route.params.wordId, 
+						pack: route.params.pack,
+						defaultSpeaker: const SpeakerMock()
+					)
+				)
+			);
 
 		return new MaterialPageRoute(
 			settings: settings,
 			builder: (context) => new RootWidgetMock(
 				noBar: noBar,
-				child: packListScreenBuilder.call()
+				child: packListScreenBuilder?.call() ?? new PackListScreen(storage, storage.wordStorage)
 			)
 		);
 	});

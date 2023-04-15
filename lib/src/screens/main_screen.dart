@@ -46,7 +46,7 @@ class MainScreen extends StatelessWidget {
 					)),
 					new _FlexibleRow(new _MenuItem(
 						locale.mainScreenWordPacksMenuItemLabel,
-						Icons.library_books, 
+						Consts.packListIcon, 
 						() => Router.goToPackList(context)
 					)),
 					new _FlexibleRow(new _MenuItem(

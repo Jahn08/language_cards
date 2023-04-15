@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/screens/list_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
@@ -375,7 +376,7 @@ Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester, { bool cardW
 
     await tester.pump(const Duration(milliseconds: 500));
 
-    final finder = find.byIcon(Icons.library_books);
+    final finder = find.byIcon(Consts.packListIcon);
     await new WidgetAssistant(tester).tapWidget(finder);
 
     return storage;

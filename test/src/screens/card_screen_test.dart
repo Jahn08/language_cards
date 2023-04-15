@@ -2,6 +2,7 @@ import 'package:http/http.dart';
 import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
@@ -10,6 +11,7 @@ import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
+import 'package:language_cards/src/widgets/bar_scaffold.dart';
 import 'package:language_cards/src/widgets/styled_text_field.dart';
 import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
@@ -257,13 +259,36 @@ void main() {
     
     testWidgets('Saves a new pack for a card', (tester) async {
 		final storage = new PackStorageMock();
-		await _testChangingPack(storage, tester, 
-			(word) => _fetchAnotherPack(storage, word.packId));
+		final wordToShow = await _displayFilledWord(tester, storage: storage);
+
+		final expectedPack = await _changePack(tester, () => _fetchAnotherPack(storage, wordToShow.packId));
+		await new WidgetAssistant(tester).pressButtonDirectly(CardEditorTester.findSaveButton());
+
+		final changedWord = await storage.wordStorage.find(wordToShow.id);
+		expect(changedWord == null, false);
+		expect(changedWord.packId, expectedPack.id);
 	});
     
-    testWidgets('Saves the none pack for a card', (tester) async {
-		await _testChangingPack(new PackStorageMock(), tester, 
-			(word) => Future.value(StoredPack.none));
+    testWidgets('Returns back to the previous pack card list after saving a new pack', (tester) async {
+		final storage = new PackStorageMock();
+		await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(storage: storage));
+		await tester.pump(const Duration(milliseconds: 500));
+
+		final packListBtnFinder = find.byIcon(Consts.packListIcon);
+		await new WidgetAssistant(tester).tapWidget(packListBtnFinder);
+
+		final pack = await _fetchAnotherPack(storage, StoredPack.none.id);
+		final assistant = new WidgetAssistant(tester);
+		await assistant.tapWidget(find.widgetWithText(ListTile, pack.name));
+
+		final cardListBtnFinder = find.byIcon(Consts.cardListIcon);
+		await new WidgetAssistant(tester).tapWidget(cardListBtnFinder);
+		await assistant.tapWidget(find.byType(ListTile).first);
+
+		await _changePack(tester, () => Future.value(StoredPack.none));
+		await new WidgetAssistant(tester).pressButtonDirectly(CardEditorTester.findSaveButton());
+
+		expect(pack.name.startsWith(tester.widget<BarTitle>(find.byType(BarTitle)).title), true);
 	});
 	
     testWidgets('Shows a warning for a card without a pack and turns off dictionaries', 
@@ -642,19 +667,6 @@ Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId,
     { bool canBeNonePack = false }) async => 
         (await storage.fetch()).firstWhere((p) => p.cardsNumber > 0 && p.id != curPackId && 
             (canBeNonePack || !p.isNone));
-
-Future<void> _testChangingPack(PackStorageMock storage, WidgetTester tester, 
-    Future<StoredPack> Function(StoredWord) newPackGetter) async {
-    final wordToShow = await _displayFilledWord(tester, storage: storage);
-
-    final expectedPack = await _changePack(tester, () => newPackGetter(wordToShow));
-
-    await new WidgetAssistant(tester).pressButtonDirectly(CardEditorTester.findSaveButton());
-
-    final changedWord = await storage.wordStorage.find(wordToShow.id);
-    expect(changedWord == null, false);
-    expect(changedWord.packId, expectedPack.id);
-}
 
 Future<StoredPack> _changePack(WidgetTester tester,
 	Future<StoredPack> Function() newPackGetter) async {

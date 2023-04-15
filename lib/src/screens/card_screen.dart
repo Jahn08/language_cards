@@ -37,7 +37,7 @@ class CardScreen extends StatelessWidget {
             body: new CardEditor(wordStorage: wordStorage, packStorage: packStorage,
 				provider: provider, defaultSpeaker: defaultSpeaker,
 				pack: pack, wordId: wordId, 
-				afterSave: (_, StoredPack pack, bool refresh) => 
+				afterSave: (_, __, bool refresh) => 
 					Router.goBackToCardList(context, pack: pack, refresh: refresh))
         );
     }

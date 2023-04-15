@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart' hide Router, NavigationBar;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/language.dart';
-import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/screens/pack_screen.dart';
 import 'package:language_cards/src/widgets/navigation_bar.dart';
 import '../../mocks/dictionary_provider_mock.dart';
@@ -268,25 +268,26 @@ Future<List<StoredPack>> _fetchPacks(WidgetTester tester, PackStorageMock storag
 Future<StoredPack> _findPack(WidgetTester tester, PackStorageMock storage, int id) =>
     tester.runAsync(() => storage.find(id));
 
-Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester,
-    {PackStorageMock storage, String packName}) async {
-  storage ??= new PackStorageMock();
-  await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
-      storage: storage,
-      noBar: true,
-      packListScreenBuilder: () => new PackListScreen(storage, storage.wordStorage)));
+Future<PackStorageMock> _pumpScreenWithRouting(
+	WidgetTester tester, {PackStorageMock storage, String packName}
+) async {
+	storage ??= new PackStorageMock();
+	await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
+		storage: storage,
+		noBar: true
+	));
 
-  await tester.pump(const Duration(milliseconds: 500));
+	await tester.pump(const Duration(milliseconds: 500));
 
-  final finder = find.byIcon(Icons.library_books);
-  await new WidgetAssistant(tester).tapWidget(finder);
+	final finder = find.byIcon(Consts.packListIcon);
+	await new WidgetAssistant(tester).tapWidget(finder);
 
-  final assistant = new WidgetAssistant(tester);
-  await assistant.tapWidget(packName == null
-      ? AssuredFinder.findOne(icon: Icons.add_circle, shouldFind: true)
-      : AssuredFinder.findOne(type: ListTile, label: packName, shouldFind: true));
+	final assistant = new WidgetAssistant(tester);
+	await assistant.tapWidget(packName == null
+		? AssuredFinder.findOne(icon: Icons.add_circle, shouldFind: true)
+		: AssuredFinder.findOne(type: ListTile, label: packName, shouldFind: true));
 
-  return storage;
+	return storage;
 }
 
 Finder _findSavingAndAddingBtn() =>

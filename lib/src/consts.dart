@@ -6,6 +6,8 @@ class Consts {
 
     static const IconData cardListIcon = Icons.filter_1;
 
+    static const IconData packListIcon = Icons.library_books;
+
 	static const double largeFontSize = 20;
 
 	static const double biggerFontSize = 18;
