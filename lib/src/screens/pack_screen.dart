@@ -52,7 +52,7 @@ class PackScreenState extends State<PackScreen> {
 		return new BarScaffold(
             title: _isNew ? locale.packScreenHeadBarAddingPackTitle:
 				locale.packScreenHeadBarChangingPackTitle,
-            onNavGoingBack: () => Router.goBackToPackList(context, refreshed: widget.refreshed),
+            onNavGoingBack: () => Router.goBackToPackList(context, refresh: widget.refresh),
             body: new Form(
                 key: _key,
                 child: new FutureBuilder(
@@ -133,7 +133,7 @@ class PackScreenState extends State<PackScreen> {
 										new ElevatedButton(
 											child: label,
 											onPressed: !isStateDirty ? null: 
-												() => _onSave((_) => Router.goBackToPackList(context, refreshed: true))
+												() => _onSave((_) => Router.goBackToPackList(context, refresh: true))
 										)
 								),
 								new ValueListenableBuilder(
@@ -144,8 +144,7 @@ class PackScreenState extends State<PackScreen> {
 											child: label,
 											onPressed: !isStateDirty ? null: 
 												() => _onSave((savedPack) =>
-													Router.goToCardList(context, pack: savedPack, 
-														packWasAdded: _isNew))
+													Router.goToCardList(context, pack: savedPack, refresh: _isNew))
 										)
 								)
 						]);
@@ -198,14 +197,14 @@ class PackScreenState extends State<PackScreen> {
 class PackScreen extends StatefulWidget {
     final int packId;
 
-    final bool refreshed;
+    final bool refresh;
     
     final BaseStorage<StoredPack> _storage;
     
     final DictionaryProvider _provider;
 
     const PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
-        { this.packId, this.refreshed = false }): 
+        { this.packId, this.refresh = false }): 
         _storage = storage ?? const PackStorage(),
 		_provider = provider;
 

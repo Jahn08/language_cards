@@ -459,7 +459,7 @@ class CardEditor extends StatefulWidget {
 
     final BaseStorage<StoredPack> _packStorage;
     
-	final void Function(StoredWord card, StoredPack pack, bool cardWasAdded) afterSave;
+	final void Function(StoredWord card, StoredPack pack, bool refresh) afterSave;
 
 	final bool hideNonePack;
 

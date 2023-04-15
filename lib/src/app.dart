@@ -86,15 +86,13 @@ class _ThemedAppState extends State<_ThemedApp> {
 					}
                     else if (route is CardListRoute) {
                         final params = route.params;
-                        return new CardListScreen(params.storage, 
-                            pack: params.pack, cardWasAdded: params.cardWasAdded,
-							packWasAdded: params.packWasAdded);
+                        return new CardListScreen( params.storage, pack: params.pack, refresh: params.refresh);
                     }
                     else if (route is PackRoute) {
                         final params = route.params;
                         return new PackScreen(params.storage, 
 							new AssetDictionaryProvider(context),
-                            packId: params.packId, refreshed: params.refreshed);
+                            packId: params.packId, refresh: params.refresh);
                     }
                     else if (route is StudyPreparerRoute)
                         return route.params.storage == null ? 

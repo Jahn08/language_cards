@@ -70,7 +70,7 @@ class RootWidgetMock extends StatelessWidget {
 	static Widget buildAsAppHomeWithNonStudyRouting({ 
 		@required PackStorageMock storage, 
 		@required PackListScreen Function() packListScreenBuilder, 
-		String packName, bool cardWasAdded, bool noBar
+		String packName, bool noBar, bool cardWasAdded
 	}) => RootWidgetMock._buildAsAppHome((settings) {
 		final route = Router.getRoute(settings);
 
@@ -87,8 +87,12 @@ class RootWidgetMock extends StatelessWidget {
 				settings: settings,
 				builder: (context) => new RootWidgetMock(
 					noBar: noBar,
-					child: new CardListScreen(storage.wordStorage, pack: route.params.pack, 
-						cardWasAdded: cardWasAdded, packWasAdded: route.params.packWasAdded))
+					child: new CardListScreen(
+						storage.wordStorage, 
+						pack: route.params.pack, 
+						refresh: (route.params.refresh ?? false) || (cardWasAdded ?? false)
+					)
+				)
 			);
 		else if (route is PackRoute)
 			return new MaterialPageRoute(
@@ -96,7 +100,7 @@ class RootWidgetMock extends StatelessWidget {
 				builder: (context) => new RootWidgetMock(
 					noBar: noBar,
 					child: new PackScreen(storage, new DictionaryProviderMock(), 
-						packId: route.params.packId, refreshed: route.params.refreshed))
+						packId: route.params.packId, refresh: route.params.refresh))
 			);
 
 		return new MaterialPageRoute(

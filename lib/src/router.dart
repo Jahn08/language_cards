@@ -12,14 +12,10 @@ _CardStorageRouteArgs([WordStorage storage]) : storage = storage ?? const WordSt
 class _CardListRouteArgs extends _CardStorageRouteArgs {
 	final StoredPack pack;
 
-	final bool cardWasAdded;
+	final bool refresh;
 
-	final bool packWasAdded;
-
-	_CardListRouteArgs({WordStorage storage, bool cardWasAdded, bool packWasAdded, this.pack})
-		: cardWasAdded = cardWasAdded ?? false,
-			packWasAdded = packWasAdded ?? false,
-			super(storage);
+	_CardListRouteArgs({WordStorage storage, bool refresh, this.pack})
+		: refresh = refresh ?? false, super(storage);
 }
 
 class CardListRoute {
@@ -105,11 +101,11 @@ class StudyModeRoute {
 class _PackRouteArgs extends _PackStorageRouteArgs {
 	final int packId;
 
-	final bool refreshed;
+	final bool refresh;
 
-	_PackRouteArgs({PackStorage storage, StoredPack pack, bool refreshed})
+	_PackRouteArgs({PackStorage storage, StoredPack pack, bool refresh})
 		: packId = pack?.id,
-			refreshed = refreshed ?? false,
+			refresh = refresh ?? false,
 			super(storage);
 }
 
@@ -178,21 +174,15 @@ class Router {
 		Navigator.pushNamed(context, _cardRouteName,
 			arguments: new _WordCardRouteArgs(storage: storage, wordId: wordId, pack: pack));
 
-	static void goToCardList(BuildContext context, { 
-		WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded 
-	}) {
+	static void goToCardList(BuildContext context, { WordStorage storage, StoredPack pack, bool refresh }) {
 		Navigator.pushNamed(context, _cardListRouteName,
-		arguments: new _CardListRouteArgs(
-			storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
+		arguments: new _CardListRouteArgs(storage: storage, pack: pack, refresh: refresh));
 	}
 		
-	static void goBackToCardList(BuildContext context, { 
-		WordStorage storage, StoredPack pack, bool cardWasAdded, bool packWasAdded 
-	}) {
+	static void goBackToCardList(BuildContext context, { WordStorage storage, StoredPack pack, bool refresh }) {
 		Navigator.pushNamedAndRemoveUntil(context, _cardListRouteName, 
-			_withNames(<String>{ _packRouteName, _packListRouteName, initialRouteName }), 
-			arguments: new _CardListRouteArgs(
-				storage: storage, pack: pack, cardWasAdded: cardWasAdded, packWasAdded: packWasAdded));
+			_withNames({ _packRouteName, _packListRouteName, initialRouteName }), 
+			arguments: new _CardListRouteArgs( storage: storage, pack: pack, refresh: refresh));
 	}
 	
 	static RoutePredicate _withNames(Set<String> names) {
@@ -223,19 +213,19 @@ class Router {
 	static void goToPack(BuildContext context, { PackStorage storage, StoredPack pack }) =>
 		Navigator.pushNamed(context, _packRouteName, arguments: new _PackRouteArgs(storage: storage, pack: pack));
 
-	static void goBackToPack(BuildContext context, { PackStorage storage, StoredPack pack, bool refreshed }) {
-		if (refreshed)
+	static void goBackToPack(BuildContext context, { PackStorage storage, StoredPack pack, bool refresh }) {
+		if (refresh)
 			Navigator.pushNamedAndRemoveUntil(context, _packRouteName, 
-				_withNames(<String>{ _packListRouteName, initialRouteName }),
-				arguments: new _PackRouteArgs(storage: storage, pack: pack, refreshed: refreshed));
+				_withNames({ _packListRouteName, initialRouteName }),
+				arguments: new _PackRouteArgs(storage: storage, pack: pack, refresh: refresh));
 		else
 			_goBackUntil(context, _packRouteName);
 	}
 
 	static void goToPackList(BuildContext context) => Navigator.pushNamed(context, _packListRouteName);
 
-	static void goBackToPackList(BuildContext context, { bool refreshed }) {
-		if (refreshed)
+	static void goBackToPackList(BuildContext context, { bool refresh }) {
+		if (refresh)
 			Navigator.pushNamedAndRemoveUntil(context, _packListRouteName, ModalRoute.withName(initialRouteName));
 		else
 			_goBackUntil(context, _packListRouteName);
