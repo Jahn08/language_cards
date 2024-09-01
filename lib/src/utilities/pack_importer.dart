@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'string_ext.dart';
 import '../data/pack_storage.dart';
@@ -16,7 +15,7 @@ class ImportException implements Exception {
   final AppLocalizations locale;
 
   const ImportException(this.error, this.trace,
-      {@required this.locale, @required this.importFilePath});
+      {required this.locale, required this.importFilePath});
 
   @override
   String toString() => locale.packImporterImportExceptionContent(

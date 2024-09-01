@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 class _AnimatedCard extends StatelessWidget {
-  const _AnimatedCard({this.child, this.animation});
+  const _AnimatedCard({required this.child, required this.animation});
 
   final Widget child;
 
@@ -12,7 +12,7 @@ class _AnimatedCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
         animation: animation,
-        builder: (BuildContext context, Widget child) {
+        builder: (BuildContext context, Widget? child) {
           final transform = Matrix4.identity();
           transform.setEntry(3, 2, 0.001);
           transform.rotateY(animation.value);
@@ -26,11 +26,11 @@ class _AnimatedCard extends StatelessWidget {
 
 class _FlipCardState extends State<FlipCard>
     with SingleTickerProviderStateMixin {
-  AnimationController _controller;
+  late AnimationController _controller;
 
-  Animation<double> _frontRotation;
+  late Animation<double> _frontRotation;
 
-  Animation<double> _backRotation;
+  late Animation<double> _backRotation;
 
   final _isFrontNotifier = new ValueNotifier(true);
 
@@ -114,9 +114,7 @@ class _FlipCardSide extends StatelessWidget {
   final Animation<double> animation;
 
   const _FlipCardSide(
-      {@required this.child,
-      @required this.animation,
-      @required this.isHittable});
+      {required this.child, required this.animation, required this.isHittable});
 
   @override
   Widget build(BuildContext context) => new IgnorePointer(
@@ -129,7 +127,7 @@ class FlipCard extends StatefulWidget {
 
   final Widget back;
 
-  const FlipCard({this.front, this.back});
+  const FlipCard({required this.front, required this.back});
 
   @override
   _FlipCardState createState() => new _FlipCardState();

@@ -1,28 +1,27 @@
 import 'package:flutter/material.dart';
 
 class ShrinkableSimpleDialogOption extends SimpleDialogOption {
-  static final EdgeInsets _defaultPadding = const SimpleDialogOption().padding;
+  static final EdgeInsets? _defaultPadding = const SimpleDialogOption().padding;
 
-  ShrinkableSimpleDialogOption(Widget child,
-      {bool isShrunk, void Function() onPressed})
+  ShrinkableSimpleDialogOption(Widget child, {bool? isShrunk, super.onPressed})
       : super(
             child: child,
-            onPressed: onPressed,
             padding: (isShrunk ?? false) ? EdgeInsets.zero : _defaultPadding);
 }
 
 class DialogListView extends StatelessWidget {
   static const _defaultAlertDialog = AlertDialog();
 
-  final Widget title;
+  final Widget? title;
 
-  final List<Widget> children;
+  final List<Widget>? children;
 
-  final List<Widget> buttons;
+  final List<Widget>? buttons;
 
   final bool isShrunk;
 
-  const DialogListView({this.title, this.children, this.buttons, bool isShrunk})
+  const DialogListView(
+      {this.title, this.children, this.buttons, bool? isShrunk})
       : isShrunk = isShrunk ?? false;
 
   @override
@@ -36,14 +35,14 @@ class DialogListView extends StatelessWidget {
           ? null
           : (title is SimpleDialogOption
               ? title
-              : new ShrinkableSimpleDialogOption(title, isShrunk: isShrunk)),
+              : new ShrinkableSimpleDialogOption(title!, isShrunk: isShrunk)),
       content: new SizedBox(
           width: double.maxFinite,
           child: new Scrollbar(
-              isAlwaysShown: true,
+              thumbVisibility: true,
               child: new _ScrollView(
                   child: new Column(
-                      mainAxisSize: MainAxisSize.min, children: children),
+                      mainAxisSize: MainAxisSize.min, children: children ?? []),
                   isShrunk: isShrunk))));
 }
 
@@ -52,7 +51,7 @@ class _ScrollView extends StatelessWidget {
 
   final Widget child;
 
-  const _ScrollView({@required this.child, @required this.isShrunk});
+  const _ScrollView({required this.child, required this.isShrunk});
 
   @override
   Widget build(BuildContext context) => isShrunk

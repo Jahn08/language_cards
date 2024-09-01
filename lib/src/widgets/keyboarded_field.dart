@@ -12,12 +12,12 @@ class KeyboardedField extends StatelessWidget {
 
   final FocusNode _focusNode;
 
-  final Language _lang;
+  final Language? _lang;
   final String _initialValue;
-  final Function(String) _onChanged;
+  final Function(String)? _onChanged;
 
-  const KeyboardedField(Language lang, FocusNode focusNode, this.label,
-      {Key key, Function(String) onChanged, String initialValue})
+  const KeyboardedField(Language? lang, FocusNode focusNode, this.label,
+      {Key? key, Function(String)? onChanged, String? initialValue})
       : _lang = lang,
         _initialValue = initialValue ?? '',
         _onChanged = onChanged,
@@ -29,9 +29,9 @@ class KeyboardedField extends StatelessWidget {
     bool isInitialBuilding = true;
     final textFieldFocusNode = new FocusNode();
 
-    TextEditingController textController;
-    int newPosition;
-    RegExp lastSymbolRegExp;
+    late TextEditingController textController;
+    int? newPosition;
+    late RegExp lastSymbolRegExp;
     final keyboard = PhoneticKeyboard.getLanguageSpecific((symbol) {
       final selection = textController.selection;
       final isNormalized = selection.isNormalized;
@@ -40,7 +40,7 @@ class KeyboardedField extends StatelessWidget {
 
       final text = textController.text;
 
-      String newText;
+      String? newText;
       newPosition = curPosition;
       if (symbol == null) {
         if (text.isNotEmpty) {
@@ -74,17 +74,18 @@ class KeyboardedField extends StatelessWidget {
         focusNode: _focusNode,
         config: _buildKeyboardConfig(keyboard),
         child: new Column(children: <Widget>[
-          new KeyboardCustomInput<String>(
+          new KeyboardCustomInput<String?>(
               focusNode: _focusNode,
-              builder: (BuildContext _context, String value, bool hasFocus) {
+              builder: (BuildContext context, String? value, bool? hasFocus) {
+                final inHasFocus = hasFocus ?? false;
                 final curValue =
                     isInitialBuilding ? _initialValue : (value ?? '');
-                if (!hasFocus && _initialValue != curValue)
+                if (!inHasFocus && _initialValue != curValue)
                   new Timer(Duration.zero, () => _emitOnChangedEvent(curValue));
 
                 if (isInitialBuilding) isInitialBuilding = false;
 
-                if (hasFocus) textFieldFocusNode.requestFocus();
+                if (inHasFocus) textFieldFocusNode.requestFocus();
 
                 textController = new TextEditingController(text: curValue);
                 textController.selection = new TextSelection.fromPosition(
@@ -95,7 +96,7 @@ class KeyboardedField extends StatelessWidget {
                     controller: textController,
                     readOnly: true,
                     showCursor: true,
-                    onSaved: (newValue) => _emitOnChangedEvent(newValue),
+                    onSaved: (newValue) => _emitOnChangedEvent(newValue ?? ''),
                     onEditingComplete: () => _emitOnChangedEvent(curValue));
               },
               notifier: keyboard.notifier)

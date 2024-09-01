@@ -45,7 +45,7 @@ void main() {
 
     final expectedSymbols =
         await new CardEditorTester(tester).enterRandomTranscription();
-    String input = expectedSymbols.join('');
+    String input = expectedSymbols.join();
 
     do {
       expect(_findEditableText(input), findsOneWidget);
@@ -54,7 +54,7 @@ void main() {
       expect(_findEditableText(input), findsNothing);
 
       expectedSymbols.removeLast();
-      input = expectedSymbols.join('');
+      input = expectedSymbols.join();
     } while (input.isNotEmpty);
 
     await _tapIconKey(tester, Icons.backspace);
@@ -66,7 +66,7 @@ void main() {
 
     final expectedSymbols =
         await new CardEditorTester(tester).enterRandomTranscription();
-    final input = expectedSymbols.join('');
+    final input = expectedSymbols.join();
 
     final textFinder = _findEditableText(input);
     final textCtrl = tester.widget<EditableText>(textFinder);
@@ -107,7 +107,7 @@ void main() {
     final expectedSymbols = await new CardEditorTester(tester)
         .enterRandomTranscription(
             symbols: singleSymbols, symbolToEnter: complexSymbol);
-    final input = expectedSymbols.join('');
+    final input = expectedSymbols.join();
 
     final textFinder = _findEditableText(input);
     final textCtrl = tester.widget<EditableText>(textFinder);
@@ -136,7 +136,7 @@ void main() {
 
     final expectedSymbols =
         await new CardEditorTester(tester).enterRandomTranscription();
-    final input = expectedSymbols.join('');
+    final input = expectedSymbols.join();
 
     final textFinder = _findEditableText(input);
     final textCtrl = tester.widget<EditableText>(textFinder);
@@ -207,7 +207,7 @@ void main() {
 
     await _tapIconKey(tester, Icons.done);
 
-    final input = expectedSymbols.join('');
+    final input = expectedSymbols.join();
     final foundResult = _findEditableText(input);
     expect(foundResult, findsOneWidget);
 
@@ -220,7 +220,7 @@ void main() {
 }
 
 Future<Finder> _createKeyboard(WidgetTester tester,
-    {bool show, Language lang}) async {
+    {bool? show, Language? lang}) async {
   final fieldKey = new Key(Randomiser.nextString());
   final fieldWithKeyboard = new KeyboardedField(
       lang ?? Language.english, new FocusNode(), '',
@@ -260,8 +260,8 @@ Future<void> _tapIconKey(WidgetTester tester, IconData icon) async {
 Finder _findEditableText(String input) => find.descendant(
     of: find.byType(EditableText), matching: find.text(input), matchRoot: true);
 
-InputKeyboard _getEmptyKeyboard([Language lang]) =>
-    PhoneticKeyboard.getLanguageSpecific((_) => _, lang: lang);
+InputKeyboard _getEmptyKeyboard([Language? lang]) =>
+    PhoneticKeyboard.getLanguageSpecific((s) => s!, lang: lang);
 
 Future<void> _testEnteringSymbol(
     WidgetTester tester, int Function(String) positionGetter) async {
@@ -272,7 +272,7 @@ Future<void> _testEnteringSymbol(
   final cardEditorTester = new CardEditorTester(tester);
   final expectedSymbols =
       await cardEditorTester.enterRandomTranscription(symbols: symbols);
-  final input = expectedSymbols.join('');
+  final input = expectedSymbols.join();
 
   final textFinder = _findEditableText(input);
   final textCtrl = tester.widget<EditableText>(textFinder);
@@ -313,7 +313,7 @@ Future<void> _testRemovingSelection(WidgetTester tester,
 
   final expectedSymbols =
       await new CardEditorTester(tester).enterRandomTranscription();
-  final input = expectedSymbols.join('');
+  final input = expectedSymbols.join();
 
   final textFinder = _findEditableText(input);
   final textCtrl = tester.widget<EditableText>(textFinder);
@@ -342,7 +342,7 @@ Future<void> _testReplacingSelectionWithSymbol(WidgetTester tester,
   final cardEditorTester = new CardEditorTester(tester);
   final expectedSymbols =
       await cardEditorTester.enterRandomTranscription(symbols: symbols);
-  final input = expectedSymbols.join('');
+  final input = expectedSymbols.join();
 
   final textFinder = _findEditableText(input);
   final textCtrl = tester.widget<EditableText>(textFinder);

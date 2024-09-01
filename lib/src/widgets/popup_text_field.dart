@@ -5,12 +5,12 @@ import '../utilities/styler.dart';
 class _PopupTextFieldState extends State<PopupTextField> {
   final LayerLink _layerLink = LayerLink();
 
-  OverlayEntry _overlayEntry;
+  OverlayEntry? _overlayEntry;
 
-  List<ListTile> _tiles;
+  late List<ListTile> _tiles;
 
-  bool _isValueChosen;
-  String _value;
+  late bool _isValueChosen;
+  late String _value;
 
   @override
   void initState() {
@@ -34,9 +34,10 @@ class _PopupTextFieldState extends State<PopupTextField> {
     return CompositedTransformTarget(
         link: _layerLink,
         child: StyledTextField(widget.label,
-            isRequired: true,
+            isRequired: widget.isRequired,
             onChanged: widget.onChanged,
-            onFocusChanged: (bool hasFocus) => _toggleOverlay(hasFocus),
+            onFocusChanged: ({bool hasFocus = false}) =>
+                _toggleOverlay(hasFocus),
             onInput: (value) async {
               if (_isValueChosen) _isValueChosen = false;
 
@@ -49,8 +50,8 @@ class _PopupTextFieldState extends State<PopupTextField> {
 
   Future<void> _setTiles(BuildContext context, String value) async {
     final isDense = new Styler(context).isDense;
-    final popupItems = await widget.popupItemsBuilder?.call(value);
-    _tiles = (popupItems ?? [])
+    final popupItems = await widget.popupItemsBuilder.call(value);
+    _tiles = popupItems
         .map((t) => new ListTile(
             title: new Text(t),
             dense: isDense,
@@ -79,15 +80,15 @@ class _PopupTextFieldState extends State<PopupTextField> {
     if (_overlayEntry == null) {
       _overlayEntry = _createOverlayEntry();
 
-      if (_overlayEntry != null) Overlay.of(context).insert(_overlayEntry);
+      if (_overlayEntry != null) Overlay.of(context).insert(_overlayEntry!);
     } else
-      _overlayEntry.markNeedsBuild();
+      _overlayEntry!.markNeedsBuild();
   }
 
-  OverlayEntry _createOverlayEntry() {
+  OverlayEntry? _createOverlayEntry() {
     if (_tiles.isEmpty) return null;
 
-    final renderBox = context.findRenderObject() as RenderBox;
+    final renderBox = context.findRenderObject()! as RenderBox;
     final size = renderBox.size;
     return OverlayEntry(
         builder: (context) => Positioned(
@@ -112,15 +113,15 @@ class PopupTextField extends StatefulWidget {
 
   final bool isRequired;
 
-  final Function(String value, bool submitted) onChanged;
+  final Function(String? value, {bool? submitted})? onChanged;
 
   final Future<Iterable<String>> Function(String value) popupItemsBuilder;
 
   const PopupTextField(this.label,
-      {@required this.popupItemsBuilder,
+      {required this.popupItemsBuilder,
       this.onChanged,
-      this.isRequired,
-      this.initialValue});
+      this.isRequired = false,
+      this.initialValue = ''});
 
   @override
   _PopupTextFieldState createState() => new _PopupTextFieldState();

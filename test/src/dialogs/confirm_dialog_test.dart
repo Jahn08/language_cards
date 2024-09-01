@@ -28,7 +28,7 @@ void main() {
             new ConfirmDialog.ok(title: title, content: content),
         {true: Localizator.defaultLocalization.confirmDialogOkButtonLabel});
 
-    _assertTextVisibility(_cancellationLabel, isVisible: false);
+    _assertTextVisibility(_cancellationLabel);
   });
 }
 
@@ -41,7 +41,7 @@ Future<void> _testDialogRendering<T>(
 
   final expectedAction = Randomiser.nextElement(actions.entries.toList());
 
-  bool dialogOutcome;
+  bool? dialogOutcome;
   await _openDialog(tester, dialogBuilder(title, content),
       onDialogClose: (result) => dialogOutcome = result);
 
@@ -60,7 +60,8 @@ Future<void> _testDialogRendering<T>(
 }
 
 Future<void> _openDialog(WidgetTester tester, ConfirmDialog dialog,
-        {Function(bool) onDialogClose}) =>
+        // ignore: avoid_positional_boolean_parameters
+        {Function(bool?)? onDialogClose}) =>
     DialogOpener.showDialog<bool>(tester,
         dialogExposer: (context) => dialog.show(context),
         onDialogClose: onDialogClose);
@@ -68,7 +69,7 @@ Future<void> _openDialog(WidgetTester tester, ConfirmDialog dialog,
 void _assertDialogVisibility(bool isVisible) =>
     AssuredFinder.findOne(type: AlertDialog, shouldFind: isVisible);
 
-void _assertTextVisibility(String text, {bool isVisible}) =>
+void _assertTextVisibility(String text, {bool isVisible = false}) =>
     AssuredFinder.findOne(label: text, shouldFind: isVisible);
 
 String get _cancellationLabel =>

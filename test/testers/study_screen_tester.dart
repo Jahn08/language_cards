@@ -9,12 +9,10 @@ class StudyScreenTester {
   StudyScreenTester(this.assistant);
 
   Future<void> goThroughCardList(int listLength,
-      {bool byClickingButton, void Function() onNextCard}) async {
+      {bool byClickingButton = false, void Function()? onNextCard}) async {
     int index = 0;
     do {
-      await ((byClickingButton ?? false)
-          ? goToNextCardByClick()
-          : goToNextCardBySwipe());
+      await (byClickingButton ? goToNextCardByClick() : goToNextCardBySwipe());
 
       onNextCard?.call();
     } while (++index < listLength);

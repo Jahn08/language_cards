@@ -5,15 +5,15 @@ class ContextProvider {
 
   ContextProvider._();
 
-  static Future<bool> isStoragePermissionRequired() =>
+  static Future<bool?> isStoragePermissionRequired() =>
       channel.invokeMethod('isStoragePermissionRequired');
 
-  static Future<String> getDownloadDirPath() =>
+  static Future<String?> getDownloadDirPath() =>
       channel.invokeMethod('getDownloadsDirectoryPath');
 
-  static Future<bool> isFileExtensionSupported(String extention) =>
+  static Future<bool?> isFileExtensionSupported(String extention) =>
       channel.invokeMethod('isFileExtensionSupported', {"ext": extention});
 
-  static Future<bool> isEmailHtmlSupported() =>
+  static Future<bool?> isEmailHtmlSupported() =>
       channel.invokeMethod('isEmailHtmlSupported');
 }

@@ -4,6 +4,6 @@ abstract class OutcomeDialog<TResult> {
   const OutcomeDialog();
 
   @protected
-  void returnResult(BuildContext context, [TResult result]) =>
+  void returnResult(BuildContext context, [TResult? result]) =>
       Navigator.pop(context, result);
 }

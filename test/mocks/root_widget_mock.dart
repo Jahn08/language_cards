@@ -17,24 +17,24 @@ import 'pack_storage_mock.dart';
 import 'speaker_mock.dart';
 
 class RootWidgetMock extends StatelessWidget {
-  final Widget _child;
+  final Widget? _child;
 
-  final Function(BuildContext) _onBuildCallback;
+  final Function(BuildContext)? _onBuildCallback;
 
   final bool _noBar;
 
   const RootWidgetMock(
-      {Function(BuildContext) onBuilding, Widget child, bool noBar})
+      {Function(BuildContext)? onBuilding, Widget? child, bool noBar = false})
       : _onBuildCallback = onBuilding,
         _child = child,
-        _noBar = noBar ?? false;
+        _noBar = noBar;
 
   @override
   Widget build(BuildContext context) {
-    if (_onBuildCallback != null) _onBuildCallback(context);
+    _onBuildCallback?.call(context);
 
     return _noBar
-        ? _child
+        ? _child!
         : new Scaffold(
             appBar: new AppBar(
               title: const Text('Test Widget'),
@@ -43,10 +43,10 @@ class RootWidgetMock extends StatelessWidget {
   }
 
   static Widget buildAsAppHome(
-          {Function(BuildContext) onBuilding,
-          Widget child,
-          Widget Function(BuildContext) childBuilder,
-          bool noBar}) =>
+          {Function(BuildContext)? onBuilding,
+          Widget? child,
+          Widget Function(BuildContext)? childBuilder,
+          bool noBar = false}) =>
       _buildAsAppHome((settings) => new MaterialPageRoute(
           builder: (context) => new RootWidgetMock(
               onBuilding: onBuilding,
@@ -66,11 +66,10 @@ class RootWidgetMock extends StatelessWidget {
           onGenerateRoute: onGenerateRoute);
 
   static Widget buildAsAppHomeWithNonStudyRouting(
-          {@required PackStorageMock storage,
-          PackListScreen Function() packListScreenBuilder,
-          String packName,
-          bool noBar,
-          bool cardWasAdded}) =>
+          {required PackStorageMock storage,
+          PackListScreen Function()? packListScreenBuilder,
+          bool noBar = false,
+          bool? cardWasAdded}) =>
       RootWidgetMock._buildAsAppHome((settings) {
         final route = Router.getRoute(settings);
 
@@ -86,8 +85,8 @@ class RootWidgetMock extends StatelessWidget {
                   noBar: noBar,
                   child: new CardListScreen(storage.wordStorage,
                       pack: route.params.pack,
-                      refresh: (route.params.refresh ?? false) ||
-                          (cardWasAdded ?? false))));
+                      refresh:
+                          route.params.refresh || (cardWasAdded ?? false))));
         else if (route is PackRoute)
           return new MaterialPageRoute(
               settings: settings,
@@ -118,9 +117,9 @@ class RootWidgetMock extends StatelessWidget {
       });
 
   static Widget buildAsAppHomeWithStudyRouting(
-          {@required PackStorageMock storage,
-          @required List<StoredPack> packsToStudy,
-          bool noBar}) =>
+          {required PackStorageMock storage,
+          required List<StoredPack> packsToStudy,
+          bool noBar = false}) =>
       RootWidgetMock._buildAsAppHome((settings) {
         final route = Router.getRoute(settings);
 

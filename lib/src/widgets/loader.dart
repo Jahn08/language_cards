@@ -13,9 +13,7 @@ class FutureLoader<TData> extends StatelessWidget {
 
   final Future<TData> future;
 
-  const FutureLoader(this.future, this.dataWidgetBuilder)
-      : assert(future != null),
-        assert(dataWidgetBuilder != null);
+  const FutureLoader(this.future, this.dataWidgetBuilder);
 
   @override
   Widget build(BuildContext context) {
@@ -24,7 +22,7 @@ class FutureLoader<TData> extends StatelessWidget {
         builder: (futureContext, AsyncSnapshot<TData> snapshot) {
           if (!snapshot.hasData) return const Loader();
 
-          return dataWidgetBuilder(snapshot.data);
+          return dataWidgetBuilder(snapshot.data as TData);
         });
   }
 }

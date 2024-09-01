@@ -11,7 +11,7 @@ void main() {
   testWidgets('Returns null for an empty list of translations', (tester) async {
     final dialogTester = new SelectorDialogTester(tester, _buildDialog);
 
-    String dialogResult;
+    String? dialogResult;
     await dialogTester.showDialog([], (tr) => dialogResult = tr);
 
     expect(dialogResult, null);
@@ -36,7 +36,7 @@ void main() {
 
     final dialogTester = new SelectorDialogTester(tester, _buildDialog);
 
-    String dialogResult;
+    String? dialogResult;
     await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
     const int chosenOptionIndex = 1;
@@ -52,9 +52,9 @@ void main() {
 
     await _pressDoneButton(tester);
 
-    expect(dialogResult.contains(availableItems[chosenOptionIndex]), true);
+    expect(dialogResult!.contains(availableItems[chosenOptionIndex]), true);
     expect(
-        dialogResult.contains(availableItems[anotherChosenOptionIndex]), true);
+        dialogResult!.contains(availableItems[anotherChosenOptionIndex]), true);
 
     const DialogTester().assureDialog(shouldFind: false);
   });
@@ -66,7 +66,7 @@ void main() {
 
     final dialogTester = new SelectorDialogTester(tester, _buildDialog);
 
-    String dialogResult;
+    String? dialogResult;
     await dialogTester.showDialog(availableItems, (tr) => dialogResult = tr);
 
     final assistant = new WidgetAssistant(tester);
@@ -76,12 +76,12 @@ void main() {
     expect(
         tester
             .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
-            .every((checkbox) => checkbox.value),
+            .every((checkbox) => checkbox.value == true),
         true);
 
     await _pressDoneButton(tester);
 
-    expect(availableItems.every((op) => dialogResult.contains(op)), true);
+    expect(availableItems.every((op) => dialogResult!.contains(op)), true);
   });
 
   testWidgets(
@@ -89,7 +89,7 @@ void main() {
       (tester) async {
     final dialogTester = new SelectorDialogTester(tester, _buildDialog);
 
-    String dialogResult;
+    String? dialogResult;
     await dialogTester.showDialog(
         Randomiser.nextStringList(minLength: 3, maxLength: 7),
         (tr) => dialogResult = tr);
@@ -103,11 +103,11 @@ void main() {
     expect(
         tester
             .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))
-            .every((checkbox) => !checkbox.value),
+            .every((checkbox) => checkbox.value == false),
         true);
 
     await _pressDoneButton(tester);
-    expect(dialogResult.isEmpty, true);
+    expect(dialogResult!.isEmpty, true);
   });
 
   testWidgets(

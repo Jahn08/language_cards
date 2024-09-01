@@ -14,21 +14,23 @@ class PackExporter {
 
   Future<String> export(List<StoredPack> packs, String filePostfix,
       AppLocalizations locale) async {
-    final packIds = packs.map((p) => p.id).toList();
+    final packIds = packs.map((p) => p.id!).toList();
     final cardsByParent = <int, List<StoredWord>>{
-      for (int id in packIds) id: []
+      for (final int id in packIds) id: []
     };
 
     (await storage.fetchFiltered(parentIds: packIds))
-        .forEach((c) => cardsByParent[c.packId].add(c));
+        .forEach((c) => cardsByParent[c.packId]!.add(c));
 
-    final contents =
-        jsonEncode(packs.map((p) => p.toJsonMap(cardsByParent[p.id])).toList());
+    final contents = jsonEncode(
+        packs.map((p) => p.toJsonMap(cardsByParent[p.id]!)).toList());
     final dirPath = await ContextProvider.getDownloadDirPath();
+    if (dirPath == null) throw new Exception('Download path is unavailable');
+
     final fileName = 'lang_cards_' + filePostfix;
     File file = new File(_compileFullFileName(dirPath, fileName));
 
-    if ((await ContextProvider.isStoragePermissionRequired()) &&
+    if ((await ContextProvider.isStoragePermissionRequired() ?? false) &&
         !(await Permission.storage.isGranted)) {
       final status = await Permission.storage.request();
 

@@ -11,13 +11,13 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
 
   final String _title;
 
-  final bool isShrunk;
+  final bool? isShrunk;
 
   const SingleSelectorDialog(this.context, String title, {this.isShrunk})
       : _title = title,
         super();
 
-  Future<T> showAsync(Future<List<T>> futureItems) {
+  Future<T?> showAsync(Future<List<T>> futureItems) {
     return showDialog(
         context: context,
         builder: (dialogContext) {
@@ -27,12 +27,12 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
                 if (!snapshot.hasData)
                   return _createDialogView([const Loader()]);
 
-                return _buildDialog(snapshot.data);
+                return _buildDialog(snapshot.data!);
               });
         });
   }
 
-  Widget _createDialogView(List<Widget> children, [List<Widget> buttons]) =>
+  Widget _createDialogView(List<Widget> children, [List<Widget>? buttons]) =>
       new DialogListView(
           isShrunk: isShrunk,
           title: new ListTile(
@@ -53,11 +53,11 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
       isShrunk: isShrunk);
 
   @override
-  Future<T> show([List<T> items]) {
+  Future<T?> show([List<T>? items]) {
     items ??= <T>[];
     return items.isNotEmpty
-        ? showDialog(context: context, builder: (_) => _buildDialog(items))
-        : Future.value(null);
+        ? showDialog(context: context, builder: (_) => _buildDialog(items!))
+        : Future.value();
   }
 
   @protected
@@ -67,5 +67,5 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
   Widget getItemSubtitle(T item);
 
   @protected
-  Widget getItemTrailing(T item);
+  Widget? getItemTrailing(T item);
 }

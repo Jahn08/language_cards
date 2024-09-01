@@ -8,9 +8,9 @@ class DialogOpener {
   DialogOpener._();
 
   static Future<void> showDialog<TResult>(WidgetTester tester,
-      {@required Future<TResult> Function(BuildContext) dialogExposer,
-      @required void Function(TResult) onDialogClose}) async {
-    BuildContext context;
+      {required Future<TResult?> Function(BuildContext) dialogExposer,
+      void Function(TResult?)? onDialogClose}) async {
+    BuildContext? context;
     final dialogBtnKey = new Key(Randomiser.nextString());
     await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
         onBuilding: (inContext) => context = inContext,
@@ -18,7 +18,7 @@ class DialogOpener {
             key: dialogBtnKey,
             child: new Text(Randomiser.nextString()),
             onPressed: () async {
-              final outcome = await dialogExposer(context);
+              final outcome = await dialogExposer(context!);
               onDialogClose?.call(outcome);
             })));
 

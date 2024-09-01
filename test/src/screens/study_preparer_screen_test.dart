@@ -60,7 +60,7 @@ void main() {
     final userParams = await PreferencesTester.saveNonDefaultUserParams();
     expect(userParams.studyParams.showStudyDate, false);
 
-    await _testRenderingStudyDates(tester, shouldShowDates: false);
+    await _testRenderingStudyDates(tester);
   });
 
   testWidgets(
@@ -149,7 +149,7 @@ void main() {
         packs.where((p) => !uncheckedPackIds.contains(p.id)).toList();
     await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
     _assureCardNumbersForStudyLevels(
-        studyPacks, checkedPacks.map((p) => p.id).toSet());
+        studyPacks, checkedPacks.map((p) => p.id!).toSet());
 
     final packToCheck = packsToUncheck.last;
     final packTileFinder = await _findPackTile(assistant, packToCheck.name);
@@ -158,7 +158,7 @@ void main() {
     checkedPacks.add(packToCheck);
     await _assureNonConsecutivelyCheckedTiles(tester, checkedPacks);
     _assureCardNumbersForStudyLevels(
-        studyPacks, checkedPacks.map((p) => p.id).toSet());
+        studyPacks, checkedPacks.map((p) => p.id!).toSet());
   });
 
   testWidgets(
@@ -184,7 +184,7 @@ void main() {
     int index = itemsToTake;
     storedPacks.skip(storedPacks.length - itemsToTake).forEach((p) {
       final checkTile = checkTiles.elementAt(checkTilesLength - (index--));
-      expect((checkTile.title as OneLineText).content, p.name);
+      expect((checkTile.title! as OneLineText).content, p.name);
     });
 
     expect(downwardScrollBtnFinder, findsNothing);
@@ -198,7 +198,7 @@ void main() {
     checkTiles = tester.widgetList<CheckboxListTile>(checkTileFinder).toList();
     storedPacks.take(itemsToTake).forEach((p) {
       final checkTile = checkTiles.elementAt(index++);
-      expect((checkTile.title as OneLineText).content, p.name);
+      expect((checkTile.title! as OneLineText).content, p.name);
     });
 
     expect(upwardScrollBtnFinder, findsNothing);
@@ -209,7 +209,7 @@ void main() {
 List<StoredPack> _sortPacksByName(List<StoredPack> packs) =>
     _sortPacks(packs, PackOrder.byNameAsc);
 
-List<StoredPack> _sortPacks(List<StoredPack> packs, PackOrder order) {
+List<StoredPack> _sortPacks(List<StoredPack> packs, PackOrder? order) {
   switch (order) {
     case PackOrder.byDateDesc:
     case PackOrder.byDateAsc:
@@ -228,7 +228,7 @@ List<StoredPack> _sortPacks(List<StoredPack> packs, PackOrder order) {
 }
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester,
-    {int packsNumber, int cardsNumber}) async {
+    {int? packsNumber, int? cardsNumber}) async {
   final storage =
       new PackStorageMock(packsNumber: packsNumber, cardsNumber: cardsNumber);
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
@@ -246,8 +246,8 @@ Future<List<StoredPack>> _fetchNamedPacks(
     StorageFetcher.fetchNamedPacks(storage);
 
 Future<List<StudyPack>> _fetchStudyPacks(
-        WidgetTester tester, PackStorageMock storage) =>
-    tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks());
+        WidgetTester tester, PackStorageMock storage) async =>
+    (await tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks()))!;
 
 Finder _findCheckTiles() {
   final finder = find.byType(CheckboxListTile, skipOffstage: false);
@@ -257,14 +257,14 @@ Finder _findCheckTiles() {
 }
 
 Future<void> _assureConsecutivelyCheckedTiles(WidgetTester tester,
-    [List<StoredPack> checkedPacks,
-    void Function(StoredPack, Finder) tileChecker,
+    [List<StoredPack>? checkedPacks,
+    void Function(StoredPack, Finder)? tileChecker,
     PackOrder packOrder = PackOrder.byNameAsc]) async {
   if (checkedPacks == null || checkedPacks.isEmpty) {
     expect(
         tester
             .widgetList<CheckboxListTile>(_findCheckTiles())
-            .every((t) => t.value),
+            .every((t) => t.value!),
         false);
     return;
   }
@@ -282,13 +282,13 @@ Future<void> _assureConsecutivelyCheckedTiles(WidgetTester tester,
 }
 
 Future<void> _assureNonConsecutivelyCheckedTiles(WidgetTester tester,
-    [List<StoredPack> checkedPacks,
-    void Function(StoredPack, Finder) tileChecker]) async {
+    [List<StoredPack>? checkedPacks,
+    void Function(StoredPack, Finder)? tileChecker]) async {
   if (checkedPacks == null || checkedPacks.isEmpty) {
     expect(
         tester
             .widgetList<CheckboxListTile>(_findCheckTiles())
-            .every((t) => t.value),
+            .every((t) => t.value!),
         false);
     return;
   }
@@ -296,7 +296,8 @@ Future<void> _assureNonConsecutivelyCheckedTiles(WidgetTester tester,
   final assistant = new WidgetAssistant(tester);
   final sortedPacks = _sortPacksByName(checkedPacks);
 
-  Finder packTileFinder = await _findPackTile(assistant, sortedPacks.first.name,
+  Finder? packTileFinder = await _findPackTile(
+      assistant, sortedPacks.first.name,
       searchUpwards: true);
   for (final p in sortedPacks) {
     packTileFinder ??= await _findPackTile(assistant, p.name);
@@ -310,19 +311,19 @@ Future<void> _assureNonConsecutivelyCheckedTiles(WidgetTester tester,
 }
 
 Future<Finder> _findPackTile(WidgetAssistant assistant, String packName,
-    {bool searchUpwards}) async {
+    {bool searchUpwards = false}) async {
   final packTileFinder = find.ancestor(
       of: find.text(packName), matching: find.byType(CheckboxListTile));
   final visibleFinder = await assistant.scrollUntilVisible(
       packTileFinder, CheckboxListTile,
-      upwards: searchUpwards ?? false);
+      upwards: searchUpwards);
   expect(visibleFinder, findsOneWidget);
   return visibleFinder;
 }
 
 void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks,
-    [Set<int> includedPackIds]) {
-  final studyStages = <int, int>{for (var v in WordStudyStage.values) v: 0};
+    [Set<int>? includedPackIds]) {
+  final studyStages = <int, int>{for (final v in WordStudyStage.values) v: 0};
 
   Iterable<StudyPack> stPacks = studyPacks;
   if (includedPackIds != null)
@@ -330,14 +331,14 @@ void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks,
 
   stPacks
       .expand((e) => e.cardsByStage.entries)
-      .forEach((en) => studyStages[en.key] += en.value);
+      .forEach((en) => studyStages[en.key] = studyStages[en.key]! + en.value);
 
   final locale = Localizator.defaultLocalization;
   final levels = <String, int>{};
   studyStages.entries.forEach((en) {
     final key = WordStudyStage.stringify(en.key, locale);
     if (levels.containsKey(key))
-      levels[key] += en.value;
+      levels[key] = levels[key]! + en.value;
     else
       levels[key] = en.value;
   });
@@ -357,12 +358,11 @@ void _assureCardNumbersForStudyLevels(Iterable<StudyPack> studyPacks,
   });
 }
 
-Finder _findDownwardScrollBtn({bool shouldFind}) => AssuredFinder.findOne(
+Finder _findDownwardScrollBtn({bool? shouldFind}) => AssuredFinder.findOne(
     icon: Icons.arrow_downward_rounded, shouldFind: shouldFind ?? false);
 
 Future<void> _testRenderingStudyDates(WidgetTester tester,
-    {bool shouldShowDates}) async {
-  final isStudyDateVisible = shouldShowDates ?? false;
+    {bool shouldShowDates = false}) async {
   final storage = await _pumpScreen(tester);
 
   final packs = await _fetchNamedPacks(tester, storage);
@@ -378,12 +378,12 @@ Future<void> _testRenderingStudyDates(WidgetTester tester,
           find.descendant(
               of: packTileFinder,
               matching: find.text(locale.studyPreparerScreenPackLastStudyDate(
-                  DateFormat.yMMMMd(locale.localeName).format(p.studyDate)))),
-          isStudyDateVisible ? findsOneWidget : findsNothing);
+                  DateFormat.yMMMMd(locale.localeName).format(p.studyDate!)))),
+          shouldShowDates ? findsOneWidget : findsNothing);
   });
 }
 
-Future<void> _setPackOrderPreference(PackOrder order) async {
+Future<void> _setPackOrderPreference(PackOrder? order) async {
   final userParams = await PreferencesProvider.fetch();
   userParams.studyParams.packOrder = order;
   await PreferencesTester.saveParams(userParams);
@@ -401,7 +401,7 @@ Future<void> _testRenderingPackOrder(
 }
 
 Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester,
-    {PackOrder packOrder, bool goBackByOSButton = false}) async {
+    {PackOrder? packOrder, bool goBackByOSButton = false}) async {
   await _setPackOrderPreference(packOrder);
 
   final storage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
@@ -437,6 +437,6 @@ Future<void> _testPackOrderAfterFinishingStudy(WidgetTester tester,
   int index = 0;
   _sortPacks(packs, packOrder).forEach((pack) {
     final checkTile = tiles.elementAt(index++);
-    expect((checkTile.title as OneLineText).content, pack.name);
+    expect((checkTile.title! as OneLineText).content, pack.name);
   });
 }

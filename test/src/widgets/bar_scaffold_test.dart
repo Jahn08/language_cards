@@ -113,7 +113,7 @@ void main() {
     expect(tester.widgetList(iconOptionsFinder).length,
         UserParams.interfaceLanguages.length + AppTheme.values.length);
 
-    Finder getLangOptionFinder({bool isSelected}) => find.descendant(
+    Finder getLangOptionFinder({bool isSelected = false}) => find.descendant(
         of: find.byWidgetPredicate(
             (w) => w is IconOption && w.isSelected == isSelected),
         matching: find.byType(AssetIcon));
@@ -126,7 +126,7 @@ void main() {
     });
 
     final assistant = new WidgetAssistant(tester);
-    await assistant.tapWidget(getLangOptionFinder(isSelected: false));
+    await assistant.tapWidget(getLangOptionFinder());
 
     final chosenLang = UserParams.interfaceLanguages
         .firstWhere((lang) => lang != expectedLang);
@@ -134,9 +134,9 @@ void main() {
         AssetIcon.getByLanguage(chosenLang));
 
     Color getThemeColour(AppTheme theme) =>
-        Colors.blueGrey[theme == AppTheme.dark ? 900 : 100];
+        Colors.blueGrey[theme == AppTheme.dark ? 900 : 100]!;
 
-    Finder getThemeOptionFinder({bool isSelected}) => find.descendant(
+    Finder getThemeOptionFinder({bool isSelected = false}) => find.descendant(
         of: find.byWidgetPredicate(
             (w) => w is IconOption && w.isSelected == isSelected),
         matching:
@@ -151,7 +151,7 @@ void main() {
           getThemeColour(theme));
     });
 
-    await assistant.tapWidget(getThemeOptionFinder(isSelected: false));
+    await assistant.tapWidget(getThemeOptionFinder());
 
     final chosenTheme =
         AppTheme.values.firstWhere((theme) => theme != expectedTheme);
@@ -328,7 +328,7 @@ void main() {
             AssuredFinder.findSeveral(type: Text, shouldFind: true))
         .toList();
     expect(
-        allTexts.where((t) => t.data.contains(new RegExp('[A-Za-z]'))).length,
+        allTexts.where((t) => t.data!.contains(new RegExp('[A-Za-z]'))).length,
         1,
         reason:
             'There are not enough English labels in [${allTexts.join(',')}]');

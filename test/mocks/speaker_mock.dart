@@ -1,7 +1,7 @@
 import 'package:language_cards/src/utilities/speaker.dart';
 
 class SpeakerMock implements ISpeaker {
-  final void Function(String) onSpeak;
+  final void Function(String)? onSpeak;
 
   const SpeakerMock({this.onSpeak});
 

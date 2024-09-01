@@ -5,11 +5,11 @@ import 'package:language_cards/src/models/article.dart';
 import '../testers/word_dictionary_tester.dart';
 
 class DictionaryProviderMock implements DictionaryProvider {
-  static HashSet<String> _acceptedLanguages;
+  static HashSet<String>? _acceptedLanguages;
 
-  final BaseArticle<Word> Function(String text) onLookUp;
+  final BaseArticle<Word> Function(String text)? onLookUp;
 
-  final Iterable<String> Function(String text) onSearchForLemmas;
+  final Iterable<String> Function(String text)? onSearchForLemmas;
 
   DictionaryProviderMock({this.onLookUp, this.onSearchForLemmas});
 
@@ -27,17 +27,18 @@ class DictionaryProviderMock implements DictionaryProvider {
 
   @override
   Future<BaseArticle<Word>> lookUp(String langParam, String text) async {
-    if (!await isTranslationPossible(langParam)) return null;
+    if (!await isTranslationPossible(langParam))
+      return new AssetArticle(text, []);
 
-    return onLookUp?.call(text);
+    return onLookUp?.call(text) ?? new AssetArticle(text, []);
   }
 
   @override
   Future<Iterable<String>> searchForLemmas(
       String langParam, String text) async {
-    if (!await isTranslationPossible(langParam)) return null;
+    if (!await isTranslationPossible(langParam)) return [];
 
-    return onSearchForLemmas?.call(text);
+    return onSearchForLemmas?.call(text) ?? [];
   }
 
   @override

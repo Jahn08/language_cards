@@ -8,8 +8,8 @@ class ContextChannelMock {
 
   ContextChannelMock._();
 
-  static Future<void> testWithChannel(Future<void> Function() action,
-      {bool arePermissionsRequired}) async {
+  static Future<void> testWithChannel(Future<void> Function()? action,
+      {bool arePermissionsRequired = false}) async {
     const channel = ContextProvider.channel;
 
     try {
@@ -18,13 +18,13 @@ class ContextChannelMock {
       channel.setMockMethodCallHandler((call) {
         switch (call.method) {
           case 'isStoragePermissionRequired':
-            return Future.value(arePermissionsRequired ?? false);
+            return Future.value(arePermissionsRequired);
           case 'getDownloadsDirectoryPath':
             return Future.value(getExternalStoragePath());
           case 'isEmailHtmlSupported':
             return Future.value(true);
           default:
-            return Future.value(null);
+            return Future.value();
         }
       });
 

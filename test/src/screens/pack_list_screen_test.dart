@@ -223,13 +223,13 @@ void main() {
     final assistant = new WidgetAssistant(tester);
     await screenTester.activateEditorMode(assistant);
 
-    _findImportExportAction(isExport: false, shouldFind: true);
+    _findImportExportAction(shouldFind: true);
     _findImportExportAction(isExport: true, shouldFind: false);
 
     await screenTester.selectSomeItemsInEditor(assistant);
 
     _findImportExportAction(isExport: true, shouldFind: true);
-    _findImportExportAction(isExport: false, shouldFind: false);
+    _findImportExportAction(shouldFind: false);
   });
 
   testWidgets(
@@ -311,7 +311,7 @@ void main() {
 
               await tester.runAsync(() =>
                   exporterTester.assertExportedPacks(storage, packsToExport));
-            }, noPermissionsByDefault: true, shouldDenyPermissions: false),
+            }, noPermissionsByDefault: true),
         arePermissionsRequired: true);
   });
 
@@ -394,8 +394,7 @@ void main() {
         (indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())));
     inScreenTester.assureFilterIndexes(newIndexes, shouldFind: true);
 
-    inScreenTester.assureFilterIndexActiveness(tester, activeIndex,
-        isActive: false);
+    inScreenTester.assureFilterIndexActiveness(tester, activeIndex);
 
     await inScreenTester.deactivateSearcherMode(assistant);
 
@@ -430,15 +429,15 @@ void main() {
 }
 
 PackListScreen _buildPackListScreen(
-    {PackStorageMock storage, int packsNumber}) {
+    {PackStorageMock? storage, int? packsNumber}) {
   storage ??= new PackStorageMock(
       packsNumber: packsNumber ?? 40,
-      textGetter: (text, id) => (id % 2).toString() + text);
+      textGetter: (text, id) => (id! % 2).toString() + text);
   return new PackListScreen(storage, storage.wordStorage);
 }
 
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester,
-    {bool cardWasAdded}) async {
+    {bool? cardWasAdded}) async {
   final storage = new PackStorageMock();
   await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
       storage: storage,
@@ -459,12 +458,12 @@ Future<StoredPack> _getFirstPackWithEnoughCards(
         p.cardsNumber > 0 && p.cardsNumber < 8 && p.name != _nonePackName);
 
 Future<List<StoredPack>> _fetchPacks(
-        PackStorageMock storage, WidgetTester tester) =>
-    tester.runAsync<List<StoredPack>>(() => storage.fetch());
+        PackStorageMock storage, WidgetTester tester) async =>
+    (await tester.runAsync<List<StoredPack>>(() => storage.fetch()))!;
 
 Future<void> _testShowingCardsWithoutChanging(
     WidgetTester tester, PackStorageMock storage, StoredPack pack,
-    {bool goBackByOSButton}) async {
+    {bool? goBackByOSButton}) async {
   final expectedNumberOfCards = pack.cardsNumber;
 
   final assistant = new WidgetAssistant(tester);
@@ -481,7 +480,7 @@ Future<void> _testShowingCardsWithoutChanging(
 
 Future<void> _testDecreasingNumberOfCards(
     WidgetTester tester, PackStorageMock storage, StoredPack pack,
-    {bool goBackByOSButton}) async {
+    {bool? goBackByOSButton}) async {
   final expectedNumberOfCards = pack.cardsNumber - 1;
 
   final assistant = new WidgetAssistant(tester);
@@ -496,7 +495,7 @@ Future<void> _testDecreasingNumberOfCards(
 
 Future<void> _testIncreasingNumberOfCards(
     WidgetTester tester, PackStorageMock storage, StoredPack pack,
-    {bool goBackByOSButton}) async {
+    {bool? goBackByOSButton}) async {
   final expectedNumberOfCards = pack.cardsNumber + 1;
 
   final assistant = new WidgetAssistant(tester);
@@ -534,7 +533,7 @@ Finder _findPackTileByName(String name) {
 }
 
 Future<void> _goBackToPackList(WidgetAssistant assistant, String packName,
-    [bool byOSButton]) async {
+    [bool? byOSButton]) async {
   await _goBack(assistant, byOSButton);
 
   if (packName == _nonePackName) return;
@@ -542,7 +541,7 @@ Future<void> _goBackToPackList(WidgetAssistant assistant, String packName,
   await _goBack(assistant, byOSButton);
 }
 
-Future<void> _goBack(WidgetAssistant assistant, [bool byOSButton]) =>
+Future<void> _goBack(WidgetAssistant assistant, [bool? byOSButton]) =>
     (byOSButton ?? false)
         ? assistant.navigateBackByOSButton()
         : assistant.navigateBack();
@@ -578,7 +577,7 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
   final tester = assistant.tester;
   final packsToExport = ExporterTester.getPacksForExport(storage);
   final existentPackIds =
-      (await tester.runAsync(() => storage.fetch())).map((p) => p.id).toSet();
+      (await tester.runAsync(() => storage.fetch()))!.map((p) => p.id).toSet();
 
   await ContextChannelMock.testWithChannel(() async {
     final importFilePath = await tester.runAsync(() =>
@@ -587,7 +586,7 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
 
     await screenTester.activateEditorMode(assistant);
 
-    await _activateImport(assistant, importFilePath);
+    await _activateImport(assistant, importFilePath!);
 
     final importInfo = _findConfirmationDialogText(tester);
     expect(importInfo.contains(packsToExport.length.toString()), true);
@@ -595,7 +594,7 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
 
     final storedCards = await tester.runAsync(() => storage.wordStorage
         .fetchFiltered(parentIds: packsToExport.map((p) => p.id).toList()));
-    expect(importInfo.contains(storedCards.length.toString()), true,
+    expect(importInfo.contains(storedCards!.length.toString()), true,
         reason:
             'A message "$importInfo" does not contain the number of imported packs=${storedCards.length}');
 
@@ -640,8 +639,7 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
 
 Future<void> _activateImport(
     WidgetAssistant assistant, String importFilePath) async {
-  final importBtnFinder =
-      _findImportExportAction(isExport: false, shouldFind: true);
+  final importBtnFinder = _findImportExportAction(shouldFind: true);
   await assistant.tapWidget(importBtnFinder);
 
   final filePathTxtFinder =
@@ -653,7 +651,7 @@ Future<void> _activateImport(
   await assistant.tapWidget(importConfirmationBtnFinder);
 }
 
-Finder _findImportExportAction({bool isExport, bool shouldFind}) {
+Finder _findImportExportAction({bool isExport = false, bool? shouldFind}) {
   final locale = Localizator.defaultLocalization;
   return AssuredFinder.findOne(
       icon: Icons.import_export,
@@ -667,8 +665,8 @@ String _findConfirmationDialogText(WidgetTester tester) {
   final dialog = DialogTester.findConfirmationDialog(tester);
   return tester
       .widget<Text>(find.descendant(
-          of: find.byWidget(dialog.content), matching: find.byType(Text)))
-      .data;
+          of: find.byWidget(dialog.content!), matching: find.byType(Text)))
+      .data!;
 }
 
 ListScreenTester<StoredPack> _buildScreenTester(PackStorageMock storage) =>

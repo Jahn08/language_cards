@@ -16,7 +16,7 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
         super(tester);
 
   Future<void> testCancelling(List<T> items) async {
-    T dialogResult;
+    T? dialogResult;
     await showDialog(items, (item) => dialogResult = item);
 
     await assureCancellingDialog();
@@ -24,13 +24,13 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
     expect(dialogResult, null);
   }
 
-  Future<void> showDialog(List<T> items, [Function(T) onDialogClose]) =>
+  Future<void> showDialog(List<T> items, [Function(T?)? onDialogClose]) =>
       DialogOpener.showDialog<T>(tester,
           dialogExposer: (context) => _dialogBuilder(context).show(items),
           onDialogClose: onDialogClose);
 
   Future<void> testTappingItem(List<T> items) async {
-    T dialogResult;
+    T? dialogResult;
     await showDialog(items, (item) => dialogResult = item);
 
     final optionFinders = find.byType(ShrinkableSimpleDialogOption);

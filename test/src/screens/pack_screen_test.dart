@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart' hide Router, NavigationBar;
+import 'package:flutter/material.dart' hide NavigationBar, Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:collection/collection.dart';
 import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
@@ -21,7 +22,7 @@ void main() {
     await _pumpScreen(tester);
 
     final nameField = tester.widget<TextFormField>(find.byType(TextFormField));
-    expect(nameField.controller?.value?.text, '');
+    expect(nameField.controller?.value.text, '');
 
     final dropdownType =
         AssuredFinder.typify<DropdownButtonFormField<String>>();
@@ -58,8 +59,8 @@ void main() {
     expect(langFields.length, 2);
 
     final locale = Localizator.defaultLocalization;
-    expect(langFields.first.initialValue, packToEdit.from.present(locale));
-    expect(langFields.last.initialValue, packToEdit.to.present(locale));
+    expect(langFields.first.initialValue, packToEdit.from!.present(locale));
+    expect(langFields.last.initialValue, packToEdit.to!.present(locale));
 
     _assureSavingButtons(locale, tester, areDisabled: true);
 
@@ -140,7 +141,7 @@ void main() {
 
     final actualPack = await _findPack(tester, storage, packToEdit.id);
     expect(
-        actualPack.name == packToEdit.name &&
+        actualPack!.name == packToEdit.name &&
             actualPack.from == packToEdit.from &&
             actualPack.to == packToEdit.to,
         true);
@@ -158,7 +159,7 @@ void main() {
 
     if (packToEdit.from != packToEdit.to)
       await assistant.setDropdownItem(
-          _findLanguageDropdowns().first, packToEdit.to);
+          _findLanguageDropdowns().first, packToEdit.to!);
 
     await assistant.tapWidget(_findSavingBtn());
 
@@ -168,7 +169,7 @@ void main() {
 
     final actualPack = await _findPack(tester, storage, packToEdit.id);
     expect(
-        actualPack.name == packToEdit.name &&
+        actualPack!.name == packToEdit.name &&
             actualPack.from == packToEdit.from &&
             actualPack.to == packToEdit.to,
         true);
@@ -188,7 +189,7 @@ void main() {
       (tester) async {
     final addedPack = await _testAddingPack(tester,
         shouldAdd: true, saveBtnSearcher: _findSavingAndAddingBtn);
-    _assureBeingInsidePack(addedPack.name);
+    _assureBeingInsidePack(addedPack!.name);
   });
 
   testWidgets(
@@ -256,12 +257,14 @@ void main() {
     await assistant.tapWidget(_findBackButton());
 
     AssuredFinder.findOne(
-        type: ListTile, label: addedPack.name, shouldFind: true);
+        type: ListTile, label: addedPack!.name, shouldFind: true);
   });
 }
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester,
-    {DictionaryProvider provider, int packId, PackStorageMock storage}) async {
+    {DictionaryProvider? provider,
+    int? packId,
+    PackStorageMock? storage}) async {
   storage ??= new PackStorageMock();
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       child: new PackScreen(storage, provider ?? new DictionaryProviderMock(),
@@ -272,7 +275,7 @@ Future<PackStorageMock> _pumpScreen(WidgetTester tester,
 }
 
 void _assureSavingButtons(AppLocalizations locale, WidgetTester tester,
-    {bool areDisabled}) {
+    {bool areDisabled = false}) {
   [
     locale.packScreenSavingAndAddingCardsButtonLabel,
     locale.constsSavingItemButtonLabel
@@ -282,11 +285,13 @@ void _assureSavingButtons(AppLocalizations locale, WidgetTester tester,
                   find.widgetWithText(ElevatedButton, btnLbl))
               .onPressed ==
           null,
-      areDisabled ?? false));
+      areDisabled));
 }
 
 Future<void> _testNonAvailableDictionaryWarning(WidgetTester tester,
-    {bool shouldWarn, Language fromLang, Language toLang}) async {
+    {bool? shouldWarn,
+    required Language fromLang,
+    required Language toLang}) async {
   await _pumpScreen(tester);
 
   final langFields = _findLanguageDropdowns();
@@ -297,7 +302,7 @@ Future<void> _testNonAvailableDictionaryWarning(WidgetTester tester,
 
   AssuredFinder.findOne(
       label: Localizator.defaultLocalization.noTranslationSnackBarInfo,
-      shouldFind: shouldWarn ?? false);
+      shouldFind: shouldWarn);
 }
 
 Finder _findLanguageDropdowns() {
@@ -306,15 +311,15 @@ Finder _findLanguageDropdowns() {
 }
 
 Future<List<StoredPack>> _fetchPacks(
-        WidgetTester tester, PackStorageMock storage) =>
-    tester.runAsync(() => storage.fetch());
+        WidgetTester tester, PackStorageMock storage) async =>
+    (await tester.runAsync(() => storage.fetch()))!;
 
-Future<StoredPack> _findPack(
-        WidgetTester tester, PackStorageMock storage, int id) =>
-    tester.runAsync(() => storage.find(id));
+Future<StoredPack?> _findPack(
+        WidgetTester tester, PackStorageMock storage, int? id) =>
+    tester.runAsync<StoredPack?>(() => storage.find(id));
 
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester,
-    {PackStorageMock storage, String packName}) async {
+    {PackStorageMock? storage, String? packName}) async {
   storage ??= new PackStorageMock();
   await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
       storage: storage, noBar: true));
@@ -342,10 +347,10 @@ Finder _findElevatedBtn(String btnLabel) => AssuredFinder.findOne(
 Finder _findSavingBtn() => _findElevatedBtn(
     Localizator.defaultLocalization.constsSavingItemButtonLabel);
 
-Future<StoredPack> _testAddingPack(WidgetTester tester,
-    {@required Finder Function() saveBtnSearcher,
-    @required bool shouldAdd,
-    PackStorageMock storage}) async {
+Future<StoredPack?> _testAddingPack(WidgetTester tester,
+    {required Finder Function() saveBtnSearcher,
+    required bool shouldAdd,
+    PackStorageMock? storage}) async {
   final packStorage = await _pumpScreenWithRouting(tester, storage: storage);
   final initialPackNumber = (await _fetchPacks(tester, packStorage)).length;
 
@@ -367,10 +372,9 @@ Future<StoredPack> _testAddingPack(WidgetTester tester,
   final actualPacks = await _fetchPacks(tester, packStorage);
   expect(actualPacks.length, initialPackNumber + (shouldAdd ? 1 : 0));
 
-  final storedPack =
-      actualPacks.singleWhere((p) => p.name == packName, orElse: () => null);
+  final storedPack = actualPacks.singleWhereOrNull((p) => p.name == packName);
   if (shouldAdd) {
-    expect(storedPack.from, fromLang);
+    expect(storedPack!.from, fromLang);
     expect(storedPack.to, toLang);
   } else
     expect(storedPack, null);
@@ -384,8 +388,8 @@ void _assureBeingInsidePack(String packName) => expect(
     findsOneWidget);
 
 Future<StoredPack> _testChangingPack(WidgetTester tester,
-    {@required Finder Function() savingBtnSearcher,
-    @required bool shouldSave}) async {
+    {required Finder Function() savingBtnSearcher,
+    required bool shouldSave}) async {
   final storage = new PackStorageMock();
   final packToEdit = storage.getRandom();
 
@@ -406,7 +410,7 @@ Future<StoredPack> _testChangingPack(WidgetTester tester,
 
   await assistant.tapWidget(savingBtnSearcher());
 
-  final actualPack = await _findPack(tester, storage, packToEdit.id);
+  final actualPack = (await _findPack(tester, storage, packToEdit.id))!;
 
   if (shouldSave) {
     expect(actualPack.name, newName);

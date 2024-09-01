@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:collection/collection.dart';
 import 'package:language_cards/src/data/data_provider.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
@@ -9,7 +10,7 @@ import 'pack_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
 class _WordDataProvider extends DataProviderMock<StoredWord> {
-  HashSet<String> _intFieldNames;
+  HashSet<String>? _intFieldNames;
 
   _WordDataProvider(List<StoredWord> cards) : super(cards);
 
@@ -29,9 +30,9 @@ class WordStorageMock extends WordStorage {
   final List<StoredWord> _words;
 
   WordStorageMock(
-      {int cardsNumber,
-      int parentsOverall,
-      String Function(String, int) textGetter})
+      {int? cardsNumber,
+      int? parentsOverall,
+      String Function(String, int?)? textGetter})
       : _words = _generateWords(cardsNumber ?? 18, parentsOverall,
             textGetter: textGetter) {
     _sortWords();
@@ -42,8 +43,8 @@ class WordStorageMock extends WordStorage {
   @override
   DataProvider get connection => new _WordDataProvider(_words);
 
-  static List<StoredWord> _generateWords(int length, int parentsOverall,
-      {String Function(String, int) textGetter}) {
+  static List<StoredWord> _generateWords(int length, int? parentsOverall,
+      {String Function(String, int?)? textGetter}) {
     final cardsWithoutPackNumber = Randomiser.nextInt(4) + 1;
     final cardsWithPackNumber = length - cardsWithoutPackNumber;
     final words = new List<StoredWord>.generate(
@@ -65,13 +66,13 @@ class WordStorageMock extends WordStorage {
   }
 
   static StoredWord generateWord(
-      {int id,
-      int packId,
-      int parentsOverall,
+      {int? id,
+      int? packId,
+      int? parentsOverall,
       bool hasNoPack = false,
-      String Function(String, int) textGetter}) {
+      String Function(String, int?)? textGetter}) {
     final phoneticSymbols =
-        PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
+        PhoneticKeyboard.getLanguageSpecific((s) => s!).symbols;
 
     const studyStages = WordStudyStage.values;
     final text = Randomiser.nextString();
@@ -94,9 +95,8 @@ class WordStorageMock extends WordStorage {
 
   StoredWord getRandom() => Randomiser.nextElement(_words);
 
-  Future<StoredWord> updateWordProgress(int id, int studyProgress) async {
-    final wordToUpdate =
-        _words.firstWhere((w) => w.id == id, orElse: () => null);
+  Future<StoredWord?> updateWordProgress(int id, int studyProgress) async {
+    final wordToUpdate = _words.firstWhereOrNull((StoredWord w) => w.id == id);
 
     if (wordToUpdate == null) return null;
 
@@ -113,7 +113,7 @@ class WordStorageMock extends WordStorage {
     return cards.first;
   }
 
-  Future<void> removeFromPacks(List<int> packIds) async {
+  Future<void> removeFromPacks(List<int?> packIds) async {
     final cards = await fetchFiltered(parentIds: packIds);
     final untiedCards = cards.map((c) {
       final values = c.toDbMap();

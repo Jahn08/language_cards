@@ -1,4 +1,3 @@
-import 'package:meta/meta.dart';
 import '../models/article.dart';
 import '../models/language.dart';
 import './dictionary_provider.dart';
@@ -12,13 +11,11 @@ class WordDictionary {
 
   final DictionaryProvider provider;
 
-  WordDictionary(this.provider, {@required Language from, Language to})
+  WordDictionary(this.provider, {required Language from, Language? to})
       : _from = DictionaryProvider.representLanguage(from),
         _to = DictionaryProvider.representLanguage(to ?? from);
 
   Future<Set<String>> searchForLemmas(String text) async {
-    if (provider == null) return <String>{};
-
     final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
 
     if (await provider.isTranslationPossible(directLangPair))
@@ -29,9 +26,7 @@ class WordDictionary {
     return <String>{};
   }
 
-  Future<BaseArticle> lookUp(String word) async {
-    if (provider == null) return null;
-
+  Future<BaseArticle?> lookUp(String word) async {
     final directLangPair = DictionaryProvider.buildLangPair(_from, _to);
 
     if (!await provider.isTranslationPossible(directLangPair)) return null;
@@ -39,10 +34,8 @@ class WordDictionary {
     return provider.lookUp(directLangPair, word);
   }
 
-  Future<bool> isTranslationPossible() => provider == null
-      ? Future.value(false)
-      : provider
-          .isTranslationPossible(DictionaryProvider.buildLangPair(_from, _to));
+  Future<bool> isTranslationPossible() => provider
+      .isTranslationPossible(DictionaryProvider.buildLangPair(_from, _to));
 
-  void dispose() => provider?.dispose();
+  void dispose() => provider.dispose();
 }

@@ -21,15 +21,15 @@ class FBLink extends Link {
 class EmailLink extends Link {
   const EmailLink._(String url) : super(url);
 
-  static bool _isHtmlSupported;
+  static bool? _isHtmlSupported;
 
   static Future<EmailLink> build(
-      {String email, String subject, String body}) async {
-    String linkBody = body;
+      {String? email, String? subject, String? body}) async {
+    String? linkBody = body;
     if ((linkBody?.isNotEmpty ?? false) &&
         !(_isHtmlSupported ??
-            (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported())))
-      linkBody = linkBody.replaceAll('<br>', '\n');
+            (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported()) ?? false))
+      linkBody = linkBody!.replaceAll('<br>', '\n');
 
     return new EmailLink._('mailto:$email?subject=$subject&body=$linkBody');
   }

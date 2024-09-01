@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/data_group.dart';
@@ -8,17 +9,17 @@ import 'package:language_cards/src/models/stored_entity.dart';
 abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
   final List<T> items;
 
-  HashSet<String> _intFieldNames;
+  HashSet<String>? _intFieldNames;
 
-  DataProviderMock(this.items) : assert(items != null);
+  DataProviderMock(this.items);
 
   @override
-  Future<int> count(String tableName, {Map<String, dynamic> filters}) =>
+  Future<int> count(String tableName, {Map<String, dynamic>? filters}) =>
       Future.value(_getFilteredItemProps(filters).length);
 
   @override
   Future<List<int>> add(String tableName, List<Map<String, dynamic>> entities) {
-    int newId = (items..sort((a, b) => a.id.compareTo(b.id))).last.id;
+    int newId = (items..sort((a, b) => a.id!.compareTo(b.id!))).last.id!;
     final newItems = entities.map((e) {
       final i = buildFromDbMap(e);
       i.id = ++newId;
@@ -26,7 +27,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
     }).toList();
     items.addAll(newItems);
 
-    return Future.value(newItems.map((p) => p.id).toList());
+    return Future.value(newItems.map((p) => p.id!).toList());
   }
 
   T buildFromDbMap(Map<String, dynamic> map);
@@ -35,11 +36,11 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
   Future<void> close() => Future.value();
 
   @override
-  Future<int> delete(String tableName, List<int> ids) => _remove(ids);
+  Future<int> delete(String tableName, List<int?> ids) => _remove(ids);
 
-  Future<int> _remove(List<int> ids) {
+  Future<int> _remove(List<int?> ids) {
     final prevLength = items.length;
-    final hashedIds = new HashSet<int>.from(ids);
+    final hashedIds = new HashSet<int?>.from(ids);
     final newLength =
         (items..removeWhere((p) => hashedIds.contains(p.id))).length;
 
@@ -48,15 +49,15 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
   @override
   Future<List<Map<String, dynamic>>> fetch(String tableName,
-      {@required String orderBy,
-      int take,
-      int skip,
-      Map<String, dynamic> filters}) {
+      {required String orderBy,
+      int? take,
+      int? skip,
+      Map<String, dynamic>? filters}) {
     var propItems = _getFilteredItemProps(filters);
 
-    if (orderBy != null && orderBy.isNotEmpty)
-      // ignore: avoid_dynamic_calls
+    if (orderBy.isNotEmpty)
       propItems = propItems.toList()
+        // ignore: avoid_dynamic_calls
         ..sort((a, b) => a[orderBy].compareTo(b[orderBy]) as int);
 
     if (skip != null) propItems = propItems.skip(skip);
@@ -67,7 +68,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
   }
 
   Iterable<Map<String, dynamic>> _getFilteredItemProps(
-      Map<String, dynamic> filters) {
+      Map<String, dynamic>? filters) {
     var propItems = items.map((i) => i.toDbMap());
     if (filters != null && filters.isNotEmpty) {
       const String anySymbolPattern = '%';
@@ -88,24 +89,24 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
   @override
   Future<Map<String, dynamic>> findById(String tableName, dynamic id) {
-    final item = items.singleWhere((p) => p.id == id, orElse: () => null);
+    final item = items.singleWhereOrNull((p) => p.id == id);
     return Future.value(item?.toDbMap());
   }
 
   @override
   Future<List<DataGroup>> groupBy(String tableName,
-          {@required String groupField,
-          List<dynamic> groupValues,
-          Map<String, dynamic> filters}) =>
+          {required String groupField,
+          List<dynamic>? groupValues,
+          Map<String, dynamic>? filters}) =>
       _groupBySeveral(tableName,
           groupFields: [groupField],
           groupValues: {groupField: groupValues},
           filters: filters);
 
   Future<List<DataGroup>> _groupBySeveral(String tableName,
-      {@required List<String> groupFields,
-      Map<String, List<dynamic>> groupValues,
-      Map<String, dynamic> filters}) {
+      {required List<String> groupFields,
+      Map<String, List<dynamic>?>? groupValues,
+      Map<String, dynamic>? filters}) {
     groupValues ??= {};
 
     final intFields = intFieldNames;
@@ -115,7 +116,8 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
         .fold<Map<String, int>>({}, (map, i) {
           final vals = groupFields
               .where((f) =>
-                  !groupValues.containsKey(f) || groupValues[f].contains(i[f]))
+                  !groupValues!.containsKey(f) ||
+                  groupValues[f]!.contains(i[f]))
               .map((f) =>
                   i.containsKey(f) ? i[f] : i[indexFieldName].toString()[0])
               .toList();
@@ -125,7 +127,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
           final key = vals.map((v) => v?.toString()).join(valSeparator);
           if (map[key] == null) map[key] = 0;
 
-          map[key] += 1;
+          map[key] = map[key]! + 1;
           return map;
         })
         .entries
@@ -144,8 +146,8 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
 
   @override
   Future<List<DataGroup>> groupBySeveral(String tableName,
-          {@required List<String> groupFields,
-          Map<String, List<dynamic>> groupValues}) =>
+          {required List<String> groupFields,
+          Map<String, List<dynamic>?>? groupValues}) =>
       _groupBySeveral(tableName,
           groupFields: groupFields, groupValues: groupValues);
 
@@ -161,7 +163,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
       String tableName, List<Map<String, dynamic>> entities) async {
     final updatedItems = entities.map((e) => buildFromDbMap(e)).toList();
 
-    final idsToDelete = updatedItems.map((p) => p.id).toList();
+    final idsToDelete = updatedItems.map((p) => p.id!).toList();
     await _remove(idsToDelete);
 
     items.addAll(updatedItems);

@@ -88,43 +88,43 @@ class StudyParams {
   static const _cardSideParam = 'cardSide';
   static const _studyDateVisibilityParam = 'showStudyDate';
 
-  PackOrder _packOrder;
+  late PackOrder _packOrder;
   PackOrder get packOrder => _packOrder;
-  set packOrder(PackOrder value) => _packOrder = value ?? _defaultPackOrder;
+  set packOrder(PackOrder? value) => _packOrder = value ?? _defaultPackOrder;
 
-  StudyDirection _direction;
+  late StudyDirection _direction;
   StudyDirection get direction => _direction;
-  set direction(StudyDirection value) =>
+  set direction(StudyDirection? value) =>
       _direction = value ?? _defaultDirection;
 
-  CardSide _cardSide;
+  late CardSide _cardSide;
   CardSide get cardSide => _cardSide;
-  set cardSide(CardSide value) => _cardSide = value ?? _defaultCardSide;
+  set cardSide(CardSide? value) => _cardSide = value ?? _defaultCardSide;
 
-  bool _showStudyDate;
+  late bool _showStudyDate;
   bool get showStudyDate => _showStudyDate;
-  set showStudyDate(bool value) =>
+  set showStudyDate(bool? value) =>
       _showStudyDate = value ?? _defaultStudyDateVisibility;
 
-  StudyParams([Map<String, dynamic> jsonMap]) {
+  StudyParams([Map<String, dynamic>? jsonMap]) {
     jsonMap = jsonMap ?? {};
 
-    final directionIndex = jsonMap[_directionParam] as int;
+    final directionIndex = jsonMap[_directionParam] as int?;
     _direction = directionIndex == null
         ? _defaultDirection
         : StudyDirection.values[directionIndex];
 
-    final cardSideIndex = jsonMap[_cardSideParam] as int;
+    final cardSideIndex = jsonMap[_cardSideParam] as int?;
     _cardSide = cardSideIndex == null
         ? _defaultCardSide
         : CardSide.values[cardSideIndex];
 
-    final packOrderIndex = jsonMap[_packOrderParam] as int;
+    final packOrderIndex = jsonMap[_packOrderParam] as int?;
     _packOrder = packOrderIndex == null
         ? _defaultPackOrder
         : PackOrder.values[packOrderIndex];
 
-    _showStudyDate = (jsonMap[_studyDateVisibilityParam] as bool) ??
+    _showStudyDate = (jsonMap[_studyDateVisibilityParam] as bool?) ??
         _defaultStudyDateVisibility;
   }
 
@@ -147,9 +147,9 @@ class UserParams {
   static const _ruLocale = Locale('ru');
   static const _enLocale = Locale('en');
 
-  Language _interfaceLang;
+  late Language _interfaceLang;
   Language get interfaceLang => _interfaceLang;
-  set interfaceLang(Language value) =>
+  set interfaceLang(Language? value) =>
       _interfaceLang = value ?? _defaultLanguage;
 
   Locale getLocale() =>
@@ -157,19 +157,19 @@ class UserParams {
 
   static const interfaceLanguages = [Language.english, Language.russian];
 
-  AppTheme _theme;
+  late AppTheme _theme;
   AppTheme get theme => _theme;
-  set theme(AppTheme value) => _theme = value ?? _defaultTheme;
+  set theme(AppTheme? value) => _theme = value ?? _defaultTheme;
 
-  StudyParams _studyParams;
+  late StudyParams _studyParams;
   StudyParams get studyParams => _studyParams;
-  set studyParams(StudyParams value) =>
+  set studyParams(StudyParams? value) =>
       _studyParams = value ?? new StudyParams();
 
-  UserParams([String json]) {
+  UserParams([String? json]) {
     final jsonMap = json == null ? {} : jsonDecode(json);
 
-    final langIndex = jsonMap[_interfaceLangParam] as int;
+    final langIndex = jsonMap[_interfaceLangParam] as int?;
     if (langIndex == null) {
       final supportedLangs =
           [_enLocale, _ruLocale].map((loc) => loc.languageCode).toSet();
@@ -183,11 +183,11 @@ class UserParams {
     } else
       _interfaceLang = interfaceLanguages[langIndex];
 
-    final themeIndex = jsonMap[_themeParam] as int;
+    final themeIndex = jsonMap[_themeParam] as int?;
     _theme = themeIndex == null ? _defaultTheme : AppTheme.values[themeIndex];
 
     _studyParams =
-        new StudyParams(jsonMap[_studyParamsParam] as Map<String, dynamic>);
+        new StudyParams(jsonMap[_studyParamsParam] as Map<String, dynamic>?);
   }
 
   String toJson() => jsonEncode({

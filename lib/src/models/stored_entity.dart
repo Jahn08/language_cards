@@ -4,28 +4,28 @@ import 'package:flutter/material.dart';
 abstract class StoredEntity {
   static const idFieldName = 'id';
 
-  int _id;
+  int? _id;
 
-  StoredEntity({int id}) : _id = id;
+  StoredEntity({int? id}) : _id = id;
 
-  int get id => _id;
+  int? get id => _id;
 
-  set id(int value) {
+  set id(int? value) {
     _id = getIdFromValue(value, _id);
   }
 
   @protected
-  int getIdFromValue(int value, int curId) =>
+  int? getIdFromValue(int? value, int? curId) =>
       curId == null && value != null ? value : curId;
 
   bool get isNew => _id == null;
 
   String get tableName;
 
-  String get foreignTableName => null;
+  String? get foreignTableName => null;
 
   @mustCallSuper
-  Map<String, dynamic> toDbMap({bool excludeIds}) =>
+  Map<String, dynamic> toDbMap({bool? excludeIds}) =>
       (excludeIds ?? false) ? {} : {idFieldName: isNew ? null : id};
 
   String get tableExpr {

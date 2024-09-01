@@ -12,7 +12,7 @@ class AssetReader {
       : assetBundle = DefaultAssetBundle.of(context);
 
   Future<String> loadString(List<String> keyPaths) =>
-      _loadString((keyPaths..insert(0, rootPath)));
+      _loadString(keyPaths..insert(0, rootPath));
 
   Future<String> _loadString(List<String> keyPaths) =>
       assetBundle.loadString(Path.combine(keyPaths));
@@ -20,7 +20,7 @@ class AssetReader {
   Future<ByteData> load(List<String> keyPaths) =>
       assetBundle.load(Path.combine(keyPaths..insert(0, rootPath)));
 
-  Future<List<String>> listAssetNames([String path]) async {
+  Future<List<String>> listAssetNames([String? path]) async {
     final paths = (json.decode(await _loadString(['AssetManifest.json']))
             as Map<String, dynamic>)
         .keys;

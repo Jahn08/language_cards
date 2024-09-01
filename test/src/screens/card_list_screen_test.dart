@@ -24,7 +24,7 @@ void main() {
   testWidgets('Switches to the search mode for cards grouped by a pack',
       (tester) async {
     final packStorage = new PackStorageMock(cardsNumber: 70);
-    final pack = (await tester.runAsync(() => packStorage.fetch()))
+    final pack = (await tester.runAsync(() => packStorage.fetch()))!
         .firstWhere((p) => !p.isNone && p.cardsNumber > 0);
     final wordStorage = packStorage.wordStorage;
 
@@ -33,7 +33,7 @@ void main() {
         .runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]));
 
     int index = 0;
-    await tester.runAsync(() => wordStorage.upsert(childCards
+    await tester.runAsync(() => wordStorage.upsert(childCards!
         .map((e) => new StoredWord((index++ % 2).toString() + e.text,
             id: e.id,
             packId: e.packId,
@@ -46,11 +46,11 @@ void main() {
     await groupedScreenTester.testSwitchingToSearchMode(tester,
         newEntityGetter: (index) =>
             WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
-        itemsLengthGetter: () => Future.value(childCards.length),
+        itemsLengthGetter: () => Future.value(childCards!.length),
         indexGroupsGetter: (_) async {
           final indexGroups = await tester
               .runAsync(() => wordStorage.groupByTextIndexAndParent([pack.id]));
-          expect(indexGroups.length, 2);
+          expect(indexGroups!.length, 2);
           return indexGroups;
         });
   });
@@ -92,9 +92,9 @@ void main() {
     final selectedWords = (await _fetchWords(tester, wordStorage))
         .where((w) => selectedItems.contains(w.text));
     final selectedWordsWithProgress = <String, int>{
-      for (var w in selectedWords) w.text: w.studyProgress
+      for (final w in selectedWords) w.text: w.studyProgress
     };
-    await _operateResettingProgressDialog(assistant, shouldConfirm: false);
+    await _operateResettingProgressDialog(assistant);
 
     await screenTester.deactivateEditorMode(assistant);
     final assuredWords =
@@ -207,7 +207,7 @@ void main() {
     await inScreenTester.pumpScreen(tester);
 
     final assistant = new WidgetAssistant(tester);
-    await assistant.scrollDownListView(find.byType(ListTile), iterations: 5);
+    await assistant.scrollDownListView(find.byType(ListTile));
     await inScreenTester.activateEditorMode(assistant);
 
     expect(
@@ -218,14 +218,14 @@ void main() {
 }
 
 ListScreenTester<StoredWord> _buildScreenTester(
-    [WordStorageMock storage, StoredPack pack]) {
+    [WordStorageMock? storage, StoredPack? pack]) {
   return new ListScreenTester(
       'Card',
       ([cardsNumber]) => new CardListScreen(
           storage ??
               new WordStorageMock(
                   cardsNumber: cardsNumber ?? 40,
-                  textGetter: (text, id) => (id % 2).toString() + text),
+                  textGetter: (text, id) => (id! % 2).toString() + text),
           pack: pack));
 }
 
@@ -253,10 +253,12 @@ Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester,
 }
 
 Future<List<StoredWord>> _fetchWords(
-        WidgetTester tester, WordStorageMock storage) =>
-    tester.runAsync(() => storage.fetchFiltered());
+    WidgetTester tester, WordStorageMock storage) async {
+  final result = await tester.runAsync(() => storage.fetchFiltered());
+  return result!;
+}
 
-Finder _findRestoreBtn({bool shouldFind}) =>
+Finder _findRestoreBtn({bool? shouldFind}) =>
     AssuredFinder.findOne(icon: Icons.restore, shouldFind: shouldFind);
 
 Finder _findBtnByLabel(String label, {bool shouldFind = true}) {
@@ -267,7 +269,7 @@ Finder _findBtnByLabel(String label, {bool shouldFind = true}) {
 }
 
 Future<void> _operateResettingProgressDialog(WidgetAssistant assistant,
-    {bool shouldConfirm, bool assureNoDialog = false}) async {
+    {bool shouldConfirm = false, bool assureNoDialog = false}) async {
   final restoreBtnFinder = _findRestoreBtn(shouldFind: true);
   await assistant.tapWidget(restoreBtnFinder);
 
@@ -289,14 +291,14 @@ Future<int> _getIndexOfFirstWordWithProgress(
   if (wordWithProgressIndex == -1) {
     wordWithProgressIndex = 0;
     await storage.updateWordProgress(
-        words[wordWithProgressIndex].id, WordStudyStage.learned);
+        words[wordWithProgressIndex].id!, WordStudyStage.learned);
   }
 
   return wordWithProgressIndex;
 }
 
 Future<void> _testSelectingOnPage(WidgetTester tester, WordStorageMock storage,
-    [StoredPack pack]) async {
+    [StoredPack? pack]) async {
   final inScreenTester = _buildScreenTester(storage, pack);
   await inScreenTester.pumpScreen(tester);
 
@@ -314,7 +316,7 @@ Future<void> _testSelectingOnPage(WidgetTester tester, WordStorageMock storage,
           ListScreen.itemsPerPage.toString(), expectedCardNumberStr));
 
   await assistant.scrollDownListView(find.byType(CheckboxListTile),
-      iterations: 25);
+      iterations: 35);
   expect(inScreenTester.getSelectorBtnLabel(tester),
       locale.constsSelectAll(expectedCardNumberStr));
   inScreenTester.assureSelectionForAllTilesInEditor(tester,

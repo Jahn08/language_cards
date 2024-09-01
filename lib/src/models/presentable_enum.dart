@@ -9,5 +9,5 @@ abstract class PresentableEnum {
 
   static Map<String, T> mapStringValues<T extends PresentableEnum>(
           Iterable<T> values, AppLocalizations locale) =>
-      <String, T>{for (var v in values) v.present(locale): v};
+      <String, T>{for (final v in values) v.present(locale): v};
 }

@@ -9,18 +9,18 @@ class WidgetAssistant {
 
   const WidgetAssistant(this.tester);
 
-  Future<void> pumpAndAnimate([int durationMs]) async {
-    final duration = new Duration(milliseconds: durationMs ?? 100);
+  Future<void> pumpAndAnimate([int durationMs = 100]) async {
+    final duration = new Duration(milliseconds: durationMs);
 
     if (!tester.hasRunningAnimations) await tester.pump(duration);
 
     if (tester.hasRunningAnimations) await tester.pumpAndSettle(duration);
   }
 
-  Future<void> tapWidget(Finder widgetFinder, {bool atCenter}) async {
+  Future<void> tapWidget(Finder widgetFinder, {bool atCenter = false}) async {
     expect(widgetFinder, findsOneWidget);
 
-    if (atCenter ?? false)
+    if (atCenter)
       await tester.tap(widgetFinder);
     else
       await tester.tapAt(tester.getTopLeft(widgetFinder));
@@ -54,8 +54,8 @@ class WidgetAssistant {
       _swipeWidget(widgetFinder, toRight: true);
 
   Future<Finder> scrollUntilVisible(Finder finder, Type scrollableChildType,
-      {bool upwards}) async {
-    final delta = 100.0 * ((upwards ?? false) ? -1 : 1);
+      {bool upwards = false}) async {
+    final delta = 100.0 * (upwards ? -1 : 1);
     if (findsNothing.matches(finder, {}))
       try {
         await tester.scrollUntilVisible(finder, delta,
@@ -66,8 +66,7 @@ class WidgetAssistant {
                 .first);
       } catch (_) {
         if (findsNothing.matches(finder, {}))
-          throw new AssertionError(
-              'Nothing was found for the finder: ${finder.toString()}');
+          throw new AssertionError('Nothing was found for the finder: $finder');
       }
 
     return finder;
@@ -93,7 +92,7 @@ class WidgetAssistant {
         .hitTestable());
   }
 
-  Future<String> enterChangedText(String initialText, {String changedText}) {
+  Future<String> enterChangedText(String initialText, {String? changedText}) {
     changedText ??= initialText.substring(1);
     return enterText(find.widgetWithText(TextField, initialText), changedText);
   }
@@ -108,7 +107,7 @@ class WidgetAssistant {
 
   Future<void> navigateBack() async {
     final backBtnFinders = find.byType(BackButton);
-    tester.widget<BackButton>(backBtnFinders.first).onPressed.call();
+    tester.widget<BackButton>(backBtnFinders.first).onPressed?.call();
 
     await pumpAndAnimate();
   }
@@ -121,8 +120,7 @@ class WidgetAssistant {
   }
 
   Future<void> scrollDownListView(Finder childFinder,
-      {int iterations, void Function() onIteration}) async {
-    iterations ??= 5;
+      {int iterations = 5, void Function()? onIteration}) async {
     int tries = 0;
 
     while (++tries < iterations) {
@@ -144,6 +142,6 @@ class WidgetAssistant {
   ScrollController retrieveListViewScroller(Finder childFinder) {
     final listView = tester.widget<ListView>(
         find.ancestor(of: childFinder.first, matching: find.byType(ListView)));
-    return listView.controller;
+    return listView.controller!;
   }
 }

@@ -5,14 +5,11 @@ import '../widgets/asset_icon.dart';
 import '../widgets/icon_option.dart';
 
 class TranslationIndicator extends StatelessWidget {
-  final Language from;
+  final Language? from;
 
-  final Language to;
+  final Language? to;
 
-  const TranslationIndicator(this.from, this.to)
-      : assert(from != null),
-        assert(to != null),
-        assert(from != to);
+  const TranslationIndicator(this.from, this.to) : assert(from != to);
 
   const TranslationIndicator.empty()
       : from = null,
@@ -27,14 +24,14 @@ class TranslationIndicator extends StatelessWidget {
           new IconOption(
               icon: from == null
                   ? const SizedBox()
-                  : AssetIcon.getByLanguage(from)),
+                  : AssetIcon.getByLanguage(from!)),
           if (to != null)
             new CustomPaint(
                 painter: new _ClippedBorderPainter(
                     clipper, new Styler(context).dividerColor),
                 child: new ClipPath(
                     clipper: clipper,
-                    child: IconOption(icon: AssetIcon.getByLanguage(to))))
+                    child: IconOption(icon: AssetIcon.getByLanguage(to!))))
         ]));
   }
 }

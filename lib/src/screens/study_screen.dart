@@ -30,23 +30,23 @@ class _CardEditorDialog
 
   final DictionaryProvider provider;
 
-  final ISpeaker defaultSpeaker;
+  final ISpeaker? defaultSpeaker;
 
   final WordStorage wordStorage;
 
   final BaseStorage<StoredPack> packStorage;
 
   const _CardEditorDialog(
-      {@required this.card,
-      @required this.pack,
-      @required this.wordStorage,
-      @required this.packStorage,
-      this.provider,
+      {required this.card,
+      required this.pack,
+      required this.wordStorage,
+      required this.packStorage,
+      required this.provider,
       this.defaultSpeaker})
       : super();
 
-  Future<MapEntry<StoredWord, StoredPack>> show(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+  Future<MapEntry<StoredWord, StoredPack>?> show(BuildContext context) {
+    final locale = AppLocalizations.of(context)!;
     return showDialog(
         context: context,
         builder: (buildContext) => new SimpleDialog(children: [
@@ -58,7 +58,7 @@ class _CardEditorDialog
                   wordStorage: wordStorage,
                   packStorage: packStorage,
                   hideNonePack: true,
-                  afterSave: (card, pack, _) {
+                  afterSave: (card, pack, {bool refresh = false}) {
                     returnResult(buildContext, new MapEntry(card, pack));
                   }),
               new Center(child: new CancelButton(() => returnResult(context)))
@@ -69,24 +69,24 @@ class _CardEditorDialog
 class _StudyScreenState extends State<StudyScreen> {
   final _controller = new PageController();
 
-  Future<List<StoredWord>> _futureCards;
+  late Future<List<StoredWord>> _futureCards;
 
-  List<StoredWord> _cards;
+  List<StoredWord>? _cards;
 
-  Map<int, StoredPack> _packMap;
+  late Map<int, StoredPack> _packMap;
 
   final _curCardIndexNotifier = new ValueNotifier(0);
   final _curCardUpdater = new ValueNotifier(0);
 
-  final _studyDirectionNotifier = new ValueNotifier<StudyDirection>(null);
+  final _studyDirectionNotifier = new ValueNotifier<StudyDirection?>(null);
 
-  final _cardSideNotifier = new ValueNotifier<CardSide>(null);
+  final _cardSideNotifier = new ValueNotifier<CardSide?>(null);
 
-  bool _shouldReorderCards;
+  late bool _shouldReorderCards;
 
-  Future<UserParams> _futureParams;
+  Future<UserParams>? _futureParams;
 
-  AppLocalizations _locale;
+  AppLocalizations? _locale;
 
   bool _packStorageChanged = false;
 
@@ -96,7 +96,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
     _shouldReorderCards = false;
 
-    _packMap = <int, StoredPack>{for (var p in widget.packs) p.id: p};
+    _packMap = <int, StoredPack>{for (final p in widget.packs) p.id!: p};
     _futureCards = widget.storage.fetchFiltered(
         parentIds: _packMap.keys.toList(), studyStageIds: widget.studyStageIds);
   }
@@ -104,10 +104,10 @@ class _StudyScreenState extends State<StudyScreen> {
   @override
   Widget build(BuildContext context) {
     _locale = AppLocalizations.of(context);
-    _futureParams ??= SettingsBlocProvider.of(context).userParams;
+    _futureParams ??= SettingsBlocProvider.of(context)!.userParams;
 
     return new FutureLoader<UserParams>(
-        _futureParams,
+        _futureParams!,
         (userParams) =>
             new FutureLoader<List<StoredWord>>(_futureCards, (cards) {
               final studyParams = userParams.studyParams;
@@ -115,7 +115,7 @@ class _StudyScreenState extends State<StudyScreen> {
               _cardSideNotifier.value ??= studyParams.cardSide;
 
               bool shouldTakeAllCards = false;
-              if (_cards == null || _cards.isEmpty) {
+              if (_cards == null || _cards!.isEmpty) {
                 _cards = cards;
 
                 shouldTakeAllCards = true;
@@ -125,18 +125,18 @@ class _StudyScreenState extends State<StudyScreen> {
               return new BarScaffold(
                   titleWidget: new ValueListenableBuilder(
                     valueListenable: _curCardIndexNotifier,
-                    builder: (_, int curCardIndex, __) => new Text(
-                        _locale.studyScreenTitle((curCardIndex + 1).toString(),
+                    builder: (_, int curCardIndex, __) => new Text(_locale!
+                        .studyScreenTitle((curCardIndex + 1).toString(),
                             cards.length.toString())),
                   ),
                   barActions: [
                     new IconButton(
                         icon: const Icon(Icons.edit),
                         onPressed: () async {
-                          final curCard = _cards[_curCardIndexNotifier.value];
+                          final curCard = _cards![_curCardIndexNotifier.value];
                           final updatedPackedCard = await new _CardEditorDialog(
                                   card: curCard,
-                                  pack: _packMap[curCard.packId],
+                                  pack: _packMap[curCard.packId]!,
                                   provider: widget.provider,
                                   defaultSpeaker: widget.defaultSpeaker,
                                   wordStorage: widget.storage,
@@ -148,10 +148,10 @@ class _StudyScreenState extends State<StudyScreen> {
                           final updatedCard = updatedPackedCard.key;
                           if (curCard.packId != updatedCard.packId &&
                               !_packMap.containsKey(updatedCard.packId))
-                            _packMap[updatedCard.packId] =
+                            _packMap[updatedCard.packId!] =
                                 updatedPackedCard.value;
 
-                          _cards[_curCardIndexNotifier.value] = updatedCard;
+                          _cards![_curCardIndexNotifier.value] = updatedCard;
 
                           ++_curCardUpdater.value;
                         })
@@ -166,7 +166,7 @@ class _StudyScreenState extends State<StudyScreen> {
                     new TightFlexible(
                         child: new _ButtonPanel(
                       onLearningPressed: () async {
-                        final card = _cards[_curCardIndexNotifier.value];
+                        final card = _cards![_curCardIndexNotifier.value];
                         if (card.incrementProgress())
                           await widget.storage.upsert([card]);
 
@@ -177,11 +177,12 @@ class _StudyScreenState extends State<StudyScreen> {
                         new ElevatedButton(
                             child: new ValueListenableBuilder(
                                 valueListenable: _studyDirectionNotifier,
-                                builder: (_, StudyDirection studyDirection,
-                                        __) =>
-                                    new _CenteredBigText(_locale
-                                        .studyScreenSortingCardButtonLabel(
-                                            studyDirection.present(_locale)))),
+                                builder:
+                                    (_, StudyDirection? studyDirection, __) =>
+                                        new _CenteredBigText(_locale!
+                                            .studyScreenSortingCardButtonLabel(
+                                                studyDirection!
+                                                    .present(_locale!)))),
                             onPressed: () {
                               _shouldReorderCards = true;
                               _studyDirectionNotifier.value = _nextValue(
@@ -191,10 +192,10 @@ class _StudyScreenState extends State<StudyScreen> {
                         new ElevatedButton(
                             child: new ValueListenableBuilder(
                                 valueListenable: _cardSideNotifier,
-                                builder: (_, CardSide cardSide, __) =>
-                                    new _CenteredBigText(
-                                        _locale.studyScreenCardSideButtonLabel(
-                                            cardSide.present(_locale)))),
+                                builder: (_, CardSide? cardSide, __) =>
+                                    new _CenteredBigText(_locale!
+                                        .studyScreenCardSideButtonLabel(
+                                            cardSide!.present(_locale!)))),
                             onPressed: () {
                               _cardSideNotifier.value = _nextValue(
                                   CardSide.values, _cardSideNotifier.value);
@@ -213,29 +214,30 @@ class _StudyScreenState extends State<StudyScreen> {
 
   void _showFinishStudyDialog() {
     WidgetsBinding.instance.addPostFrameCallback((_) => new ConfirmDialog.ok(
-            title: _locale.studyScreenStudyEndDialogTitle,
-            content: _locale.studyScreenStudyEndDialogContent)
+            title: _locale!.studyScreenStudyEndDialogTitle,
+            content: _locale!.studyScreenStudyEndDialogContent)
         .show(context));
   }
 
   void _orderCards(int newIndex, bool shouldTakeAllCards) {
-    final listToOrder =
-        shouldTakeAllCards ? _cards : _cards.sublist(newIndex, _cards.length);
+    final listToOrder = shouldTakeAllCards
+        ? _cards!
+        : _cards!.sublist(newIndex, _cards!.length);
 
     if (listToOrder.length <= 1) return;
 
     final studyDirection = _studyDirectionNotifier.value;
     if (studyDirection == StudyDirection.forward) {
-      listToOrder.sort((a, b) => a.packId.compareTo(b.packId));
+      listToOrder.sort((a, b) => a.packId!.compareTo(b.packId!));
       listToOrder.sort((a, b) => a.text.compareTo(b.text));
     } else if (studyDirection == StudyDirection.backward) {
-      listToOrder.sort((a, b) => b.packId.compareTo(a.packId));
+      listToOrder.sort((a, b) => b.packId!.compareTo(a.packId!));
       listToOrder.sort((a, b) => b.text.compareTo(a.text));
     } else
       listToOrder.shuffle(new Random());
 
     if (!shouldTakeAllCards)
-      _cards.replaceRange(newIndex, _cards.length, listToOrder);
+      _cards!.replaceRange(newIndex, _cards!.length, listToOrder);
   }
 
   Widget _buildCard(_, int index) {
@@ -249,13 +251,13 @@ class _StudyScreenState extends State<StudyScreen> {
     return new ValueListenableBuilder(
         valueListenable: _curCardUpdater,
         builder: (_, __, ___) {
-          final card = _cards[indexCard];
+          final card = _cards![indexCard];
           return new Column(children: [
-            new TightFlexible(child: _PackLabel(_packMap[card.packId])),
+            new TightFlexible(child: _PackLabel(_packMap[card.packId]!)),
             new TightFlexible(
                 child: new ValueListenableBuilder(
                     valueListenable: _cardSideNotifier,
-                    builder: (_, CardSide cardSide, __) {
+                    builder: (_, CardSide? cardSide, __) {
                       final isFront = cardSide == CardSide.random
                           ? new Random().nextBool()
                           : cardSide == CardSide.front;
@@ -290,10 +292,10 @@ class _StudyScreenState extends State<StudyScreen> {
   }
 
   bool _isStudyOver(int newIndex) =>
-      newIndex == 0 && _curCardIndexNotifier.value == _cards.length - 1;
+      newIndex == 0 && _curCardIndexNotifier.value == _cards!.length - 1;
 
   int _getIndexCard(int newIndex) {
-    final cardsLength = _cards.length;
+    final cardsLength = _cards!.length;
     return newIndex >= cardsLength
         ? newIndex % cardsLength
         : (newIndex < 0 ? cardsLength - 1 : newIndex);
@@ -309,7 +311,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
   @override
   void dispose() {
-    _controller?.dispose();
+    _controller.dispose();
 
     _curCardIndexNotifier.dispose();
     _curCardUpdater.dispose();
@@ -346,18 +348,18 @@ class _CardSideFrame extends StatelessWidget {
 
   final bool isFront;
 
-  const _CardSideFrame({@required this.card, @required this.isFront});
+  const _CardSideFrame({required this.card, required this.isFront});
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
 
-    Widget subtitle;
+    Widget? subtitle;
     if (isFront) {
       String subtext =
-          (card.transcription ?? '').isEmpty ? '' : '[${card.transcription}]\n';
+          card.transcription.isEmpty ? '' : '[${card.transcription}]\n';
       if (card.partOfSpeech != null)
-        subtext += card.partOfSpeech.present(locale);
+        subtext += card.partOfSpeech!.present(locale);
 
       subtitle = _CenteredBigText(subtext);
     }
@@ -379,7 +381,7 @@ class _CardSideFrame extends StatelessWidget {
               child: new Center(
                   child: new ListTile(
                       title: new _CenteredBigText(
-                          isFront ? card.text : card.translation),
+                          isFront ? card.text : card.translation!),
                       subtitle: subtitle)),
               flex: 2)
         ])));
@@ -394,14 +396,14 @@ class _ButtonPanel extends StatelessWidget {
   final List<ElevatedButton> addButtons;
 
   const _ButtonPanel(
-      {@required this.onLearningPressed,
-      @required this.onNextCardPressed,
-      List<ElevatedButton> addButtons})
+      {required this.onLearningPressed,
+      required this.onNextCardPressed,
+      List<ElevatedButton>? addButtons})
       : addButtons = addButtons ?? const <ElevatedButton>[];
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     final screenSize = MediaQuery.of(context).size;
     final buttons = [
       new ElevatedButton(
@@ -435,7 +437,7 @@ class _CenteredBigText extends StatelessWidget {
   @override
   Widget build(BuildContext context) => new Text(data,
       textAlign: TextAlign.center,
-      textScaleFactor: new Styler(context).isDense ? 1.2 : 1.6);
+      textScaler: TextScaler.linear(new Styler(context).isDense ? 1.2 : 1.6));
 }
 
 class StudyScreen extends StatefulWidget {
@@ -445,16 +447,16 @@ class StudyScreen extends StatefulWidget {
 
   final List<StoredPack> packs;
 
-  final List<int> studyStageIds;
+  final List<int>? studyStageIds;
 
   final DictionaryProvider provider;
 
-  final ISpeaker defaultSpeaker;
+  final ISpeaker? defaultSpeaker;
 
   const StudyScreen(this.storage,
-      {@required this.packs,
-      @required this.packStorage,
-      @required this.provider,
+      {required this.packs,
+      required this.packStorage,
+      required this.provider,
       this.studyStageIds,
       this.defaultSpeaker});
 

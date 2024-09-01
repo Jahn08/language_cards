@@ -25,7 +25,7 @@ class ExporterTester {
 
     final packObjs =
         jsonDecode(expectedFile.readAsStringSync()) as List<dynamic>;
-    expect(packObjs?.length, packsToExport.length);
+    expect(packObjs.length, packsToExport.length);
 
     final packedCards = await packStorage.wordStorage
         .fetchFiltered(parentIds: packsToExport.map((p) => p.id).toList());
@@ -92,7 +92,6 @@ class ExporterTester {
     final imports = await new PackImporter(packStorage, packStorage.wordStorage,
             Localizator.defaultLocalization)
         .import(exportFilePath);
-    expect(imports == null, false);
     expect(imports.length, originalPacks.length);
 
     final packedCards = await packStorage.wordStorage
@@ -107,7 +106,7 @@ class ExporterTester {
       ExporterTester.assertPacksAreEqual(importedPack, originalPack);
 
       final storedPack = await packStorage.find(importedPack.id);
-      ExporterTester.assertPacksAreEqual(importedPack, storedPack);
+      ExporterTester.assertPacksAreEqual(importedPack, storedPack!);
 
       final importedCards = importedPackObj.value;
       final originalCards =

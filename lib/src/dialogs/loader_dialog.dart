@@ -4,7 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 class LoaderDialog {
   LoaderDialog._();
 
-  static Future<LoaderState<T>> showAsync<T>(BuildContext context,
+  static Future<LoaderState<T>?> showAsync<T>(BuildContext context,
       Future<T> Function() processor, AppLocalizations locale) {
     return showDialog<LoaderState<T>>(
         barrierDismissible: false,
@@ -35,9 +35,9 @@ class LoaderDialog {
 }
 
 class LoaderState<T> {
-  final T value;
+  final T? value;
 
-  final Object error;
+  final Object? error;
 
   LoaderState({this.value, this.error});
 }

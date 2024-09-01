@@ -37,7 +37,7 @@ class AssetIcon extends Image {
       case Language.italian:
         return italianFlag;
       default:
-        return null;
+        throw new Exception('Language id $lang is not supported');
     }
   }
 }

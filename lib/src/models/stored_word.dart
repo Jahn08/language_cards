@@ -13,23 +13,23 @@ class StoredWord extends StoredEntity {
   static const studyProgressFieldName = 'study_progress';
   static const packIdFieldName = 'pack_id';
 
-  int _packId;
+  int? _packId;
 
   final String text;
 
   final String transcription;
 
-  final PartOfSpeech partOfSpeech;
+  final PartOfSpeech? partOfSpeech;
 
-  final String translation;
+  final String? translation;
 
   int _studyProgress;
 
   StoredWord(this.text,
-      {int id,
-      int packId,
-      String transcription,
-      int studyProgress,
+      {int? id,
+      int? packId,
+      String? transcription,
+      int? studyProgress,
       this.translation,
       this.partOfSpeech})
       : _packId = packId,
@@ -39,17 +39,17 @@ class StoredWord extends StoredEntity {
 
   StoredWord.fromDbMap(Map<String, dynamic> values)
       : this(values[textFieldName] as String,
-            id: values[StoredEntity.idFieldName] as int,
-            packId: values[packIdFieldName] as int,
-            transcription: values[transcriptionFieldName] as String,
-            studyProgress: values[studyProgressFieldName] as int,
+            id: values[StoredEntity.idFieldName] as int?,
+            packId: values[packIdFieldName] as int?,
+            transcription: values[transcriptionFieldName] as String?,
+            studyProgress: values[studyProgressFieldName] as int?,
             partOfSpeech:
-                PartOfSpeech.retrieve(values[partOfSpeechFieldName] as String),
-            translation: values[translationFieldName] as String);
+                PartOfSpeech.retrieve(values[partOfSpeechFieldName] as String?),
+            translation: values[translationFieldName] as String?);
 
-  int get packId => _packId;
+  int? get packId => _packId;
 
-  set packId(int value) {
+  set packId(int? value) {
     _packId = getIdFromValue(value, _packId);
   }
 
@@ -73,7 +73,7 @@ class StoredWord extends StoredEntity {
   String get foreignTableName => StoredPack.entityName;
 
   @override
-  Map<String, dynamic> toDbMap({bool excludeIds}) {
+  Map<String, dynamic> toDbMap({bool? excludeIds}) {
     final map = super.toDbMap(excludeIds: excludeIds);
     map.addAll({
       textFieldName: text,

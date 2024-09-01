@@ -13,7 +13,7 @@ class WordStorage extends BaseStorage<StoredWord> {
   String get entityName => StoredWord.entityName;
 
   Future<List<StoredWord>> findDuplicates(
-      {@required String text, @required PartOfSpeech pos, int id}) async {
+      {required String text, PartOfSpeech? pos, int? id}) async {
     final foundWords = await fetchInternally(filters: {
       StoredWord.textFieldName: [text],
       StoredWord.partOfSpeechFieldName: [pos.toString()]
@@ -24,11 +24,11 @@ class WordStorage extends BaseStorage<StoredWord> {
   }
 
   Future<List<StoredWord>> fetchFiltered(
-      {List<int> parentIds,
-      List<int> studyStageIds,
-      String text,
-      int skipCount,
-      int takeCount}) {
+      {List<int?>? parentIds,
+      List<int>? studyStageIds,
+      String? text,
+      int? skipCount,
+      int? takeCount}) {
     final filters = <String, List<dynamic>>{};
 
     if (parentIds != null && parentIds.isNotEmpty)
@@ -45,12 +45,18 @@ class WordStorage extends BaseStorage<StoredWord> {
   }
 
   @override
+  Future<List<StoredWord>> fetch(
+          {String? textFilter, int? skipCount, int? takeCount}) =>
+      fetchInternally(
+          textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
+
+  @override
   Future<List<StoredWord>> fetchInternally(
-          {int skipCount,
-          int takeCount,
-          String orderBy,
-          String textFilter,
-          Map<String, List<dynamic>> filters}) =>
+          {int? skipCount,
+          int? takeCount,
+          String? orderBy,
+          String? textFilter,
+          Map<String, List<dynamic>>? filters}) =>
       super.fetchInternally(
           skipCount: skipCount,
           takeCount: takeCount,
@@ -68,38 +74,39 @@ class WordStorage extends BaseStorage<StoredWord> {
       values.map((w) => new StoredWord.fromDbMap(w)).toList();
 
   @override
-  Future<int> count({int parentId, String textFilter}) async {
+  Future<int> count({int? parentId, String? textFilter}) async {
     if (parentId == null) return super.count(textFilter: textFilter);
 
-    return (await groupByParent([parentId], textFilter))[parentId];
+    return (await groupByParent([parentId], textFilter))[parentId]!;
   }
 
-  Future<Map<int, int>> groupByParent(
-      [List<int> parentIds, String textFilter]) async {
+  Future<Map<int?, int>> groupByParent(
+      [List<int?>? parentIds, String? textFilter]) async {
     final groups = await connection.groupBy(entityName,
         groupField: StoredWord.packIdFieldName,
         groupValues: parentIds,
         filters: addTextFilterClause(textFilter: textFilter));
-    return <int, int>{
-      for (var g in groups) g[StoredWord.packIdFieldName] as int: g.length
+    return <int?, int>{
+      for (final g in groups) g[StoredWord.packIdFieldName] as int?: g.length
     };
   }
 
-  Future<Map<int, Map<int, int>>> groupByStudyLevels() async {
+  Future<Map<int?, Map<int, int>>> groupByStudyLevels() async {
     final groups = await connection.groupBySeveral(entityName,
         groupFields: [_parentIdField, StoredWord.studyProgressFieldName]);
 
-    return groups.fold<Map<int, Map<int, int>>>(<int, Map<int, int>>{},
+    return groups.fold<Map<int?, Map<int, int>>>(<int?, Map<int, int>>{},
         (res, gr) {
-      final packId = gr[_parentIdField] as int;
+      final packId = gr[_parentIdField] as int?;
       if (!res.containsKey(packId)) res[packId] = <int, int>{};
 
-      res[packId][gr[StoredWord.studyProgressFieldName] as int] = gr.length;
+      res[packId]![gr[StoredWord.studyProgressFieldName] as int] = gr.length;
       return res;
     });
   }
 
-  Future<Map<String, int>> groupByTextIndexAndParent([List<int> parentIds]) =>
+  Future<Map<String, int>?> groupByTextIndexAndParent(
+          [List<int?>? parentIds]) =>
       groupByTextIndex(parentIds == null || parentIds.isEmpty
           ? null
           : {_parentIdField: parentIds});
@@ -107,6 +114,6 @@ class WordStorage extends BaseStorage<StoredWord> {
   @protected
   @override
   Future<Map<String, int>> groupByTextIndex(
-          [Map<String, List<dynamic>> groupValues]) =>
+          [Map<String, List<dynamic>>? groupValues]) =>
       super.groupByTextIndex(groupValues);
 }

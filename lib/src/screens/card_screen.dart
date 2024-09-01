@@ -10,22 +10,22 @@ import '../widgets/card_editor.dart';
 import '../widgets/bar_scaffold.dart';
 
 class CardScreen extends StatelessWidget {
-  final int wordId;
+  final int? wordId;
 
-  final StoredPack pack;
+  final StoredPack? pack;
 
   final DictionaryProvider provider;
 
-  final ISpeaker defaultSpeaker;
+  final ISpeaker? defaultSpeaker;
 
   final WordStorage wordStorage;
 
   final BaseStorage<StoredPack> packStorage;
 
   const CardScreen(
-      {@required this.wordStorage,
-      @required this.packStorage,
-      @required this.provider,
+      {required this.wordStorage,
+      required this.packStorage,
+      required this.provider,
       this.defaultSpeaker,
       this.pack,
       this.wordId});
@@ -34,8 +34,8 @@ class CardScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context);
     final title = wordId == null
-        ? locale.cardScreenHeadBarAddingCardTitle
-        : locale.cardScreenHeadBarChangingCardTitle;
+        ? locale!.cardScreenHeadBarAddingCardTitle
+        : locale!.cardScreenHeadBarChangingCardTitle;
 
     return new BarScaffold(
         title: title,
@@ -46,7 +46,8 @@ class CardScreen extends StatelessWidget {
             defaultSpeaker: defaultSpeaker,
             pack: pack,
             wordId: wordId,
-            afterSave: (_, __, bool refresh) => Router.goBackToCardList(context,
-                pack: pack, refresh: refresh)));
+            afterSave: (_, __, {bool refresh = false}) =>
+                Router.goBackToCardList(context,
+                    pack: pack, refresh: refresh)));
   }
 }

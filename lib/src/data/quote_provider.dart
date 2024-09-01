@@ -48,7 +48,7 @@ class QuoteProvider {
       ];
     }
 
-    return _quoteCache[localeName];
+    return _quoteCache[localeName]!;
   }
 
   static MapEntry<String, String> _separateTextFromSource(String quote) {

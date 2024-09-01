@@ -6,16 +6,17 @@ abstract class ISpeaker {
 }
 
 class Speaker implements ISpeaker {
-  static Speaker _instance;
+  static Speaker? _instance;
 
-  Language _lang;
+  Language? _lang;
 
   final FlutterTts _tts;
 
   Speaker._() : _tts = new FlutterTts();
 
-  Future<bool> _setLanguage(Language newLang) async {
+  Future<bool> _setLanguage(Language? newLang) async {
     if (newLang == _lang) return true;
+    if (newLang == null) return false;
 
     final langStr = _stringifyLanguage(newLang);
     if (!(await _tts.isLanguageAvailable(langStr) as bool)) return false;
@@ -41,7 +42,7 @@ class Speaker implements ISpeaker {
       case Language.italian:
         return 'it-IT';
       default:
-        return null;
+        throw new Exception('Language $lang is not found');
     }
   }
 
@@ -50,12 +51,12 @@ class Speaker implements ISpeaker {
     await _tts.speak(text);
   }
 
-  static Future<ISpeaker> getSpeaker(Language lang) async {
+  static Future<ISpeaker?> getSpeaker(Language? lang) async {
     if (lang == null) return null;
 
     _instance ??= new Speaker._();
 
-    if (!(await _instance._setLanguage(lang))) return null;
+    if (!(await _instance!._setLanguage(lang))) return null;
 
     return _instance;
   }

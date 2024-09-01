@@ -10,11 +10,11 @@ class WordDictionaryTester {
   static Map<String, dynamic> buildEmptyArticleJson() => _buildArticle([]);
 
   static Map<String, dynamic> buildArticleJson(
-      {String text, PartOfSpeech partOfSpeech}) {
+      {String? text, PartOfSpeech? partOfSpeech}) {
     text ??= Randomiser.nextString();
     partOfSpeech ??= Randomiser.nextElement(PartOfSpeech.values);
 
-    final usedPos = <PartOfSpeech>{partOfSpeech};
+    final usedPos = <PartOfSpeech>{partOfSpeech!};
     return _buildArticle(List.generate(Randomiser.nextInt(3) + 2, (index) {
       PartOfSpeech articlePos;
       if (index > 0) {
@@ -22,7 +22,7 @@ class WordDictionaryTester {
           articlePos = Randomiser.nextElement(PartOfSpeech.values);
         } while (!usedPos.add(articlePos));
       } else
-        articlePos = partOfSpeech;
+        articlePos = partOfSpeech!;
 
       return _buildWordDefinition(
           text ?? Randomiser.nextString(), articlePos.valueList.first);

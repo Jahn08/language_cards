@@ -8,17 +8,17 @@ class ConfirmDialog extends OutcomeDialog<bool> {
 
   final String content;
 
-  final String confirmationLabel;
+  final String? confirmationLabel;
 
-  final String cancellationLabel;
+  final String? cancellationLabel;
 
   final bool isCancellable;
 
   const ConfirmDialog(
-      {@required String title,
-      @required String content,
-      @required String confirmationLabel,
-      String cancellationLabel})
+      {required String title,
+      required String content,
+      required String confirmationLabel,
+      String? cancellationLabel})
       : this._(
             title: title,
             content: content,
@@ -27,21 +27,21 @@ class ConfirmDialog extends OutcomeDialog<bool> {
             cancellationLabel: cancellationLabel);
 
   const ConfirmDialog._(
-      {this.title,
-      this.content,
-      this.isCancellable,
+      {required this.title,
+      required this.content,
+      required this.isCancellable,
       this.confirmationLabel,
       this.cancellationLabel})
       : super();
 
-  ConfirmDialog.ok({@required String title, @required String content})
+  ConfirmDialog.ok({required String title, required String content})
       : this._(title: title, content: content, isCancellable: false);
 
-  Future<bool> show(BuildContext context) => showDialog<bool>(
+  Future<bool?> show(BuildContext context) => showDialog<bool>(
       context: context,
       builder: (buildContext) => new AlertDialog(
               content: new Scrollbar(
-                  isAlwaysShown: true,
+                  thumbVisibility: true,
                   child: new SingleChildScrollView(child: new Text(content))),
               title: new Text(title),
               actions: [
@@ -50,7 +50,7 @@ class ConfirmDialog extends OutcomeDialog<bool> {
                       () => returnResult(context, false), cancellationLabel),
                 ElevatedButton(
                     child: new Text(confirmationLabel ??
-                        AppLocalizations.of(context)
+                        AppLocalizations.of(context)!
                             .confirmDialogOkButtonLabel),
                     onPressed: () => Navigator.pop(buildContext, true))
               ]));

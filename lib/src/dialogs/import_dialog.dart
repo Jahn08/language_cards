@@ -13,13 +13,13 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 
   final _key = new GlobalKey<FormState>();
 
-  final _importFilePathNotifier = new ValueNotifier<String>(null);
+  final _importFilePathNotifier = new ValueNotifier<String?>('');
 
-  bool _isJsonMimeSupported;
+  bool? _isJsonMimeSupported;
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     return new AlertDialog(
         content: new SizedBox(
             height: MediaQuery.of(context).size.height * 0.2,
@@ -28,12 +28,12 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
                 child: new Column(children: [
                   new ValueListenableBuilder(
                       valueListenable: _importFilePathNotifier,
-                      builder: (_, String importFilePath, __) =>
+                      builder: (_, String? importFilePath, __) =>
                           new StyledTextField(
                             locale.importDialogFileNameTextFieldLabel,
-                            onChanged: (value, _) =>
-                                _importFilePathNotifier.value = value,
-                            initialValue: importFilePath,
+                            onChanged: (value, {bool? submitted}) =>
+                                _importFilePathNotifier.value = value ?? '',
+                            initialValue: importFilePath ?? '',
                             isRequired: true,
                             validator: (val) {
                               return val == null ||
@@ -52,7 +52,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
                             await ContextProvider.isFileExtensionSupported(
                                 _jsonExtension);
 
-                        final fileResult = await (_isJsonMimeSupported
+                        final fileResult = await (_isJsonMimeSupported!
                             ? FilePicker.platform.pickFiles(
                                 allowedExtensions: [_jsonExtension],
                                 type: FileType.custom)
@@ -72,7 +72,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
               child: new Text(locale.importDialogImportBtnLabel),
               onPressed: () async {
                 final state = _key.currentState;
-                if (!state.validate()) return null;
+                if (state == null || !state.validate()) return;
 
                 state.save();
 
@@ -92,7 +92,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
 class _ImportFormDialog extends StatefulWidget {
   final Widget cancelButton;
 
-  final void Function(String) onPathChosen;
+  final void Function(String?)? onPathChosen;
 
   const _ImportFormDialog(this.cancelButton, this.onPathChosen);
 
@@ -111,7 +111,7 @@ class ImportDialogResult {
 class ImportDialog extends OutcomeDialog<String> {
   const ImportDialog();
 
-  Future<String> show(BuildContext context) {
+  Future<String?> show(BuildContext context) {
     return showDialog<String>(
         context: context,
         builder: (buildContext) => new _ImportFormDialog(

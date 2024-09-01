@@ -5,7 +5,11 @@ class AssuredFinder {
   AssuredFinder._();
 
   static Finder findOne(
-          {Key key, String label, IconData icon, Type type, bool shouldFind}) =>
+          {Key? key,
+          String? label,
+          IconData? icon,
+          Type? type,
+          bool? shouldFind}) =>
       _find(
           key: key,
           expectSeveral: false,
@@ -15,12 +19,12 @@ class AssuredFinder {
           shouldFind: shouldFind);
 
   static Finder _find(
-      {Key key,
-      String label,
-      IconData icon,
-      Type type,
-      bool shouldFind,
-      bool expectSeveral}) {
+      {Key? key,
+      String? label,
+      IconData? icon,
+      Type? type,
+      bool? shouldFind,
+      bool? expectSeveral}) {
     Finder finder;
     if (key != null)
       finder = find.byKey(key);
@@ -31,7 +35,7 @@ class AssuredFinder {
     else if (icon != null)
       finder = find.byIcon(icon);
     else
-      finder = find.byType(type);
+      finder = find.byType(type!);
 
     expect(
         finder,
@@ -41,14 +45,14 @@ class AssuredFinder {
     return finder;
   }
 
-  static Finder findSeveral({String label, Type type, bool shouldFind}) =>
+  static Finder findSeveral({String? label, Type? type, bool? shouldFind}) =>
       _find(
           expectSeveral: true,
           label: label,
           type: type,
           shouldFind: shouldFind);
 
-  static Finder findFlatButtonByIcon(IconData icon, {bool shouldFind}) {
+  static Finder findFlatButtonByIcon(IconData icon, {bool? shouldFind}) {
     final flatBtnFinder = find.ancestor(
         of: find.byIcon(icon),
         matching: find.byWidgetPredicate((widget) => widget is TextButton));
@@ -59,9 +63,9 @@ class AssuredFinder {
 
   static Type typify<T>() => T;
 
-  static Matcher matchOne({bool shouldFind}) =>
+  static Matcher matchOne({bool? shouldFind}) =>
       (shouldFind ?? false) ? findsOneWidget : findsNothing;
 
-  static Matcher matchSeveral({bool shouldFind}) =>
+  static Matcher matchSeveral({bool? shouldFind}) =>
       (shouldFind ?? false) ? findsWidgets : findsNothing;
 }

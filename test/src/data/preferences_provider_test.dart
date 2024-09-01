@@ -10,7 +10,7 @@ void main() {
     PreferencesTester.resetSharedPreferences();
 
     final userParams = await PreferencesProvider.fetch();
-    expect(userParams?.toJson(), new UserParams().toJson());
+    expect(userParams.toJson(), new UserParams().toJson());
   });
 
   testWidgets(
@@ -24,7 +24,6 @@ void main() {
     final expectedPackOrder = expectedParams.studyParams.packOrder;
 
     final userParams = await PreferencesProvider.fetch();
-    expect(userParams != null, true);
     expect(userParams.theme, expectedTheme);
     expect(userParams.interfaceLang, expectedLang);
     expect(userParams.studyParams.cardSide, expectedCardSide);

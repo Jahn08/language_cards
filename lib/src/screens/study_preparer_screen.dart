@@ -17,10 +17,10 @@ import '../widgets/translation_indicator.dart';
 import '../widgets/underlined_container.dart';
 
 class _HashSetNotifier<T> extends ValueNotifier<HashSet<T>> {
-  _HashSetNotifier([HashSet<T> value]) : super(value ?? new HashSet<T>());
+  _HashSetNotifier([HashSet<T>? value]) : super(value ?? new HashSet<T>());
 
   void clear() {
-    if (value == null || value.isEmpty) return;
+    if (value.isEmpty) return;
 
     value.clear();
     notifyListeners();
@@ -28,7 +28,7 @@ class _HashSetNotifier<T> extends ValueNotifier<HashSet<T>> {
 
   @override
   set value(HashSet<T> newValue) {
-    final valueToSet = newValue ?? new HashSet();
+    final valueToSet = newValue;
     if ((value.length + valueToSet.length) == 0) return;
 
     super.value = valueToSet;
@@ -51,9 +51,9 @@ class _HashSetNotifier<T> extends ValueNotifier<HashSet<T>> {
 }
 
 class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
-  List<StudyPack> _packs;
+  List<StudyPack>? _packs;
 
-  Future<UserParams> _futureParams;
+  Future<UserParams>? _futureParams;
 
   bool _hasScrollNavigator = false;
 
@@ -74,14 +74,14 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
-    _futureParams ??= SettingsBlocProvider.of(context).userParams;
+    final locale = AppLocalizations.of(context)!;
+    _futureParams ??= SettingsBlocProvider.of(context)!.userParams;
 
     return new FutureLoader<List<StudyPack>>(
         _packs == null
             ? widget.storage.fetchStudyPacks()
             : Future.value(_packs),
-        (stPacks) => new FutureLoader(_futureParams, (UserParams userParams) {
+        (stPacks) => new FutureLoader(_futureParams!, (UserParams userParams) {
               _initPacks(stPacks, userParams.studyParams.packOrder);
 
               final styler = new Styler(context);
@@ -92,7 +92,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                         onPressed: () {
                           if (_excludedPackIdsNotifier.value.isEmpty)
                             _excludedPackIdsNotifier
-                                .addAll(stPacks.map((p) => p.pack.id));
+                                .addAll(stPacks.map((p) => p.pack.id!));
                           else
                             _excludedPackIdsNotifier.clear();
                         },
@@ -113,7 +113,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                     new Flexible(
                         child: new Scrollbar(
                             child: new ListView(
-                                children: _packs
+                                children: _packs!
                                     .map((p) => new ValueListenableBuilder(
                                         valueListenable:
                                             _excludedPackIdsNotifier,
@@ -125,7 +125,8 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                                                 stPack: p,
                                                 isChecked: !excludedPacks
                                                     .contains(p.pack.id),
-                                                onChanged: (isChecked, packId) {
+                                                onChanged: (packId,
+                                                    {bool isChecked = false}) {
                                                   if (isChecked)
                                                     _excludedPackIdsNotifier
                                                         .remove(packId);
@@ -133,7 +134,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
                                                     _excludedPackIdsNotifier
                                                         .add(packId);
                                                 },
-                                                secondary: child,
+                                                secondary: child!,
                                                 showStudyDate: userParams
                                                     .studyParams
                                                     .showStudyDate)))
@@ -170,7 +171,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
     if (_packs != null) return;
 
     _packs = _sortPacks(stPacks, order);
-    _hasScrollNavigator = _packs.length > 10;
+    _hasScrollNavigator = _packs!.length > 10;
 
     if (_hasScrollNavigator)
       _scrollController.addListener(() {
@@ -206,7 +207,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 }
 
 class _CheckListItem extends StatelessWidget {
-  final void Function(bool, int) onChanged;
+  final void Function(int, {bool isChecked}) onChanged;
 
   final StudyPack stPack;
 
@@ -217,29 +218,30 @@ class _CheckListItem extends StatelessWidget {
   final bool showStudyDate;
 
   const _CheckListItem(
-      {@required this.isChecked,
-      @required this.stPack,
-      @required this.onChanged,
-      @required this.secondary,
-      @required this.showStudyDate});
+      {required this.isChecked,
+      required this.stPack,
+      required this.onChanged,
+      required this.secondary,
+      required this.showStudyDate});
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     final pack = stPack.pack;
 
     final cardNumIndicator = new CardNumberIndicator(stPack.cardsOverall);
     final isThreeLined = showStudyDate && pack.studyDate != null;
     return new UnderlinedContainer(new CheckboxListTile(
       value: isChecked,
-      onChanged: (isChecked) => onChanged(isChecked, pack.id),
+      onChanged: (isChecked) =>
+          onChanged(pack.id!, isChecked: isChecked ?? false),
       secondary: secondary,
       title: new OneLineText(pack.name),
       subtitle: isThreeLined
           ? new Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               cardNumIndicator,
               new Text(locale.studyPreparerScreenPackLastStudyDate(
-                  DateFormat.yMMMMd(locale.localeName).format(pack.studyDate)))
+                  DateFormat.yMMMMd(locale.localeName).format(pack.studyDate!)))
             ])
           : cardNumIndicator,
       isThreeLine: isThreeLined,
@@ -252,25 +254,26 @@ class _StudyLevelList extends StatelessWidget {
 
   final HashSet<int> excludedPackIds;
 
-  const _StudyLevelList(
-      {@required this.stPacks, @required this.excludedPackIds});
+  const _StudyLevelList({required this.stPacks, required this.excludedPackIds});
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
 
-    final studyStages = <int, int>{for (var st in WordStudyStage.values) st: 0};
+    final studyStages = <int, int>{
+      for (final st in WordStudyStage.values) st: 0
+    };
     final includedPacks =
         stPacks.where((p) => !excludedPackIds.contains(p.pack.id)).toList();
     includedPacks
         .expand((e) => e.cardsByStage.entries)
-        .forEach((en) => studyStages[en.key] += en.value);
+        .forEach((en) => studyStages[en.key] = studyStages[en.key]! + en.value);
 
     final levels = <String, int>{};
     studyStages.entries.forEach((en) {
       final key = WordStudyStage.stringify(en.key, locale);
       if (levels.containsKey(key))
-        levels[key] += en.value;
+        levels[key] = levels[key]! + en.value;
       else
         levels[key] = en.value;
     });
@@ -281,7 +284,7 @@ class _StudyLevelList extends StatelessWidget {
           new MapEntry(locale.studyPreparerScreenAllCardsCategoryName,
               levels.values.reduce((res, el) => res + el)));
     return new Scrollbar(
-        isAlwaysShown: true,
+        thumbVisibility: true,
         child: new ListView(
             children: lvlEntries.map((lvl) {
           final isEnabled = lvl.value > 2;
@@ -303,7 +306,7 @@ class _StudyLevelList extends StatelessWidget {
 class StudyPreparerScreen extends StatefulWidget {
   final StudyStorage storage;
 
-  const StudyPreparerScreen([StudyStorage storage])
+  const StudyPreparerScreen([StudyStorage? storage])
       : storage = storage ?? const PackStorage();
 
   @override

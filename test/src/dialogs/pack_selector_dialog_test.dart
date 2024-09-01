@@ -18,10 +18,11 @@ void main() {
         await _generatePacks(tester, storage), (finder, pack) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
-      final optionTile = option.child as ListTile;
-      expect((optionTile.title as Column).children.whereType<Text>().first.data,
+      final optionTile = option.child! as ListTile;
+      expect(
+          (optionTile.title! as Column).children.whereType<Text>().first.data,
           pack.name);
-      expect((optionTile.subtitle as CardNumberIndicator).number,
+      expect((optionTile.subtitle! as CardNumberIndicator).number,
           pack.cardsNumber);
       expect(optionTile.trailing != null, pack.id == chosenPack.id);
     }, ListTile);
@@ -40,14 +41,14 @@ void main() {
 }
 
 Future<List<StoredPack>> _generatePacks(WidgetTester tester,
-    [PackStorageMock storage]) async {
-  storage ??= new PackStorageMock();
+    [PackStorageMock? storage]) async {
+  storage ??= new PackStorageMock(packsNumber: 2);
 
-  List<StoredPack> packs;
-  await tester.runAsync(() async => packs = await storage.fetch());
+  late List<StoredPack> packs;
+  await tester.runAsync(() async => packs = await storage!.fetch());
 
   return packs;
 }
 
-PackSelectorDialog _buildDialog(BuildContext context, [int chosenPackId]) =>
+PackSelectorDialog _buildDialog(BuildContext context, [int? chosenPackId]) =>
     new PackSelectorDialog(context, chosenPackId);

@@ -9,13 +9,13 @@ class WebDictionaryProvider extends DictionaryProvider {
 
   final Client _client;
 
-  static List<String> _acceptedLangs;
+  static List<String>? _acceptedLangs;
 
-  WebDictionaryProvider(String apiKey, {Client client})
+  WebDictionaryProvider(String apiKey, {Client? client})
       : _key = apiKey,
         _client = client ?? new Client();
 
-  Uri _buildRootUri(String method, [Map<String, String> queryParams]) {
+  Uri _buildRootUri(String method, [Map<String, String>? queryParams]) {
     final params = {'key': _key};
     if (queryParams != null) params.addAll(queryParams);
 
@@ -40,7 +40,7 @@ class WebDictionaryProvider extends DictionaryProvider {
       _acceptedLangs = (jsonDecode(response.body) as List).cast<String>();
     }
 
-    return new HashSet.from(_acceptedLangs);
+    return new HashSet.from(_acceptedLangs!);
   }
 
   Uri _buildSearchUri(String langPair) =>
@@ -57,7 +57,7 @@ class WebDictionaryProvider extends DictionaryProvider {
   }
 
   @override
-  void dispose() => _client?.close();
+  void dispose() => _client.close();
 
   @override
   Future<Iterable<String>> searchForLemmas(String langParam, String text) =>

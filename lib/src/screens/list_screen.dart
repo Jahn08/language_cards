@@ -29,10 +29,10 @@ class _BottomBar extends StatelessWidget {
 }
 
 class _ListNotifier<T> extends ValueNotifier<List<T>> {
-  _ListNotifier([List<T> value]) : super(value ?? <T>[]);
+  _ListNotifier([List<T>? value]) : super(value ?? <T>[]);
 
   void clear() {
-    if (value == null || value.isEmpty) return;
+    if (value.isEmpty) return;
 
     value.clear();
     notifyListeners();
@@ -40,10 +40,9 @@ class _ListNotifier<T> extends ValueNotifier<List<T>> {
 
   @override
   set value(List<T> newValue) {
-    final valueToSet = newValue ?? <T>[];
-    if ((value.length + valueToSet.length) == 0) return;
+    if ((value.length + newValue.length) == 0) return;
 
-    super.value = valueToSet;
+    super.value = newValue;
   }
 
   void add(T item) {
@@ -68,10 +67,10 @@ class _ListNotifier<T> extends ValueNotifier<List<T>> {
 }
 
 class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
-  _MapNotifier([Map<TKey, TValue> value]) : super(value ?? {});
+  _MapNotifier([Map<TKey, TValue>? value]) : super(value ?? {});
 
   void clear() {
-    if (value == null || value.isEmpty) return;
+    if (value.isEmpty) return;
 
     value.clear();
     notifyListeners();
@@ -79,10 +78,9 @@ class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
 
   @override
   set value(Map<TKey, TValue> newValue) {
-    final valueToSet = newValue ?? {};
-    if ((value.length + valueToSet.length) == 0) return;
+    if ((value.length + newValue.length) == 0) return;
 
-    super.value = valueToSet;
+    super.value = newValue;
   }
 
   void upsert(TKey key, TValue item) {
@@ -91,8 +89,7 @@ class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
   }
 
   void upsertAll(Iterable<MapEntry<TKey, TValue>> entries) {
-    final inEntries = entries ?? {};
-    if (inEntries.isEmpty) return;
+    if (entries.isEmpty) return;
 
     value.addEntries(entries);
     notifyListeners();
@@ -105,8 +102,7 @@ class _MapNotifier<TKey, TValue> extends ValueNotifier<Map<TKey, TValue>> {
   }
 
   void removeAll(Iterable<TKey> keys) {
-    final inKeys = keys ?? <TKey>[];
-    if (inKeys.isEmpty) return;
+    if (keys.isEmpty) return;
 
     value.removeWhere((k, v) => keys.contains(k));
     notifyListeners();
@@ -123,7 +119,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
   int _pageIndex = 0;
 
   final _filterIndexesNotifier = new _MapNotifier<String, int>();
-  final _curFilterIndexNotifier = new ValueNotifier<String>(null);
+  final _curFilterIndexNotifier = new ValueNotifier<String?>(null);
 
   final Map<int, _CachedItem<TItem>> _itemsToRemove = {};
 
@@ -144,13 +140,13 @@ abstract class ListScreenState<TItem extends StoredEntity,
   }
 
   Future<void> _initFilterIndexes() async {
-    _filterIndexesNotifier.value = await getFilterIndexes();
+    _filterIndexesNotifier.value = await getFilterIndexes() ?? {};
   }
 
   @protected
-  Future<Map<String, int>> getFilterIndexes();
+  Future<Map<String, int>?> getFilterIndexes();
 
-  Future<void> _fetchItems([String text]) async {
+  Future<void> _fetchItems([String? text]) async {
     _canFetch = false;
     final nextItems = await _fetchNextItems(text);
 
@@ -165,11 +161,12 @@ abstract class ListScreenState<TItem extends StoredEntity,
       _fetchItems(curFilterIndex);
   }
 
-  Future<List<TItem>> _fetchNextItems([String text]) => fetchNextItems(
+  Future<List<TItem>> _fetchNextItems([String? text]) => fetchNextItems(
       _pageIndex++ * ListScreen.itemsPerPage, ListScreen.itemsPerPage, text);
 
   @protected
-  Future<List<TItem>> fetchNextItems(int skipCount, int takeCount, String text);
+  Future<List<TItem>> fetchNextItems(
+      int skipCount, int takeCount, String? text);
 
   @override
   void dispose() {
@@ -187,7 +184,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
 
   @override
   Widget build(BuildContext buildContext) {
-    final locale = AppLocalizations.of(buildContext);
+    final locale = AppLocalizations.of(buildContext)!;
     return new BarScaffold(
         title: title,
         barActions: <Widget>[
@@ -217,11 +214,9 @@ abstract class ListScreenState<TItem extends StoredEntity,
                     builder: (_, Map<String, int> filterIndexes, __) {
                       if (_getIsSearchModeAvailable(filterIndexLength))
                         return new IconButton(
-                            onPressed: filterIndexes == null
-                                ? null
-                                : () {
-                                    _isSearchModeNotifier.value = true;
-                                  },
+                            onPressed: () {
+                              _isSearchModeNotifier.value = true;
+                            },
                             icon: const Icon(Icons.search));
 
                       return const SizedBox.shrink();
@@ -264,12 +259,12 @@ abstract class ListScreenState<TItem extends StoredEntity,
   bool get canGoBack;
 
   @protected
-  String get curFilterIndex => _curFilterIndexNotifier.value;
+  String? get curFilterIndex => _curFilterIndexNotifier.value;
 
   @protected
   int get filterIndexLength => curFilterIndex == null
       ? _itemsLengthFromIndexes
-      : _filterIndexesNotifier.value[curFilterIndex];
+      : _filterIndexesNotifier.value[curFilterIndex]!;
 
   int get _itemsLengthFromIndexes => _filterIndexesNotifier.value.values
       .fold<int>(0, (prevLength, curLength) => prevLength + curLength);
@@ -281,15 +276,14 @@ abstract class ListScreenState<TItem extends StoredEntity,
   int get removableItemsLength => _itemsNotifier.value.length;
 
   @protected
-  Set<int> get nonRemovableItemIds => <int>{};
+  Set<int?> get nonRemovableItemIds => <int?>{};
 
   bool _isRemovableItem(TItem item) => !nonRemovableItemIds.contains(item.id);
 
   List<Widget> _buildBottomOptions(
       BuildContext scaffoldContext, List<TItem> markedItems) {
-    final locale = AppLocalizations.of(scaffoldContext);
-    final options =
-        getBottomBarOptions(markedItems, locale, scaffoldContext) ?? <Widget>[];
+    final locale = AppLocalizations.of(scaffoldContext)!;
+    final options = getBottomBarOptions(markedItems, locale, scaffoldContext);
     options.addAll(_buildBottomBarOptions(locale, scaffoldContext));
 
     return options;
@@ -316,6 +310,8 @@ abstract class ListScreenState<TItem extends StoredEntity,
 
               _itemsToRemove.addAll(markedItems);
               _itemsNotifier.removeWhere((w) => markedItems.containsKey(w.id));
+
+              if (!scaffoldContext.mounted) return;
 
               _showItemRemovalInfoSnackBar(
                   scaffoldContext: scaffoldContext,
@@ -348,12 +344,14 @@ abstract class ListScreenState<TItem extends StoredEntity,
               final nonRemovableIds = nonRemovableItemIds.toSet();
               _markedItemsNotifier.upsertAll(items
                   .where((i) => !nonRemovableIds.contains(i.id))
-                  .map((i) => new MapEntry(i.id, new _CachedItem(i, index++))));
+                  .map(
+                      (i) => new MapEntry(i.id!, new _CachedItem(i, index++))));
             })
       ];
 
   @protected
-  String getSelectorBtnLabel({bool allSelected, AppLocalizations locale}) {
+  String getSelectorBtnLabel(
+      {required bool allSelected, required AppLocalizations locale}) {
     final itemsOverall = removableItemsLength.toString();
     return allSelected
         ? locale.constsUnselectAll(itemsOverall)
@@ -364,12 +362,12 @@ abstract class ListScreenState<TItem extends StoredEntity,
   void clearItemsMarkedInEditor() => _markedItemsNotifier.clear();
 
   void _showItemRemovalInfoSnackBar(
-      {@required BuildContext scaffoldContext,
-      @required String message,
-      @required List<int> itemIdsToRemove,
-      @required AppLocalizations locale}) {
-    final snackBar = ScaffoldMessenger.of(scaffoldContext ?? context)
-        .showSnackBar(new SnackBar(
+      {required BuildContext scaffoldContext,
+      required String message,
+      required List<int> itemIdsToRemove,
+      required AppLocalizations locale}) {
+    final snackBar = ScaffoldMessenger.of(scaffoldContext).showSnackBar(
+        new SnackBar(
             duration: const Duration(milliseconds: ListScreen.removalTimeoutMs),
             content: new Text(message),
             action: SnackBarAction(
@@ -396,7 +394,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
                           builder: (_, Map<String, int> filterIndexes, __) =>
                               new ValueListenableBuilder(
                                   valueListenable: _curFilterIndexNotifier,
-                                  builder: (_, String curIndex, __) =>
+                                  builder: (_, String? curIndex, __) =>
                                       new ListView(
                                           shrinkWrap: true,
                                           children: (filterIndexes.keys.toList()
@@ -411,7 +409,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
   }
 
   Widget _buildFilterIndex(
-      BuildContext context, String index, String curIndex) {
+      BuildContext context, String index, String? curIndex) {
     final textBtn = new TextButton(
         onPressed: () => refetchItems(text: index), child: new Text(index));
 
@@ -426,10 +424,12 @@ abstract class ListScreenState<TItem extends StoredEntity,
 
   @protected
   Future<void> refetchItems(
-      {String text, bool isForceful, bool shouldInitIndices}) async {
-    String newFilterIndex = text;
+      {String? text,
+      bool isForceful = false,
+      bool shouldInitIndices = false}) async {
+    String? newFilterIndex = text;
 
-    if (!(isForceful ?? false) && curFilterIndex == newFilterIndex) {
+    if (!isForceful && curFilterIndex == newFilterIndex) {
       if (curFilterIndex == null) return;
 
       newFilterIndex = null;
@@ -445,7 +445,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
 
     await _fetchItems(newFilterIndex);
 
-    if (shouldInitIndices ?? false) await _initFilterIndexes();
+    if (shouldInitIndices) await _initFilterIndexes();
   }
 
   Widget _buildList(AppLocalizations locale) => new Scrollbar(
@@ -486,11 +486,11 @@ abstract class ListScreenState<TItem extends StoredEntity,
         value: markedIds.contains(item.id),
         onChanged: _isRemovableItem(item)
             ? (isChecked) {
-                if (isChecked)
+                if (isChecked == true)
                   _markedItemsNotifier.upsert(
-                      item.id, new _CachedItem(item, itemIndex));
+                      item.id!, new _CachedItem(item, itemIndex));
                 else
-                  _markedItemsNotifier.remove(item.id);
+                  _markedItemsNotifier.remove(item.id!);
               }
             : null,
         secondary: getItemLeading(item),
@@ -499,7 +499,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
   }
 
   @protected
-  Widget getItemLeading(TItem item) => null;
+  Widget? getItemLeading(TItem item) => null;
 
   @protected
   Widget getItemTitle(TItem item);
@@ -524,27 +524,29 @@ abstract class ListScreenState<TItem extends StoredEntity,
                 color: Colors.deepOrange[300], child: const _DeleteIcon()),
             onDismissed: (_) async {
               final itemToRemove = item;
-              _itemsToRemove[itemToRemove.id] =
+              final itemToRemoveId = itemToRemove.id!;
+              _itemsToRemove[itemToRemoveId] =
                   new _CachedItem(itemToRemove, itemIndex);
 
               _itemsNotifier.remove(itemToRemove);
 
-              if (await shouldContinueRemoval([itemToRemove]))
+              if (await shouldContinueRemoval([itemToRemove]) &&
+                  buildContext.mounted)
                 _showItemRemovalInfoSnackBar(
                     scaffoldContext: buildContext,
                     message: locale.listScreenBottomSnackBarDismissedItemInfo(
                         itemToRemove.textData),
-                    itemIdsToRemove: [itemToRemove.id],
+                    itemIdsToRemove: [itemToRemoveId],
                     locale: locale);
               else
-                _recoverMarkedForRemoval([itemToRemove.id]);
+                _recoverMarkedForRemoval([itemToRemoveId]);
             },
             child: _buildListTile(buildContext, item))
         : _buildListTile(buildContext, item));
   }
 
   @protected
-  Widget getItemTrailing(TItem item) => null;
+  Widget? getItemTrailing(TItem item) => null;
 
   void _recoverMarkedForRemoval(List<int> ids) {
     final itemsToRecover = _getCachedItemsMarkedForRemoval(ids).toList();
@@ -558,7 +560,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
   }
 
   List<_CachedItem<TItem>> _getCachedItemsMarkedForRemoval(List<int> ids) {
-    return ids.map((id) => _itemsToRemove[id]).toList();
+    return ids.map((id) => _itemsToRemove[id]!).toList();
   }
 
   void _deleteFromMarkedForRemoval(List<int> ids) =>
@@ -616,7 +618,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
       if (indexLength == length)
         indexesToRemove.add(ind);
       else
-        filterIndexes[ind] -= length;
+        filterIndexes[ind] = filterIndexes[ind]! - length;
     });
 
     if (indexesToRemove.isNotEmpty)
@@ -633,7 +635,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
           backgroundColor: new Styler(buildContext).floatingActionButtonColor);
 
   @mustCallSuper
-  void onGoingToItem(BuildContext buildContext, [TItem item]) =>
+  void onGoingToItem(BuildContext buildContext, [TItem? item]) =>
       _deleteAllMarkedForRemoval();
 
   void _deleteAllMarkedForRemoval() {

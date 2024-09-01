@@ -13,7 +13,7 @@ void main() {
     final expectedFbUserId = Randomiser.nextString();
     final expectedAppStoreId = Randomiser.nextString();
 
-    AppParams params;
+    late AppParams params;
     await _pumpApp(
         tester,
         new DefaultAssetBundle(
@@ -41,7 +41,7 @@ void main() {
     final expectedFbUserId = Randomiser.nextString();
     final expectedAppStoreId = Randomiser.nextString();
 
-    AppParams params;
+    late AppParams params;
     await _pumpApp(
         tester,
         new DefaultAssetBundle(
@@ -63,24 +63,28 @@ void main() {
 
   testWidgets('Returns empty parameters when there is no configuration found',
       (tester) async {
+    late AppParams params;
     await _pumpApp(
         tester,
         new DefaultAssetBundle(
             bundle: new AssetBundleMock(),
             child: new RootWidgetMock(onBuilding: (context) async {
-              final params = await Configuration.getParams(context);
-              expect(params.contacts, null);
-              expect(params.dictionary, null);
+              params = await Configuration.getParams(context);
             })));
+
+    expect(params.contacts, null);
+    expect(params.dictionary, null);
   });
 }
 
 AppParams _buildAppParams(String apiKey,
-        {String email, String fbUserId, String appStoreId}) =>
+        {String? email, String? fbUserId, String? appStoreId}) =>
     new AppParams(
         dictionary: new DictionaryParams(apiKey: apiKey),
         contacts: new ContactsParams(
-            appStoreId: appStoreId, email: email, fbUserId: fbUserId));
+            appStoreId: appStoreId ?? '',
+            email: email ?? '',
+            fbUserId: fbUserId ?? ''));
 
 Future<void> _pumpApp(WidgetTester tester, Widget home) =>
     tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: home));

@@ -11,7 +11,7 @@ class MainScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     final quote = QuoteProvider.getNextQuote(locale);
 
     return new BarScaffold.withSettings('Language Cards',
@@ -52,9 +52,9 @@ class MainScreen extends StatelessWidget {
 }
 
 class _FlexibleRow extends StatelessWidget {
-  final Widget child;
+  final Widget? child;
 
-  final int flex;
+  final int? flex;
 
   const _FlexibleRow(this.child, [this.flex]);
 
@@ -62,7 +62,7 @@ class _FlexibleRow extends StatelessWidget {
   Widget build(BuildContext context) => new TightFlexible(
       child: new Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: child == null ? [] : [child]),
+          children: child == null ? [] : [child!]),
       flex: flex);
 }
 
@@ -81,7 +81,7 @@ class _MenuItem extends StatelessWidget {
           padding: const EdgeInsets.all(10),
           child: new ElevatedButton.icon(
               style: new ButtonStyle(
-                  textStyle: MaterialStateProperty.resolveWith((states) =>
+                  textStyle: WidgetStateProperty.resolveWith((states) =>
                       const TextStyle(fontSize: Consts.largeFontSize))),
               onPressed: onClick,
               icon: new Icon(icon),

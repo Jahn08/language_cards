@@ -33,7 +33,7 @@ void main() {
       final emptyPack =
           PackStorageMock.generatePack(Randomiser.nextInt(99) + 11);
 
-      final packProps = emptyPack.toJsonMap(null);
+      final packProps = emptyPack.toJsonMap([]);
       packProps.removeWhere((_, val) => val == null);
 
       final filePath = ExporterTester.writeToJsonFile([packProps]);
@@ -44,8 +44,8 @@ void main() {
   test('Imports nothing from a non-existent file', () async {
     final packStorage = new PackStorageMock();
 
-    FileSystemException err;
-    Map<StoredPack, List<StoredWord>> outcome;
+    FileSystemException? err;
+    Map<StoredPack, List<StoredWord>>? outcome;
     try {
       outcome = await new PackImporter(packStorage, packStorage.wordStorage,
               Localizator.defaultLocalization)
@@ -67,14 +67,13 @@ void main() {
         Randomiser.nextString()
       ]);
 
-      ImportException err;
+      ImportException? err;
 
       try {
         final packStorage = new PackStorageMock();
         await new PackImporter(packStorage, packStorage.wordStorage,
                 Localizator.defaultLocalization)
             .import(filePath);
-        fail('The $PackImporter should have failed');
       } on ImportException catch (ex) {
         err = ex;
       }

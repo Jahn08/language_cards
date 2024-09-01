@@ -1,5 +1,4 @@
 import 'dart:collection';
-import 'package:meta/meta.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'data_provider.dart';
@@ -8,7 +7,7 @@ import '../models/stored_entity.dart';
 import '../utilities/path.dart';
 
 class DbProvider extends DataProvider {
-  Database _db;
+  Database? _db;
 
   final List<StoredEntity> tableEntities;
 
@@ -48,14 +47,14 @@ class DbProvider extends DataProvider {
   }
 
   List<String> _compileCreationClauses(List<StoredEntity> entities,
-      [HashSet<String> tableNames]) {
+      [HashSet<String>? tableNames]) {
     tableNames ??= HashSet<String>();
 
     final dependantEntitiesToCreate = <StoredEntity>[];
     final creationCmds = <String>[];
 
     entities.forEach((ent) {
-      if (tableNames.contains(ent.tableName)) return;
+      if (tableNames!.contains(ent.tableName)) return;
 
       if (ent.foreignTableName == null ||
           tableNames.contains(ent.foreignTableName)) {
@@ -84,7 +83,7 @@ class DbProvider extends DataProvider {
   @override
   Future<void> update(String tableName, List<Map<String, dynamic>> entities) =>
       _perform<void>(tableName, () async {
-        final batch = _db.batch();
+        final batch = _db!.batch();
         entities.forEach((values) {
           batch.update(tableName, values,
               where: '${StoredEntity.idFieldName}=?',
@@ -98,7 +97,7 @@ class DbProvider extends DataProvider {
   Future<List<int>> add(
           String tableName, List<Map<String, dynamic>> entities) =>
       _perform(tableName, () async {
-        final batch = _db.batch();
+        final batch = _db!.batch();
         entities.forEach((values) => batch.insert(tableName, values));
 
         return (await batch.commit(noResult: false, continueOnError: false))
@@ -111,7 +110,7 @@ class DbProvider extends DataProvider {
       const int recordsLimit = 999;
       final iterationCount = (ids.length / recordsLimit).ceil();
 
-      final batch = _db.batch();
+      final batch = _db!.batch();
       final grouppedIds = new List.generate(
           iterationCount,
           (index) =>
@@ -126,8 +125,8 @@ class DbProvider extends DataProvider {
     });
   }
 
-  String _composeInFilterClause(String fieldName, List<dynamic> values) {
-    String whereInExpr;
+  String? _composeInFilterClause(String fieldName, List<dynamic> values) {
+    String? whereInExpr;
 
     final nonEmptyValueCount = _getNonNullValues(values).length;
     if (nonEmptyValueCount > 0)
@@ -142,27 +141,27 @@ class DbProvider extends DataProvider {
         : _joinWithOrOperator([whereInExpr, whereNullExpr]);
   }
 
-  List<dynamic> _getNonNullValues(Iterable<dynamic> values) =>
-      values?.where((v) => v != null)?.toList(growable: false);
+  List<dynamic> _getNonNullValues(Iterable<dynamic>? values) =>
+      values?.where((v) => v != null).toList(growable: false) ?? [];
 
   String _joinWithOrOperator(Iterable items) => items.join(' OR ');
 
   @override
-  Future<int> count(String tableName, {Map<String, dynamic> filters}) {
+  Future<int> count(String tableName, {Map<String, dynamic>? filters}) {
     return _perform(tableName, () async {
-      final res = await _db.query(tableName,
+      final res = await _db!.query(tableName,
           columns: ['COUNT(*) ${DataGroup.lengthField}'],
           where: _composeFilterClause(filters),
           whereArgs: _getFilterValues(filters));
-      return res.single[DataGroup.lengthField] as int;
+      return res.single[DataGroup.lengthField]! as int;
     });
   }
 
   @override
   Future<List<DataGroup>> groupBy(String tableName,
-      {@required String groupField,
-      List<dynamic> groupValues,
-      Map<String, dynamic> filters}) {
+      {required String groupField,
+      List<dynamic>? groupValues,
+      Map<String, dynamic>? filters}) {
     filters ??= {};
     if (groupValues == null || groupValues.isEmpty)
       filters[groupField] = groupValues;
@@ -171,13 +170,13 @@ class DbProvider extends DataProvider {
       final groupClause = _composeGroupClause(tableName,
           groupFields: [groupField],
           filterClause: _composeFilterClause(filters));
-      final res = await _db.rawQuery(groupClause, _getFilterValues(filters));
+      final res = await _db!.rawQuery(groupClause, _getFilterValues(filters));
 
       return res.map((v) => new DataGroup(v)).toList();
     });
   }
 
-  String _composeFilterClause(Map<String, dynamic> filters) {
+  String? _composeFilterClause(Map<String, dynamic>? filters) {
     return filters == null || filters.isEmpty
         ? null
         : _joinWithAndOperator(filters.entries.map((entry) {
@@ -191,7 +190,7 @@ class DbProvider extends DataProvider {
           }));
   }
 
-  List<dynamic> _getFilterValues(Map<String, dynamic> filters) {
+  List<dynamic>? _getFilterValues(Map<String, dynamic>? filters) {
     return filters == null || filters.isEmpty
         ? null
         : _getNonNullValues(
@@ -202,7 +201,7 @@ class DbProvider extends DataProvider {
   }
 
   String _composeGroupClause(String tableName,
-      {@required List<String> groupFields, String filterClause}) {
+      {required List<String> groupFields, String? filterClause}) {
     final fieldClause = groupFields.join(', ');
     final whereClause = filterClause == null || filterClause.isEmpty
         ? ''
@@ -213,19 +212,19 @@ class DbProvider extends DataProvider {
 
   @override
   Future<List<DataGroup>> groupBySeveral(String tableName,
-      {@required List<String> groupFields,
-      Map<String, List<dynamic>> groupValues}) {
+      {required List<String> groupFields,
+      Map<String, List<dynamic>>? groupValues}) {
     final filterClause = groupValues == null || groupValues.isEmpty
         ? null
         : _joinWithAndOperator(groupFields
             .where((f) => groupValues.containsKey(f))
-            .map((f) => _composeInFilterClause(f, groupValues[f])));
+            .map((f) => _composeInFilterClause(f, groupValues[f]!)));
 
     return _perform(tableName, () async {
       final groupClause = _composeGroupClause(tableName,
           groupFields: groupFields, filterClause: filterClause);
-      final res = await _db.rawQuery(groupClause,
-          _getNonNullValues(groupValues?.values?.expand((v) => v)));
+      final res = await _db!.rawQuery(
+          groupClause, _getNonNullValues(groupValues?.values.expand((v) => v)));
 
       return res.map((v) => new DataGroup(v)).toList();
     });
@@ -235,14 +234,13 @@ class DbProvider extends DataProvider {
 
   @override
   Future<List<Map<String, dynamic>>> fetch(String tableName,
-      {@required String orderBy,
-      int take,
-      int skip,
-      Map<String, dynamic> filters}) {
+      {required String orderBy,
+      int? take,
+      int? skip,
+      Map<String, dynamic>? filters}) {
     return _perform(
         tableName,
-        () async => _db.query(tableName,
-            columns: null,
+        () async => _db!.query(tableName,
             limit: take,
             offset: skip,
             orderBy: orderBy + ' COLLATE NOCASE',
@@ -251,15 +249,14 @@ class DbProvider extends DataProvider {
   }
 
   @override
-  Future<Map<String, dynamic>> findById(String tableName, dynamic id) async {
+  Future<Map<String, dynamic>?> findById(String tableName, dynamic id) async {
     return (await _perform(
             tableName,
-            () async => _db.query(tableName,
-                columns: null,
+            () async => _db!.query(tableName,
                 limit: 1,
                 where: '"${StoredEntity.idFieldName}"=?',
                 whereArgs: [id])))
-        .firstWhere((el) => true, orElse: () => null);
+        .firstOrNull;
   }
 
   static String composeSubstrFunc(String fieldName, int length) =>

@@ -31,7 +31,7 @@ void main() {
   testWidgets('Builds a screen displaying fields for a word from a storage',
       (tester) async {
     final wordToShow = await _displayFilledWord(tester);
-    new CardEditorTester(tester).assureRenderingCardFields(wordToShow);
+    new CardEditorTester(tester).assureRenderingCardFields(wordToShow!);
   });
 
   testWidgets('Displays a card pack for a word from a storage', (tester) async {
@@ -60,7 +60,7 @@ void main() {
       'Displays a button showing study progress for a card and resetting it',
       (tester) async {
     final storage = new PackStorageMock();
-    StoredWord wordWithProgress;
+    late StoredWord wordWithProgress;
     await tester.runAsync(() async {
       final words = await storage.wordStorage.fetch();
       wordWithProgress = words.firstWhere(
@@ -69,7 +69,7 @@ void main() {
 
       if (wordWithProgress.studyProgress == WordStudyStage.unknown)
         await storage.wordStorage
-            .updateWordProgress(wordWithProgress.id, WordStudyStage.learned);
+            .updateWordProgress(wordWithProgress.id!, WordStudyStage.learned);
     });
 
     await _displayFilledWord(tester,
@@ -87,7 +87,7 @@ void main() {
     await _saveCard(assistant);
 
     final changedWord = await storage.wordStorage.find(wordWithProgress.id);
-    expect(changedWord.studyProgress, WordStudyStage.unknown);
+    expect(changedWord!.studyProgress, WordStudyStage.unknown);
   });
 
   testWidgets(
@@ -111,7 +111,7 @@ void main() {
         CardEditorTester.findListTileByTitle(expectedPack.name);
     _assureTileIsTicked(packTileFinder);
 
-    StoredPack anotherExpectedPack;
+    late StoredPack anotherExpectedPack;
     await tester.runAsync(() async => anotherExpectedPack =
         await _fetchAnotherPack(storage, expectedPack.id));
     final anotherPackTileFinder =
@@ -136,7 +136,7 @@ void main() {
     await assistant.tapWidget(packBtnFinder);
 
     final packs = await tester.runAsync(() => storage.fetch());
-    packs.forEach((p) {
+    packs!.forEach((p) {
       if (p.isNone) return;
 
       CardEditorTester.findListTileByTitle(p.name);
@@ -186,7 +186,7 @@ void main() {
     final pack = storage.getRandom();
     final card = storage.wordStorage.getRandom();
 
-    String spokenText;
+    late String spokenText;
     await _displayFilledWord(tester,
         storage: storage,
         pack: pack,
@@ -203,7 +203,7 @@ void main() {
       (tester) async {
     final wordToShow = await _displayFilledWord(tester);
     await _testRefocusingChangedValues(
-        tester, wordToShow.text, wordToShow.translation);
+        tester, wordToShow!.text, wordToShow.translation!);
   });
 
   testWidgets(
@@ -211,7 +211,7 @@ void main() {
       (tester) async {
     final wordToShow = await _displayFilledWord(tester);
     await _testRefocusingChangedValues(
-        tester, wordToShow.translation, wordToShow.text);
+        tester, wordToShow!.translation!, wordToShow.text);
   });
 
   testWidgets(
@@ -219,13 +219,13 @@ void main() {
       (tester) async {
     final wordToShow = await _displayFilledWord(tester);
     await _testRefocusingChangedValues(
-        tester, wordToShow.text, wordToShow.transcription);
+        tester, wordToShow!.text, wordToShow.transcription);
   });
 
   testWidgets(
       'Switches focus to another text field after changes in the transcription field',
       (tester) async {
-    final wordToShow = await _displayFilledWord(tester);
+    final wordToShow = (await _displayFilledWord(tester))!;
 
     final assistant = new WidgetAssistant(tester);
     await _showTranscriptionKeyboard(assistant, wordToShow.transcription);
@@ -240,7 +240,7 @@ void main() {
     expect(find.widgetWithText(TextField, expectedChangedTr), findsOneWidget);
 
     final refocusedField = tester.widget<TextField>(refocusedFieldFinder);
-    expect(refocusedField.focusNode.hasFocus, true);
+    expect(refocusedField.focusNode!.hasFocus, true);
   });
 
   testWidgets('Saves a new card', (tester) async {
@@ -270,7 +270,7 @@ void main() {
 
   testWidgets(
       'Saves nothing when changes to the word translation field have not been accepted yet',
-      (tester) => _testSavingChangedValue(tester, (word) => word.translation));
+      (tester) => _testSavingChangedValue(tester, (word) => word.translation!));
 
   testWidgets(
       'Saves nothing when changes to the word transcription field have not been accepted yet',
@@ -279,7 +279,7 @@ void main() {
     final wordToShow = await _displayFilledWord(tester, storage: storage);
 
     final assistant = new WidgetAssistant(tester);
-    final initialValue = wordToShow.transcription;
+    final initialValue = wordToShow!.transcription;
     await _showTranscriptionKeyboard(assistant, initialValue);
 
     final changedValue = await _changeTranscription(tester, initialValue);
@@ -292,7 +292,7 @@ void main() {
 
   testWidgets('Saves a new pack for a card', (tester) async {
     final storage = new PackStorageMock();
-    final wordToShow = await _displayFilledWord(tester, storage: storage);
+    final wordToShow = (await _displayFilledWord(tester, storage: storage))!;
 
     final expectedPack = await _changePack(
         tester, () => _fetchAnotherPack(storage, wordToShow.packId));
@@ -301,7 +301,7 @@ void main() {
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord == null, false);
-    expect(changedWord.packId, expectedPack.id);
+    expect(changedWord!.packId, expectedPack.id);
   });
 
   testWidgets(
@@ -329,7 +329,7 @@ void main() {
 
     expect(
         pack.name
-            .startsWith(tester.widget<BarTitle>(find.byType(BarTitle)).title),
+            .startsWith(tester.widget<BarTitle>(find.byType(BarTitle)).title!),
         true);
   });
 
@@ -351,20 +351,18 @@ void main() {
 
   testWidgets('Shows no popup initially when focusing on the word text field',
       (tester) async {
-    final dicProviderMock = new DictionaryProviderMock(
-        onSearchForLemmas: (text) => Randomiser.nextStringList());
+    final dicProviderMock = _createDictionaryProvider();
     final wordText =
-        (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+        (await _displayWordWithPack(tester, provider: dicProviderMock))!.text;
 
     await _focusTextField(new WidgetAssistant(tester), wordText);
     AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
   });
 
   testWidgets('Shows no popup for a word without a pack', (tester) async {
-    final dicProviderMock = new DictionaryProviderMock(
-        onSearchForLemmas: (text) => Randomiser.nextStringList());
+    final dicProviderMock = _createDictionaryProvider();
     final wordText = (await _displayFilledWord(tester,
-            provider: dicProviderMock, pack: StoredPack.none))
+            provider: dicProviderMock, pack: StoredPack.none))!
         .text;
     await new WidgetAssistant(tester).enterChangedText(wordText);
 
@@ -374,10 +372,9 @@ void main() {
   testWidgets(
       'Shows no popup when the text field is empty or made up of spaces',
       (tester) async {
-    final dicProviderMock = new DictionaryProviderMock(
-        onSearchForLemmas: (text) => Randomiser.nextStringList());
+    final dicProviderMock = _createDictionaryProvider();
     final wordText =
-        (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+        (await _displayWordWithPack(tester, provider: dicProviderMock))!.text;
 
     final assistant = new WidgetAssistant(tester);
     final changedText =
@@ -390,10 +387,9 @@ void main() {
 
   testWidgets('Shows no popup when there are no suggestions for a word',
       (tester) async {
-    final dicProviderMock =
-        new DictionaryProviderMock(onSearchForLemmas: (text) => []);
+    final dicProviderMock = _createDictionaryProvider([]);
     final wordText =
-        (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+        (await _displayWordWithPack(tester, provider: dicProviderMock))!.text;
     await new WidgetAssistant(tester).enterChangedText(wordText);
 
     AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
@@ -405,17 +401,16 @@ void main() {
       (tester) async {
     final popupValues = Randomiser.nextStringList(
         minLength: lemmaLimit + 2, maxLength: lemmaLimit + 5);
-    final dicProviderMock =
-        new DictionaryProviderMock(onSearchForLemmas: (text) => popupValues);
+    final dicProviderMock = _createDictionaryProvider(popupValues);
 
     final wordText =
-        (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+        (await _displayWordWithPack(tester, provider: dicProviderMock))!.text;
     await new WidgetAssistant(tester).enterChangedText(wordText);
 
     final foundTiles = tester
         .widgetList<ListTile>(
             AssuredFinder.findSeveral(type: ListTile, shouldFind: true))
-        .map((t) => (t.title as Text).data)
+        .map((t) => (t.title! as Text).data)
         .toSet();
     expect(foundTiles.length, lemmaLimit);
     expect(popupValues.where((v) => foundTiles.contains(v)).length, lemmaLimit);
@@ -424,10 +419,9 @@ void main() {
   testWidgets(
       'Closes the suggestion popup after opting for a word there and displays its chosen text',
       (tester) async {
-    final dicProviderMock = new DictionaryProviderMock(
-        onSearchForLemmas: (text) => Randomiser.nextStringList());
+    final dicProviderMock = _createDictionaryProvider();
     final wordText =
-        (await _displayWordWithPack(tester, provider: dicProviderMock)).text;
+        (await _displayWordWithPack(tester, provider: dicProviderMock))!.text;
 
     final assistant = new WidgetAssistant(tester);
     await assistant.enterChangedText(wordText);
@@ -435,7 +429,7 @@ void main() {
     final tileFinder =
         AssuredFinder.findSeveral(type: ListTile, shouldFind: true).first;
     final expectedText =
-        (tester.widget<ListTile>(tileFinder).title as Text).data;
+        (tester.widget<ListTile>(tileFinder).title! as Text).data;
 
     await assistant.tapWidget(tileFinder.first);
 
@@ -446,15 +440,14 @@ void main() {
 
   testWidgets('Closes the suggestion popup after the field gets unfocused',
       (tester) async {
-    final dicProviderMock = new DictionaryProviderMock(
-        onSearchForLemmas: (text) => Randomiser.nextStringList());
+    final dicProviderMock = _createDictionaryProvider();
     final shownWord =
         await _displayWordWithPack(tester, provider: dicProviderMock);
 
-    await new WidgetAssistant(tester).enterChangedText(shownWord.text);
+    await new WidgetAssistant(tester).enterChangedText(shownWord!.text);
     AssuredFinder.findSeveral(type: ListTile, shouldFind: true);
 
-    await _focusTextField(new WidgetAssistant(tester), shownWord.translation);
+    await _focusTextField(new WidgetAssistant(tester), shownWord.translation!);
     AssuredFinder.findSeveral(type: ListTile, shouldFind: false);
   });
 
@@ -489,12 +482,12 @@ void main() {
     await assistant.tapWidget(mergeConfirmationBtnFinder);
 
     final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
-    expect(nonChangedWord.text, initialText);
+    expect(nonChangedWord!.text, initialText);
     expect(nonChangedWord.translation, initialTranslation);
 
     final mergedWord = await storage.wordStorage.find(duplicatedCard.id);
-    expect(mergedWord.translation.startsWith(duplicateTranslation), true);
-    expect(mergedWord.translation.endsWith(initialTranslation), true);
+    expect(mergedWord!.translation!.startsWith(duplicateTranslation!), true);
+    expect(mergedWord.translation!.endsWith(initialTranslation!), true);
   });
 
   testWidgets('Merges translations of a duplicate with a chosen card',
@@ -537,15 +530,15 @@ void main() {
     await assistant.pumpAndAnimate(500);
 
     final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
-    expect(nonChangedWord.text, initialText);
+    expect(nonChangedWord!.text, initialText);
     expect(nonChangedWord.translation, initialTranslation);
 
     final mergedWord = await storage.wordStorage.find(duplicatedCardA.id);
-    expect(mergedWord.translation.startsWith(duplicateTranslationA), true);
-    expect(mergedWord.translation.endsWith(initialTranslation), true);
+    expect(mergedWord!.translation!.startsWith(duplicateTranslationA!), true);
+    expect(mergedWord.translation!.endsWith(initialTranslation!), true);
 
     final nonMergedWord = await storage.wordStorage.find(duplicatedCardB.id);
-    expect(nonMergedWord.translation, duplicateTranslationB);
+    expect(nonMergedWord!.translation, duplicateTranslationB);
   });
 
   testWidgets(
@@ -582,19 +575,19 @@ void main() {
     await assistant.tapWidget(mergeConfirmationBtnFinder);
 
     await _focusTextField(
-        new WidgetAssistant(assistant.tester), cardToShow.translation);
+        new WidgetAssistant(assistant.tester), cardToShow.translation!);
     AssuredFinder.findOne(label: duplicateTranslationA, shouldFind: false);
     AssuredFinder.findOne(label: duplicateTranslationB, shouldFind: false);
 
     final nonChangedWord = await storage.wordStorage.find(cardToShow.id);
-    expect(nonChangedWord.text, initialText);
+    expect(nonChangedWord!.text, initialText);
     expect(nonChangedWord.translation, initialTranslation);
 
     final nonMergedWordA = await storage.wordStorage.find(duplicatedCardA.id);
-    expect(nonMergedWordA.translation, duplicateTranslationA);
+    expect(nonMergedWordA!.translation, duplicateTranslationA);
 
     final nonMergedWordB = await storage.wordStorage.find(duplicatedCardB.id);
-    expect(nonMergedWordB.translation, duplicateTranslationB);
+    expect(nonMergedWordB!.translation, duplicateTranslationB);
   });
 
   testWidgets('Desagrees to merge translations and saves a duplicated card',
@@ -628,21 +621,21 @@ void main() {
     await assistant.tapWidget(mergeConfirmationBtnFinder);
 
     final changedWord = await storage.wordStorage.find(cardToShow.id);
-    expect(changedWord.text, duplicatedText);
+    expect(changedWord!.text, duplicatedText);
     expect(changedWord.translation, initialTranslation);
 
     final nonMergedWord = await storage.wordStorage.find(duplicatedCard.id);
-    expect(nonMergedWord.text, duplicatedText);
+    expect(nonMergedWord!.text, duplicatedText);
     expect(nonMergedWord.translation, duplicateTranslation);
   });
 }
 
-Future<StoredWord> _displayFilledWord(WidgetTester tester,
-    {DictionaryProvider provider,
-    PackStorageMock storage,
-    StoredPack pack,
-    StoredWord wordToShow,
-    SpeakerMock speaker,
+Future<StoredWord?> _displayFilledWord(WidgetTester tester,
+    {DictionaryProvider? provider,
+    PackStorageMock? storage,
+    StoredPack? pack,
+    StoredWord? wordToShow,
+    SpeakerMock? speaker,
     bool shouldHideWarningDialog = true}) async {
   storage ??= new PackStorageMock();
   final wordStorage = storage.wordStorage;
@@ -656,11 +649,11 @@ Future<StoredWord> _displayFilledWord(WidgetTester tester,
       shouldHideWarningDialog: shouldHideWarningDialog);
 }
 
-Future<StoredWord> _displayWord(WidgetTester tester, PackStorageMock storage,
-    {DictionaryProvider provider,
-    StoredPack pack,
-    StoredWord wordToShow,
-    SpeakerMock speaker,
+Future<StoredWord?> _displayWord(WidgetTester tester, PackStorageMock storage,
+    {DictionaryProvider? provider,
+    StoredPack? pack,
+    StoredWord? wordToShow,
+    SpeakerMock? speaker,
     bool shouldHideWarningDialog = true}) async {
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       childBuilder: (context) => new CardScreen(
@@ -668,7 +661,7 @@ Future<StoredWord> _displayWord(WidgetTester tester, PackStorageMock storage,
           packStorage: storage,
           wordId: wordToShow?.id,
           pack: pack,
-          provider: provider,
+          provider: provider ?? _createDictionaryProvider([]),
           defaultSpeaker: speaker ?? const SpeakerMock())));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 200));
@@ -686,7 +679,11 @@ Future<StoredWord> _displayWord(WidgetTester tester, PackStorageMock storage,
   return wordToShow;
 }
 
-Finder _findWarningDialogButton({bool shouldFind}) {
+DictionaryProvider _createDictionaryProvider([Iterable<String>? lemmas]) =>
+    new DictionaryProviderMock(
+        onSearchForLemmas: (text) => lemmas ?? Randomiser.nextStringList());
+
+Finder _findWarningDialogButton({bool? shouldFind}) {
   final dialogBtnFinder = DialogTester.findConfirmationDialogBtn();
   expect(dialogBtnFinder, AssuredFinder.matchOne(shouldFind: shouldFind));
 
@@ -706,7 +703,7 @@ Future<void> _testRefocusingChangedValues(WidgetTester tester,
   expect(initiallyFocusedFieldFinder, findsOneWidget);
 
   final refocusedField = tester.widget<TextField>(refocusedFieldFinder);
-  expect(refocusedField.focusNode.hasFocus, true);
+  expect(refocusedField.focusNode!.hasFocus, true);
 }
 
 Future<Finder> _focusTextField(
@@ -723,14 +720,14 @@ Future<void> _testSavingChangedValue(WidgetTester tester,
 
   final assistant = new WidgetAssistant(tester);
 
-  final initialValue = valueToChangeGetter(wordToShow);
+  final initialValue = valueToChangeGetter(wordToShow!);
   final changedText = await assistant.enterChangedText(initialValue);
 
   await assistant.tapWidget(CardEditorTester.findSaveButton());
 
   final changedWord = await storage.wordStorage.find(wordToShow.id);
   expect(changedWord == null, false);
-  expect(valueToChangeGetter(changedWord), initialValue);
+  expect(valueToChangeGetter(changedWord!), initialValue);
   expect(valueToChangeGetter(changedWord) == changedText, false);
 }
 
@@ -750,20 +747,20 @@ Future<String> _changeTranscription(
 }
 
 Future<void> _testDisplayingPackName(WidgetTester tester,
-    [StoredPack expectedPack]) async {
+    [StoredPack? expectedPack]) async {
   await _displayFilledWord(tester, pack: expectedPack);
 
   new CardEditorTester(tester).assureRenderingPack(expectedPack);
 }
 
-Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int curPackId,
+Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int? curPackId,
         {bool canBeNonePack = false}) async =>
     (await storage.fetch()).firstWhere((p) =>
         p.cardsNumber > 0 && p.id != curPackId && (canBeNonePack || !p.isNone));
 
 Future<StoredPack> _changePack(
     WidgetTester tester, Future<StoredPack> Function() newPackGetter) async {
-  StoredPack expectedPack;
+  late StoredPack expectedPack;
   await tester.runAsync(() async => expectedPack = await newPackGetter());
 
   await new CardEditorTester(tester).changePack(expectedPack);
@@ -776,7 +773,7 @@ void _assureTileIsTicked(Finder tileFinder) => expect(
     findsOneWidget);
 
 Future<void> _testInitialDictionaryState(WidgetTester tester,
-    {@required bool hasPack}) async {
+    {required bool hasPack}) async {
   bool dictionaryIsActive = false;
   final client = new MockClient((request) async {
     dictionaryIsActive = true;
@@ -793,7 +790,7 @@ Future<void> _testInitialDictionaryState(WidgetTester tester,
 
   await _assureWarningDialog(tester, !hasPack);
 
-  await _inputTextAndAccept(tester, wordToShow.text);
+  await _inputTextAndAccept(tester, wordToShow!.text);
 
   expect(dictionaryIsActive, hasPack);
 }
@@ -814,12 +811,12 @@ Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
   final newText = await assistant.enterChangedText(wordText);
   final textFinder = find.widgetWithText(TextField, newText);
 
-  tester.widget<TextField>(textFinder).onEditingComplete();
+  tester.widget<TextField>(textFinder).onEditingComplete?.call();
   await assistant.pumpAndAnimate();
 }
 
 Future<void> _testChangingDictionaryState(WidgetTester tester,
-    {@required bool nullifyPack}) async {
+    {required bool nullifyPack}) async {
   bool dictionaryIsActive = false;
   final client = new MockClient((request) async {
     if (WordDictionaryTester.isLookUpRequest(request))
@@ -841,20 +838,20 @@ Future<void> _testChangingDictionaryState(WidgetTester tester,
       tester,
       () => nullifyPack
           ? Future.value(StoredPack.none)
-          : _fetchAnotherPack(storage, wordToShow.packId));
+          : _fetchAnotherPack(storage, wordToShow!.packId));
 
   await _assureWarningDialog(tester, nullifyPack);
 
-  await _inputTextAndAccept(tester, wordToShow.text);
+  await _inputTextAndAccept(tester, wordToShow!.text);
 
   expect(dictionaryIsActive, !nullifyPack);
 }
 
-Future<StoredWord> _displayWordWithPack(WidgetTester tester,
-    {DictionaryProvider provider,
-    PackStorageMock storage,
-    StoredWord wordToShow,
-    SpeakerMock speaker,
+Future<StoredWord?> _displayWordWithPack(WidgetTester tester,
+    {DictionaryProvider? provider,
+    PackStorageMock? storage,
+    StoredWord? wordToShow,
+    SpeakerMock? speaker,
     bool shouldHideWarningDialog = true}) {
   storage ??= new PackStorageMock();
 
@@ -868,14 +865,14 @@ Future<StoredWord> _displayWordWithPack(WidgetTester tester,
 }
 
 Future<List<StoredWord>> _getDuplicatedCards(
-    int packId, WordStorageMock storage,
+    int? packId, WordStorageMock storage,
     [int take = 2]) async {
   final result = <StoredWord>[];
 
   final cards = await storage.fetch();
 
-  String duplicatedText;
-  PartOfSpeech pos;
+  String? duplicatedText;
+  PartOfSpeech? pos;
   for (int i = 0; i < take; ++i) {
     final card = cards[i];
     pos ??= card.partOfSpeech;
@@ -892,7 +889,7 @@ Future<List<StoredWord>> _getDuplicatedCards(
 }
 
 Future<StoredWord> _updateCard(WordStorageMock wordStorage, StoredWord card,
-    {PartOfSpeech newPos, String newText, int newPackId}) async {
+    {PartOfSpeech? newPos, String? newText, int? newPackId}) async {
   if (card.partOfSpeech == (newPos ?? card.partOfSpeech) &&
       card.text == (newText ?? card.text) &&
       card.packId == (newPackId ?? card.packId)) return card;

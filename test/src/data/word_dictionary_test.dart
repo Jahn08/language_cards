@@ -25,7 +25,7 @@ void main() {
             new WebDictionaryProvider(Randomiser.nextString(), client: client),
             from: Language.english)
         .lookUp(expectedArticle.words.first.text);
-    _assureWords(expectedArticle, article.words);
+    _assureWords(expectedArticle, article!.words);
   });
 
   test('Returns an empty word article for an unknown word', () async {
@@ -40,13 +40,13 @@ void main() {
             new WebDictionaryProvider(Randomiser.nextString(), client: client),
             from: Language.english)
         .lookUp(unknownWord);
-    expect(article?.words?.length, 0);
+    expect(article?.words.length, 0);
   });
 
   test(
       'Sends request to a properly built URL with containing an api key and searched word',
       () async {
-    Uri url;
+    Uri? url;
     final client = new MockClient((request) async {
       url = request.url;
       return HttpResponder.respondWithJson(
@@ -63,10 +63,10 @@ void main() {
         .lookUp(expectedWord);
 
     expect(url == null, false);
-    expect(url.query?.isEmpty, false);
+    expect(url!.query.isEmpty, false);
 
-    expect(url.queryParameters['key'], expectedApiKey);
-    expect(url.queryParameters['text'], expectedWord);
+    expect(url!.queryParameters['key'], expectedApiKey);
+    expect(url!.queryParameters['text'], expectedWord);
   });
 
   test('Returns null for a non-present language pair dictionary', () async {
@@ -89,7 +89,7 @@ void main() {
 
 void _assureWords(BaseArticle expectedArticle, List<Word> actualWords) {
   final expectedWordNumber = expectedArticle.words.length;
-  expect(actualWords?.length, expectedWordNumber);
+  expect(actualWords.length, expectedWordNumber);
   expect(actualWords.map((word) => word.partOfSpeech).toSet().length,
       expectedWordNumber);
 

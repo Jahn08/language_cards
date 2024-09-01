@@ -10,7 +10,7 @@ class SpeakerButton extends StatelessWidget {
 
   final Function(ISpeaker speaker) onPressed;
 
-  final ISpeaker defaultSpeaker;
+  final ISpeaker? defaultSpeaker;
 
   const SpeakerButton(this.lang, this.onPressed, {this.defaultSpeaker});
 
@@ -19,9 +19,9 @@ class SpeakerButton extends StatelessWidget {
     final futureSpeaker = defaultSpeaker == null
         ? Speaker.getSpeaker(lang)
         : Future.value(defaultSpeaker);
-    return new FutureLoader(futureSpeaker, (ISpeaker speaker) {
+    return new FutureLoader(futureSpeaker, (ISpeaker? speaker) {
       if (speaker == null) {
-        final locale = AppLocalizations.of(context);
+        final locale = AppLocalizations.of(context)!;
         new ConfirmDialog.ok(
                 title: locale.speakerButtonUnaivailableTTSDialogTitle,
                 content: locale

@@ -22,7 +22,7 @@ class App extends StatefulWidget {
 }
 
 class AppState extends State<App> {
-  SettingsBlocProvider _blocProvider;
+  SettingsBlocProvider? _blocProvider;
 
   @override
   Widget build(BuildContext context) =>
@@ -30,35 +30,42 @@ class AppState extends State<App> {
 }
 
 class _ThemedAppState extends State<_ThemedApp> {
-  SettingsBloc _bloc;
+  SettingsBloc? _bloc;
 
   @override
   Widget build(BuildContext context) {
     if (_bloc == null) {
       _bloc = SettingsBlocProvider.of(context);
-      _bloc.addOnSaveListener(_updateState);
+      _bloc!.addOnSaveListener(_updateState);
     }
 
-    return new FutureLoader<UserParams>(_bloc.userParams, (params) {
+    return new FutureLoader<UserParams>(_bloc!.userParams, (params) {
       ThemeData theme = params.theme == AppTheme.dark
-          ? new ThemeData.dark()
-          : new ThemeData.light();
+          ? new ThemeData.dark(useMaterial3: false)
+          : new ThemeData.light(useMaterial3: false);
 
-      if (!Styler.isWindowDense)
+      if (!new Styler(context).isWindowDense)
         theme = theme.copyWith(
             textTheme: theme.textTheme.copyWith(
-                headline1: _copyTextStyleAsScaled(theme.textTheme.headline1),
-                headline2: _copyTextStyleAsScaled(theme.textTheme.headline2),
-                headline3: _copyTextStyleAsScaled(theme.textTheme.headline3),
-                headline4: _copyTextStyleAsScaled(theme.textTheme.headline4),
-                headline5: _copyTextStyleAsScaled(theme.textTheme.headline5),
-                headline6: _copyTextStyleAsScaled(theme.textTheme.headline6),
-                subtitle1: _copyTextStyleAsScaled(theme.textTheme.subtitle1),
-                subtitle2: _copyTextStyleAsScaled(theme.textTheme.subtitle2),
-                bodyText1: _copyTextStyleAsScaled(theme.textTheme.bodyText1),
-                bodyText2: _copyTextStyleAsScaled(theme.textTheme.bodyText2),
-                button: _copyTextStyleAsScaled(theme.textTheme.button),
-                overline: _copyTextStyleAsScaled(theme.textTheme.overline)));
+                displayLarge:
+                    _copyTextStyleAsScaled(theme.textTheme.displayLarge),
+                displayMedium:
+                    _copyTextStyleAsScaled(theme.textTheme.displayMedium),
+                displaySmall:
+                    _copyTextStyleAsScaled(theme.textTheme.displaySmall),
+                headlineMedium:
+                    _copyTextStyleAsScaled(theme.textTheme.headlineMedium),
+                headlineSmall:
+                    _copyTextStyleAsScaled(theme.textTheme.headlineSmall),
+                titleLarge: _copyTextStyleAsScaled(theme.textTheme.titleLarge),
+                titleMedium:
+                    _copyTextStyleAsScaled(theme.textTheme.titleMedium),
+                titleSmall: _copyTextStyleAsScaled(theme.textTheme.titleSmall),
+                bodyLarge: _copyTextStyleAsScaled(theme.textTheme.bodyLarge),
+                bodyMedium: _copyTextStyleAsScaled(theme.textTheme.bodyMedium),
+                labelLarge: _copyTextStyleAsScaled(theme.textTheme.labelLarge),
+                labelSmall:
+                    _copyTextStyleAsScaled(theme.textTheme.labelSmall)));
 
       return new MaterialApp(
           localizationsDelegates: const [
@@ -111,19 +118,17 @@ class _ThemedAppState extends State<_ThemedApp> {
                   return const StudyHelpScreen();
 
                 final packListParams = (route as PackListRoute).params;
-                return packListParams.storage == null &&
-                        packListParams.cardStorage == null
+                return packListParams.storage == null
                     ? const PackListScreen()
-                    : new PackListScreen(
-                        packListParams.storage, packListParams.cardStorage);
+                    : new PackListScreen(packListParams.storage);
               }));
     });
   }
 
   void _updateState(_) => setState(() {});
 
-  TextStyle _copyTextStyleAsScaled(TextStyle original) =>
-      original.copyWith(fontSize: (original?.fontSize ?? 14) * 1.3);
+  TextStyle? _copyTextStyleAsScaled(TextStyle? original) =>
+      original?.copyWith(fontSize: (original.fontSize ?? 14) * 1.3);
 
   MaterialPageRoute _buildPageRoute(
       RouteSettings settings, Widget Function(BuildContext, dynamic) builder) {

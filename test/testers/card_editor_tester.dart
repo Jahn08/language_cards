@@ -23,23 +23,23 @@ class CardEditorTester {
 
     final posField = tester.widget<DropdownButton<String>>(
         find.byType(AssuredFinder.typify<DropdownButton<String>>()));
-    expect(posField.value, card.partOfSpeech.valueList.first);
+    expect(posField.value, card.partOfSpeech!.valueList.first);
   }
 
-  void assureRenderingPack([StoredPack pack]) {
+  void assureRenderingPack([StoredPack? pack]) {
     final packBtnFinder = findPackButton();
     final packLabelFinder =
         find.descendant(of: packBtnFinder, matching: find.byType(Text));
     expect(packLabelFinder, findsOneWidget);
 
     final packLabel = tester.widget<Text>(packLabelFinder);
-    expect(packLabel.data.endsWith(pack?.name ?? StoredPack.none.name), true);
+    expect(packLabel.data!.endsWith(pack?.name ?? StoredPack.none.name), true);
   }
 
   static Finder findPackButton() =>
       AssuredFinder.findFlatButtonByIcon(Icons.folder_open, shouldFind: true);
 
-  static Finder findSpeakerButton({bool shouldFind}) =>
+  static Finder findSpeakerButton({bool? shouldFind}) =>
       AssuredFinder.findOne(type: SpeakerButton, shouldFind: shouldFind);
 
   void assureNonZeroStudyProgress(int studyProgress) {
@@ -50,12 +50,12 @@ class CardEditorTester {
     expect(
         tester
             .widget<Text>(progressLabelFinder)
-            .data
+            .data!
             .contains('$studyProgress%'),
         true);
   }
 
-  static Finder findStudyProgressButton({bool shouldFind}) =>
+  static Finder findStudyProgressButton({bool? shouldFind}) =>
       AssuredFinder.findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
 
   static Finder findSaveButton() => AssuredFinder.findOne(
@@ -80,9 +80,9 @@ class CardEditorTester {
   }
 
   Future<List<String>> enterRandomTranscription(
-      {List<String> symbols, String symbolToEnter}) async {
+      {List<String>? symbols, String? symbolToEnter}) async {
     final inSymbols =
-        symbols ?? PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
+        symbols ?? PhoneticKeyboard.getLanguageSpecific((s) => s!).symbols;
     final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1,
         orElse: () => Randomiser.nextElement(inSymbols));
     final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1,

@@ -9,7 +9,7 @@ import './dictionary_provider.dart';
 class AssetDictionaryProvider extends DictionaryProvider {
   static final Map<String, Map<String, dynamic>> _cache = {};
 
-  static Map<String, String> _dicNames;
+  static Map<String, String>? _dicNames;
 
   final AssetReader _reader;
 
@@ -28,10 +28,10 @@ class AssetDictionaryProvider extends DictionaryProvider {
 
     final json = dic[key];
     return new AssetArticle(
-        key, (json as List<dynamic>)?.cast<Map<String, dynamic>>());
+        key, (json as List<dynamic>?)?.cast<Map<String, dynamic>>());
   }
 
-  Future<Map<String, dynamic>> _getCachedDictionary(String langParam) async {
+  Future<Map<String, dynamic>?> _getCachedDictionary(String langParam) async {
     var dic = _cache[langParam];
     if (dic == null) {
       dic = await _getDictionaryByLang(langParam);
@@ -41,7 +41,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
     return dic;
   }
 
-  Future<Map<String, dynamic>> _getDictionaryByLang(String langParam) async {
+  Future<Map<String, dynamic>?> _getDictionaryByLang(String langParam) async {
     final dicFileName = (await _getDicNames())[langParam];
     if (dicFileName == null) return null;
 
@@ -60,7 +60,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
       };
     }
 
-    return _dicNames;
+    return _dicNames!;
   }
 
   @override

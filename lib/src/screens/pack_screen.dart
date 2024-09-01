@@ -17,17 +17,17 @@ import '../widgets/styled_text_field.dart';
 class PackScreenState extends State<PackScreen> {
   final _key = new GlobalKey<FormState>();
 
-  final _nameNotifier = new ValueNotifier<String>(null);
-  final _fromLangNotifier = new ValueNotifier<String>(null);
-  final _toLangNotifier = new ValueNotifier<String>(null);
+  final _nameNotifier = new ValueNotifier<String>('');
+  final _fromLangNotifier = new ValueNotifier<String?>(null);
+  final _toLangNotifier = new ValueNotifier<String?>(null);
 
-  final _isStateDirtyNotifier = new ValueNotifier<bool>(null);
+  final _isStateDirtyNotifier = new ValueNotifier<bool>(false);
 
   int _cardsNumber = 0;
-  StoredPack _foundPack;
+  StoredPack? _foundPack;
   bool _initialised = false;
 
-  Map<String, Language> _languages;
+  Map<String, Language>? _languages;
 
   BaseStorage<StoredPack> get _storage => widget._storage;
 
@@ -44,7 +44,7 @@ class PackScreenState extends State<PackScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     _languages ??= PresentableEnum.mapStringValues(Language.values, locale);
 
     final futurePack = _isNew || _initialised
@@ -60,7 +60,7 @@ class PackScreenState extends State<PackScreen> {
             key: _key,
             child: new FutureBuilder(
                 future: futurePack,
-                builder: (context, AsyncSnapshot<StoredPack> snapshot) {
+                builder: (context, AsyncSnapshot<StoredPack?> snapshot) {
                   if (!snapshot.hasData) return const Loader();
 
                   final foundPack = snapshot.data;
@@ -69,8 +69,8 @@ class PackScreenState extends State<PackScreen> {
                     _initialised = true;
 
                     _nameNotifier.value = foundPack.name;
-                    _fromLangNotifier.value = foundPack.from.present(locale);
-                    _toLangNotifier.value = foundPack.to.present(locale);
+                    _fromLangNotifier.value = foundPack.from!.present(locale);
+                    _toLangNotifier.value = foundPack.to!.present(locale);
 
                     _cardsNumber = foundPack.cardsNumber;
                   }
@@ -81,14 +81,15 @@ class PackScreenState extends State<PackScreen> {
                         valueListenable: _nameNotifier,
                         builder: (_, String name, __) => new StyledTextField(
                                 locale.packScreenPackNameTextFieldLabel,
-                                isRequired: true, onChanged: (value, _) {
-                              _nameNotifier.value = value;
+                                isRequired: true,
+                                onChanged: (value, {bool? submitted}) {
+                              _nameNotifier.value = value ?? '';
                               _setStateDirtiness();
                             }, initialValue: name)),
                     new ValueListenableBuilder(
                         valueListenable: _fromLangNotifier,
-                        builder: (buildContext, String fromLang, _) =>
-                            new StyledDropdown(_languages.keys,
+                        builder: (buildContext, String? fromLang, _) =>
+                            new StyledDropdown(_languages!.keys,
                                 isRequired: true,
                                 label: locale
                                     .packScreenTranslationFromDropdownLabel,
@@ -103,8 +104,8 @@ class PackScreenState extends State<PackScreen> {
                                 onValidate: (_) => _validateLanguages(locale))),
                     new ValueListenableBuilder(
                         valueListenable: _toLangNotifier,
-                        builder: (buildContext, String toLang, _) =>
-                            new StyledDropdown(_languages.keys,
+                        builder: (buildContext, String? toLang, _) =>
+                            new StyledDropdown(_languages!.keys,
                                 isRequired: true,
                                 label:
                                     locale.packScreenTranslationToDropdownLabel,
@@ -158,11 +159,11 @@ class PackScreenState extends State<PackScreen> {
 
   void _setStateDirtiness() => _isStateDirtyNotifier.value = _isNew ||
       (_foundPack != null &&
-          (_foundPack.name != _nameNotifier.value ||
-              _foundPack.to != _languages[_toLangNotifier.value] ||
-              _foundPack.from != _languages[_fromLangNotifier.value]));
+          (_foundPack!.name != _nameNotifier.value ||
+              _foundPack!.to != _languages![_toLangNotifier.value] ||
+              _foundPack!.from != _languages![_fromLangNotifier.value]));
 
-  String _validateLanguages(AppLocalizations locale) =>
+  String? _validateLanguages(AppLocalizations locale) =>
       _fromLangNotifier.value == _toLangNotifier.value
           ? locale.packScreenSameTranslationDirectionsValidationError
           : null;
@@ -174,22 +175,23 @@ class PackScreenState extends State<PackScreen> {
         (_toLangNotifier.value?.isEmpty ?? true)) return;
 
     new WordDictionary(widget._provider,
-            from: _languages[_fromLangNotifier.value],
-            to: _languages[_toLangNotifier.value])
+            from: _languages![_fromLangNotifier.value]!,
+            to: _languages![_toLangNotifier.value])
         .isTranslationPossible()
         .then((resp) {
-      if (!resp) NoTranslationSnackBar.show(buildContext, locale);
+      if (!resp && buildContext.mounted)
+        NoTranslationSnackBar.show(buildContext, locale);
     });
   }
 
   StoredPack _buildPack() => new StoredPack(_nameNotifier.value,
       id: widget.packId,
-      to: _languages[_toLangNotifier.value],
-      from: _languages[_fromLangNotifier.value]);
+      to: _languages![_toLangNotifier.value],
+      from: _languages![_fromLangNotifier.value]);
 
   Future<void> _onSave(void Function(StoredPack pack) afterSaving) async {
     final state = _key.currentState;
-    if (!state.validate()) return;
+    if (state == null || !state.validate()) return;
 
     state.save();
     afterSaving((await _storage.upsert([_buildPack()])).first);
@@ -197,7 +199,7 @@ class PackScreenState extends State<PackScreen> {
 }
 
 class PackScreen extends StatefulWidget {
-  final int packId;
+  final int? packId;
 
   final bool refresh;
 
@@ -205,7 +207,8 @@ class PackScreen extends StatefulWidget {
 
   final DictionaryProvider _provider;
 
-  const PackScreen(BaseStorage<StoredPack> storage, DictionaryProvider provider,
+  const PackScreen(
+      BaseStorage<StoredPack>? storage, DictionaryProvider provider,
       {this.packId, this.refresh = false})
       : _storage = storage ?? const PackStorage(),
         _provider = provider;

@@ -11,9 +11,9 @@ import '../widgets/bar_scaffold.dart';
 class _SliderScreenState extends State<_SliderScreen> {
   final _pageIndexNotifier = new ValueNotifier<int>(0);
 
-  List<Widget> _slides;
+  List<Widget>? _slides;
 
-  PageController _ctrl;
+  late PageController _ctrl;
 
   @override
   void initState() {
@@ -24,7 +24,7 @@ class _SliderScreenState extends State<_SliderScreen> {
 
   @override
   void dispose() {
-    _ctrl?.dispose();
+    _ctrl.dispose();
 
     _pageIndexNotifier.dispose();
 
@@ -33,7 +33,7 @@ class _SliderScreenState extends State<_SliderScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
     _slides ??= widget.slideNames
         .map((n) => _buildSlide(new Image(
             image: new LocalAssetImage(n,
@@ -50,7 +50,7 @@ class _SliderScreenState extends State<_SliderScreen> {
           child: new PageView(
               controller: _ctrl,
               allowImplicitScrolling: true,
-              children: _slides,
+              children: _slides!,
               onPageChanged: (pageIndex) {
                 _pageIndexNotifier.value = pageIndex;
                 _showInfoDialog(context, locale);
@@ -69,7 +69,7 @@ class _SliderScreenState extends State<_SliderScreen> {
   String _compileTitle(AppLocalizations locale) =>
       '${widget.getTitle(locale)}\n' +
       locale.helpScreenPageIndicator(
-          _pageIndexNotifier.value + 1, _slides.length);
+          _pageIndexNotifier.value + 1, _slides!.length);
 
   Widget _buildSlide(Image image) {
     const double iconSize = 30;
@@ -83,8 +83,8 @@ class _SliderScreenState extends State<_SliderScreen> {
                 valueListenable: _pageIndexNotifier,
                 child: const Icon(Icons.chevron_right_outlined),
                 builder: (_, pageIndex, icon) => new IconButton(
-                    icon: icon,
-                    onPressed: pageIndex == _slides.length - 1
+                    icon: icon!,
+                    onPressed: pageIndex == _slides!.length - 1
                         ? null
                         : () => _ctrl.nextPage(
                             duration: const Duration(milliseconds: 200),
@@ -96,7 +96,7 @@ class _SliderScreenState extends State<_SliderScreen> {
                 valueListenable: _pageIndexNotifier,
                 child: const Icon(Icons.chevron_left_outlined),
                 builder: (_, pageIndex, icon) => new IconButton(
-                    icon: icon,
+                    icon: icon!,
                     onPressed: pageIndex == 0
                         ? null
                         : () => _ctrl.previousPage(

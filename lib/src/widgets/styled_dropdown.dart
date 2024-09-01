@@ -3,18 +3,18 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'styled_input_decoration.dart';
 
 class StyledDropdown extends StatelessWidget {
-  final String label;
-  final String initialValue;
+  final String? label;
+  final String? initialValue;
 
   final bool isRequired;
 
-  final void Function(String) onChanged;
-  final String Function(String) onValidate;
+  final void Function(String?)? onChanged;
+  final String? Function(String?)? onValidate;
   final List<String> options;
 
   StyledDropdown(Iterable<String> options,
-      {Key key,
-      bool isRequired,
+      {Key? key,
+      bool? isRequired,
       this.onChanged,
       this.onValidate,
       this.initialValue,
@@ -34,9 +34,9 @@ class StyledDropdown extends StatelessWidget {
         onChanged: onChanged,
         decoration: new StyledInputDecoration(label),
         value: initialValue,
-        validator: (String text) {
+        validator: (String? text) {
           if (isRequired && (text == null || text.isEmpty))
-            return locale.constsEmptyValueValidationError;
+            return locale!.constsEmptyValueValidationError;
 
           return onValidate?.call(text);
         });

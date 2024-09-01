@@ -12,12 +12,12 @@ abstract class InputKeyboard extends StatelessWidget
 
   final List<String> symbols;
 
-  final String Function(String symbol) onSymbolTap;
+  final String Function(String? symbol) onSymbolTap;
 
   InputKeyboard(this.symbols,
-      {@required this.onSymbolTap,
-      String initialValue,
-      Key key,
+      {required this.onSymbolTap,
+      String? initialValue,
+      Key? key,
       double symbolSize = 15})
       : _symbolSize = symbolSize,
         _notifier = new ValueNotifier(initialValue ?? ''),
@@ -88,12 +88,12 @@ class _Key extends StatelessWidget {
 
   final double width;
 
-  final Color borderColor;
+  final Color? borderColor;
 
   const _Key(
-      {@required this.symbol,
-      @required this.height,
-      @required this.width,
+      {required this.symbol,
+      required this.height,
+      required this.width,
       this.borderColor});
 
   @override
@@ -102,20 +102,20 @@ class _Key extends StatelessWidget {
       child: symbol,
       decoration: new BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(7)),
-          border: Border.all(color: borderColor ?? Colors.grey[300]),
-          boxShadow: [new BoxShadow(color: Colors.grey[400], spreadRadius: 1)]),
+          border: Border.all(color: borderColor ?? Colors.grey[300]!),
+          boxShadow: [new BoxShadow(color: Colors.grey[400]!, spreadRadius: 1)]),
       width: width,
       height: height);
 }
 
 class _Button extends StatelessWidget {
-  final Color color;
+  final Color? color;
 
   final Widget child;
 
   final void Function() onTap;
 
-  const _Button({@required this.child, @required this.onTap, this.color});
+  const _Button({required this.child, required this.onTap, this.color});
 
   @override
   Widget build(BuildContext context) => new Material(
@@ -132,7 +132,7 @@ class _SymbolButton extends StatelessWidget {
   final void Function() onTap;
 
   const _SymbolButton(
-      {@required this.symbol, @required this.symbolSize, @required this.onTap});
+      {required this.symbol, required this.symbolSize, required this.onTap});
 
   @override
   Widget build(BuildContext context) => new _Button(

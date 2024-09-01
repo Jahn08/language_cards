@@ -5,7 +5,7 @@ class IconOption extends StatelessWidget {
   final Widget _iconWidget;
   final bool isSelected;
 
-  const IconOption({@required Widget icon, bool isSelected})
+  const IconOption({required Widget icon, bool? isSelected})
       : _iconWidget = icon,
         isSelected = isSelected ?? false;
 

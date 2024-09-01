@@ -17,9 +17,9 @@ import '../widgets/one_line_text.dart';
 import '../widgets/translation_indicator.dart';
 
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
-  Set<int> _nonRemovableItemIds;
+  Set<int?>? _nonRemovableItemIds;
 
-  final _nonPackCardsNumberNotifier = new ValueNotifier<int>(null);
+  final _nonPackCardsNumberNotifier = new ValueNotifier<int?>(null);
 
   @override
   void dispose() {
@@ -34,12 +34,12 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
       : new TranslationIndicator(item.from, item.to);
 
   @override
-  Widget getItemSubtitle(StoredPack item, {bool forCheckbox}) {
+  Widget getItemSubtitle(StoredPack item, {bool forCheckbox = false}) {
     if (item.isNone) {
       _nonPackCardsNumberNotifier.value ??= item.cardsNumber;
       return new ValueListenableBuilder(
           valueListenable: _nonPackCardsNumberNotifier,
-          builder: (_, int nonPackCardsNumber, __) =>
+          builder: (_, int? nonPackCardsNumber, __) =>
               new CardNumberIndicator(nonPackCardsNumber));
     }
 
@@ -51,7 +51,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
       new OneLineText(item.getLocalisedName(context));
 
   @override
-  void onGoingToItem(BuildContext buildContext, [StoredPack item]) {
+  void onGoingToItem(BuildContext buildContext, [StoredPack? item]) {
     super.onGoingToItem(buildContext, item);
 
     item != null && item.isNone
@@ -61,7 +61,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
   @override
   Future<List<StoredPack>> fetchNextItems(
-      int skipCount, int takeCount, String text) {
+      int skipCount, int takeCount, String? text) {
     if (skipCount > 0) return Future.value([]);
 
     return widget.storage.fetch(textFilter: text);
@@ -71,7 +71,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   void deleteItems(List<StoredPack> items) {
     if (items.isEmpty) return;
 
-    widget.storage.delete(items.map((i) => i.id).toList()).then((res) {
+    widget.storage.delete(items.map((i) => i.id!).toList()).then((res) {
       final untiedCardsNumber =
           items.map((i) => i.cardsNumber).fold<int>(0, (prev, el) => prev + el);
       if (untiedCardsNumber > 0) {
@@ -90,7 +90,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
     if (filledPackNames.isEmpty) return true;
 
     filledPackNames.sort((a, b) => a.compareTo(b));
-    final locale = AppLocalizations.of(context);
+    final locale = AppLocalizations.of(context)!;
 
     const String newLine = '\n';
     final joinedNames =
@@ -108,7 +108,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   }
 
   @override
-  String get title => AppLocalizations.of(context).packListScreenTitle;
+  String get title => AppLocalizations.of(context)!.packListScreenTitle;
 
   @override
   bool get canGoBack => true;
@@ -122,7 +122,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
       (super.curFilterIndex == null ? nonRemovableItemIds.length : 0);
 
   @override
-  Set<int> get nonRemovableItemIds => _nonRemovableItemIds ??=
+  Set<int?> get nonRemovableItemIds => _nonRemovableItemIds ??=
       super.nonRemovableItemIds..add(StoredPack.none.id);
 
   @override
@@ -145,7 +145,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
               if (markedItems.isEmpty) {
                 final filePath =
                     await const ImportDialog().show(scaffoldContext);
-                if (!mounted) return;
+                if (!scaffoldContext.mounted) return;
 
                 if (filePath == null) return;
 
@@ -156,11 +156,11 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
                             widget.storage, widget.cardStorage, locale)
                         .import(filePath),
                     locale);
-                if (!mounted) return;
+                if (!scaffoldContext.mounted) return;
 
-                if (importState.error != null) throw importState.error;
+                if (importState!.error != null) throw importState.error!;
 
-                final packsWithCards = importState.value;
+                final packsWithCards = importState.value!;
                 await new ConfirmDialog.ok(
                         title: locale.packListScreenImportDialogTitle,
                         content: locale.packListScreenImportDialogContent(
@@ -180,11 +180,11 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
                     () => new PackExporter(widget.cardStorage)
                         .export(markedItems.toList(), 'packs', locale),
                     locale);
-                if (!mounted) return;
+                if (!scaffoldContext.mounted) return;
 
-                if (exportState.error != null) throw exportState.error;
+                if (exportState!.error != null) throw exportState.error!;
 
-                final exportFilePath = exportState.value;
+                final exportFilePath = exportState.value!;
                 await new ConfirmDialog.ok(
                         title: locale.packListScreenExportDialogTitle,
                         content: locale.packListScreenExportDialogContent(
@@ -206,6 +206,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
               await new ConfirmDialog.ok(
                       title: locale.importExportWarningDialogTitle,
                       content: errMessage)
+                  // ignore: use_build_context_synchronously
                   .show(context);
 
               if (!Platform.environment.containsKey('FLUTTER_TEST')) rethrow;
@@ -220,7 +221,7 @@ class PackListScreen extends ListScreen<StoredPack> {
 
   final WordStorage cardStorage;
 
-  const PackListScreen([PackStorage storage, WordStorage cardStorage])
+  const PackListScreen([PackStorage? storage, WordStorage? cardStorage])
       : storage = storage ?? const PackStorage(),
         cardStorage = cardStorage ?? const WordStorage(),
         super();

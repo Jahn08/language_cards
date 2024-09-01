@@ -56,8 +56,8 @@ class _EnglishPhoneticKeyboard extends InputKeyboard {
   ];
 
   _EnglishPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -107,8 +107,8 @@ class _FrenchPhoneticKeyboard extends InputKeyboard {
   ];
 
   _FrenchPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -157,8 +157,8 @@ class _SpanishPhoneticKeyboard extends InputKeyboard {
   ];
 
   _SpanishPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -210,8 +210,8 @@ class _ItalianPhoneticKeyboard extends InputKeyboard {
   ];
 
   _ItalianPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -287,8 +287,8 @@ class _GermanPhoneticKeyboard extends InputKeyboard {
   ];
 
   _GermanPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -340,8 +340,8 @@ class _RussianPhoneticKeyboard extends InputKeyboard {
   ];
 
   _RussianPhoneticKeyboard(
-      String initialValue, String Function(String symbol) onSymbolTap,
-      {Key key})
+      String? initialValue, String Function(String? symbol) onSymbolTap,
+      {Key? key})
       : super(_phoneticSymbols,
             initialValue: initialValue, onSymbolTap: onSymbolTap, key: key);
 }
@@ -349,9 +349,10 @@ class _RussianPhoneticKeyboard extends InputKeyboard {
 class PhoneticKeyboard {
   PhoneticKeyboard._();
 
-  static InputKeyboard getLanguageSpecific(String Function(String) onSymbolTap,
-      {String initialValue, Key key, Language lang = Language.english}) {
-    switch (lang ?? Language.english) {
+  static InputKeyboard getLanguageSpecific(String Function(String?) onSymbolTap,
+      {String? initialValue, Key? key, Language? lang}) {
+    lang ??= Language.english;
+    switch (lang) {
       case Language.english:
         return new _EnglishPhoneticKeyboard(initialValue, onSymbolTap,
             key: key);

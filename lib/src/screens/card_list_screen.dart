@@ -12,10 +12,10 @@ import '../widgets/one_line_text.dart';
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   bool _cardsWereRemoved = false;
 
-  int _loadedItemsCount;
+  int _loadedItemsCount = 0;
 
   @override
-  Widget getItemSubtitle(StoredWord item, {bool forCheckbox}) {
+  Widget getItemSubtitle(StoredWord item, {bool? forCheckbox}) {
     final translationText = new OneLineText(item.translation);
     return (forCheckbox ?? false)
         ? new _CardAdditionalInfo(
@@ -31,7 +31,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
       new _CardAdditionalInfo(item, CrossAxisAlignment.end);
 
   @override
-  void onGoingToItem(BuildContext buildContext, [StoredWord item]) {
+  void onGoingToItem(BuildContext buildContext, [StoredWord? item]) {
     super.onGoingToItem(buildContext, item);
 
     Router.goToCard(buildContext, wordId: item?.id, pack: widget.pack);
@@ -39,7 +39,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
   @override
   Future<List<StoredWord>> fetchNextItems(
-      int skipCount, int takeCount, String text) async {
+      int skipCount, int takeCount, String? text) async {
     final items = await widget.storage.fetchFiltered(
         skipCount: skipCount,
         takeCount: takeCount,
@@ -51,13 +51,14 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     return items;
   }
 
-  List<int> get _parentIds => widget.pack == null ? null : [widget.pack.id];
+  List<int?>? get _parentIds => widget.pack == null ? null : [widget.pack!.id];
 
   @override
   void deleteItems(List<StoredWord> items) {
     if (items.isEmpty) return;
 
-    widget.storage.delete(items.map((i) => i.id).toList());
+    widget.storage
+        .delete(items.where((i) => i.id != null).map((i) => i.id!).toList());
     _cardsWereRemoved = true;
   }
 
@@ -73,8 +74,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   String get title {
     final packName = widget.pack?.getLocalisedName(context);
     return (packName?.isEmpty ?? true)
-        ? AppLocalizations.of(context).cardListScreenWithoutPackTitle
-        : packName;
+        ? AppLocalizations.of(context)!.cardListScreenWithoutPackTitle
+        : packName!;
   }
 
   @override
@@ -86,7 +87,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
 
     if (widget.pack == null)
       Router.returnHome(context);
-    else if (widget.pack.isNone)
+    else if (widget.pack!.isNone)
       Router.goBackToPackList(context, refresh: shouldRefreshPack);
     else
       Router.goBackToPack(context,
@@ -107,7 +108,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
                 .where((card) => card.studyProgress != WordStudyStage.unknown)
                 .toList();
             if (itemsToReset.isEmpty ||
-                    !(await new ConfirmDialog(
+                !(await new ConfirmDialog(
                             title: locale
                                 .cardListScreenResettingProgressDialogTitle,
                             content: locale
@@ -115,15 +116,15 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
                                     itemsToReset.length.toString()),
                             confirmationLabel: locale
                                 .cardListScreenResettingProgressDialogConfirmationButtonLabel)
-                        .show(scaffoldContext)) ??
-                false) return;
+                        .show(scaffoldContext) ??
+                    false)) return;
 
             itemsToReset.forEach((w) => w.resetStudyProgress());
             await widget.storage.upsert(itemsToReset);
 
             await refetchItems(isForceful: true);
 
-            if (!mounted) return;
+            if (!scaffoldContext.mounted) return;
 
             ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
                 content: new Text(
@@ -135,11 +136,12 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   }
 
   @override
-  Future<Map<String, int>> getFilterIndexes() =>
+  Future<Map<String, int>?> getFilterIndexes() =>
       widget.storage.groupByTextIndexAndParent(_parentIds);
 
   @override
-  String getSelectorBtnLabel({bool allSelected, AppLocalizations locale}) {
+  String getSelectorBtnLabel(
+      {required bool allSelected, required AppLocalizations locale}) {
     final itemsOverall = super.filterIndexLength;
     if (_loadedItemsCount == itemsOverall)
       return super
@@ -158,17 +160,17 @@ class _CardAdditionalInfo extends StatelessWidget {
 
   final CrossAxisAlignment alignment;
 
-  final Widget topItem;
+  final Widget? topItem;
 
   const _CardAdditionalInfo(this.card, this.alignment, [this.topItem]);
 
   @override
   Widget build(BuildContext context) =>
       new Column(crossAxisAlignment: alignment, children: <Widget>[
-        if (topItem != null) topItem,
+        if (topItem != null) topItem!,
         if (card.partOfSpeech != null)
           new OneLineText(
-              card.partOfSpeech.present(AppLocalizations.of(context))),
+              card.partOfSpeech!.present(AppLocalizations.of(context)!)),
         new OneLineText('${card.studyProgress}%')
       ]);
 }
@@ -177,11 +179,11 @@ class CardListScreen extends ListScreen<StoredWord> {
   @override
   final WordStorage storage;
 
-  final StoredPack pack;
+  final StoredPack? pack;
 
   final bool refresh;
 
-  const CardListScreen(this.storage, {this.pack, bool refresh})
+  const CardListScreen(this.storage, {this.pack, bool? refresh})
       : refresh = refresh ?? false,
         super();
 

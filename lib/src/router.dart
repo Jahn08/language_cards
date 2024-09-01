@@ -6,16 +6,16 @@ import './data/word_storage.dart';
 class _CardStorageRouteArgs {
   final WordStorage storage;
 
-  _CardStorageRouteArgs([WordStorage storage])
+  _CardStorageRouteArgs([WordStorage? storage])
       : storage = storage ?? const WordStorage();
 }
 
 class _CardListRouteArgs extends _CardStorageRouteArgs {
-  final StoredPack pack;
+  final StoredPack? pack;
 
   final bool refresh;
 
-  _CardListRouteArgs({WordStorage storage, bool refresh, this.pack})
+  _CardListRouteArgs({WordStorage? storage, bool? refresh, this.pack})
       : refresh = refresh ?? false,
         super(storage);
 }
@@ -23,43 +23,40 @@ class _CardListRouteArgs extends _CardStorageRouteArgs {
 class CardListRoute {
   final _CardListRouteArgs params;
 
-  CardListRoute.fromArguments(Object arguments)
+  CardListRoute.fromArguments(Object? arguments)
       : params = arguments is _CardListRouteArgs
             ? arguments
             : new _CardListRouteArgs();
 }
 
 class _PackStorageRouteArgs {
-  final PackStorage storage;
+  final PackStorage? storage;
 
   const _PackStorageRouteArgs([this.storage]);
 }
 
 class _PackStorageWithCardsRouteArgs extends _PackStorageRouteArgs {
-  final WordStorage cardStorage;
-
-  const _PackStorageWithCardsRouteArgs([PackStorage storage, this.cardStorage])
-      : super(storage);
+  const _PackStorageWithCardsRouteArgs();
 }
 
 class PackListRoute {
   final _PackStorageWithCardsRouteArgs params;
 
-  PackListRoute.fromArguments(Object arguments)
+  PackListRoute.fromArguments(Object? arguments)
       : params = arguments is _PackStorageWithCardsRouteArgs
             ? arguments
             : const _PackStorageWithCardsRouteArgs();
 }
 
 class _WordCardRouteArgs extends _CardStorageRouteArgs {
-  final int wordId;
+  final int? wordId;
 
-  final StoredPack pack;
+  final StoredPack? pack;
 
   final PackStorage packStorage;
 
   _WordCardRouteArgs(
-      {WordStorage storage, PackStorage packStorage, this.wordId, this.pack})
+      {WordStorage? storage, PackStorage? packStorage, this.wordId, this.pack})
       : packStorage = packStorage ?? const PackStorage(),
         super(storage);
 }
@@ -67,14 +64,14 @@ class _WordCardRouteArgs extends _CardStorageRouteArgs {
 class WordCardRoute {
   final _WordCardRouteArgs params;
 
-  WordCardRoute.fromArguments(Object arguments)
+  WordCardRoute.fromArguments(Object? arguments)
       : params = arguments is _WordCardRouteArgs
             ? arguments
             : new _WordCardRouteArgs();
 }
 
 class _StudyStorageRouteArgs {
-  final StudyStorage storage;
+  final StudyStorage? storage;
 
   const _StudyStorageRouteArgs([this.storage]);
 }
@@ -82,7 +79,7 @@ class _StudyStorageRouteArgs {
 class StudyPreparerRoute {
   final _StudyStorageRouteArgs params;
 
-  StudyPreparerRoute.fromArguments(Object arguments)
+  StudyPreparerRoute.fromArguments(Object? arguments)
       : params = arguments is _StudyStorageRouteArgs
             ? arguments
             : const _StudyStorageRouteArgs();
@@ -91,14 +88,14 @@ class StudyPreparerRoute {
 class _StudyModeRouteArgs extends _CardStorageRouteArgs {
   final List<StoredPack> packs;
 
-  final List<int> studyStageIds;
+  final List<int>? studyStageIds;
 
   final BaseStorage<StoredPack> packStorage;
 
   _StudyModeRouteArgs(this.packs,
       {this.studyStageIds,
-      WordStorage storage,
-      BaseStorage<StoredPack> packStorage})
+      WordStorage? storage,
+      BaseStorage<StoredPack>? packStorage})
       : packStorage = packStorage ?? const PackStorage(),
         super(storage);
 }
@@ -106,18 +103,18 @@ class _StudyModeRouteArgs extends _CardStorageRouteArgs {
 class StudyModeRoute {
   final _StudyModeRouteArgs params;
 
-  StudyModeRoute.fromArguments(Object arguments)
+  StudyModeRoute.fromArguments(Object? arguments)
       : params = arguments is _StudyModeRouteArgs
             ? arguments
             : new _StudyModeRouteArgs([]);
 }
 
 class _PackRouteArgs extends _PackStorageRouteArgs {
-  final int packId;
+  final int? packId;
 
   final bool refresh;
 
-  _PackRouteArgs({PackStorage storage, StoredPack pack, bool refresh})
+  _PackRouteArgs({PackStorage? storage, StoredPack? pack, bool? refresh})
       : packId = pack?.id,
         refresh = refresh ?? false,
         super(storage);
@@ -126,7 +123,7 @@ class _PackRouteArgs extends _PackStorageRouteArgs {
 class PackRoute {
   final _PackRouteArgs params;
 
-  PackRoute.fromArguments(Object arguments)
+  PackRoute.fromArguments(Object? arguments)
       : params = arguments is _PackRouteArgs ? arguments : new _PackRouteArgs();
 }
 
@@ -185,20 +182,20 @@ class Router {
   }
 
   static void goToCard(BuildContext context,
-          {WordStorage storage, int wordId, StoredPack pack}) =>
+          {WordStorage? storage, int? wordId, StoredPack? pack}) =>
       Navigator.pushNamed(context, _cardRouteName,
           arguments: new _WordCardRouteArgs(
               storage: storage, wordId: wordId, pack: pack));
 
   static void goToCardList(BuildContext context,
-      {WordStorage storage, StoredPack pack, bool refresh}) {
+      {WordStorage? storage, StoredPack? pack, bool? refresh}) {
     Navigator.pushNamed(context, _cardListRouteName,
         arguments: new _CardListRouteArgs(
             storage: storage, pack: pack, refresh: refresh));
   }
 
   static void goBackToCardList(BuildContext context,
-      {WordStorage storage, StoredPack pack, bool refresh}) {
+      {WordStorage? storage, StoredPack? pack, bool? refresh}) {
     Navigator.pushNamedAndRemoveUntil(context, _cardListRouteName,
         _withNames({_packRouteName, _packListRouteName, initialRouteName}),
         arguments: new _CardListRouteArgs(
@@ -217,7 +214,7 @@ class Router {
       _goBackUntil(context, initialRouteName);
 
   static void goToStudyPreparation(BuildContext context,
-          [StudyStorage storage]) =>
+          [StudyStorage? storage]) =>
       Navigator.pushNamedAndRemoveUntil(context, _studyPreparerRouteName,
           ModalRoute.withName(initialRouteName),
           arguments: new _StudyStorageRouteArgs(storage));
@@ -229,22 +226,22 @@ class Router {
       _goBackUntil(context, _studyPreparerRouteName);
 
   static void goToStudyMode(BuildContext context,
-      {@required List<StoredPack> packs,
-      List<int> studyStageIds,
-      WordStorage storage}) {
+      {required List<StoredPack> packs,
+      List<int>? studyStageIds,
+      WordStorage? storage}) {
     Navigator.pushNamed(context, _studyModeRouteName,
         arguments: new _StudyModeRouteArgs(packs,
             studyStageIds: studyStageIds, storage: storage));
   }
 
   static void goToPack(BuildContext context,
-          {PackStorage storage, StoredPack pack}) =>
+          {PackStorage? storage, StoredPack? pack}) =>
       Navigator.pushNamed(context, _packRouteName,
           arguments: new _PackRouteArgs(storage: storage, pack: pack));
 
   static void goBackToPack(BuildContext context,
-      {PackStorage storage, StoredPack pack, bool refresh}) {
-    if (refresh)
+      {PackStorage? storage, StoredPack? pack, bool? refresh}) {
+    if (refresh ?? false)
       Navigator.pushNamedAndRemoveUntil(context, _packRouteName,
           _withNames({_packListRouteName, initialRouteName}),
           arguments: new _PackRouteArgs(
@@ -256,8 +253,8 @@ class Router {
   static void goToPackList(BuildContext context) =>
       Navigator.pushNamed(context, _packListRouteName);
 
-  static void goBackToPackList(BuildContext context, {bool refresh}) {
-    if (refresh)
+  static void goBackToPackList(BuildContext context, {bool? refresh}) {
+    if (refresh ?? false)
       Navigator.pushNamedAndRemoveUntil(
           context, _packListRouteName, ModalRoute.withName(initialRouteName));
     else

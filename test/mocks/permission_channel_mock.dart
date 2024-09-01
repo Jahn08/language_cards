@@ -8,20 +8,21 @@ class PermissionChannelMock {
   PermissionChannelMock._();
 
   static Future<void> testWithChannel(Future<void> Function() action,
-      {bool noPermissionsByDefault, bool shouldDenyPermissions}) async {
+      {bool noPermissionsByDefault = false,
+      bool shouldDenyPermissions = false}) async {
     try {
       _channel.setMockMethodCallHandler((call) {
         switch (call.method) {
           case 'checkPermissionStatus':
-            return Future.value((noPermissionsByDefault ?? false) ? 0 : 1);
+            return Future.value(noPermissionsByDefault ? 0 : 1);
           case 'requestPermissions':
-            return Future.value({15: (shouldDenyPermissions ?? false) ? 0 : 1});
+            return Future.value({15: (shouldDenyPermissions ? 0 : 1)});
           default:
-            return Future.value(null);
+            return Future.value();
         }
       });
 
-      await action?.call();
+      await action.call();
     } finally {
       _channel.setMockMethodCallHandler(null);
     }

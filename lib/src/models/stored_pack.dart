@@ -20,36 +20,36 @@ class StoredPack extends StoredEntity {
 
   final String name;
 
-  final Language from;
+  final Language? from;
 
-  final Language to;
+  final Language? to;
 
-  DateTime _studyDate;
+  DateTime? _studyDate;
 
   int _cardsNumber;
 
   StoredPack(this.name,
-      {int id, this.from, this.to, DateTime studyDate, int cardsNumber})
-      : assert(name != null),
-        assert(from == null || to == null || from != to),
+      {int? id, this.from, this.to, DateTime? studyDate, int? cardsNumber})
+      : assert(from == null || to == null || from != to),
         _cardsNumber = _getNonNegativeNumber(cardsNumber),
         _studyDate = studyDate,
         super(id: id);
 
-  DateTime get studyDate => _studyDate;
+  DateTime? get studyDate => _studyDate;
 
   void setNowAsStudyDate() => _studyDate = DateTime.now();
 
-  static int _getNonNegativeNumber(int value) => (value ?? 0) > 0 ? value : 0;
+  static int _getNonNegativeNumber(int? value) =>
+      value == null || value < 0 ? 0 : value;
 
   StoredPack.fromDbMap(Map<String, dynamic> values)
       : this(values[nameFieldName] as String,
-            id: values[StoredEntity.idFieldName] as int,
+            id: values[StoredEntity.idFieldName] as int?,
             from: Language.values[values[fromFieldName] as int],
             to: Language.values[values[toFieldName] as int],
-            studyDate: _tryParseDate(values[studyDateFieldName] as int));
+            studyDate: _tryParseDate(values[studyDateFieldName] as int?));
 
-  static DateTime _tryParseDate(int value) => value == null
+  static DateTime? _tryParseDate(int? value) => value == null
       ? null
       : DateTime.fromMillisecondsSinceEpoch(value, isUtc: true).toLocal();
 
@@ -60,13 +60,13 @@ class StoredPack extends StoredEntity {
   bool get isNone => name == _noneName && id == null;
 
   @override
-  Map<String, dynamic> toDbMap({bool excludeIds}) {
+  Map<String, dynamic> toDbMap({bool? excludeIds}) {
     final map = super.toDbMap(excludeIds: excludeIds);
     map.addAll({
       nameFieldName: name,
       fromFieldName: from?.index,
       toFieldName: to?.index,
-      studyDateFieldName: studyDate?.toUtc()?.millisecondsSinceEpoch
+      studyDateFieldName: studyDate?.toUtc().millisecondsSinceEpoch
     });
 
     return map;
@@ -95,7 +95,7 @@ class StoredPack extends StoredEntity {
   String get textData => name;
 
   String getLocalisedName(BuildContext context) =>
-      isNone ? AppLocalizations.of(context).storedPackNonePackName : name;
+      isNone ? AppLocalizations.of(context)!.storedPackNonePackName : name;
 
   Map<String, dynamic> toJsonMap(List<StoredWord> cards) {
     final packProps = toDbMap(excludeIds: true);

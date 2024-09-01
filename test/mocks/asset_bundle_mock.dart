@@ -7,21 +7,24 @@ class AssetBundleMock extends CachingAssetBundle {
   static const String _secretParamAssetKey = 'assets/cfg/secret_params.json';
   static const String _paramAssetKey = 'assets/cfg/params.json';
 
-  final AppParams _params;
-  final AppParams _secretParams;
+  final AppParams? _params;
+  final AppParams? _secretParams;
 
-  final void Function(String key, ByteData data) onAssetLoaded;
+  final void Function(String key, ByteData data)? onAssetLoaded;
 
   AssetBundleMock(
-      {AppParams params, AppParams secretParams, this.onAssetLoaded})
+      {AppParams? params, AppParams? secretParams, this.onAssetLoaded})
       : _params = params,
         _secretParams = secretParams;
 
   @override
   Future<ByteData> load(String key) async {
     if (key == _secretParamAssetKey)
-      return _convertToBytes(_secretParams);
-    else if (key == _paramAssetKey) return _convertToBytes(_params);
+      return _secretParams == null
+          ? new ByteData(0)
+          : _convertToBytes(_secretParams!);
+    else if (key == _paramAssetKey)
+      return _params == null ? new ByteData(0) : _convertToBytes(_params!);
 
     final data = await rootBundle.load(key);
     onAssetLoaded?.call(key, data);
@@ -30,8 +33,6 @@ class AssetBundleMock extends CachingAssetBundle {
   }
 
   ByteData _convertToBytes(Object obj) {
-    if (obj == null) return null;
-
     final bytes = const Utf8Codec().encode(jsonEncode(obj));
     return new ByteData.sublistView(Int8List.fromList(bytes));
   }

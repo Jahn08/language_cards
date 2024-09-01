@@ -23,7 +23,7 @@ void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {
       (tester) async {
     final loadedSlides = <String>[];
     await _pumpScreen(tester, screenBuilder, (key, data) {
-      if (data != null && key.endsWith('png')) loadedSlides.add(key);
+      if (key.endsWith('png')) loadedSlides.add(key);
     });
 
     final assistant = new WidgetAssistant(tester);
@@ -85,7 +85,7 @@ void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {
 }
 
 Future<void> _pumpScreen(WidgetTester tester, Widget Function() screenBuilder,
-    [Function(String, ByteData) onAssetLoaded]) async {
+    [Function(String, ByteData)? onAssetLoaded]) async {
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       child: new DefaultAssetBundle(
           bundle: new AssetBundleMock(onAssetLoaded: onAssetLoaded),
@@ -118,7 +118,7 @@ void _assurePageIndicator(WidgetTester tester, int pageIndex) {
   final pageIndicator = ' $pageIndex ';
   tester
       .widgetList<Text>(barTitleFinder)
-      .singleWhere((t) => t.data.contains(pageIndicator));
+      .singleWhere((t) => t.data!.contains(pageIndicator));
 }
 
 Future<MapEntry<String, String>> _assureInfoDialogRendering(
@@ -127,8 +127,8 @@ Future<MapEntry<String, String>> _assureInfoDialogRendering(
       AssuredFinder.findOne(icon: Icons.info, shouldFind: true);
   final timesToTap = Randomiser.nextInt(3) + 2;
 
-  String initialTitle;
-  String initialContent;
+  String? initialTitle;
+  String? initialContent;
   for (int i = 0; i < timesToTap; ++i) {
     await assistant.tapWidget(infoBtnFinder);
 
@@ -149,14 +149,14 @@ Future<MapEntry<String, String>> _assureInfoDialogRendering(
     await _closeDialog(assistant);
   }
 
-  return new MapEntry(initialTitle, initialContent);
+  return new MapEntry(initialTitle!, initialContent!);
 }
 
 MapEntry<String, String> _extractDialogData(WidgetTester tester) {
   final dialog = DialogTester.findConfirmationDialog(tester);
   final content = tester
       .widget<Text>(find.descendant(
-          of: find.byWidget(dialog.content), matching: find.byType(Text)))
+          of: find.byWidget(dialog.content!), matching: find.byType(Text)))
       .data;
-  return new MapEntry((dialog.title as Text).data, content);
+  return new MapEntry((dialog.title! as Text).data!, content!);
 }

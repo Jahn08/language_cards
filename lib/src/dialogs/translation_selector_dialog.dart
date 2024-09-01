@@ -20,19 +20,19 @@ class _CheckboxListState extends State<_CheckboxList> {
             onChanged: (value) => setState(() {
                   _chosenItems.clear();
 
-                  if (value) _chosenItems.addAll(widget.items);
+                  if (value == true) _chosenItems.addAll(widget.items);
 
-                  widget.onChange?.call(_chosenItems);
+                  widget.onChange.call(_chosenItems);
                 })),
         children: widget.items
             .map((item) => new _DialogOption(
                 title: item,
                 isChosen: _chosenItems.contains(item),
                 onChanged: (value) => setState(() {
-                      value
+                      value == true
                           ? _chosenItems.add(item)
                           : _chosenItems.remove(item);
-                      widget.onChange?.call(_chosenItems);
+                      widget.onChange.call(_chosenItems);
                     })))
             .toList());
   }
@@ -43,12 +43,11 @@ class _DialogOption extends StatelessWidget {
 
   final bool isChosen;
 
-  final void Function(bool) onChanged;
+  // ignore: avoid_positional_boolean_parameters
+  final void Function(bool?) onChanged;
 
   const _DialogOption(
-      {@required this.title,
-      @required this.isChosen,
-      @required this.onChanged});
+      {required this.title, required this.isChosen, required this.onChanged});
 
   @override
   Widget build(BuildContext context) => new ShrinkableSimpleDialogOption(
@@ -64,7 +63,7 @@ class _CheckboxList extends StatefulWidget {
   final Function(Set<String>) onChange;
 
   const _CheckboxList(this.title, this.items,
-      {@required this.onChange, @required this.buttons})
+      {required this.onChange, required this.buttons})
       : super();
 
   @override
@@ -74,7 +73,7 @@ class _CheckboxList extends StatefulWidget {
 }
 
 class TranslationSelectorDialog extends SelectorDialog<String> {
-  Set<String> _chosenTranslations;
+  Set<String>? _chosenTranslations;
 
   final BuildContext _context;
 
@@ -83,7 +82,7 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
         super();
 
   @override
-  Future<String> show([List<String> items]) {
+  Future<String?> show([List<String>? items]) {
     final locale = AppLocalizations.of(_context);
     items ??= <String>[];
     return items.isNotEmpty
@@ -91,7 +90,7 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
             context: _context,
             builder: (dialogContext) {
               return new _CheckboxList(
-                  locale.translationSelectorDialogTitle, items,
+                  locale!.translationSelectorDialogTitle, items!,
                   onChange: (chosenItems) => _chosenTranslations = chosenItems,
                   buttons: <Widget>[
                     new CancelButton(() => returnResult(_context)),
@@ -102,6 +101,6 @@ class TranslationSelectorDialog extends SelectorDialog<String> {
                             new Text(locale.translationSelectorDoneButtonLabel))
                   ]);
             })
-        : Future.value(items.firstWhere((_) => true, orElse: () => null));
+        : Future.value(items.firstOrNull);
   }
 }

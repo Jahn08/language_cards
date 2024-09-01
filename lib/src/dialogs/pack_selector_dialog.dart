@@ -6,10 +6,10 @@ import '../widgets/card_number_indicator.dart';
 import '../widgets/translation_indicator.dart';
 
 class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
-  final int _chosenPackId;
+  final int? _chosenPackId;
 
   PackSelectorDialog(BuildContext context, this._chosenPackId)
-      : super(context, AppLocalizations.of(context).packSelectorDialogTitle);
+      : super(context, AppLocalizations.of(context)!.packSelectorDialogTitle);
 
   @override
   Widget getItemSubtitle(StoredPack item) =>
@@ -26,6 +26,6 @@ class PackSelectorDialog extends SingleSelectorDialog<StoredPack> {
       ]);
 
   @override
-  Widget getItemTrailing(StoredPack item) =>
+  Widget? getItemTrailing(StoredPack item) =>
       item.id == _chosenPackId ? const Icon(Icons.check) : null;
 }

@@ -3,8 +3,8 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'styled_input_decoration.dart';
 
 class _StyledTextFieldState extends State<StyledTextField> {
-  FocusNode _focusNode;
-  TextEditingController _controller;
+  late FocusNode _focusNode;
+  late TextEditingController _controller;
   bool _isChanged = false;
 
   @override
@@ -18,7 +18,7 @@ class _StyledTextFieldState extends State<StyledTextField> {
   }
 
   void _emitOnChangedEvent() {
-    widget.onFocusChanged?.call(_focusNode.hasFocus);
+    widget.onFocusChanged?.call(hasFocus: _focusNode.hasFocus);
 
     if (!_focusNode.hasFocus && _isChanged) _emitOnChanged(_controller.text);
   }
@@ -37,12 +37,12 @@ class _StyledTextFieldState extends State<StyledTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final locale = AppLocalizations.of(context);
-    String tempValue = widget.initialValue;
+    final locale = AppLocalizations.of(context)!;
+    String? tempValue = widget.initialValue;
     return new TextFormField(
         focusNode: _focusNode,
         readOnly: widget.readonly,
-        keyboardType: (widget.enableSuggestions ?? true)
+        keyboardType: widget.enableSuggestions
             ? TextInputType.text
             : TextInputType.visiblePassword,
         decoration: new StyledInputDecoration(widget.label),
@@ -53,12 +53,12 @@ class _StyledTextFieldState extends State<StyledTextField> {
           widget.onInput?.call(val);
         },
         onEditingComplete: () {
-          _emitOnChanged(tempValue, true);
+          _emitOnChanged(tempValue, submitted: true);
 
           FocusScope.of(context).unfocus();
         },
         onSaved: _emitOnChanged,
-        validator: (String text) {
+        validator: (String? text) {
           if (widget.isRequired && (text == null || text.isEmpty))
             return locale.constsEmptyValueValidationError;
 
@@ -67,10 +67,10 @@ class _StyledTextFieldState extends State<StyledTextField> {
         controller: _controller);
   }
 
-  void _emitOnChanged(String value, [bool isSubmitted]) {
+  void _emitOnChanged(String? value, {bool submitted = false}) {
     _isChanged = false;
 
-    widget._onChanged?.call(value, isSubmitted ?? false);
+    widget._onChanged?.call(value, submitted: submitted);
   }
 
   @override
@@ -89,31 +89,29 @@ class StyledTextField extends StatefulWidget {
 
   final String label;
 
-  final Function(String, bool) _onChanged;
+  final void Function(String?, {bool? submitted})? _onChanged;
 
-  final Function(String) onInput;
+  final Function(String)? onInput;
 
-  final Function(bool) onFocusChanged;
+  final Function({bool hasFocus})? onFocusChanged;
 
   final String initialValue;
 
-  final String Function(String) validator;
+  final String? Function(String?)? validator;
 
   final bool enableSuggestions;
 
   const StyledTextField(this.label,
-      {Key key,
-      bool isRequired,
-      Function(String value, bool submitted) onChanged,
-      bool readonly,
-      this.initialValue,
+      {Key? key,
+      this.isRequired = false,
+      void Function(String? value, {bool? submitted})? onChanged,
+      this.readonly = false,
+      this.initialValue = '',
       this.validator,
-      this.enableSuggestions,
+      this.enableSuggestions = true,
       this.onInput,
       this.onFocusChanged})
-      : isRequired = isRequired ?? false,
-        readonly = readonly ?? false,
-        _onChanged = onChanged,
+      : _onChanged = onChanged,
         super(key: key);
 
   @override

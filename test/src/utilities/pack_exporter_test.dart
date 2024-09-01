@@ -60,7 +60,7 @@ void main() {
         final exporterTester = new ExporterTester(expectedFilePath);
         exporterTester.assertExportFileName(filePostfix);
         await exporterTester.assertExportedPacks(packStorage, packsToExport);
-      }, noPermissionsByDefault: true, shouldDenyPermissions: false);
+      }, noPermissionsByDefault: true);
     }, arePermissionsRequired: true);
   });
 
@@ -73,7 +73,7 @@ void main() {
 
         final filePostfix = Randomiser.nextString();
 
-        FileSystemException error;
+        FileSystemException? error;
         try {
           await new PackExporter(packStorage.wordStorage).export(
               packsToExport, filePostfix, Localizator.defaultLocalization);

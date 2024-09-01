@@ -9,17 +9,19 @@ class MergeSelectorDialog extends SingleSelectorDialog<StoredWord> {
   final Map<int, String> _packNamesById;
 
   MergeSelectorDialog(BuildContext context, this._packNamesById)
-      : _locale = AppLocalizations.of(context),
-        super(context, AppLocalizations.of(context).mergeSelectorDialogTitle);
+      : _locale = AppLocalizations.of(context)!,
+        super(context, AppLocalizations.of(context)!.mergeSelectorDialogTitle);
 
   @override
-  Widget getItemTrailing(StoredWord item) => null;
+  Widget? getItemTrailing(StoredWord item) => null;
 
   @override
   Widget getItemTitle(StoredWord item) =>
-      new Text(_locale.mergeSelectorDialogWordTitle(item.text,
-          item.partOfSpeech.present(_locale), _packNamesById[item.packId]));
+      new Text(_locale.mergeSelectorDialogWordTitle(
+          item.text,
+          item.partOfSpeech?.present(_locale) ?? '',
+          _packNamesById[item.packId]!));
 
   @override
-  Widget getItemSubtitle(StoredWord item) => new Text(item.translation);
+  Widget getItemSubtitle(StoredWord item) => new Text(item.translation ?? '');
 }

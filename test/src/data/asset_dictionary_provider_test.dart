@@ -12,8 +12,6 @@ void main() {
         .pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
       final languages =
           await new AssetDictionaryProvider(context).getAcceptedLanguages();
-      expect(languages == null, false);
-
       final expectedLangPairs = [
         WordDictionaryTester.buildLangPair(Language.english, Language.russian),
         WordDictionaryTester.buildLangPair(Language.russian, Language.english)
@@ -57,7 +55,6 @@ void main() {
           WordDictionaryTester.buildLangPair(
               Language.english, Language.russian),
           wordToLookUp);
-      expect(article == null, false);
 
       final expectedText = wordToLookUp.toLowerCase();
       expect(article.words.every((w) => w.text == expectedText), true);
@@ -74,7 +71,6 @@ void main() {
           WordDictionaryTester.buildLangPair(
               Language.english, Language.russian),
           Randomiser.nextString());
-      expect(article == null, false);
       expect(article.words.isEmpty, true);
     }));
   });

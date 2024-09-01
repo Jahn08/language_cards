@@ -11,7 +11,7 @@ void main() {
   testWidgets('Returns null for an empty list of words', (tester) async {
     final dialogTester = new SelectorDialogTester<Word>(tester, _buildDialog);
 
-    Word dialogResult;
+    Word? dialogResult;
     await dialogTester.showDialog([], (word) => dialogResult = word);
     expect(dialogResult, null);
 
@@ -28,7 +28,7 @@ void main() {
       expect(
           find.descendant(
               of: finder,
-              matching: find.text(word.partOfSpeech.valueList.first)),
+              matching: find.text(word.partOfSpeech!.valueList.first)),
           findsOneWidget);
       expect(
           find.descendant(

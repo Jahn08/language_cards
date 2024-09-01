@@ -11,7 +11,7 @@ abstract class BaseStorage<T extends StoredEntity> {
     new StoredPack('')
   ];
 
-  static DataProvider _provider;
+  static DataProvider? _provider;
 
   const BaseStorage();
 
@@ -22,22 +22,20 @@ abstract class BaseStorage<T extends StoredEntity> {
   DataProvider get connection =>
       _provider ?? (_provider = new DbProvider(_entities));
 
-  Future<List<T>> fetch({String textFilter, int skipCount, int takeCount}) =>
-      fetchInternally(
-          textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
+  Future<List<T>> fetch({String? textFilter, int? skipCount, int? takeCount});
 
-  Future<int> count({String textFilter}) {
+  Future<int> count({String? textFilter}) {
     return connection.count(entityName,
         filters: addTextFilterClause(textFilter: textFilter));
   }
 
   @protected
   Future<List<T>> fetchInternally(
-      {int skipCount,
-      int takeCount,
-      String orderBy,
-      String textFilter,
-      Map<String, List<dynamic>> filters}) async {
+      {required String orderBy,
+      int? skipCount,
+      int? takeCount,
+      String? textFilter,
+      Map<String, List<dynamic>>? filters}) async {
     final inFilters =
         addTextFilterClause(filters: filters, textFilter: textFilter);
     final wordValues = await connection.fetch(entityName,
@@ -47,7 +45,7 @@ abstract class BaseStorage<T extends StoredEntity> {
 
   @protected
   Map<String, dynamic> addTextFilterClause(
-      {Map<String, dynamic> filters, String textFilter}) {
+      {Map<String, dynamic>? filters, String? textFilter}) {
     final inFilters = new Map<String, dynamic>.from(filters ?? {});
     if (textFilter != null && textFilter.isNotEmpty)
       inFilters[textFilterFieldName] = '$textFilter%';
@@ -58,7 +56,7 @@ abstract class BaseStorage<T extends StoredEntity> {
   @protected
   String get textFilterFieldName;
 
-  Future<void> closeConnection() => _provider?.close();
+  Future<void>? closeConnection() => _provider?.close();
 
   Future<List<T>> upsert(List<T> entities) async {
     final toInsert = entities.where((e) => e.isNew).toList();
@@ -87,14 +85,14 @@ abstract class BaseStorage<T extends StoredEntity> {
     return entities;
   }
 
-  Future<T> find(int id) async {
+  Future<T?> find(int? id) async {
     if (id == null) return null;
 
     final values = await connection.findById(entityName, id);
     return values == null ? null : convertToEntity([values]).first;
   }
 
-  Future<void> delete(List<int> ids) async {
+  Future<void> delete(List<int?> ids) async {
     await connection.delete(entityName, ids);
   }
 
@@ -102,7 +100,7 @@ abstract class BaseStorage<T extends StoredEntity> {
   List<T> convertToEntity(List<Map<String, dynamic>> values);
 
   Future<Map<String, int>> groupByTextIndex(
-      [Map<String, List<dynamic>> groupValues]) async {
+      [Map<String, List<dynamic>>? groupValues]) async {
     final mainGroupFieldKey =
         DbProvider.composeSubstrFunc(textFilterFieldName, 1);
     final groupFields = [mainGroupFieldKey];

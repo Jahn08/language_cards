@@ -46,7 +46,7 @@ class WordStudyStage {
     }
   }
 
-  static List<int> fromString(String name, AppLocalizations locale) {
+  static List<int>? fromString(String name, AppLocalizations locale) {
     if (name == _getFamiliarStageName(locale))
       return [recognisedOnce, familiar];
     else if (name == _getWellKnownStageName(locale))

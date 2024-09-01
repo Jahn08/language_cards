@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:keyboard_actions/keyboard_actions.dart';
 
 class _KeyboardActionsStateBottomed extends KeyboardActionstate {
-  FocusNode _focusNode;
+  late FocusNode _focusNode;
 
   _KeyboardActionsStateBottomed() : super();
 
@@ -21,7 +21,7 @@ class _KeyboardActionsStateBottomed extends KeyboardActionstate {
       nodeToListen.addListener(_stickToBottom);
 
   void _stickToBottom() {
-    final bottom = WidgetsBinding.instance.window.viewInsets.bottom;
+    final bottom = View.of(context).viewInsets.bottom;
     final mainFocusNode = FocusScope.of(context);
 
     if (mainFocusNode.hasFocus && bottom > 0) {
@@ -56,9 +56,9 @@ class KeyboardActionsBottomed extends KeyboardActions {
   final FocusNode focusNode;
 
   const KeyboardActionsBottomed(
-      {@required this.focusNode,
-      @required KeyboardActionsConfig config,
-      Widget child})
+      {required this.focusNode,
+      required KeyboardActionsConfig config,
+      Widget? child})
       : super(child: child, config: config, disableScroll: true);
 
   @override

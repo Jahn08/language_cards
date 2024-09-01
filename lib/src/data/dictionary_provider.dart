@@ -3,13 +3,13 @@ import '../models/article.dart';
 import '../models/language.dart';
 
 abstract class DictionaryProvider {
-  HashSet<String> _acceptedLanguages;
+  HashSet<String>? _acceptedLanguages;
 
   Future<HashSet<String>> getAcceptedLanguages();
 
   Future<bool> isTranslationPossible(String langParam) async {
     _acceptedLanguages ??= await getAcceptedLanguages();
-    return _acceptedLanguages.contains(langParam);
+    return _acceptedLanguages!.contains(langParam);
   }
 
   Future<BaseArticle> lookUp(String langParam, String text);
