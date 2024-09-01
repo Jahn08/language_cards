@@ -102,7 +102,7 @@ class StyledTextField extends StatefulWidget {
   final bool enableSuggestions;
 
   const StyledTextField(this.label,
-      {Key? key,
+      {super.key,
       this.isRequired = false,
       void Function(String? value, {bool? submitted})? onChanged,
       this.readonly = false,
@@ -111,8 +111,7 @@ class StyledTextField extends StatefulWidget {
       this.enableSuggestions = true,
       this.onInput,
       this.onFocusChanged})
-      : _onChanged = onChanged,
-        super(key: key);
+      : _onChanged = onChanged;
 
   @override
   State<StatefulWidget> createState() {

@@ -29,11 +29,10 @@ class StoredPack extends StoredEntity {
   int _cardsNumber;
 
   StoredPack(this.name,
-      {int? id, this.from, this.to, DateTime? studyDate, int? cardsNumber})
+      {super.id, this.from, this.to, DateTime? studyDate, int? cardsNumber})
       : assert(from == null || to == null || from != to),
         _cardsNumber = _getNonNegativeNumber(cardsNumber),
-        _studyDate = studyDate,
-        super(id: id);
+        _studyDate = studyDate;
 
   DateTime? get studyDate => _studyDate;
 

@@ -10,7 +10,7 @@ import '../utilities/randomiser.dart';
 class _PackDataProvider extends DataProviderMock<StoredPack> {
   final WordStorageMock wordStorage;
 
-  _PackDataProvider(List<StoredPack> packs, this.wordStorage) : super(packs);
+  _PackDataProvider(super.packs, this.wordStorage);
 
   @override
   StoredPack buildFromDbMap(Map<String, dynamic> map) =>

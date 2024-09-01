@@ -24,7 +24,7 @@ class PackOrder extends PresentableEnum {
   static List<PackOrder> get values =>
       [byNameAsc, byNameDesc, byDateAsc, byDateDesc];
 
-  const PackOrder._(int index) : super(index);
+  const PackOrder._(super.index);
 
   @override
   String present(AppLocalizations locale) {
@@ -50,7 +50,7 @@ class CardSide extends PresentableEnum {
 
   static List<CardSide> get values => [front, back, random];
 
-  const CardSide._(int index) : super(index);
+  const CardSide._(super.index);
 
   @override
   String present(AppLocalizations locale) => this == front
@@ -67,7 +67,7 @@ class StudyDirection extends PresentableEnum {
 
   static List<StudyDirection> get values => [forward, backward, random];
 
-  const StudyDirection._(int index) : super(index);
+  const StudyDirection._(super.index);
 
   @override
   String present(AppLocalizations locale) => this == forward

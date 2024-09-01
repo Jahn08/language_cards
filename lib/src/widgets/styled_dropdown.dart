@@ -13,15 +13,14 @@ class StyledDropdown extends StatelessWidget {
   final List<String> options;
 
   StyledDropdown(Iterable<String> options,
-      {Key? key,
+      {super.key,
       bool? isRequired,
       this.onChanged,
       this.onValidate,
       this.initialValue,
       this.label})
       : options = options.toList()..sort(),
-        isRequired = isRequired ?? false,
-        super(key: key);
+        isRequired = isRequired ?? false;
 
   @override
   Widget build(BuildContext context) {

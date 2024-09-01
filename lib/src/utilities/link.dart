@@ -7,10 +7,11 @@ abstract class Link {
   const Link(this.url);
 
   Future<void> activate() async {
-    if (!(await canLaunch(url)))
+    final uri = Uri.parse(url);
+    if (!(await canLaunchUrl(uri)))
       throw new Exception('A link with the $url URL cannot be launched');
 
-    await launch(url);
+    await launchUrl(uri);
   }
 }
 
@@ -19,7 +20,7 @@ class FBLink extends Link {
 }
 
 class EmailLink extends Link {
-  const EmailLink._(String url) : super(url);
+  const EmailLink._(super.url);
 
   static bool? _isHtmlSupported;
 
@@ -28,8 +29,8 @@ class EmailLink extends Link {
     String? linkBody = body;
     if ((linkBody?.isNotEmpty ?? false) &&
         !(_isHtmlSupported ??
-            (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported()) ?? false))
-      linkBody = linkBody!.replaceAll('<br>', '\n');
+            (_isHtmlSupported = await ContextProvider.isEmailHtmlSupported()) ??
+            false)) linkBody = linkBody!.replaceAll('<br>', '\n');
 
     return new EmailLink._('mailto:$email?subject=$subject&body=$linkBody');
   }

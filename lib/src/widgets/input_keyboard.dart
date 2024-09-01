@@ -17,11 +17,10 @@ abstract class InputKeyboard extends StatelessWidget
   InputKeyboard(this.symbols,
       {required this.onSymbolTap,
       String? initialValue,
-      Key? key,
+      super.key,
       double symbolSize = 15})
       : _symbolSize = symbolSize,
-        _notifier = new ValueNotifier(initialValue ?? ''),
-        super(key: key);
+        _notifier = new ValueNotifier(initialValue ?? '');
 
   @override
   Widget build(BuildContext context) {
@@ -103,7 +102,9 @@ class _Key extends StatelessWidget {
       decoration: new BoxDecoration(
           borderRadius: const BorderRadius.all(Radius.circular(7)),
           border: Border.all(color: borderColor ?? Colors.grey[300]!),
-          boxShadow: [new BoxShadow(color: Colors.grey[400]!, spreadRadius: 1)]),
+          boxShadow: [
+            new BoxShadow(color: Colors.grey[400]!, spreadRadius: 1)
+          ]),
       width: width,
       height: height);
 }

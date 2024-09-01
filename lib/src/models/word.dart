@@ -43,16 +43,8 @@ class Word {
 }
 
 class AssetWord extends Word {
-  AssetWord(String text,
-      {int? id,
-      String? transcription,
-      PartOfSpeech? partOfSpeech,
-      List<String>? translations})
-      : super(text,
-            id: id,
-            transcription: transcription,
-            partOfSpeech: partOfSpeech,
-            translations: translations);
+  AssetWord(super.text,
+      {super.id, super.transcription, super.partOfSpeech, super.translations});
 
   AssetWord.fromJson(String text, Map<String, dynamic> json)
       : super(json['t'] as String? ?? text,

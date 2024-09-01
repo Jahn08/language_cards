@@ -17,12 +17,11 @@ class KeyboardedField extends StatelessWidget {
   final Function(String)? _onChanged;
 
   const KeyboardedField(Language? lang, FocusNode focusNode, this.label,
-      {Key? key, Function(String)? onChanged, String? initialValue})
+      {super.key, Function(String)? onChanged, String? initialValue})
       : _lang = lang,
         _initialValue = initialValue ?? '',
         _onChanged = onChanged,
-        _focusNode = focusNode,
-        super(key: key);
+        _focusNode = focusNode;
 
   @override
   Widget build(BuildContext context) {

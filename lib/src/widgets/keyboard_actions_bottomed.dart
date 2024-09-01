@@ -56,10 +56,8 @@ class KeyboardActionsBottomed extends KeyboardActions {
   final FocusNode focusNode;
 
   const KeyboardActionsBottomed(
-      {required this.focusNode,
-      required KeyboardActionsConfig config,
-      Widget? child})
-      : super(child: child, config: config, disableScroll: true);
+      {required this.focusNode, required super.config, super.child})
+      : super(disableScroll: true);
 
   @override
   _KeyboardActionsStateBottomed createState() =>

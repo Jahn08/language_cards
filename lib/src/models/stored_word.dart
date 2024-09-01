@@ -26,7 +26,7 @@ class StoredWord extends StoredEntity {
   int _studyProgress;
 
   StoredWord(this.text,
-      {int? id,
+      {super.id,
       int? packId,
       String? transcription,
       int? studyProgress,
@@ -34,8 +34,7 @@ class StoredWord extends StoredEntity {
       this.partOfSpeech})
       : _packId = packId,
         transcription = transcription ?? '',
-        _studyProgress = studyProgress ?? WordStudyStage.unknown,
-        super(id: id);
+        _studyProgress = studyProgress ?? WordStudyStage.unknown;
 
   StoredWord.fromDbMap(Map<String, dynamic> values)
       : this(values[textFieldName] as String,

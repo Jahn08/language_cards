@@ -33,14 +33,15 @@ class SettingsBloc {
 class SettingsBlocProvider extends InheritedWidget {
   final SettingsBloc _bloc;
 
-  SettingsBlocProvider({Key? key, required Widget child})
-      : _bloc = new SettingsBloc._(),
-        super(key: key, child: child);
+  SettingsBlocProvider({super.key, required super.child})
+      : _bloc = new SettingsBloc._();
 
   @override
   bool updateShouldNotify(_) => true;
 
   static SettingsBloc? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<SettingsBlocProvider>()?._bloc;
+    return context
+        .dependOnInheritedWidgetOfExactType<SettingsBlocProvider>()
+        ?._bloc;
   }
 }

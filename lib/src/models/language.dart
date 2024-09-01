@@ -16,7 +16,7 @@ class Language extends PresentableEnum {
 
   static const values = [english, russian, german, french, italian, spanish];
 
-  const Language._(int index) : super(index);
+  const Language._(super.index);
 
   @override
   String present(AppLocalizations locale) {

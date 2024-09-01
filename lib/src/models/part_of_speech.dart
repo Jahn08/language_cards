@@ -22,10 +22,12 @@ class PartOfSpeech extends PresentableEnum {
 
   final List<String> valueList;
 
-  const PartOfSpeech._(int index, this.valueList) : super(index);
+  const PartOfSpeech._(super.index, this.valueList);
 
-  static PartOfSpeech retrieve(String? value) =>
-      value == null ? collocation : values.firstWhere((p) => p.valueList.contains(value), orElse: () => collocation);
+  static PartOfSpeech retrieve(String? value) => value == null
+      ? collocation
+      : values.firstWhere((p) => p.valueList.contains(value),
+          orElse: () => collocation);
 
   static HashSet<PartOfSpeech> get values => new HashSet.from([
         adjective,

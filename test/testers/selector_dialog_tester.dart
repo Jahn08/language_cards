@@ -10,10 +10,9 @@ import 'cancellable_dialog_tester.dart';
 class SelectorDialogTester<T> extends CancellableDialogTester {
   final SelectorDialog<T> Function(BuildContext) _dialogBuilder;
 
-  const SelectorDialogTester(WidgetTester tester,
-      SelectorDialog<T> Function(BuildContext) dialogBuilder)
-      : _dialogBuilder = dialogBuilder,
-        super(tester);
+  const SelectorDialogTester(
+      super.tester, SelectorDialog<T> Function(BuildContext) dialogBuilder)
+      : _dialogBuilder = dialogBuilder;
 
   Future<void> testCancelling(List<T> items) async {
     T? dialogResult;

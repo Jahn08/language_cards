@@ -7,7 +7,7 @@ class BaseArticle<W extends Word> {
 }
 
 class Article extends BaseArticle<Word> {
-  const Article._(List<Word> words) : super._(words);
+  const Article._(super.words) : super._();
 
   Article.fromJson(Map<String, dynamic> json)
       : this._(_decodeWords(json['def'] as List<dynamic>? ?? []));
@@ -21,7 +21,7 @@ class AssetArticle extends BaseArticle<AssetWord> {
   AssetArticle(String text, List<Map<String, dynamic>>? words)
       : this._(_decodeWords(text, words));
 
-  const AssetArticle._(List<AssetWord> words) : super._(words);
+  const AssetArticle._(super.words) : super._();
 
   static List<AssetWord> _decodeWords(
           String text, List<Map<String, dynamic>>? definitionJson) =>

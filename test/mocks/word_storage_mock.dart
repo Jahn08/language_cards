@@ -12,7 +12,7 @@ import '../utilities/randomiser.dart';
 class _WordDataProvider extends DataProviderMock<StoredWord> {
   HashSet<String>? _intFieldNames;
 
-  _WordDataProvider(List<StoredWord> cards) : super(cards);
+  _WordDataProvider(super.cards);
 
   @override
   StoredWord buildFromDbMap(Map<String, dynamic> map) =>
