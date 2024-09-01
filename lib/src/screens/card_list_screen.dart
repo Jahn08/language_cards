@@ -10,174 +10,181 @@ import '../widgets/iconed_button.dart';
 import '../widgets/one_line_text.dart';
 
 class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
+  bool _cardsWereRemoved = false;
 
-    bool _cardsWereRemoved = false;
+  int _loadedItemsCount;
 
-	int _loadedItemsCount;
+  @override
+  Widget getItemSubtitle(StoredWord item, {bool forCheckbox}) {
+    final translationText = new OneLineText(item.translation);
+    return (forCheckbox ?? false)
+        ? new _CardAdditionalInfo(
+            item, CrossAxisAlignment.start, translationText)
+        : translationText;
+  }
 
-    @override
-    Widget getItemSubtitle(StoredWord item, { bool forCheckbox }) {
-		final translationText = new OneLineText(item.translation);
-		return (forCheckbox ?? false) ? 
-			new _CardAdditionalInfo(item, CrossAxisAlignment.start, translationText) : translationText;
-	}
-    
-    @override
-    Widget getItemTitle(StoredWord item) => new OneLineText(item.text);
-    
-    @override
-    Widget getItemTrailing(StoredWord item) => new _CardAdditionalInfo(item, CrossAxisAlignment.end);
+  @override
+  Widget getItemTitle(StoredWord item) => new OneLineText(item.text);
 
-    @override
-    void onGoingToItem(BuildContext buildContext, [StoredWord item]) {
-        super.onGoingToItem(buildContext, item);
-        
-        Router.goToCard(buildContext, wordId: item?.id, pack: widget.pack);
-    }
+  @override
+  Widget getItemTrailing(StoredWord item) =>
+      new _CardAdditionalInfo(item, CrossAxisAlignment.end);
 
-    @override
-    Future<List<StoredWord>> fetchNextItems(int skipCount, int takeCount, String text) async {
-        final items = await widget.storage.fetchFiltered(skipCount: skipCount, takeCount: takeCount, 
-            parentIds: _parentIds, text: text);
-			
-		if (items.isNotEmpty)
-			_loadedItemsCount = skipCount + items.length;
-		
-		return items;
-	}
+  @override
+  void onGoingToItem(BuildContext buildContext, [StoredWord item]) {
+    super.onGoingToItem(buildContext, item);
 
-	List<int> get _parentIds => widget.pack == null ? null: [widget.pack.id];
+    Router.goToCard(buildContext, wordId: item?.id, pack: widget.pack);
+  }
 
-    @override
-    void deleteItems(List<StoredWord> items) {
-		if (items.isEmpty)
-			return;
-			
-        widget.storage.delete(items.map((i) => i.id).toList());
-        _cardsWereRemoved = true;
-    }
+  @override
+  Future<List<StoredWord>> fetchNextItems(
+      int skipCount, int takeCount, String text) async {
+    final items = await widget.storage.fetchFiltered(
+        skipCount: skipCount,
+        takeCount: takeCount,
+        parentIds: _parentIds,
+        text: text);
 
-	@override
-	Future<void> updateStateAfterDeletion() async {
-		_loadedItemsCount = 0;
-		await refetchItems(text: super.curFilterIndex, isForceful: true);
+    if (items.isNotEmpty) _loadedItemsCount = skipCount + items.length;
 
-		if (_loadedItemsCount == 0)
-			await super.updateStateAfterDeletion();
-	}
+    return items;
+  }
 
-    @override
-    String get title {
-        final packName = widget.pack?.getLocalisedName(context);        
-        return (packName?.isEmpty ?? true) ? 
-			AppLocalizations.of(context).cardListScreenWithoutPackTitle: packName;
-    }
+  List<int> get _parentIds => widget.pack == null ? null : [widget.pack.id];
 
-    @override
-    bool get canGoBack => true;
+  @override
+  void deleteItems(List<StoredWord> items) {
+    if (items.isEmpty) return;
 
-    @override
-    void onGoingBack(BuildContext context) {
-        final shouldRefreshPack = _cardsWereRemoved || widget.refresh;
+    widget.storage.delete(items.map((i) => i.id).toList());
+    _cardsWereRemoved = true;
+  }
 
-        if (widget.pack == null)
-            Router.returnHome(context);
-        else if (widget.pack.isNone)
-			Router.goBackToPackList(context, refresh: shouldRefreshPack);
-        else
-			Router.goBackToPack(context, pack: widget.pack, refresh: shouldRefreshPack);
-    }
+  @override
+  Future<void> updateStateAfterDeletion() async {
+    _loadedItemsCount = 0;
+    await refetchItems(text: super.curFilterIndex, isForceful: true);
 
-    @override
-    List<Widget> getBottomBarOptions(
-		List<StoredWord> markedItems, AppLocalizations locale, BuildContext scaffoldContext
-	) {
-        final options = super.getBottomBarOptions(markedItems, locale, scaffoldContext);
-        return options..add(new IconedButton(
-            label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
-            icon: const Icon(Icons.restore),
-			onPressed: () async {
-				final itemsToReset = markedItems.where(
-					(card) => card.studyProgress != WordStudyStage.unknown).toList();
-				if (itemsToReset.isEmpty || !(await new ConfirmDialog(
-						title: locale.cardListScreenResettingProgressDialogTitle,
-						content: locale.cardListScreenResettingProgressDialogContent(
-							itemsToReset.length.toString()),
-						confirmationLabel: 
-							locale.cardListScreenResettingProgressDialogConfirmationButtonLabel)
-					.show(scaffoldContext)) ?? false)
-					return;
+    if (_loadedItemsCount == 0) await super.updateStateAfterDeletion();
+  }
 
-				itemsToReset.forEach((w) => w.resetStudyProgress());
-				await widget.storage.upsert(itemsToReset);
+  @override
+  String get title {
+    final packName = widget.pack?.getLocalisedName(context);
+    return (packName?.isEmpty ?? true)
+        ? AppLocalizations.of(context).cardListScreenWithoutPackTitle
+        : packName;
+  }
 
-				await refetchItems(isForceful: true);
+  @override
+  bool get canGoBack => true;
 
-				if (!mounted)
-					return;
+  @override
+  void onGoingBack(BuildContext context) {
+    final shouldRefreshPack = _cardsWereRemoved || widget.refresh;
 
-				ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
-					content: new Text(locale.cardListScreenBottomSnackBarResettingProgressInfo(
-						itemsToReset.length.toString()))
-				));
-			
-				super.clearItemsMarkedInEditor();
-			}
-        ));
-    }
+    if (widget.pack == null)
+      Router.returnHome(context);
+    else if (widget.pack.isNone)
+      Router.goBackToPackList(context, refresh: shouldRefreshPack);
+    else
+      Router.goBackToPack(context,
+          pack: widget.pack, refresh: shouldRefreshPack);
+  }
 
-	@override
-	Future<Map<String, int>> getFilterIndexes() => 
-		widget.storage.groupByTextIndexAndParent(_parentIds);
+  @override
+  List<Widget> getBottomBarOptions(List<StoredWord> markedItems,
+      AppLocalizations locale, BuildContext scaffoldContext) {
+    final options =
+        super.getBottomBarOptions(markedItems, locale, scaffoldContext);
+    return options
+      ..add(new IconedButton(
+          label: locale.cardListScreenBottomNavBarResettingProgressActionLabel,
+          icon: const Icon(Icons.restore),
+          onPressed: () async {
+            final itemsToReset = markedItems
+                .where((card) => card.studyProgress != WordStudyStage.unknown)
+                .toList();
+            if (itemsToReset.isEmpty ||
+                    !(await new ConfirmDialog(
+                            title: locale
+                                .cardListScreenResettingProgressDialogTitle,
+                            content: locale
+                                .cardListScreenResettingProgressDialogContent(
+                                    itemsToReset.length.toString()),
+                            confirmationLabel: locale
+                                .cardListScreenResettingProgressDialogConfirmationButtonLabel)
+                        .show(scaffoldContext)) ??
+                false) return;
 
-	@override
-	String getSelectorBtnLabel({ bool allSelected, AppLocalizations locale }) {
-		final itemsOverall = super.filterIndexLength;
-		if (_loadedItemsCount == itemsOverall)
-			return super.getSelectorBtnLabel(allSelected: allSelected, locale: locale);
+            itemsToReset.forEach((w) => w.resetStudyProgress());
+            await widget.storage.upsert(itemsToReset);
 
-		return allSelected ? 
-			locale.constsUnselectSome(_loadedItemsCount.toString(), itemsOverall.toString()): 
-			locale.constsSelectSome(_loadedItemsCount.toString(), itemsOverall.toString()); 
-	}
+            await refetchItems(isForceful: true);
+
+            if (!mounted) return;
+
+            ScaffoldMessenger.of(scaffoldContext).showSnackBar(new SnackBar(
+                content: new Text(
+                    locale.cardListScreenBottomSnackBarResettingProgressInfo(
+                        itemsToReset.length.toString()))));
+
+            super.clearItemsMarkedInEditor();
+          }));
+  }
+
+  @override
+  Future<Map<String, int>> getFilterIndexes() =>
+      widget.storage.groupByTextIndexAndParent(_parentIds);
+
+  @override
+  String getSelectorBtnLabel({bool allSelected, AppLocalizations locale}) {
+    final itemsOverall = super.filterIndexLength;
+    if (_loadedItemsCount == itemsOverall)
+      return super
+          .getSelectorBtnLabel(allSelected: allSelected, locale: locale);
+
+    return allSelected
+        ? locale.constsUnselectSome(
+            _loadedItemsCount.toString(), itemsOverall.toString())
+        : locale.constsSelectSome(
+            _loadedItemsCount.toString(), itemsOverall.toString());
+  }
 }
 
 class _CardAdditionalInfo extends StatelessWidget {
+  final StoredWord card;
 
-	final StoredWord card;
+  final CrossAxisAlignment alignment;
 
-	final CrossAxisAlignment alignment;
-	
-	final Widget topItem;
+  final Widget topItem;
 
-	const _CardAdditionalInfo(this.card, this.alignment, [this.topItem]);
+  const _CardAdditionalInfo(this.card, this.alignment, [this.topItem]);
 
-	@override
-	Widget build(BuildContext context) =>
-		new Column(
-			crossAxisAlignment: alignment,
-			children: <Widget>[
-				if (topItem != null) 
-					topItem,
-				if (card.partOfSpeech != null)
-					new OneLineText(card.partOfSpeech.present(AppLocalizations.of(context))),
-				new OneLineText('${card.studyProgress}%')
-			]
-		);
+  @override
+  Widget build(BuildContext context) =>
+      new Column(crossAxisAlignment: alignment, children: <Widget>[
+        if (topItem != null) topItem,
+        if (card.partOfSpeech != null)
+          new OneLineText(
+              card.partOfSpeech.present(AppLocalizations.of(context))),
+        new OneLineText('${card.studyProgress}%')
+      ]);
 }
 
 class CardListScreen extends ListScreen<StoredWord> {
-	@override
-    final WordStorage storage;
+  @override
+  final WordStorage storage;
 
-    final StoredPack pack;
+  final StoredPack pack;
 
-    final bool refresh;
+  final bool refresh;
 
-    const CardListScreen(this.storage, { this.pack, bool refresh }):
-        refresh = refresh ?? false,
-		super();
+  const CardListScreen(this.storage, {this.pack, bool refresh})
+      : refresh = refresh ?? false,
+        super();
 
-    @override
-    _CardListScreenState createState() => new _CardListScreenState();
+  @override
+  _CardListScreenState createState() => new _CardListScreenState();
 }

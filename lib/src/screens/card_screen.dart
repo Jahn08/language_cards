@@ -10,35 +10,43 @@ import '../widgets/card_editor.dart';
 import '../widgets/bar_scaffold.dart';
 
 class CardScreen extends StatelessWidget {
-	
-    final int wordId;
-    
-    final StoredPack pack;
+  final int wordId;
 
-    final DictionaryProvider provider;
+  final StoredPack pack;
 
-    final ISpeaker defaultSpeaker;
+  final DictionaryProvider provider;
 
-    final WordStorage wordStorage;
+  final ISpeaker defaultSpeaker;
 
-    final BaseStorage<StoredPack> packStorage;
-    
-    const CardScreen({ @required this.wordStorage, @required this.packStorage,
-		@required this.provider, this.defaultSpeaker, this.pack, this.wordId });
+  final WordStorage wordStorage;
 
-    @override
-    Widget build(BuildContext context) {
-		final locale = AppLocalizations.of(context);
-		final title = wordId == null ? 
-			locale.cardScreenHeadBarAddingCardTitle: locale.cardScreenHeadBarChangingCardTitle;
+  final BaseStorage<StoredPack> packStorage;
 
-        return new BarScaffold(
-			title: title,
-            body: new CardEditor(wordStorage: wordStorage, packStorage: packStorage,
-				provider: provider, defaultSpeaker: defaultSpeaker,
-				pack: pack, wordId: wordId, 
-				afterSave: (_, __, bool refresh) => 
-					Router.goBackToCardList(context, pack: pack, refresh: refresh))
-        );
-    }
+  const CardScreen(
+      {@required this.wordStorage,
+      @required this.packStorage,
+      @required this.provider,
+      this.defaultSpeaker,
+      this.pack,
+      this.wordId});
+
+  @override
+  Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context);
+    final title = wordId == null
+        ? locale.cardScreenHeadBarAddingCardTitle
+        : locale.cardScreenHeadBarChangingCardTitle;
+
+    return new BarScaffold(
+        title: title,
+        body: new CardEditor(
+            wordStorage: wordStorage,
+            packStorage: packStorage,
+            provider: provider,
+            defaultSpeaker: defaultSpeaker,
+            pack: pack,
+            wordId: wordId,
+            afterSave: (_, __, bool refresh) => Router.goBackToCardList(context,
+                pack: pack, refresh: refresh)));
+  }
 }

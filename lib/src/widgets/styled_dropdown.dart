@@ -3,37 +3,42 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'styled_input_decoration.dart';
 
 class StyledDropdown extends StatelessWidget {
-    final String label;
-    final String initialValue;
-    
-    final bool isRequired;
+  final String label;
+  final String initialValue;
 
-    final void Function(String) onChanged;
-    final String Function(String) onValidate;
-    final List<String> options;
+  final bool isRequired;
 
-    StyledDropdown(Iterable<String> options, { Key key, bool isRequired, this.onChanged, 
-        this.onValidate, this.initialValue, this.label }):
-		options = options.toList()..sort(),
+  final void Function(String) onChanged;
+  final String Function(String) onValidate;
+  final List<String> options;
+
+  StyledDropdown(Iterable<String> options,
+      {Key key,
+      bool isRequired,
+      this.onChanged,
+      this.onValidate,
+      this.initialValue,
+      this.label})
+      : options = options.toList()..sort(),
         isRequired = isRequired ?? false,
         super(key: key);
 
-    @override
-    Widget build(BuildContext context) {
-		final locale = AppLocalizations.of(context);
-        return new DropdownButtonFormField<String>(
-			isExpanded: true,
-            items: options.map((v) => 
-                new DropdownMenuItem(child: new Text(v), value: v)).toList(), 
-            onChanged: onChanged,
-            decoration: new StyledInputDecoration(label),
-            value: initialValue,
-            validator: (String text) {
-                if (isRequired && (text == null || text.isEmpty))
-                    return locale.constsEmptyValueValidationError;
+  @override
+  Widget build(BuildContext context) {
+    final locale = AppLocalizations.of(context);
+    return new DropdownButtonFormField<String>(
+        isExpanded: true,
+        items: options
+            .map((v) => new DropdownMenuItem(child: new Text(v), value: v))
+            .toList(),
+        onChanged: onChanged,
+        decoration: new StyledInputDecoration(label),
+        value: initialValue,
+        validator: (String text) {
+          if (isRequired && (text == null || text.isEmpty))
+            return locale.constsEmptyValueValidationError;
 
-                return onValidate?.call(text);
-            } 
-        );
-    }
+          return onValidate?.call(text);
+        });
+  }
 }

@@ -4,56 +4,51 @@ import 'package:language_cards/src/utilities/context_provider.dart';
 import 'package:language_cards/src/utilities/path.dart';
 
 class ContextChannelMock {
+  static const String _rootFolderPath = 'test_root';
 
-	static const String _rootFolderPath = 'test_root';
+  ContextChannelMock._();
 
-	ContextChannelMock._();
+  static Future<void> testWithChannel(Future<void> Function() action,
+      {bool arePermissionsRequired}) async {
+    const channel = ContextProvider.channel;
 
-	static Future<void> testWithChannel(
-		Future<void> Function() action, { bool arePermissionsRequired }
-	) async {
-		const channel = ContextProvider.channel;
+    try {
+      _cleanResources();
 
-		try {
-			_cleanResources();
-			
-			channel.setMockMethodCallHandler((call) {
-				switch (call.method) {
-					case 'isStoragePermissionRequired':
-						return Future.value(arePermissionsRequired ?? false);
-					case 'getDownloadsDirectoryPath':
-						return Future.value(getExternalStoragePath());
-					case 'isEmailHtmlSupported':
-						return Future.value(true);
-					default:
-						return Future.value(null);
-				}
-			});
+      channel.setMockMethodCallHandler((call) {
+        switch (call.method) {
+          case 'isStoragePermissionRequired':
+            return Future.value(arePermissionsRequired ?? false);
+          case 'getDownloadsDirectoryPath':
+            return Future.value(getExternalStoragePath());
+          case 'isEmailHtmlSupported':
+            return Future.value(true);
+          default:
+            return Future.value(null);
+        }
+      });
 
-			await action?.call();
-		}
-		finally {
-			channel.setMockMethodCallHandler(null);
-			_cleanResources();
-		}
-	}
+      await action?.call();
+    } finally {
+      channel.setMockMethodCallHandler(null);
+      _cleanResources();
+    }
+  }
 
-	static String getExternalStoragePath() {
-		final path = Path.combine([_rootFolderPath, 'external']);
-		final dir = new Directory(path);
-		
-		if (!dir.existsSync())
-			dir.createSync(recursive: true);
+  static String getExternalStoragePath() {
+    final path = Path.combine([_rootFolderPath, 'external']);
+    final dir = new Directory(path);
 
-		return dir.path;
-	}
+    if (!dir.existsSync()) dir.createSync(recursive: true);
 
-	static void _cleanResources() {
-		final rootDir = Directory(_rootFolderPath);
+    return dir.path;
+  }
 
-		if (!rootDir.existsSync())
-			return;
+  static void _cleanResources() {
+    final rootDir = Directory(_rootFolderPath);
 
-		rootDir.deleteSync(recursive: true);
-	}
+    if (!rootDir.existsSync()) return;
+
+    rootDir.deleteSync(recursive: true);
+  }
 }

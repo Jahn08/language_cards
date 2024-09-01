@@ -6,82 +6,81 @@ import '../../mocks/asset_bundle_mock.dart';
 import '../../utilities/randomiser.dart';
 
 void main() {
+  testWidgets('Loads configuration preferring secret parameteres',
+      (tester) async {
+    final expectedSecretApiKey = Randomiser.nextString();
+    final expectedEmail = Randomiser.nextString();
+    final expectedFbUserId = Randomiser.nextString();
+    final expectedAppStoreId = Randomiser.nextString();
 
-    testWidgets('Loads configuration preferring secret parameteres', (tester) async {
-        final expectedSecretApiKey = Randomiser.nextString();
-        final expectedEmail = Randomiser.nextString();
-        final expectedFbUserId = Randomiser.nextString();
-        final expectedAppStoreId = Randomiser.nextString();
-        
-        AppParams params;
-        await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new AssetBundleMock(
-				params: _buildAppParams(
-					Randomiser.nextString(), 
-					appStoreId: expectedAppStoreId,
-					email: expectedEmail, 
-					fbUserId: Randomiser.nextString()
-				), 
-				secretParams: _buildAppParams(
-					expectedSecretApiKey, 
-					fbUserId: expectedFbUserId
-				)),
-			child: new RootWidgetMock(onBuilding: (context) async =>
-				params = await Configuration.getParams(context)),
-		));
+    AppParams params;
+    await _pumpApp(
+        tester,
+        new DefaultAssetBundle(
+          bundle: new AssetBundleMock(
+              params: _buildAppParams(Randomiser.nextString(),
+                  appStoreId: expectedAppStoreId,
+                  email: expectedEmail,
+                  fbUserId: Randomiser.nextString()),
+              secretParams: _buildAppParams(expectedSecretApiKey,
+                  fbUserId: expectedFbUserId)),
+          child: new RootWidgetMock(
+              onBuilding: (context) async =>
+                  params = await Configuration.getParams(context)),
+        ));
 
-        expect(params.dictionary?.apiKey, expectedSecretApiKey);
-        expect(params.contacts?.appStoreId, expectedAppStoreId);
-        expect(params.contacts?.email, expectedEmail);
-        expect(params.contacts?.fbUserId, expectedFbUserId);
-    });
+    expect(params.dictionary?.apiKey, expectedSecretApiKey);
+    expect(params.contacts?.appStoreId, expectedAppStoreId);
+    expect(params.contacts?.email, expectedEmail);
+    expect(params.contacts?.fbUserId, expectedFbUserId);
+  });
 
-     testWidgets('Loads configuration without secret parameteres', (tester) async {
-        final expectedApiKey = Randomiser.nextString();
-        final expectedEmail = Randomiser.nextString();
-        final expectedFbUserId = Randomiser.nextString();
-        final expectedAppStoreId = Randomiser.nextString();
-        
-        AppParams params;
-        await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new AssetBundleMock(params: _buildAppParams(
-				expectedApiKey, 
-				appStoreId: expectedAppStoreId,
-				email: expectedEmail, 
-				fbUserId: expectedFbUserId
-			)),
-			child: new RootWidgetMock(onBuilding: (context) async =>
-				params = await Configuration.getParams(context)),
-		));
+  testWidgets('Loads configuration without secret parameteres', (tester) async {
+    final expectedApiKey = Randomiser.nextString();
+    final expectedEmail = Randomiser.nextString();
+    final expectedFbUserId = Randomiser.nextString();
+    final expectedAppStoreId = Randomiser.nextString();
 
-        expect(params.dictionary?.apiKey, expectedApiKey);
-        expect(params.contacts?.appStoreId, expectedAppStoreId);
-        expect(params.contacts?.email, expectedEmail);
-        expect(params.contacts?.fbUserId, expectedFbUserId);
-    });
+    AppParams params;
+    await _pumpApp(
+        tester,
+        new DefaultAssetBundle(
+          bundle: new AssetBundleMock(
+              params: _buildAppParams(expectedApiKey,
+                  appStoreId: expectedAppStoreId,
+                  email: expectedEmail,
+                  fbUserId: expectedFbUserId)),
+          child: new RootWidgetMock(
+              onBuilding: (context) async =>
+                  params = await Configuration.getParams(context)),
+        ));
 
-    testWidgets('Returns empty parameters when there is no configuration found', (tester) async {
-        await _pumpApp(tester, new DefaultAssetBundle(
-			bundle: new AssetBundleMock(),
-			child: new RootWidgetMock(onBuilding: (context) async {
-				final params = await Configuration.getParams(context);
-				expect(params.contacts, null);
-				expect(params.dictionary, null);
-			})
-		));
-    });
+    expect(params.dictionary?.apiKey, expectedApiKey);
+    expect(params.contacts?.appStoreId, expectedAppStoreId);
+    expect(params.contacts?.email, expectedEmail);
+    expect(params.contacts?.fbUserId, expectedFbUserId);
+  });
+
+  testWidgets('Returns empty parameters when there is no configuration found',
+      (tester) async {
+    await _pumpApp(
+        tester,
+        new DefaultAssetBundle(
+            bundle: new AssetBundleMock(),
+            child: new RootWidgetMock(onBuilding: (context) async {
+              final params = await Configuration.getParams(context);
+              expect(params.contacts, null);
+              expect(params.dictionary, null);
+            })));
+  });
 }
 
-AppParams _buildAppParams(String apiKey, {
-	String email, String fbUserId, String appStoreId
-}) => new AppParams(
-	dictionary: new DictionaryParams(apiKey: apiKey),
-	contacts: new ContactsParams(
-		appStoreId: appStoreId,
-		email: email,
-		fbUserId: fbUserId
-	)
-);
+AppParams _buildAppParams(String apiKey,
+        {String email, String fbUserId, String appStoreId}) =>
+    new AppParams(
+        dictionary: new DictionaryParams(apiKey: apiKey),
+        contacts: new ContactsParams(
+            appStoreId: appStoreId, email: email, fbUserId: fbUserId));
 
-Future<void> _pumpApp(WidgetTester tester, Widget home) => 
-	tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: home));
+Future<void> _pumpApp(WidgetTester tester, Widget home) =>
+    tester.pumpWidget(RootWidgetMock.buildAsAppHome(child: home));

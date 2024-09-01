@@ -6,108 +6,113 @@ import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 
 abstract class BaseStorage<T extends StoredEntity> {
-    
-    static final _entities = <StoredEntity>[new StoredWord(''), new StoredPack('')];
+  static final _entities = <StoredEntity>[
+    new StoredWord(''),
+    new StoredPack('')
+  ];
 
-	static DataProvider _provider;
+  static DataProvider _provider;
 
-	const BaseStorage();
+  const BaseStorage();
 
-    @protected
-    String get entityName;
+  @protected
+  String get entityName;
 
-    @protected
-    DataProvider get connection => _provider ?? (_provider = new DbProvider(_entities));
+  @protected
+  DataProvider get connection =>
+      _provider ?? (_provider = new DbProvider(_entities));
 
-    Future<List<T>> fetch({ String textFilter, int skipCount, int takeCount }) => 
-        fetchInternally(textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
+  Future<List<T>> fetch({String textFilter, int skipCount, int takeCount}) =>
+      fetchInternally(
+          textFilter: textFilter, takeCount: takeCount, skipCount: skipCount);
 
-	Future<int> count({ String textFilter }) {
-		return connection.count(entityName, filters: addTextFilterClause(textFilter: textFilter));
-	}
+  Future<int> count({String textFilter}) {
+    return connection.count(entityName,
+        filters: addTextFilterClause(textFilter: textFilter));
+  }
 
-    @protected
-    Future<List<T>> fetchInternally({ 
-		int skipCount, int takeCount, String orderBy, String textFilter, 
-		Map<String, List<dynamic>> filters 
-	}) async {
-		final inFilters = addTextFilterClause(filters: filters, textFilter: textFilter);
-		final wordValues = await connection.fetch(entityName, 
-			take: takeCount, 
-			filters: inFilters,
-			orderBy: orderBy, 
-			skip: skipCount);
-		return convertToEntity(wordValues);
-	}
+  @protected
+  Future<List<T>> fetchInternally(
+      {int skipCount,
+      int takeCount,
+      String orderBy,
+      String textFilter,
+      Map<String, List<dynamic>> filters}) async {
+    final inFilters =
+        addTextFilterClause(filters: filters, textFilter: textFilter);
+    final wordValues = await connection.fetch(entityName,
+        take: takeCount, filters: inFilters, orderBy: orderBy, skip: skipCount);
+    return convertToEntity(wordValues);
+  }
 
-	@protected
-	Map<String, dynamic> addTextFilterClause({ Map<String, dynamic> filters, String textFilter }) {
-		final inFilters = new Map<String, dynamic>.from(filters ?? {});
-		if (textFilter != null && textFilter.isNotEmpty)
-			inFilters[textFilterFieldName] = '$textFilter%';
+  @protected
+  Map<String, dynamic> addTextFilterClause(
+      {Map<String, dynamic> filters, String textFilter}) {
+    final inFilters = new Map<String, dynamic>.from(filters ?? {});
+    if (textFilter != null && textFilter.isNotEmpty)
+      inFilters[textFilterFieldName] = '$textFilter%';
 
-		return inFilters;
-	}
+    return inFilters;
+  }
 
-	@protected
-	String get textFilterFieldName;
+  @protected
+  String get textFilterFieldName;
 
-    Future<void> closeConnection() => _provider?.close();
+  Future<void> closeConnection() => _provider?.close();
 
-    Future<List<T>> upsert(List<T> entities) async {
-		final toInsert = entities.where((e) => e.isNew).toList();
-		final toUpdate = entities.where((e) => !e.isNew).toList();
-		
-		return new List<T>.from(await _insert(toInsert))..addAll(await _update(toUpdate));
-	}
-		
-    Future<List<T>> _insert(List<T> entities) async {
-		if (entities.isEmpty)
-			return entities;
+  Future<List<T>> upsert(List<T> entities) async {
+    final toInsert = entities.where((e) => e.isNew).toList();
+    final toUpdate = entities.where((e) => !e.isNew).toList();
 
-        final ids = await connection.add(entityName, 
-            entities.map((w) => w.toDbMap()).toList());
-		int index = 0;
-		for (final id in ids)
-			entities[index++].id = id;
+    return new List<T>.from(await _insert(toInsert))
+      ..addAll(await _update(toUpdate));
+  }
 
-		return entities;
-	}
+  Future<List<T>> _insert(List<T> entities) async {
+    if (entities.isEmpty) return entities;
 
-    Future<List<T>> _update(List<T> entities) async {
-		if (entities.isEmpty)
-			return entities;
+    final ids = await connection.add(
+        entityName, entities.map((w) => w.toDbMap()).toList());
+    int index = 0;
+    for (final id in ids) entities[index++].id = id;
 
-        await connection.update(entityName, 
-            entities.map((w) => w.toDbMap()).toList());
-		return entities;
-    }
+    return entities;
+  }
 
-    Future<T> find(int id) async {
-		if (id == null)
-			return null;
+  Future<List<T>> _update(List<T> entities) async {
+    if (entities.isEmpty) return entities;
 
-        final values = await connection.findById(entityName, id); 
-        return values == null ? null: convertToEntity([values]).first;
-    }
+    await connection.update(
+        entityName, entities.map((w) => w.toDbMap()).toList());
+    return entities;
+  }
 
-    Future<void> delete(List<int> ids) async {
-        await connection.delete(entityName, ids);
-    }
+  Future<T> find(int id) async {
+    if (id == null) return null;
 
-    @protected
-    List<T> convertToEntity(List<Map<String, dynamic>> values);
+    final values = await connection.findById(entityName, id);
+    return values == null ? null : convertToEntity([values]).first;
+  }
 
-	Future<Map<String, int>> groupByTextIndex([Map<String, List<dynamic>> groupValues]) async {
-		final mainGroupFieldKey = DbProvider.composeSubstrFunc(textFilterFieldName, 1);
-		final groupFields = [mainGroupFieldKey];
+  Future<void> delete(List<int> ids) async {
+    await connection.delete(entityName, ids);
+  }
 
-		if (groupValues != null && groupValues.isNotEmpty)
-			groupFields.addAll(groupValues.keys);
+  @protected
+  List<T> convertToEntity(List<Map<String, dynamic>> values);
 
-		final groups = await connection.groupBySeveral(entityName, 
-            groupFields: groupFields, groupValues: groupValues);
-        return new Map.fromEntries(
-			groups.map((g) => new MapEntry(g.fields[mainGroupFieldKey] as String, g.length)));
-	}
+  Future<Map<String, int>> groupByTextIndex(
+      [Map<String, List<dynamic>> groupValues]) async {
+    final mainGroupFieldKey =
+        DbProvider.composeSubstrFunc(textFilterFieldName, 1);
+    final groupFields = [mainGroupFieldKey];
+
+    if (groupValues != null && groupValues.isNotEmpty)
+      groupFields.addAll(groupValues.keys);
+
+    final groups = await connection.groupBySeveral(entityName,
+        groupFields: groupFields, groupValues: groupValues);
+    return new Map.fromEntries(groups.map(
+        (g) => new MapEntry(g.fields[mainGroupFieldKey] as String, g.length)));
+  }
 }

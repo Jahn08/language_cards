@@ -9,79 +9,81 @@ import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 
 void main() {
+  testWidgets('Exports packs to a JSON-file', (_) async {
+    await ContextChannelMock.testWithChannel(() async {
+      final packStorage = new PackStorageMock();
+      final packsToExport = ExporterTester.getPacksForExport(packStorage);
 
-	testWidgets('Exports packs to a JSON-file', (_) async {
-		await ContextChannelMock.testWithChannel(() async {
-			final packStorage = new PackStorageMock();
-			final packsToExport = ExporterTester.getPacksForExport(packStorage);
-			
-			final filePostfix = Randomiser.nextString();
-			final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-				.export(packsToExport, filePostfix, Localizator.defaultLocalization);
-			
-			final exporterTester = new ExporterTester(expectedFilePath);
-			exporterTester.assertExportFileName(filePostfix);
-			await exporterTester.assertExportedPacks(packStorage, packsToExport);
-		});
-	});
+      final filePostfix = Randomiser.nextString();
+      final expectedFilePath = await new PackExporter(packStorage.wordStorage)
+          .export(packsToExport, filePostfix, Localizator.defaultLocalization);
 
-	testWidgets('Exports packs to a JSON-file with a numbered name if there is already one named equally', 
-		(_) async {
-			await ContextChannelMock.testWithChannel(() async {
-				final packStorage = new PackStorageMock();
-				final packsToExport = ExporterTester.getPacksForExport(packStorage);
+      final exporterTester = new ExporterTester(expectedFilePath);
+      exporterTester.assertExportFileName(filePostfix);
+      await exporterTester.assertExportedPacks(packStorage, packsToExport);
+    });
+  });
 
-				final filePostfix = Randomiser.nextString();
-				await new PackExporter(packStorage.wordStorage)
-					.export(packsToExport, filePostfix, Localizator.defaultLocalization);
-				
-				final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-					.export(packsToExport, filePostfix, Localizator.defaultLocalization);
+  testWidgets(
+      'Exports packs to a JSON-file with a numbered name if there is already one named equally',
+      (_) async {
+    await ContextChannelMock.testWithChannel(() async {
+      final packStorage = new PackStorageMock();
+      final packsToExport = ExporterTester.getPacksForExport(packStorage);
 
-				final exporterTester = new ExporterTester(expectedFilePath);
-				exporterTester.assertExportFileName(filePostfix + '_1');
-				await exporterTester.assertExportedPacks(packStorage, packsToExport);
-			});
-		});
+      final filePostfix = Randomiser.nextString();
+      await new PackExporter(packStorage.wordStorage)
+          .export(packsToExport, filePostfix, Localizator.defaultLocalization);
 
-	testWidgets('Exports packs successfully when a user grants required permissions', 
-		(_) async {
-			await ContextChannelMock.testWithChannel(() async {
-				await PermissionChannelMock.testWithChannel(() async {
-					final packStorage = new PackStorageMock();
-					final packsToExport = ExporterTester.getPacksForExport(packStorage);
-					
-					final filePostfix = Randomiser.nextString();
-					final expectedFilePath = await new PackExporter(packStorage.wordStorage)
-						.export(packsToExport, filePostfix, Localizator.defaultLocalization);
-					
-					final exporterTester = new ExporterTester(expectedFilePath);
-					exporterTester.assertExportFileName(filePostfix);
-					await exporterTester.assertExportedPacks(packStorage, packsToExport);
-				}, noPermissionsByDefault: true, shouldDenyPermissions: false);
-			}, arePermissionsRequired: true);
-		});
+      final expectedFilePath = await new PackExporter(packStorage.wordStorage)
+          .export(packsToExport, filePostfix, Localizator.defaultLocalization);
 
-	testWidgets('Throws an error when a user grants no access to an export path', (_) async {
-		await ContextChannelMock.testWithChannel(() async {
-			await PermissionChannelMock.testWithChannel(() async {
-					final packStorage = new PackStorageMock();
-					final packsToExport = ExporterTester.getPacksForExport(packStorage);
-					
-					final filePostfix = Randomiser.nextString();
-					
-					FileSystemException error;
-					try {
-						await new PackExporter(packStorage.wordStorage)
-							.export(packsToExport, filePostfix, Localizator.defaultLocalization);
-					}
-					on FileSystemException catch (err) {
-						error = err;
-					}
+      final exporterTester = new ExporterTester(expectedFilePath);
+      exporterTester.assertExportFileName(filePostfix + '_1');
+      await exporterTester.assertExportedPacks(packStorage, packsToExport);
+    });
+  });
 
-					assert(error != null, true);
-					assert(error.toString().contains('permissions'), true);
-				}, noPermissionsByDefault: true, shouldDenyPermissions: true);
-			}, arePermissionsRequired: true);
-	});
+  testWidgets(
+      'Exports packs successfully when a user grants required permissions',
+      (_) async {
+    await ContextChannelMock.testWithChannel(() async {
+      await PermissionChannelMock.testWithChannel(() async {
+        final packStorage = new PackStorageMock();
+        final packsToExport = ExporterTester.getPacksForExport(packStorage);
+
+        final filePostfix = Randomiser.nextString();
+        final expectedFilePath = await new PackExporter(packStorage.wordStorage)
+            .export(
+                packsToExport, filePostfix, Localizator.defaultLocalization);
+
+        final exporterTester = new ExporterTester(expectedFilePath);
+        exporterTester.assertExportFileName(filePostfix);
+        await exporterTester.assertExportedPacks(packStorage, packsToExport);
+      }, noPermissionsByDefault: true, shouldDenyPermissions: false);
+    }, arePermissionsRequired: true);
+  });
+
+  testWidgets('Throws an error when a user grants no access to an export path',
+      (_) async {
+    await ContextChannelMock.testWithChannel(() async {
+      await PermissionChannelMock.testWithChannel(() async {
+        final packStorage = new PackStorageMock();
+        final packsToExport = ExporterTester.getPacksForExport(packStorage);
+
+        final filePostfix = Randomiser.nextString();
+
+        FileSystemException error;
+        try {
+          await new PackExporter(packStorage.wordStorage).export(
+              packsToExport, filePostfix, Localizator.defaultLocalization);
+        } on FileSystemException catch (err) {
+          error = err;
+        }
+
+        assert(error != null, true);
+        assert(error.toString().contains('permissions'), true);
+      }, noPermissionsByDefault: true, shouldDenyPermissions: true);
+    }, arePermissionsRequired: true);
+  });
 }

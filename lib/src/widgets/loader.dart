@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 
 class Loader extends StatelessWidget {
+  const Loader();
 
-	const Loader();
-
-    @override
-    Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
+  @override
+  Widget build(BuildContext context) =>
+      const Center(child: CircularProgressIndicator());
 }
 
 class FutureLoader<TData> extends StatelessWidget {
-    final Widget Function(TData data) dataWidgetBuilder;
+  final Widget Function(TData data) dataWidgetBuilder;
 
-    final Future<TData> future;
+  final Future<TData> future;
 
-    const FutureLoader(this.future, this.dataWidgetBuilder):
-        assert(future != null),
+  const FutureLoader(this.future, this.dataWidgetBuilder)
+      : assert(future != null),
         assert(dataWidgetBuilder != null);
 
-    @override
-    Widget build(BuildContext context) {
-        return FutureBuilder(future: future,
-            builder: (futureContext, AsyncSnapshot<TData> snapshot) {
-                if (!snapshot.hasData)
-                    return const Loader();
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+        future: future,
+        builder: (futureContext, AsyncSnapshot<TData> snapshot) {
+          if (!snapshot.hasData) return const Loader();
 
-                return dataWidgetBuilder(snapshot.data);
-            });
-    }
+          return dataWidgetBuilder(snapshot.data);
+        });
+  }
 }

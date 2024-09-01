@@ -1,14 +1,13 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 abstract class PresentableEnum {
+  final int index;
 
-	final int index;
+  const PresentableEnum(this.index);
 
-	const PresentableEnum(this.index);
+  String present(AppLocalizations locale);
 
-	String present(AppLocalizations locale);
-	
-	static Map<String, T> mapStringValues<T extends PresentableEnum>(
-		Iterable<T> values, AppLocalizations locale
-	) => <String, T>{ for (var v in values) v.present(locale): v };
+  static Map<String, T> mapStringValues<T extends PresentableEnum>(
+          Iterable<T> values, AppLocalizations locale) =>
+      <String, T>{for (var v in values) v.present(locale): v};
 }

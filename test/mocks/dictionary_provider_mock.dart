@@ -5,42 +5,41 @@ import 'package:language_cards/src/models/article.dart';
 import '../testers/word_dictionary_tester.dart';
 
 class DictionaryProviderMock implements DictionaryProvider {
+  static HashSet<String> _acceptedLanguages;
 
-	static HashSet<String> _acceptedLanguages;
+  final BaseArticle<Word> Function(String text) onLookUp;
 
-	final BaseArticle<Word> Function(String text) onLookUp;
+  final Iterable<String> Function(String text) onSearchForLemmas;
 
-	final Iterable<String> Function(String text) onSearchForLemmas;
+  DictionaryProviderMock({this.onLookUp, this.onSearchForLemmas});
 
-	DictionaryProviderMock({ this.onLookUp, this.onSearchForLemmas });
+  @override
+  Future<HashSet<String>> getAcceptedLanguages() {
+    _acceptedLanguages ??=
+        new HashSet.from(WordDictionaryTester.buildAcceptedLanguagesResponse());
+    return Future.value(_acceptedLanguages);
+  }
 
-	@override
-	Future<HashSet<String>> getAcceptedLanguages() {
-		_acceptedLanguages ??= new HashSet.from(WordDictionaryTester.buildAcceptedLanguagesResponse());
-		return Future.value(_acceptedLanguages);
-	}
+  @override
+  Future<bool> isTranslationPossible(String langParam) async {
+    return (await getAcceptedLanguages()).contains(langParam);
+  }
 
-	@override
-	Future<bool> isTranslationPossible(String langParam) async {
-		return (await getAcceptedLanguages()).contains(langParam);
-	}
+  @override
+  Future<BaseArticle<Word>> lookUp(String langParam, String text) async {
+    if (!await isTranslationPossible(langParam)) return null;
 
-	@override
-	Future<BaseArticle<Word>> lookUp(String langParam, String text) async {
-		if (!await isTranslationPossible(langParam))
-			return null;
-		
-		return onLookUp?.call(text);
-	}
+    return onLookUp?.call(text);
+  }
 
-	@override
-	Future<Iterable<String>> searchForLemmas(String langParam, String text) async {
-		if (!await isTranslationPossible(langParam))
-			return null;
+  @override
+  Future<Iterable<String>> searchForLemmas(
+      String langParam, String text) async {
+    if (!await isTranslationPossible(langParam)) return null;
 
-		return onSearchForLemmas?.call(text);
-	}
+    return onSearchForLemmas?.call(text);
+  }
 
-	@override
-	void dispose() {}
+  @override
+  void dispose() {}
 }

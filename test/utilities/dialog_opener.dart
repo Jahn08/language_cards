@@ -5,30 +5,26 @@ import '../mocks/root_widget_mock.dart';
 import './widget_assistant.dart';
 
 class DialogOpener {
+  DialogOpener._();
 
-    DialogOpener._();
+  static Future<void> showDialog<TResult>(WidgetTester tester,
+      {@required Future<TResult> Function(BuildContext) dialogExposer,
+      @required void Function(TResult) onDialogClose}) async {
+    BuildContext context;
+    final dialogBtnKey = new Key(Randomiser.nextString());
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
+        onBuilding: (inContext) => context = inContext,
+        child: new ElevatedButton(
+            key: dialogBtnKey,
+            child: new Text(Randomiser.nextString()),
+            onPressed: () async {
+              final outcome = await dialogExposer(context);
+              onDialogClose?.call(outcome);
+            })));
 
-    static Future<void> showDialog<TResult>(WidgetTester tester, {
-        @required Future<TResult> Function(BuildContext) dialogExposer,
-        @required void Function(TResult) onDialogClose
-    }) async {
-        BuildContext context;
-        final dialogBtnKey = new Key(Randomiser.nextString());
-        await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
-            onBuilding: (inContext) => context = inContext,
-            child: new ElevatedButton(
-                key: dialogBtnKey,
-				child: new Text(Randomiser.nextString()),
-                onPressed: () async {
-                    final outcome = await dialogExposer(context);
-                    onDialogClose?.call(outcome);
-                })
-            )
-        );
+    final foundDialogBtn = find.byKey(dialogBtnKey);
+    expect(foundDialogBtn, findsOneWidget);
 
-        final foundDialogBtn = find.byKey(dialogBtnKey);
-        expect(foundDialogBtn, findsOneWidget);
-            
-        await new WidgetAssistant(tester).tapWidget(foundDialogBtn);
-    }
+    await new WidgetAssistant(tester).tapWidget(foundDialogBtn);
+  }
 }

@@ -4,16 +4,15 @@ import '../utilities/widget_assistant.dart';
 import 'dialog_tester.dart';
 
 class CancellableDialogTester extends DialogTester {
+  @protected
+  final WidgetTester tester;
 
-	@protected
-	final WidgetTester tester;
-	
-	const CancellableDialogTester(this.tester);
+  const CancellableDialogTester(this.tester);
 
-	Future<void> assureCancellingDialog() async {
-		final assistant = new WidgetAssistant(tester);
-        await assistant.pressButtonDirectlyByLabel('Cancel');
+  Future<void> assureCancellingDialog() async {
+    final assistant = new WidgetAssistant(tester);
+    await assistant.pressButtonDirectlyByLabel('Cancel');
 
-		assureDialog(shouldFind: false);
-	}
+    assureDialog(shouldFind: false);
+  }
 }

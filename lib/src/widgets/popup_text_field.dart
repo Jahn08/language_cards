@@ -3,136 +3,125 @@ import 'styled_text_field.dart';
 import '../utilities/styler.dart';
 
 class _PopupTextFieldState extends State<PopupTextField> {
+  final LayerLink _layerLink = LayerLink();
 
-	final LayerLink _layerLink = LayerLink();
+  OverlayEntry _overlayEntry;
 
-	OverlayEntry _overlayEntry;
+  List<ListTile> _tiles;
 
-	List<ListTile> _tiles;
+  bool _isValueChosen;
+  String _value;
 
-	bool _isValueChosen;
-	String _value;
+  @override
+  void initState() {
+    super.initState();
 
-	@override 
-	void initState() {
-		super.initState();
+    _tiles = [];
 
-		_tiles = [];
+    _value = widget.initialValue;
+    _isValueChosen = false;
+  }
 
-		_value = widget.initialValue;
-		_isValueChosen = false;
-	}
+  @override
+  void didUpdateWidget(covariant PopupTextField oldWidget) {
+    super.didUpdateWidget(oldWidget);
 
-	@override
-	void didUpdateWidget(covariant PopupTextField oldWidget) {
-		super.didUpdateWidget(oldWidget);
-		
-		_value = widget.initialValue;
-	}
+    _value = widget.initialValue;
+  }
 
-	@override
-	Widget build(BuildContext context) {
-		return CompositedTransformTarget(
-			link: _layerLink,
-			child: StyledTextField(widget.label, 
-				isRequired: true, 
-				onChanged: widget.onChanged,
-				onFocusChanged: (bool hasFocus) => _toggleOverlay(hasFocus),
-				onInput: (value) async {
-					if (_isValueChosen)
-						_isValueChosen = false;
-					
-					await _setTiles(context, value);
+  @override
+  Widget build(BuildContext context) {
+    return CompositedTransformTarget(
+        link: _layerLink,
+        child: StyledTextField(widget.label,
+            isRequired: true,
+            onChanged: widget.onChanged,
+            onFocusChanged: (bool hasFocus) => _toggleOverlay(hasFocus),
+            onInput: (value) async {
+              if (_isValueChosen) _isValueChosen = false;
 
-					_toggleOverlay(true);
-				},
-				initialValue: _value
-			)
-		);
-	}
+              await _setTiles(context, value);
 
-	Future<void> _setTiles(BuildContext context, String value) async {
-		final isDense = new Styler(context).isDense;
-		final popupItems = await widget.popupItemsBuilder?.call(value);
-		_tiles = (popupItems ?? [])
-			.map((t) => new ListTile(
-				title: new Text(t), 
-				dense: isDense,
-				visualDensity: VisualDensity.comfortable,
-				onTap: () { 
-					_toggleOverlay(false);
-					
-					_isValueChosen = true;
-					setState(() => _value = t);
-				}
-			)).toList();
-	}
+              _toggleOverlay(true);
+            },
+            initialValue: _value));
+  }
 
-	void _toggleOverlay(bool hasFocus) {
-		if (_isValueChosen)
-			return;
+  Future<void> _setTiles(BuildContext context, String value) async {
+    final isDense = new Styler(context).isDense;
+    final popupItems = await widget.popupItemsBuilder?.call(value);
+    _tiles = (popupItems ?? [])
+        .map((t) => new ListTile(
+            title: new Text(t),
+            dense: isDense,
+            visualDensity: VisualDensity.comfortable,
+            onTap: () {
+              _toggleOverlay(false);
 
-		if (!hasFocus) {
-			if (_overlayEntry != null) {
-				_overlayEntry?.remove();
-				_overlayEntry = null;
-			}
+              _isValueChosen = true;
+              setState(() => _value = t);
+            }))
+        .toList();
+  }
 
-			return;
-		}
+  void _toggleOverlay(bool hasFocus) {
+    if (_isValueChosen) return;
 
-		if (_overlayEntry == null) {
-			_overlayEntry = _createOverlayEntry();
+    if (!hasFocus) {
+      if (_overlayEntry != null) {
+        _overlayEntry?.remove();
+        _overlayEntry = null;
+      }
 
-			if (_overlayEntry != null)
-				Overlay.of(context).insert(_overlayEntry);
-		}
-		else
-			_overlayEntry.markNeedsBuild();
-	}
-	
-	OverlayEntry _createOverlayEntry() {
-		if (_tiles.isEmpty)
-			return null;
+      return;
+    }
 
-		final renderBox = context.findRenderObject() as RenderBox;
-		final size = renderBox.size;
-		return OverlayEntry(
-			builder: (context) => Positioned(
-				width: size.width,
-				child: CompositedTransformFollower(
-					link: _layerLink,
-					showWhenUnlinked: false,
-					offset: Offset(0.0, size.height + 5.0),
-					child: Material(
-						elevation: 4.0,
-						child: ListView(
-							padding: EdgeInsets.zero,
-							shrinkWrap: true,
-							children: _tiles
-						)
-					)
-				)
-			)
-		);
-	}
+    if (_overlayEntry == null) {
+      _overlayEntry = _createOverlayEntry();
+
+      if (_overlayEntry != null) Overlay.of(context).insert(_overlayEntry);
+    } else
+      _overlayEntry.markNeedsBuild();
+  }
+
+  OverlayEntry _createOverlayEntry() {
+    if (_tiles.isEmpty) return null;
+
+    final renderBox = context.findRenderObject() as RenderBox;
+    final size = renderBox.size;
+    return OverlayEntry(
+        builder: (context) => Positioned(
+            width: size.width,
+            child: CompositedTransformFollower(
+                link: _layerLink,
+                showWhenUnlinked: false,
+                offset: Offset(0.0, size.height + 5.0),
+                child: Material(
+                    elevation: 4.0,
+                    child: ListView(
+                        padding: EdgeInsets.zero,
+                        shrinkWrap: true,
+                        children: _tiles)))));
+  }
 }
 
 class PopupTextField extends StatefulWidget {
+  final String label;
 
-	final String label;
+  final String initialValue;
 
-	final String initialValue;
+  final bool isRequired;
 
-	final bool isRequired;
+  final Function(String value, bool submitted) onChanged;
 
-	final Function(String value, bool submitted) onChanged;
+  final Future<Iterable<String>> Function(String value) popupItemsBuilder;
 
-	final Future<Iterable<String>> Function(String value) popupItemsBuilder;
+  const PopupTextField(this.label,
+      {@required this.popupItemsBuilder,
+      this.onChanged,
+      this.isRequired,
+      this.initialValue});
 
-	const PopupTextField(this.label, { @required this.popupItemsBuilder, 
-		this.onChanged, this.isRequired, this.initialValue });
-
-	@override
-	_PopupTextFieldState createState() => new _PopupTextFieldState();
+  @override
+  _PopupTextFieldState createState() => new _PopupTextFieldState();
 }

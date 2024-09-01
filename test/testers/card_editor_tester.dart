@@ -10,89 +10,106 @@ import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 
 class CardEditorTester {
+  final WidgetTester tester;
 
-	final WidgetTester tester;
+  const CardEditorTester(this.tester);
 
-	const CardEditorTester(this.tester);
+  void assureRenderingCardFields(StoredWord card) {
+    AssuredFinder.findOne(type: TextField, label: card.text, shouldFind: true);
+    AssuredFinder.findOne(
+        type: TextField, label: card.translation, shouldFind: true);
+    AssuredFinder.findOne(
+        type: TextField, label: card.transcription, shouldFind: true);
 
-	void assureRenderingCardFields(StoredWord card) {
-		AssuredFinder.findOne(type: TextField, label: card.text, shouldFind: true);
-		AssuredFinder.findOne(type: TextField, label: card.translation, shouldFind: true);
-		AssuredFinder.findOne(type: TextField, label: card.transcription, shouldFind: true);
+    final posField = tester.widget<DropdownButton<String>>(
+        find.byType(AssuredFinder.typify<DropdownButton<String>>()));
+    expect(posField.value, card.partOfSpeech.valueList.first);
+  }
 
-		final posField = tester.widget<DropdownButton<String>>(
-			find.byType(AssuredFinder.typify<DropdownButton<String>>()));
-		expect(posField.value, card.partOfSpeech.valueList.first);
-	}
+  void assureRenderingPack([StoredPack pack]) {
+    final packBtnFinder = findPackButton();
+    final packLabelFinder =
+        find.descendant(of: packBtnFinder, matching: find.byType(Text));
+    expect(packLabelFinder, findsOneWidget);
 
-	void assureRenderingPack([StoredPack pack]) {
-		final packBtnFinder = findPackButton();
-		final packLabelFinder = find.descendant(of: packBtnFinder, matching: find.byType(Text));
-		expect(packLabelFinder, findsOneWidget);
-		
-		final packLabel = tester.widget<Text>(packLabelFinder);
-		expect(packLabel.data.endsWith(pack?.name ?? StoredPack.none.name), true);
-	}
+    final packLabel = tester.widget<Text>(packLabelFinder);
+    expect(packLabel.data.endsWith(pack?.name ?? StoredPack.none.name), true);
+  }
 
-	static Finder findPackButton() => 
-		AssuredFinder.findFlatButtonByIcon(Icons.folder_open, shouldFind: true);
+  static Finder findPackButton() =>
+      AssuredFinder.findFlatButtonByIcon(Icons.folder_open, shouldFind: true);
 
-	static Finder findSpeakerButton({ bool shouldFind }) => 
-		AssuredFinder.findOne(type: SpeakerButton, shouldFind: shouldFind);
-	
-	void assureNonZeroStudyProgress(int studyProgress) {
-		final progressBtnFinder = findStudyProgressButton(shouldFind: true);
-		final progressLabelFinder = find.descendant(of: progressBtnFinder, 
-			matching: find.byType(Text));
-		expect(progressLabelFinder, findsOneWidget);
-		expect(tester.widget<Text>(progressLabelFinder)
-			.data.contains('$studyProgress%'), true);
-	}
+  static Finder findSpeakerButton({bool shouldFind}) =>
+      AssuredFinder.findOne(type: SpeakerButton, shouldFind: shouldFind);
 
-	static Finder findStudyProgressButton({ bool shouldFind }) => 
-		AssuredFinder.findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
+  void assureNonZeroStudyProgress(int studyProgress) {
+    final progressBtnFinder = findStudyProgressButton(shouldFind: true);
+    final progressLabelFinder =
+        find.descendant(of: progressBtnFinder, matching: find.byType(Text));
+    expect(progressLabelFinder, findsOneWidget);
+    expect(
+        tester
+            .widget<Text>(progressLabelFinder)
+            .data
+            .contains('$studyProgress%'),
+        true);
+  }
 
-	static Finder findSaveButton() => 
-		AssuredFinder.findOne(type: ElevatedButton, 
-			label: Localizator.defaultLocalization.constsSavingItemButtonLabel, shouldFind: true);
+  static Finder findStudyProgressButton({bool shouldFind}) =>
+      AssuredFinder.findFlatButtonByIcon(Icons.restore, shouldFind: shouldFind);
 
-	Future<void> changePack(StoredPack newPack) async {
-		final assistant = new WidgetAssistant(tester);
-		await assistant.tapWidget(findPackButton());
+  static Finder findSaveButton() => AssuredFinder.findOne(
+      type: ElevatedButton,
+      label: Localizator.defaultLocalization.constsSavingItemButtonLabel,
+      shouldFind: true);
 
-		final packTileFinder = findListTileByTitle(newPack.name);
-		await assistant.tapWidget(packTileFinder);
-	}
+  Future<void> changePack(StoredPack newPack) async {
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(findPackButton());
 
-	static Finder findListTileByTitle(String title) {
-		final tileFinder = find.ancestor(of: find.text(title), 
-			matching: find.byType(ListTile));
-		expect(tileFinder, findsOneWidget); 
+    final packTileFinder = findListTileByTitle(newPack.name);
+    await assistant.tapWidget(packTileFinder);
+  }
 
-		return tileFinder;
-	}
+  static Finder findListTileByTitle(String title) {
+    final tileFinder =
+        find.ancestor(of: find.text(title), matching: find.byType(ListTile));
+    expect(tileFinder, findsOneWidget);
 
-	Future<List<String>> enterRandomTranscription({ List<String> symbols, String symbolToEnter }) async {
-        final inSymbols = symbols ?? PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
-		final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1, orElse: () => Randomiser.nextElement(inSymbols));
-		final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1, orElse: () => Randomiser.nextElement(inSymbols));
-        final expectedSymbols = [Randomiser.nextElement(inSymbols), doubleSymbolA,
-            Randomiser.nextElement(inSymbols), if (symbolToEnter != null) symbolToEnter,
-			doubleSymbolB, Randomiser.nextElement(inSymbols)]..shuffle();
+    return tileFinder;
+  }
 
-		final assistant = new WidgetAssistant(tester);
-        for (final symbol in expectedSymbols)
-            await _tapSymbolKey(symbol, assistant);
+  Future<List<String>> enterRandomTranscription(
+      {List<String> symbols, String symbolToEnter}) async {
+    final inSymbols =
+        symbols ?? PhoneticKeyboard.getLanguageSpecific((_) => _).symbols;
+    final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1,
+        orElse: () => Randomiser.nextElement(inSymbols));
+    final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1,
+        orElse: () => Randomiser.nextElement(inSymbols));
+    final expectedSymbols = [
+      Randomiser.nextElement(inSymbols),
+      doubleSymbolA,
+      Randomiser.nextElement(inSymbols),
+      if (symbolToEnter != null) symbolToEnter,
+      doubleSymbolB,
+      Randomiser.nextElement(inSymbols)
+    ]..shuffle();
 
-        return expectedSymbols;
-    }
+    final assistant = new WidgetAssistant(tester);
+    for (final symbol in expectedSymbols)
+      await _tapSymbolKey(symbol, assistant);
 
-    Future<void> tapSymbolKey(String symbol) => _tapSymbolKey(symbol, new WidgetAssistant(tester));
+    return expectedSymbols;
+  }
 
-    Future<void> _tapSymbolKey(String symbol, WidgetAssistant assistant) async {
-        final foundKey = find.widgetWithText(InkWell, symbol);
-        expect(foundKey, findsOneWidget);
+  Future<void> tapSymbolKey(String symbol) =>
+      _tapSymbolKey(symbol, new WidgetAssistant(tester));
 
-		await assistant.tapWidget(foundKey, atCenter: true);
-    }
+  Future<void> _tapSymbolKey(String symbol, WidgetAssistant assistant) async {
+    final foundKey = find.widgetWithText(InkWell, symbol);
+    expect(foundKey, findsOneWidget);
+
+    await assistant.tapWidget(foundKey, atCenter: true);
+  }
 }

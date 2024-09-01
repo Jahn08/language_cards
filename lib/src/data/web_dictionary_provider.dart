@@ -5,59 +5,61 @@ import 'dictionary_provider.dart';
 import '../models/article.dart';
 
 class WebDictionaryProvider extends DictionaryProvider {
-    final String _key;
-	
-    final Client _client;
+  final String _key;
 
-	static List<String> _acceptedLangs;
+  final Client _client;
 
-    WebDictionaryProvider(String apiKey, { Client client }): 
-		_key = apiKey,
+  static List<String> _acceptedLangs;
+
+  WebDictionaryProvider(String apiKey, {Client client})
+      : _key = apiKey,
         _client = client ?? new Client();
 
-	Uri _buildRootUri(String method, [Map<String, String> queryParams]) {
-		final params = { 'key': _key };
-		if (queryParams != null)
-			params.addAll(queryParams);
+  Uri _buildRootUri(String method, [Map<String, String> queryParams]) {
+    final params = {'key': _key};
+    if (queryParams != null) params.addAll(queryParams);
 
-		return new Uri(
-			host: 'dictionary.yandex.net', 
-			pathSegments: ['api', 'v1', 'dicservice.json', method],
-			queryParameters: params
-		);
-	}
+    return new Uri(
+        host: 'dictionary.yandex.net',
+        pathSegments: ['api', 'v1', 'dicservice.json', method],
+        queryParameters: params);
+  }
 
-  	@override
-    Future<Article> lookUp(String langParam, String word) {
-		return _sendLookUpRequest(_buildSearchUri(langParam), word);
+  @override
+  Future<Article> lookUp(String langParam, String word) {
+    return _sendLookUpRequest(_buildSearchUri(langParam), word);
+  }
+
+  @override
+  Future<HashSet<String>> getAcceptedLanguages() async {
+    if (_acceptedLangs == null) {
+      final langListUri = _buildRootUri('getLangs');
+
+      final response = await _client.get(Uri.https(langListUri.authority,
+          langListUri.path, langListUri.queryParameters));
+      _acceptedLangs = (jsonDecode(response.body) as List).cast<String>();
     }
 
-	@override
-	Future<HashSet<String>> getAcceptedLanguages() async {
-		if (_acceptedLangs == null) {
-			final langListUri = _buildRootUri('getLangs');
+    return new HashSet.from(_acceptedLangs);
+  }
 
-			final response = await _client.get(
-				Uri.https(langListUri.authority, langListUri.path, langListUri.queryParameters));
-			_acceptedLangs = (jsonDecode(response.body) as List).cast<String>();
-		}
+  Uri _buildSearchUri(String langPair) =>
+      _buildRootUri('lookup', {'lang': langPair});
 
-		return new HashSet.from(_acceptedLangs);
-	}
+  Future<Article> _sendLookUpRequest(Uri rootUri, String text) async {
+    final params = new Map<String, dynamic>.of(rootUri.queryParameters);
+    params['text'] = text;
 
-	Uri _buildSearchUri(String langPair) => _buildRootUri('lookup', { 'lang': langPair });
+    final response =
+        await _client.post(Uri.https(rootUri.authority, rootUri.path, params));
+    return new Article.fromJson(
+        jsonDecode(response.body) as Map<String, dynamic>);
+  }
 
-	Future<Article> _sendLookUpRequest(Uri rootUri, String text) async {
-		final params = new Map<String, dynamic>.of(rootUri.queryParameters);
-		params['text'] = text;
+  @override
+  void dispose() => _client?.close();
 
-		final response = await _client.post(Uri.https(rootUri.authority, rootUri.path, params));
-		return new Article.fromJson(jsonDecode(response.body) as Map<String, dynamic>);
-	}
-
-	@override
-    void dispose() => _client?.close();
-	
-  	@override
-  	Future<Iterable<String>> searchForLemmas(String langParam, String text) => Future.value([]);
+  @override
+  Future<Iterable<String>> searchForLemmas(String langParam, String text) =>
+      Future.value([]);
 }
