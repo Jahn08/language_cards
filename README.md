@@ -20,20 +20,20 @@ The application is available for [Google Play](https://play.google.com/store/app
 ## Developing
 
 Since the project is developed with the Flutter framework its environment must be built beforehand:
-* [Flutter 2.2.2](https://flutter.dev/docs/get-started/install)
-* [Open JDK 15](http://jdk.java.net/java-se-ri/15)
-* [Android command line tools](https://developer.android.com/studio#downloads) with some packages installed by its utility *sdkmanger*:
+* [Flutter 3.24.1](https://flutter.dev/docs/get-started/install)
+* [Open JDK 22](http://jdk.java.net)
+* [Android command line tools](https://developer.android.com/studio#downloads) with some packages installed by its utility *sdkmanager*:
   * platforms, system-images and build-tools - their particular versions depend on what Android OS the application is supposed to be emulated on: the target version is 35, the minimal one is 21
+  * cmdline-tools
   * emulator
   * platform-tools
-  * ndk;22.1.7171670
 
 To create an emulator for debugging run a command: *avdmanager -s create avd -n <emulator name> -k "<system_images full pack name>" -d <device number>*.
 The device number parameter is optional, to list such devices use a command: *avdmanager list*.
 
-[Visual Studio Code 1.59](https://code.visualstudio.com/updates/v1_59) is used as an IDE with extensions:
-* [Dart 3.27.2](https://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code)
-* [Flutter 3.27.0](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter)
+[Visual Studio Code](https://code.visualstudio.com/) is used as an IDE with extensions:
+* [Dart](https://marketplace.visualstudio.com/items?itemName=Dart-Code.dart-code)
+* [Flutter](https://marketplace.visualstudio.com/items?itemName=Dart-Code.flutter)
 
  ## Configuration
  
