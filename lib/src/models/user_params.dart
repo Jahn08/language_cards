@@ -1,6 +1,7 @@
 // ignore_for_file: avoid_dynamic_calls
 
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'language.dart';
@@ -173,7 +174,7 @@ class UserParams {
     if (langIndex == null) {
       final supportedLangs =
           [_enLocale, _ruLocale].map((loc) => loc.languageCode).toSet();
-      final allLocs = WidgetsBinding.instance.window.locales;
+      final allLocs = PlatformDispatcher.instance.locales;
       final firstLoc = allLocs.firstWhere(
           (loc) => supportedLangs.contains(loc.languageCode),
           orElse: () => allLocs.first);

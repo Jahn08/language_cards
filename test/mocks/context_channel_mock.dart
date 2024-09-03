@@ -15,7 +15,8 @@ class ContextChannelMock {
     try {
       _cleanResources();
 
-      channel.setMockMethodCallHandler((call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, (call) {
         switch (call.method) {
           case 'isStoragePermissionRequired':
             return Future.value(arePermissionsRequired);
@@ -30,7 +31,8 @@ class ContextChannelMock {
 
       await action?.call();
     } finally {
-      channel.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(channel, null);
       _cleanResources();
     }
   }

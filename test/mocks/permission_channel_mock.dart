@@ -11,7 +11,8 @@ class PermissionChannelMock {
       {bool noPermissionsByDefault = false,
       bool shouldDenyPermissions = false}) async {
     try {
-      _channel.setMockMethodCallHandler((call) {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(_channel, (call) {
         switch (call.method) {
           case 'checkPermissionStatus':
             return Future.value(noPermissionsByDefault ? 0 : 1);
@@ -24,7 +25,8 @@ class PermissionChannelMock {
 
       await action.call();
     } finally {
-      _channel.setMockMethodCallHandler(null);
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(_channel, null);
     }
   }
 }
