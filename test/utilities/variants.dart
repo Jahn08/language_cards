@@ -1,0 +1,1 @@
+enum ReturnNavigationWay { byOSButton, byBarBackButton }

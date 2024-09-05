@@ -105,6 +105,11 @@ class WidgetAssistant {
     return changedText;
   }
 
+  Future<void> finishEnteringText() async {
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await pumpAndAnimate();
+  }
+
   Future<void> navigateBack() async {
     final backBtnFinders = find.byType(BackButton);
     tester.widget<BackButton>(backBtnFinders.first).onPressed?.call();

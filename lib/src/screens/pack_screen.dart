@@ -150,7 +150,7 @@ class PackScreenState extends State<PackScreen> {
                                     ? null
                                     : () => _onSave((savedPack) =>
                                         Router.goToCardList(context,
-                                            pack: savedPack, refresh: _isNew))))
+                                            pack: savedPack, refresh: true))))
                   ]);
                 })));
   }
