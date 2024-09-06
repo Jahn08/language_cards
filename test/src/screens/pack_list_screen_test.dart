@@ -32,6 +32,16 @@ void main() {
   final returnNavigationWay = ValueVariant<ReturnNavigationWay>(
       {ReturnNavigationWay.byOSButton, ReturnNavigationWay.byBarBackButton});
 
+  final returnNavigationWayAndPack =
+      new ValueVariant<DoubleVariant<ReturnNavigationWay, bool>>({
+    new DoubleVariant(ReturnNavigationWay.byOSButton, true, name2: "nonePack"),
+    new DoubleVariant(ReturnNavigationWay.byBarBackButton, true,
+        name2: "nonePack"),
+    new DoubleVariant(ReturnNavigationWay.byOSButton, false, name2: "namedPack"),
+    new DoubleVariant(ReturnNavigationWay.byBarBackButton, false,
+        name2: "namedPack")
+  });
+
   testWidgets(
       "Updates a pack in the pack list, after going to its cards and back to the card list",
       (tester) async {
@@ -64,28 +74,74 @@ void main() {
       (tester) async {
     final storage = await _pumpScreenWithRouting(tester);
 
-    final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
-    await _testShowingCardsWithoutChanging(
-        tester, storage, packWithCards, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
+    final isNonePack = returnNavigationWayAndPack.currentValue!.value2;
+    final packWithCards = await (isNonePack
+        ? _getNonePack(storage, tester)
+        : _getFirstPackWithEnoughCards(storage, tester));
+
+    final expectedNumberOfCards = packWithCards.cardsNumber;
+
+    final assistant = new WidgetAssistant(tester);
+
+    final packName = packWithCards.name;
+    await _goToCardList(assistant, packName);
+
+    expect(find.byType(Dismissible), findsNWidgets(expectedNumberOfCards));
+
+    final returnNavigationWay = returnNavigationWayAndPack.currentValue!.value1;
+    await _goBackToPackList(assistant, packName, returnNavigationWay);
+
+    await _assertPackCardNumber(
+        tester, storage, packWithCards, expectedNumberOfCards);
+  }, variant: returnNavigationWayAndPack);
 
   testWidgets("Decreases a number of cards for a pack after deleting one",
       (tester) async {
     final storage = await _pumpScreenWithRouting(tester);
 
-    final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
-    await _testDecreasingNumberOfCards(
-        tester, storage, packWithCards, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
+    final isNonePack = returnNavigationWayAndPack.currentValue!.value2;
+    final packWithCards = await (isNonePack
+        ? _getNonePack(storage, tester)
+        : _getFirstPackWithEnoughCards(storage, tester));
+
+    final expectedNumberOfCards = packWithCards.cardsNumber - 1;
+
+    final assistant = new WidgetAssistant(tester);
+    await _goToCardList(assistant, packWithCards.name);
+
+    await assistant.swipeWidgetLeft(find.byType(Dismissible).first);
+
+    final returnNavigationWay = returnNavigationWayAndPack.currentValue!.value1;
+    await _goBackToPackList(assistant, packWithCards.name, returnNavigationWay);
+
+    await _assertPackCardNumber(
+        tester, storage, packWithCards, expectedNumberOfCards);
+  }, variant: returnNavigationWayAndPack);
 
   testWidgets("Increases a number of cards for a pack after adding one",
       (tester) async {
     final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
 
-    final packWithCards = await _getFirstPackWithEnoughCards(storage, tester);
-    await _testIncreasingNumberOfCards(
-        tester, storage, packWithCards, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
+    final isNonePack = returnNavigationWayAndPack.currentValue!.value2;
+    final packWithCards = await (isNonePack
+        ? _getNonePack(storage, tester)
+        : _getFirstPackWithEnoughCards(storage, tester));
+  final expectedNumberOfCards = packWithCards.cardsNumber + 1;
+
+    final assistant = new WidgetAssistant(tester);
+    await _goToCardList(assistant, packWithCards.name);
+
+    await tester.runAsync(() async {
+      final randomWord =
+          WordStorageMock.generateWord(packId: packWithCards.id, hasNoPack: packWithCards.isNone);
+      await storage.wordStorage.upsert([randomWord]);
+    });
+
+    final returnNavigationWay = returnNavigationWayAndPack.currentValue!.value1;
+    await _goBackToPackList(assistant, packWithCards.name, returnNavigationWay);
+
+    await _assertPackCardNumber(tester, storage, packWithCards, expectedNumberOfCards);
+  }, variant: returnNavigationWayAndPack);
 
   testWidgets("Renders an unremovable link for a list of cards without a pack",
       (tester) async {
@@ -95,35 +151,6 @@ void main() {
     await screenTester.activateEditorMode(new WidgetAssistant(tester));
     _findPackTileByName(_nonePackName);
   });
-
-  testWidgets(
-      "Doesn't update a number of cards for the none pack without changes in it",
-      (tester) async {
-    final storage = await _pumpScreenWithRouting(tester);
-
-    final nonePack = await _getNonePack(storage, tester);
-    await _testShowingCardsWithoutChanging(
-        tester, storage, nonePack, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
-
-  testWidgets(
-      "Decreases a number of cards for the none pack after deleting one",
-      (tester) async {
-    final storage = await _pumpScreenWithRouting(tester);
-
-    final nonePack = await _getNonePack(storage, tester);
-    await _testDecreasingNumberOfCards(
-        tester, storage, nonePack, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
-
-  testWidgets("Increases a number of cards for the none pack after adding one",
-      (tester) async {
-    final storage = await _pumpScreenWithRouting(tester, cardWasAdded: true);
-
-    final nonePack = await _getNonePack(storage, tester);
-    await _testIncreasingNumberOfCards(
-        tester, storage, nonePack, returnNavigationWay.currentValue!);
-  }, variant: returnNavigationWay);
 
   testWidgets(
       "Deletes packs with cards and increases the number of cards without a pack",
@@ -437,63 +464,6 @@ Future<StoredPack> _getFirstPackWithEnoughCards(
 Future<List<StoredPack>> _fetchPacks(
         PackStorageMock storage, WidgetTester tester) async =>
     (await tester.runAsync<List<StoredPack>>(() => storage.fetch()))!;
-
-Future<void> _testShowingCardsWithoutChanging(
-    WidgetTester tester,
-    PackStorageMock storage,
-    StoredPack pack,
-    ReturnNavigationWay returnNavigationWay) async {
-  final expectedNumberOfCards = pack.cardsNumber;
-
-  final assistant = new WidgetAssistant(tester);
-
-  final packName = pack.name;
-  await _goToCardList(assistant, packName);
-
-  expect(find.byType(Dismissible), findsNWidgets(expectedNumberOfCards));
-
-  await _goBackToPackList(assistant, packName, returnNavigationWay);
-
-  await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
-}
-
-Future<void> _testDecreasingNumberOfCards(
-    WidgetTester tester,
-    PackStorageMock storage,
-    StoredPack pack,
-    ReturnNavigationWay returnNavigationWay) async {
-  final expectedNumberOfCards = pack.cardsNumber - 1;
-
-  final assistant = new WidgetAssistant(tester);
-  await _goToCardList(assistant, pack.name);
-
-  await assistant.swipeWidgetLeft(find.byType(Dismissible).first);
-
-  await _goBackToPackList(assistant, pack.name, returnNavigationWay);
-
-  await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
-}
-
-Future<void> _testIncreasingNumberOfCards(
-    WidgetTester tester,
-    PackStorageMock storage,
-    StoredPack pack,
-    ReturnNavigationWay returnNavigationWay) async {
-  final expectedNumberOfCards = pack.cardsNumber + 1;
-
-  final assistant = new WidgetAssistant(tester);
-  await _goToCardList(assistant, pack.name);
-
-  await tester.runAsync(() async {
-    final randomWord =
-        WordStorageMock.generateWord(packId: pack.id, hasNoPack: pack.isNone);
-    await storage.wordStorage.upsert([randomWord]);
-  });
-
-  await _goBackToPackList(assistant, pack.name, returnNavigationWay);
-
-  await _assertPackCardNumber(tester, storage, pack, expectedNumberOfCards);
-}
 
 Future<void> _goToCardList(WidgetAssistant assistant, String packName) async {
   await _goToPack(assistant, packName);

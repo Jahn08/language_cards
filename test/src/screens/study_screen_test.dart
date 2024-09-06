@@ -23,6 +23,12 @@ import '../../utilities/localizator.dart';
 import '../../utilities/storage_fetcher.dart';
 import '../../utilities/widget_assistant.dart';
 
+enum _CardNavigationWay {
+  bySwipe,
+
+  byArrow
+}
+
 void main() {
   setUp(() => PreferencesTester.resetSharedPreferences());
 
@@ -76,29 +82,106 @@ void main() {
         tester, CardSide.values.toList()..add(CardSide.front));
   });
 
-  testWidgets(
-      'Renders all next/previous cards once when swiping left/right with the forward sorting',
-      (tester) => _testForwardSorting(tester, shouldSwipe: true));
+  final cardNavigationWay = ValueVariant<_CardNavigationWay>(
+      {_CardNavigationWay.bySwipe, _CardNavigationWay.byArrow});
 
-  testWidgets(
-      'Renders all next/previous cards once when swiping left/right with the backward sorting',
-      (tester) => _testBackwardSorting(tester, shouldSwipe: true));
+  testWidgets('Renders cards once when navigating with the forward sorting',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
 
-  testWidgets(
-      'Renders all next/previous cards once when swiping left/right with the random sorting',
-      (tester) => _testRandomSorting(tester, shouldSwipe: true));
+    final cards = _sortCards(
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
-  testWidgets(
-      'Renders all next/previous cards once when clicking the next button/swiping right with the forward sorting',
-      (tester) => _testForwardSorting(tester, shouldSwipe: false));
+    final assistant = new WidgetAssistant(tester);
+    final screenTester = new StudyScreenTester(assistant);
 
-  testWidgets(
-      'Renders all next/previous cards once when clicking the next button/swiping right with the backward sorting',
-      (tester) => _testBackwardSorting(tester, shouldSwipe: false));
+    final shouldSwipe =
+        cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe;
+    await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
 
-  testWidgets(
-      'Renders all next/previous cards once when clicking the next button/swiping right with the random sorting',
-      (tester) => _testRandomSorting(tester, shouldSwipe: false));
+    _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+
+    await screenTester.goToPreviousCard();
+    _assureFrontSideRendering(tester, packs, cards);
+
+    final shownCards = <StoredWord>[cards.first];
+    await screenTester.goThroughCardList(cards.length - 1,
+        byClickingButton: !shouldSwipe,
+        onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+    expect(cards.length, new Set.from(shownCards).length);
+  }, variant: cardNavigationWay);
+
+  testWidgets('Renders cards once when navigating with the backward sorting',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
+
+    final cards = _sortCards(
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage), true);
+
+    final assistant = new WidgetAssistant(tester);
+    await _pressButtonEndingWithText(assistant,
+        StudyDirection.forward.present(Localizator.defaultLocalization));
+
+    final shouldSwipe =
+        cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe;
+
+    final screenTester = new StudyScreenTester(assistant);
+    await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
+    _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+
+    await screenTester.goToPreviousCard();
+    _assureFrontSideRendering(tester, packs, cards);
+
+    final shownCards = <StoredWord>[cards.first];
+    await screenTester.goThroughCardList(cards.length - 1,
+        byClickingButton: !shouldSwipe,
+        onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+    expect(cards.length, new Set.from(shownCards).length);
+  }, variant: cardNavigationWay);
+
+  testWidgets('Renders cards once when navigating with the random sorting',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
+
+    final cards =
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage);
+
+    final assistant = new WidgetAssistant(tester);
+
+    for (final sortMode in [StudyDirection.forward, StudyDirection.backward])
+      await _pressButtonEndingWithText(
+          assistant, sortMode.present(Localizator.defaultLocalization));
+
+    final shownCards = <StoredWord>[];
+    final firstCard = _getShownCard(tester, cards);
+    shownCards.add(firstCard);
+
+    final shouldSwipe =
+        cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe;
+
+    final screenTester = new StudyScreenTester(assistant);
+    await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
+
+    final nextCard = _getShownCard(tester, cards);
+
+    _assureFrontSideRendering(tester, packs, cards,
+        card: nextCard, expectedIndex: 1);
+
+    await screenTester.goToPreviousCard();
+
+    _assureFrontSideRendering(tester, packs, cards, card: firstCard);
+
+    await screenTester.goThroughCardList(cards.length - 1,
+        byClickingButton: !shouldSwipe,
+        onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
+
+    expect(cards.length, new Set.from(shownCards).length);
+  }, variant: cardNavigationWay);
 
   testWidgets(
       'Shows a dialog after finishing a study cycle, then closes it and starts afresh',
@@ -212,31 +295,100 @@ void main() {
   });
 
   testWidgets(
-      'Shows the back side of a card when tapping it and the front side of the next one when swiping left',
-      (tester) async => _testReversingFrontCardSide(tester, shouldSwipe: true));
+      'Shows the back side of a card when tapping it and the front side of the next one when navigating forward',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
+
+    final cards = _sortCards(
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+
+    final assistant = new WidgetAssistant(tester);
+    await _reverseCardSide(assistant);
+
+    _assureBackSideRendering(tester, packs, cards, isReversed: true);
+
+    final screenTester = new StudyScreenTester(assistant);
+    await _goToNextCard(screenTester,
+        shouldSwipe:
+            cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe);
+
+    _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
+  }, variant: cardNavigationWay);
 
   testWidgets(
-      'Shows the back side of a card when tapping it and the front side of the next one when clicking the next button',
-      (tester) async =>
-          _testReversingFrontCardSide(tester, shouldSwipe: false));
+      'Shows the back side of cards when navigating and the front one when clicking on them',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
+
+    final cards = _sortCards(
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage));
+
+    final assistant = new WidgetAssistant(tester);
+    await _pressButtonEndingWithText(
+        assistant, CardSide.front.present(Localizator.defaultLocalization));
+
+    _assureBackSideRendering(tester, packs, cards);
+
+    final screenTester = new StudyScreenTester(assistant);
+    await _goToNextCard(screenTester,
+        shouldSwipe:
+            cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe);
+
+    const nextIndex = 1;
+    _assureBackSideRendering(tester, packs, cards, expectedIndex: nextIndex);
+
+    await _reverseCardSide(assistant);
+    _assureFrontSideRendering(tester, packs, cards,
+        expectedIndex: nextIndex, isReversed: true);
+
+    await screenTester.goToPreviousCard();
+    _assureBackSideRendering(tester, packs, cards);
+  }, variant: cardNavigationWay);
 
   testWidgets(
-      'Shows the back side of cards when swiping left/right and the front one when clicking on them',
-      (tester) async => _testReversingBackCardSide(tester, shouldSwipe: true));
+      'Shows a random side of cards when navigating and the opposite one when clicking on them',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final packs = await _pumpScreen(tester, packStorage);
 
-  testWidgets(
-      'Shows the back side of cards when clicking the next button/swiping right and the front one when clicking on them',
-      (tester) async => _testReversingBackCardSide(tester, shouldSwipe: false));
+    final cards = _sortCards(
+        await _fetchPackedCards(tester, packs, packStorage.wordStorage));
 
-  testWidgets(
-      'Shows a random side of cards when swiping left and the opposite one when clicking on them',
-      (tester) async =>
-          _testReversingRandomCardSide(tester, shouldSwipe: true));
+    final assistant = new WidgetAssistant(tester);
 
-  testWidgets(
-      'Shows a random side of cards when clicking the next button and the opposite one when clicking on them',
-      (tester) async =>
-          _testReversingRandomCardSide(tester, shouldSwipe: false));
+    for (final sideMode in [CardSide.front, CardSide.back])
+      await _pressButtonEndingWithText(
+          assistant, sideMode.present(Localizator.defaultLocalization));
+
+    int curIndex = 0;
+    do {
+      if (curIndex > 0)
+        await _goToNextCard(new StudyScreenTester(assistant),
+            shouldSwipe:
+                cardNavigationWay.currentValue! == _CardNavigationWay.bySwipe);
+
+      final cardText = _getShownCardText(tester);
+      final curCard = cards[curIndex];
+
+      final isFrontSide = curCard.text == cardText;
+      if (isFrontSide)
+        _assureFrontSideRendering(tester, packs, cards,
+            card: curCard, expectedIndex: curIndex);
+      else
+        _assureBackSideRendering(tester, packs, cards,
+            card: curCard, expectedIndex: curIndex);
+
+      await _reverseCardSide(assistant);
+      if (isFrontSide)
+        _assureBackSideRendering(tester, packs, cards,
+            card: curCard, expectedIndex: curIndex, isReversed: true);
+      else
+        _assureFrontSideRendering(tester, packs, cards,
+            card: curCard, expectedIndex: curIndex, isReversed: true);
+    } while (++curIndex < 2);
+  }, variant: cardNavigationWay);
 
   testWidgets(
       'Reverses a card side from its front to its back and to its front again',
@@ -473,99 +625,11 @@ Finder _findButtonEndingWithText(String text) => find.ancestor(
         skipOffstage: false),
     matching: find.byType(ElevatedButton, skipOffstage: false));
 
-Future<void> _testForwardSorting(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = _sortCards(
-      await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-
-  final assistant = new WidgetAssistant(tester);
-  final screenTester = new StudyScreenTester(assistant);
-  await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
-
-  _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
-
-  await screenTester.goToPreviousCard();
-  _assureFrontSideRendering(tester, packs, cards);
-
-  final shownCards = <StoredWord>[cards.first];
-  await screenTester.goThroughCardList(cards.length - 1,
-      byClickingButton: !shouldSwipe,
-      onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
-
-  expect(cards.length, new Set.from(shownCards).length);
-}
-
 Future<void> _goToNextCard(StudyScreenTester tester,
     {required bool shouldSwipe}) async {
   await (shouldSwipe
       ? tester.goToNextCardBySwipe()
       : tester.goToNextCardByClick());
-}
-
-Future<void> _testBackwardSorting(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = _sortCards(
-      await _fetchPackedCards(tester, packs, packStorage.wordStorage), true);
-
-  final assistant = new WidgetAssistant(tester);
-  await _pressButtonEndingWithText(assistant,
-      StudyDirection.forward.present(Localizator.defaultLocalization));
-
-  final screenTester = new StudyScreenTester(assistant);
-  await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
-  _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
-
-  await screenTester.goToPreviousCard();
-  _assureFrontSideRendering(tester, packs, cards);
-
-  final shownCards = <StoredWord>[cards.first];
-  await screenTester.goThroughCardList(cards.length - 1,
-      byClickingButton: !shouldSwipe,
-      onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
-
-  expect(cards.length, new Set.from(shownCards).length);
-}
-
-Future<void> _testRandomSorting(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = await _fetchPackedCards(tester, packs, packStorage.wordStorage);
-
-  final assistant = new WidgetAssistant(tester);
-
-  for (final sortMode in [StudyDirection.forward, StudyDirection.backward])
-    await _pressButtonEndingWithText(
-        assistant, sortMode.present(Localizator.defaultLocalization));
-
-  final shownCards = <StoredWord>[];
-  final firstCard = _getShownCard(tester, cards);
-  shownCards.add(firstCard);
-
-  final screenTester = new StudyScreenTester(assistant);
-  await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
-
-  final nextCard = _getShownCard(tester, cards);
-
-  _assureFrontSideRendering(tester, packs, cards,
-      card: nextCard, expectedIndex: 1);
-
-  await screenTester.goToPreviousCard();
-
-  _assureFrontSideRendering(tester, packs, cards, card: firstCard);
-
-  await screenTester.goThroughCardList(cards.length - 1,
-      byClickingButton: !shouldSwipe,
-      onNextCard: () => shownCards.add(_getShownCard(tester, cards)));
-
-  expect(cards.length, new Set.from(shownCards).length);
 }
 
 StoredWord _getShownCard(WidgetTester tester, List<StoredWord> cards) {
@@ -611,96 +675,8 @@ void _assureBackSideRendering(
   _assureCardsNumberRendering(tester, cards.length, expectedIndex);
 }
 
-Future<void> _testReversingFrontCardSide(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = _sortCards(
-      await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-
-  final assistant = new WidgetAssistant(tester);
-  await _reverseCardSide(assistant);
-
-  _assureBackSideRendering(tester, packs, cards, isReversed: true);
-
-  final screenTester = new StudyScreenTester(assistant);
-  await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
-
-  _assureFrontSideRendering(tester, packs, cards, expectedIndex: 1);
-}
-
 Future<void> _reverseCardSide(WidgetAssistant assistant) =>
     assistant.tapWidget(StudyScreenTester.findCardWidget(), atCenter: true);
-
-Future<void> _testReversingBackCardSide(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = _sortCards(
-      await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-
-  final assistant = new WidgetAssistant(tester);
-  await _pressButtonEndingWithText(
-      assistant, CardSide.front.present(Localizator.defaultLocalization));
-
-  _assureBackSideRendering(tester, packs, cards);
-
-  final screenTester = new StudyScreenTester(assistant);
-  await _goToNextCard(screenTester, shouldSwipe: shouldSwipe);
-
-  const nextIndex = 1;
-  _assureBackSideRendering(tester, packs, cards, expectedIndex: nextIndex);
-
-  await _reverseCardSide(assistant);
-  _assureFrontSideRendering(tester, packs, cards,
-      expectedIndex: nextIndex, isReversed: true);
-
-  await screenTester.goToPreviousCard();
-  _assureBackSideRendering(tester, packs, cards);
-}
-
-Future<void> _testReversingRandomCardSide(WidgetTester tester,
-    {required bool shouldSwipe}) async {
-  final packStorage = new PackStorageMock();
-  final packs = await _pumpScreen(tester, packStorage);
-
-  final cards = _sortCards(
-      await _fetchPackedCards(tester, packs, packStorage.wordStorage));
-
-  final assistant = new WidgetAssistant(tester);
-
-  for (final sideMode in [CardSide.front, CardSide.back])
-    await _pressButtonEndingWithText(
-        assistant, sideMode.present(Localizator.defaultLocalization));
-
-  int curIndex = 0;
-  do {
-    if (curIndex > 0)
-      await _goToNextCard(new StudyScreenTester(assistant),
-          shouldSwipe: shouldSwipe);
-
-    final cardText = _getShownCardText(tester);
-    final curCard = cards[curIndex];
-
-    final isFrontSide = curCard.text == cardText;
-    if (isFrontSide)
-      _assureFrontSideRendering(tester, packs, cards,
-          card: curCard, expectedIndex: curIndex);
-    else
-      _assureBackSideRendering(tester, packs, cards,
-          card: curCard, expectedIndex: curIndex);
-
-    await _reverseCardSide(assistant);
-    if (isFrontSide)
-      _assureBackSideRendering(tester, packs, cards,
-          card: curCard, expectedIndex: curIndex, isReversed: true);
-    else
-      _assureFrontSideRendering(tester, packs, cards,
-          card: curCard, expectedIndex: curIndex, isReversed: true);
-  } while (++curIndex < 2);
-}
 
 Future<void> _openEditorMode(WidgetTester tester) =>
     new WidgetAssistant(tester).tapWidget(find.byIcon(Icons.edit));
