@@ -141,12 +141,15 @@ class UserParams {
   static const _defaultLanguage = Language.english;
   static const _defaultTheme = AppTheme.light;
 
+  static const _languagePairParam = 'languagePair';
   static const _interfaceLangParam = 'interfaceLang';
   static const _themeParam = 'theme';
   static const _studyParamsParam = 'studyParams';
 
   static const _ruLocale = Locale('ru');
   static const _enLocale = Locale('en');
+
+  late LanguagePair? languagePair;
 
   late Language _interfaceLang;
   Language get interfaceLang => _interfaceLang;
@@ -168,7 +171,7 @@ class UserParams {
       _studyParams = value ?? new StudyParams();
 
   UserParams([String? json]) {
-    final jsonMap = json == null ? {} : jsonDecode(json);
+    final jsonMap = json == null || json.isEmpty ? {} : jsonDecode(json);
 
     final langIndex = jsonMap[_interfaceLangParam] as int?;
     if (langIndex == null) {
@@ -189,11 +192,18 @@ class UserParams {
 
     _studyParams =
         new StudyParams(jsonMap[_studyParamsParam] as Map<String, dynamic>?);
+
+    final langPairMap = jsonMap[_languagePairParam];
+    if(langPairMap == null)
+      languagePair = null;
+    else
+      languagePair = LanguagePair.fromMap(langPairMap as Map<String, dynamic>);
   }
 
   String toJson() => jsonEncode({
         _interfaceLangParam: _interfaceLang.index,
         _themeParam: _theme.index,
-        _studyParamsParam: _studyParams.toMap()
+        _studyParamsParam: _studyParams.toMap(),
+        _languagePairParam: languagePair?.toMap()
       });
 }

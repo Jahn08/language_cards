@@ -1,4 +1,5 @@
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import 'presentable_enum.dart';
 
 class Language extends PresentableEnum {
@@ -37,4 +38,41 @@ class Language extends PresentableEnum {
         return '';
     }
   }
+}
+
+class LanguagePair {
+  static const _fromFieldName = 'from';
+  static const _toFieldName = 'to';
+
+  final Language from;
+
+  final Language to;
+
+  const LanguagePair(this.from, this.to);
+
+  LanguagePair.empty() : this(Language.english, Language.english);
+
+  LanguagePair.fromMap(Map<String, dynamic> map)
+      : this(Language.values[map[_fromFieldName] as int],
+            Language.values[map[_toFieldName] as int]);
+
+  LanguagePair.fromDbMap(Map<String, dynamic> map)
+      : this(Language.values[map[StoredPack.fromFieldName] as int],
+            Language.values[map[StoredPack.toFieldName] as int]);
+
+  Map<String, dynamic> toMap() =>
+      {_fromFieldName: from.index, _toFieldName: to.index};
+
+  String present(AppLocalizations locale) {
+    return '${from.present(locale)} - ${to.present(locale)}';
+  }
+
+  bool get isEmpty => to == from;
+
+  @override
+  bool operator ==(Object o) =>
+      o is LanguagePair && o.to == to && o.from == from;
+
+  @override
+  int get hashCode => Object.hash(to, from);
 }
