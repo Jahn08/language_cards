@@ -82,8 +82,8 @@ void main() {
         tester, CardSide.values.toList()..add(CardSide.front));
   });
 
-  final cardNavigationWay = ValueVariant<_CardNavigationWay>(
-      {_CardNavigationWay.bySwipe, _CardNavigationWay.byArrow});
+  final cardNavigationWay =
+      ValueVariant<_CardNavigationWay>(_CardNavigationWay.values.toSet());
 
   testWidgets('Renders cards once when navigating with the forward sorting',
       (tester) async {

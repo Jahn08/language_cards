@@ -29,15 +29,16 @@ void main() {
 
   screenTester.testDismissingItems();
 
-  final returnNavigationWay = ValueVariant<ReturnNavigationWay>(
-      {ReturnNavigationWay.byOSButton, ReturnNavigationWay.byBarBackButton});
+  final returnNavigationWay =
+      ValueVariant<ReturnNavigationWay>(ReturnNavigationWay.values.toSet());
 
   final returnNavigationWayAndPack =
       new ValueVariant<DoubleVariant<ReturnNavigationWay, bool>>({
     new DoubleVariant(ReturnNavigationWay.byOSButton, true, name2: "nonePack"),
     new DoubleVariant(ReturnNavigationWay.byBarBackButton, true,
         name2: "nonePack"),
-    new DoubleVariant(ReturnNavigationWay.byOSButton, false, name2: "namedPack"),
+    new DoubleVariant(ReturnNavigationWay.byOSButton, false,
+        name2: "namedPack"),
     new DoubleVariant(ReturnNavigationWay.byBarBackButton, false,
         name2: "namedPack")
   });
@@ -126,21 +127,22 @@ void main() {
     final packWithCards = await (isNonePack
         ? _getNonePack(storage, tester)
         : _getFirstPackWithEnoughCards(storage, tester));
-  final expectedNumberOfCards = packWithCards.cardsNumber + 1;
+    final expectedNumberOfCards = packWithCards.cardsNumber + 1;
 
     final assistant = new WidgetAssistant(tester);
     await _goToCardList(assistant, packWithCards.name);
 
     await tester.runAsync(() async {
-      final randomWord =
-          WordStorageMock.generateWord(packId: packWithCards.id, hasNoPack: packWithCards.isNone);
+      final randomWord = WordStorageMock.generateWord(
+          packId: packWithCards.id, hasNoPack: packWithCards.isNone);
       await storage.wordStorage.upsert([randomWord]);
     });
 
     final returnNavigationWay = returnNavigationWayAndPack.currentValue!.value1;
     await _goBackToPackList(assistant, packWithCards.name, returnNavigationWay);
 
-    await _assertPackCardNumber(tester, storage, packWithCards, expectedNumberOfCards);
+    await _assertPackCardNumber(
+        tester, storage, packWithCards, expectedNumberOfCards);
   }, variant: returnNavigationWayAndPack);
 
   testWidgets("Renders an unremovable link for a list of cards without a pack",

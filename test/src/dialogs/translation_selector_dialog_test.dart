@@ -15,7 +15,7 @@ void main() {
     await dialogTester.showDialog([], (tr) => dialogResult = tr);
 
     expect(dialogResult, null);
-    const DialogTester().assureDialog(shouldFind: false);
+    DialogTester.assureDialog(shouldFind: false);
   });
 
   testWidgets(
@@ -56,7 +56,7 @@ void main() {
     expect(
         dialogResult!.contains(availableItems[anotherChosenOptionIndex]), true);
 
-    const DialogTester().assureDialog(shouldFind: false);
+    DialogTester.assureDialog(shouldFind: false);
   });
 
   testWidgets('Returns all translations chosen by ticking the title checkbox',

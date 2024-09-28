@@ -406,6 +406,11 @@
     "@languageFrenchName": {},
     "languageItalianName": "Italian",
     "@languageItalianName": {},
+    
+    "languagePairSelectorDialogTitle": "Filter Packs by Language Pair",
+    "@languagePairSelectorDialogTitle": {},
+    "languagePairSelectorNoneLanguagePairName": "None",
+    "@languagePairSelectorNoneLanguagePairName": {},
 
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} items have been removed",
     "@listScreenBottomSnackBarRemovedItemsInfo": {
@@ -437,7 +442,7 @@
     "mainScreenWordPacksMenuItemLabel": "Word Packs",
     "@mainScreenWordPacksMenuItemLabel": {},
 
-    "mergeSelectorDialogTitle": "Choosing Translation for Merge",
+    "mergeSelectorDialogTitle": "Choose Translation for Merge",
     "@mergeSelectorDialogTitle": {},
     "mergeSelectorDialogWordTitle": "{text} ({partOfSpeech}) from the {packName} pack",
     "@mergeSelectorDialogWordTitle": {
@@ -457,7 +462,7 @@
     "noTranslationSnackBarInfo": "No automatic translation is possible for the chosen language pair",
     "@noTranslationSnackBarInfo": {},
 
-    "packListScreenRemovingNonEmptyPacksDialogTitle": "Removing Packs with Cards",
+    "packListScreenRemovingNonEmptyPacksDialogTitle": "Remove Packs with Cards",
     "@packListScreenRemovingNonEmptyPacksDialogTitle": {},
     "packListScreenRemovingNonEmptyPacksDialogContent": "All the cards from {packNames}\nwill be moved to the {nonePackName} pack. Continue?",
     "@packListScreenRemovingNonEmptyPacksDialogContent": {
@@ -553,7 +558,7 @@
     "packScreenSameTranslationDirectionsValidationError": "Translation languages must differ",
     "@packScreenSameTranslationDirectionsValidationError": {},
 
-    "packSelectorDialogTitle": "Choose a Card Pack",
+    "packSelectorDialogTitle": "Choose Card Pack",
     "@packSelectorDialogTitle": {},
     
     "partOfSpeechAdjectiveName": "adjective",
@@ -673,7 +678,7 @@
 
     "studyScreenEditingCardDialogTitle": "Change Card",
     "@studyScreenEditingCardDialogTitle": {},
-    "studyScreenStudyEndDialogTitle": "The Study Cycle Is Over",
+    "studyScreenStudyEndDialogTitle": "Study Cycle Is Over",
     "@studyScreenStudyEndDialogTitle": {},
     "studyScreenStudyEndDialogContent": "Well Done! You have finished the study.\n\nYou can repeat the study to hone your knowledge to perfection",
     "@studyScreenStudyEndDialogContent": {},
@@ -709,12 +714,12 @@
         }
     },
 
-    "translationSelectorDialogTitle": "Select Translations",
+    "translationSelectorDialogTitle": "Choose Translations",
     "@translationSelectorDialogTitle": {},
     "translationSelectorDoneButtonLabel": "Done",
     "@translationSelectorDoneButtonLabel": {},
 
-    "wordSelectorDialogTitle": "Choose a Word Definition",
+    "wordSelectorDialogTitle": "Choose Word Definition",
     "@wordSelectorDialogTitle": {},
     "wordStudyStageNewStageName": "New",
     "@wordStudyStageNewStageName": {},

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/dialogs/confirm_dialog.dart';
+import '../../testers/dialog_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/dialog_opener.dart';
 import '../../utilities/localizator.dart';
@@ -45,7 +46,7 @@ Future<void> _testDialogRendering<T>(
   await _openDialog(tester, dialogBuilder(title, content),
       onDialogClose: (result) => dialogOutcome = result);
 
-  _assertDialogVisibility(true);
+  DialogTester.assureDialog(shouldFind: true);
 
   _assertTextVisibility(title, isVisible: true);
   _assertTextVisibility(content, isVisible: true);
@@ -55,7 +56,7 @@ Future<void> _testDialogRendering<T>(
   await new WidgetAssistant(tester)
       .tapWidget(find.widgetWithText(ElevatedButton, expectedAction.value));
 
-  _assertDialogVisibility(false);
+  DialogTester.assureDialog(shouldFind: false);
   expect(dialogOutcome, expectedAction.key);
 }
 
@@ -65,9 +66,6 @@ Future<void> _openDialog(WidgetTester tester, ConfirmDialog dialog,
     DialogOpener.showDialog<bool>(tester,
         dialogExposer: (context) => dialog.show(context),
         onDialogClose: onDialogClose);
-
-void _assertDialogVisibility(bool isVisible) =>
-    AssuredFinder.findOne(type: AlertDialog, shouldFind: isVisible);
 
 void _assertTextVisibility(String text, {bool isVisible = false}) =>
     AssuredFinder.findOne(label: text, shouldFind: isVisible);

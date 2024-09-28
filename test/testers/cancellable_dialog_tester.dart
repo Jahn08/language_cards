@@ -13,6 +13,6 @@ class CancellableDialogTester extends DialogTester {
     final assistant = new WidgetAssistant(tester);
     await assistant.pressButtonDirectlyByLabel('Cancel');
 
-    assureDialog(shouldFind: false);
+    DialogTester.assureDialog(shouldFind: false);
   }
 }

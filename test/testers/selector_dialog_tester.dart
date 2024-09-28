@@ -6,6 +6,7 @@ import '../utilities/dialog_opener.dart';
 import '../utilities/randomiser.dart';
 import '../utilities/widget_assistant.dart';
 import 'cancellable_dialog_tester.dart';
+import 'dialog_tester.dart';
 
 class SelectorDialogTester<T> extends CancellableDialogTester {
   final SelectorDialog<T> Function(BuildContext) _dialogBuilder;
@@ -32,22 +33,19 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
     T? dialogResult;
     await showDialog(items, (item) => dialogResult = item);
 
-    final optionFinders = find.byType(ShrinkableSimpleDialogOption);
-    final itemIndex = Randomiser.nextInt(items.length);
-    final chosenOptionIndex = itemIndex + 1;
-    final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
-    expect(chosenOptionFinder, findsOneWidget);
-
-    await new WidgetAssistant(tester).tapWidget(chosenOptionFinder);
-
-    expect(dialogResult, items[itemIndex]);
-    assureDialog(shouldFind: false);
+    final expectedDialogResult = await assureTappingItem(tester, items);
+    expect(dialogResult, expectedDialogResult);
   }
 
   Future<void> testRenderingOptions(List<T> items,
       Function(Finder, T) optionChecker, Type optionTileType) async {
     await showDialog(items);
 
+    assureRenderedOptions(tester, items, optionChecker, optionTileType);
+  }
+
+  static void assureRenderedOptions<T>(WidgetTester tester, List<T> items,
+      Function(Finder, T) optionChecker, Type optionTileType) {
     final initialOptionIndex = findsNothing.matches(
             find.descendant(
                 of: find.byType(ShrinkableSimpleDialogOption).first,
@@ -64,5 +62,18 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
     final optionsNumber = items.length;
     for (int i = initialOptionIndex; i < optionsNumber; ++i)
       optionChecker(optionFinders.at(i), items[i - initialOptionIndex]);
+  }
+
+  static Future<T> assureTappingItem<T>(WidgetTester tester, List<T> items) async {
+    final optionFinders = find.byType(ShrinkableSimpleDialogOption);
+    final itemIndex = Randomiser.nextInt(items.length);
+    final chosenOptionIndex = itemIndex + 1;
+    final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
+    expect(chosenOptionFinder, findsOneWidget);
+
+    await new WidgetAssistant(tester).tapWidget(chosenOptionFinder);
+
+    DialogTester.assureDialog(shouldFind: false);
+    return items[itemIndex];
   }
 }

@@ -15,7 +15,7 @@ void main() {
     await dialogTester.showDialog([], (word) => dialogResult = word);
     expect(dialogResult, null);
 
-    const DialogTester().assureDialog(shouldFind: false);
+    DialogTester.assureDialog(shouldFind: false);
   });
 
   testWidgets('Shows the word dialog according to items passed as an argument',

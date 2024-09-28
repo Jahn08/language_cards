@@ -408,6 +408,11 @@
     "languageItalianName": "Итальянский",
     "@languageItalianName": {},
 
+    "languagePairSelectorDialogTitle": "Фильтрация наборов по языковой паре",
+    "@languagePairSelectorDialogTitle": {},
+    "languagePairSelectorNoneLanguagePairName": "Отсутствует",
+    "@languagePairSelectorNoneLanguagePairName": {},
+
     "listScreenBottomSnackBarRemovedItemsInfo": "{removedItemsLength} записей было удалено",
     "@listScreenBottomSnackBarRemovedItemsInfo": {
         "placeholders": {

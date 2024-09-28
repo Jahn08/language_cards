@@ -20,6 +20,9 @@ class FutureLoader<TData> extends StatelessWidget {
     return FutureBuilder(
         future: future,
         builder: (futureContext, AsyncSnapshot<TData> snapshot) {
+          if (snapshot.hasError)
+            throw Error.throwWithStackTrace(
+                snapshot.error!, snapshot.stackTrace!);
           if (!snapshot.hasData) return const Loader();
 
           return dataWidgetBuilder(snapshot.data as TData);
