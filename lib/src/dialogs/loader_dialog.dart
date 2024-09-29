@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import '../widgets/empty_widget.dart';
 
 class LoaderDialog {
   LoaderDialog._();
@@ -21,7 +22,7 @@ class LoaderDialog {
                             ? new LoaderState<T>(value: snapshot.data)
                             : new LoaderState<T>(error: snapshot.error));
                   });
-                  return const SizedBox.shrink();
+                  return const EmptyWidget();
                 }
 
                 return new AlertDialog(

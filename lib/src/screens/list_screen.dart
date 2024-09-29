@@ -3,6 +3,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../data/base_storage.dart';
 import '../models/stored_entity.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/empty_widget.dart';
 import '../widgets/iconed_button.dart';
 import '../widgets/underlined_container.dart';
 import '../utilities/styler.dart';
@@ -219,7 +220,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
                             },
                             icon: const Icon(Icons.search));
 
-                      return const SizedBox.shrink();
+                      return const EmptyWidget();
                     });
               })
         ],
@@ -242,7 +243,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
                           _buildBottomOptions(scaffoldContext, items));
                     });
 
-              return const SizedBox.shrink();
+              return const EmptyWidget();
             }),
         body: _buildListView(buildContext, locale),
         floatingActionButton: _buildNewItemButton(buildContext, locale));
@@ -403,7 +404,7 @@ abstract class ListScreenState<TItem extends StoredEntity,
                                                   context, i, curIndex))
                                               .toList())))));
 
-            return const SizedBox.shrink();
+            return const EmptyWidget();
           })
     ]);
   }

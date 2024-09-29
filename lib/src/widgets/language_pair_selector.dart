@@ -4,6 +4,7 @@ import '../blocs/settings_bloc.dart';
 import '../dialogs/single_selector_dialog.dart';
 import '../models/user_params.dart';
 import '../models/language.dart';
+import '../widgets/empty_widget.dart';
 import 'loader.dart';
 import 'translation_indicator.dart';
 
@@ -17,7 +18,7 @@ class LanguagePairSelector extends StatelessWidget {
     final locale = AppLocalizations.of(context)!;
     final futureParams = SettingsBlocProvider.of(context)?.userParams;
     return futureParams == null
-        ? const SizedBox.shrink()
+        ? const EmptyWidget()
         : new FutureLoader(futureParams, (userParams) {
             final curLangPair = userParams.languagePair;
 
@@ -27,7 +28,7 @@ class LanguagePairSelector extends StatelessWidget {
                   onPressed: () =>
                       showLanguagePairDialog(context, locale, userParams));
 
-            if (_pairs.length < 2) return const SizedBox.shrink();
+            if (_pairs.length < 2) return const EmptyWidget();
 
             return IconButton(
                 icon: const Icon(Icons.flag_outlined),

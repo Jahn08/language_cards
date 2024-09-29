@@ -5,6 +5,7 @@ import '../data/pack_storage.dart';
 import '../router.dart';
 import '../data/quote_provider.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/empty_widget.dart';
 import '../widgets/language_pair_selector.dart';
 import '../widgets/tight_flexible.dart';
 
@@ -24,8 +25,7 @@ class MainScreenState extends State<MainScreen> {
                 if (langPairsSnapshot.hasData)
                   return LanguagePairSelector(langPairsSnapshot.data!);
 
-                // TODO: replace with empty widget everywhere where it's used
-                return const SizedBox.shrink();
+                return const EmptyWidget();
               })
         ],
         body: new Column(children: [
