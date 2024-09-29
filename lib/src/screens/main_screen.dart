@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
+import '../data/pack_storage.dart';
 import '../router.dart';
 import '../data/quote_provider.dart';
 import '../widgets/bar_scaffold.dart';
+import '../widgets/language_pair_selector.dart';
 import '../widgets/tight_flexible.dart';
 
-class MainScreen extends StatelessWidget {
-  const MainScreen();
-
+class MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     final quote = QuoteProvider.getNextQuote(locale);
 
+    final languagePairsFuture = widget.packStorage.fetchLanguagePairs();
+
     return new BarScaffold.withSettings('Language Cards',
+        barActions: [
+          FutureBuilder(
+              future: languagePairsFuture,
+              builder: (context, langPairsSnapshot) {
+                if (langPairsSnapshot.hasData)
+                  return LanguagePairSelector(langPairsSnapshot.data!);
+
+                // TODO: replace with empty widget everywhere where it's used
+                return const SizedBox.shrink();
+              })
+        ],
         body: new Column(children: [
           _FlexibleRow(
               new Container(
@@ -86,4 +99,17 @@ class _MenuItem extends StatelessWidget {
               onPressed: onClick,
               icon: new Icon(icon),
               label: new Text(title))));
+}
+
+class MainScreen extends StatefulWidget {
+
+  final PackStorage packStorage;
+
+  const MainScreen({ PackStorage? packStorage }) : 
+    packStorage = packStorage ?? const PackStorage();
+
+  @override
+  State<StatefulWidget> createState() {
+    return new MainScreenState();
+  }
 }

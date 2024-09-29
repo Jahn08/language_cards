@@ -305,7 +305,7 @@ void main() {
       'Changes the interface language immediately after applying the setting',
       (tester) async {
     PreferencesTester.resetSharedPreferences();
-    await tester.pumpWidget(new App());
+    await tester.pumpWidget(const App());
     await tester.pump();
     await tester.pump();
 

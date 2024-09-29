@@ -64,9 +64,9 @@ class SelectorDialogTester<T> extends CancellableDialogTester {
       optionChecker(optionFinders.at(i), items[i - initialOptionIndex]);
   }
 
-  static Future<T> assureTappingItem<T>(WidgetTester tester, List<T> items) async {
+  static Future<T> assureTappingItem<T>(WidgetTester tester, List<T> items, [int? itemIndex]) async {
     final optionFinders = find.byType(ShrinkableSimpleDialogOption);
-    final itemIndex = Randomiser.nextInt(items.length);
+    itemIndex ??= Randomiser.nextInt(items.length);
     final chosenOptionIndex = itemIndex + 1;
     final chosenOptionFinder = optionFinders.at(chosenOptionIndex);
     expect(chosenOptionFinder, findsOneWidget);

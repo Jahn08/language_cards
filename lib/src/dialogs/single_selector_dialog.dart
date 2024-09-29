@@ -27,7 +27,7 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
                 if (!snapshot.hasData)
                   return _createDialogView([const Loader()]);
 
-                return _buildDialog(snapshot.data!);
+                return _buildDialog(snapshot.data!, dialogContext);
               });
         });
   }
@@ -40,23 +40,26 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
           children: children,
           buttons: buttons);
 
-  Widget _buildDialog(List<T> items) => _createDialogView(
-      items.map((w) => _buildDialogOption(w)).toList(),
-      [new Center(child: new CancelButton(() => returnResult(context)))]);
+  Widget _buildDialog(List<T> items, BuildContext inContext) =>
+      _createDialogView(items.map((w) => _buildDialogOption(w, inContext)).toList(),
+          [new Center(child: new CancelButton(() => returnResult(inContext)))]);
 
-  Widget _buildDialogOption(T item) => new ShrinkableSimpleDialogOption(
+  Widget _buildDialogOption(T item, BuildContext inContext) => new ShrinkableSimpleDialogOption(
       new ListTile(
           title: getItemTitle(item),
           subtitle: getItemSubtitle(item),
           trailing: getItemTrailing(item)),
-      onPressed: () => returnResult(context, item),
+      onPressed: () => returnResult(inContext, item),
       isShrunk: isShrunk);
 
   @override
   Future<T?> show([List<T>? items]) {
     items ??= <T>[];
     return items.isNotEmpty
-        ? showDialog(context: context, builder: (_) => _buildDialog(items!))
+        ? showDialog(
+            context: context,
+            builder: (BuildContext inContext) =>
+                _buildDialog(items!, inContext))
         : Future.value();
   }
 

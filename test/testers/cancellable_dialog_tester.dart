@@ -10,9 +10,11 @@ class CancellableDialogTester extends DialogTester {
   const CancellableDialogTester(this.tester);
 
   Future<void> assureCancellingDialog() async {
-    final assistant = new WidgetAssistant(tester);
-    await assistant.pressButtonDirectlyByLabel('Cancel');
+    await CancellableDialogTester.cancelDialog(tester);
 
     DialogTester.assureDialog(shouldFind: false);
   }
+
+  static Future<void> cancelDialog(WidgetTester tester) =>
+      new WidgetAssistant(tester).pressButtonDirectlyByLabel('Cancel');
 }

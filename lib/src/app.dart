@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:language_cards/src/data/pack_storage.dart';
 import './blocs/settings_bloc.dart';
 import './data/asset_dictionary_provider.dart';
 import './models/user_params.dart';
@@ -17,6 +18,10 @@ import './utilities/styler.dart';
 import './widgets/loader.dart';
 
 class App extends StatefulWidget {
+  final PackStorage? packStorage;
+
+  const App({this.packStorage});
+
   @override
   AppState createState() => new AppState();
 }
@@ -26,7 +31,7 @@ class AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) =>
-      _blocProvider ??= new SettingsBlocProvider(child: new _ThemedApp());
+      _blocProvider ??= new SettingsBlocProvider(child: new _ThemedApp(packStorage: widget.packStorage));
 }
 
 class _ThemedAppState extends State<_ThemedApp> {
@@ -81,7 +86,7 @@ class _ThemedAppState extends State<_ThemedApp> {
           onGenerateRoute: (settings) =>
               _buildPageRoute(settings, (context, route) {
                 if (route == null)
-                  return const MainScreen();
+                  return MainScreen(packStorage: widget.packStorage);
                 else if (route is WordCardRoute) {
                   final params = route.params;
                   return new CardScreen(
@@ -146,6 +151,10 @@ class _ThemedAppState extends State<_ThemedApp> {
 }
 
 class _ThemedApp extends StatefulWidget {
+  final PackStorage? packStorage;
+
+  const _ThemedApp({this.packStorage});
+
   @override
   State<StatefulWidget> createState() => new _ThemedAppState();
 }

@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'package:language_cards/src/data/data_provider.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/data/study_storage.dart';
@@ -8,6 +9,8 @@ import 'word_storage_mock.dart';
 import '../utilities/randomiser.dart';
 
 class _PackDataProvider extends DataProviderMock<StoredPack> {
+  HashSet<String>? _intFieldNames;
+
   final WordStorageMock wordStorage;
 
   _PackDataProvider(super.packs, this.wordStorage);
@@ -26,6 +29,10 @@ class _PackDataProvider extends DataProviderMock<StoredPack> {
     await wordStorage.removeFromPacks(ids);
     return deletedCount;
   }
+
+  @override
+  HashSet<String> get intFieldNames => _intFieldNames ??= super.intFieldNames
+    ..addAll([StoredPack.fromFieldName, StoredPack.toFieldName]);
 }
 
 class PackStorageMock extends PackStorage with StudyStorage {
@@ -44,9 +51,10 @@ class PackStorageMock extends PackStorage with StudyStorage {
   PackStorageMock(
       {int? packsNumber,
       int? cardsNumber,
-      String Function(String, int?)? textGetter})
+      String Function(String, int?)? textGetter,
+      bool singleLanguagePair = true})
       : _packs = _generatePacks(packsNumber ?? namedPacksNumber,
-            textGetter: textGetter),
+            textGetter: textGetter, singleLanguagePair: singleLanguagePair),
         wordStorage = new WordStorageMock(
             cardsNumber: cardsNumber,
             parentsOverall: packsNumber ?? namedPacksNumber,
@@ -56,22 +64,28 @@ class PackStorageMock extends PackStorage with StudyStorage {
       packs.sort((a, b) => a.isNone ? -1 : a.name.compareTo(b.name));
 
   static List<StoredPack> _generatePacks(int packsNumber,
-      {String Function(String, int?)? textGetter}) {
-    final packs = new List<StoredPack>.generate(
-        packsNumber, (index) => generatePack(index + 1, textGetter));
+      {String Function(String, int?)? textGetter,
+      bool singleLanguagePair = true}) {
+    final packs = new List<StoredPack>.generate(packsNumber,
+        (index) => generatePack(index + 1, textGetter, singleLanguagePair));
     _sort(packs);
 
     return packs;
   }
 
   static StoredPack generatePack(
-      [int? id, String Function(String, int?)? textGetter]) {
+      [int? id,
+      String Function(String, int?)? textGetter,
+      bool singleLanguagePair = true]) {
     final text = Randomiser.nextString();
+    final isIdEven = id?.isEven == true;
     return new StoredPack(textGetter?.call(text, id) ?? text,
         id: id,
         from: Language.english,
-        to: Language.russian,
-        studyDate: id?.isEven == true
+        to: singleLanguagePair || isIdEven
+            ? Language.russian
+            : Language.spanish,
+        studyDate: isIdEven
             ? DateTime.now().add(new Duration(days: -Randomiser.nextInt(99)))
             : null,
         cardsNumber: 0);

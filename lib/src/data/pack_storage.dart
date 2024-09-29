@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'study_storage.dart';
 import '../data/word_storage.dart';
 import '../models/stored_pack.dart';
+import '../models/language.dart';
 
 export '../models/stored_pack.dart';
 
@@ -75,5 +76,13 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         .where((e) => e.key != null)
         .map((e) => new StudyPack(packMap[e.key]!, e.value))
         .toList();
+  }
+
+  Future<Set<LanguagePair>> fetchLanguagePairs() async {
+    final groups = await connection.groupBySeveral(entityName,
+        groupFields: [StoredPack.fromFieldName, StoredPack.toFieldName]);
+    return groups.where((gr) => gr[StoredPack.fromFieldName] != null).map((gr) {
+      return LanguagePair.fromDbMap(gr.fields);
+    }).toSet();
   }
 }

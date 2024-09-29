@@ -77,7 +77,7 @@ class RootWidgetMock extends StatelessWidget {
           return new MaterialPageRoute(
               settings: settings,
               builder: (context) =>
-                  new RootWidgetMock(noBar: noBar, child: const MainScreen()));
+                  new RootWidgetMock(noBar: noBar, child: MainScreen(packStorage: storage)));
         if (route is CardListRoute)
           return new MaterialPageRoute(
               settings: settings,

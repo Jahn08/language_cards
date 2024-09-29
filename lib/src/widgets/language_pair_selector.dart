@@ -15,22 +15,25 @@ class LanguagePairSelector extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
-    final futureParams = SettingsBlocProvider.of(context)!.userParams;
-    return new FutureLoader(futureParams, (userParams) {
-      final curLangPair = userParams.languagePair;
+    final futureParams = SettingsBlocProvider.of(context)?.userParams;
+    return futureParams == null
+        ? const SizedBox.shrink()
+        : new FutureLoader(futureParams, (userParams) {
+            final curLangPair = userParams.languagePair;
 
-      if (curLangPair != null && !curLangPair.isEmpty)
-        return IconButton(
-            icon: TranslationIndicator(curLangPair.from, curLangPair.to),
-            onPressed: () =>
-                showLanguagePairDialog(context, locale, userParams));
+            if (curLangPair != null && !curLangPair.isEmpty)
+              return IconButton(
+                  icon: TranslationIndicator(curLangPair.from, curLangPair.to),
+                  onPressed: () =>
+                      showLanguagePairDialog(context, locale, userParams));
 
-      if (_pairs.length < 2) return const SizedBox.shrink();
+            if (_pairs.length < 2) return const SizedBox.shrink();
 
-      return IconButton(
-          icon: const Icon(Icons.flag_outlined),
-          onPressed: () => showLanguagePairDialog(context, locale, userParams));
-    });
+            return IconButton(
+                icon: const Icon(Icons.flag_outlined),
+                onPressed: () =>
+                    showLanguagePairDialog(context, locale, userParams));
+          });
   }
 
   Future<void> showLanguagePairDialog(BuildContext context,

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
+import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/widgets/language_pair_selector.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../testers/cancellable_dialog_tester.dart';
 import '../../testers/dialog_tester.dart';
+import '../../testers/language_pair_selector_tester.dart';
 import '../../testers/preferences_tester.dart';
 import '../../testers/selector_dialog_tester.dart';
 import '../../utilities/assured_finder.dart';
@@ -45,9 +48,8 @@ void main() {
     await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
 
     final assistant = new WidgetAssistant(tester);
-    final pairSelectorFinder = AssuredFinder.findOne(
-        type: IconButton, icon: Icons.flag_outlined, shouldFind: true);
-    await assistant.tapWidget(pairSelectorFinder);
+    await assistant
+        .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
     DialogTester.assureDialog(shouldFind: true);
 
     SelectorDialogTester.assureRenderedOptions(
@@ -100,19 +102,10 @@ void main() {
     };
     await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
 
-    Finder pairSelectorFinder;
-
-    if (isEmptyPairChosen)
-      pairSelectorFinder = AssuredFinder.findOne(
-          type: IconButton, icon: Icons.flag_outlined, shouldFind: true);
-    else {
-      pairSelectorFinder =
-          AssuredFinder.findOne(type: TranslationIndicator, shouldFind: true);
-      final indicator = tester.widget<TranslationIndicator>(pairSelectorFinder);
-      expect(indicator.from, Language.english);
-      expect(indicator.to, Language.spanish);
-    }
-
+    final pairSelectorFinder = isEmptyPairChosen
+        ? LanguagePairSelectorTester.findEmptyPairSelector()
+        : LanguagePairSelectorTester.assureNonEmptyPairSelector(
+            tester, chosenLangPair);
     await new WidgetAssistant(tester).tapWidget(pairSelectorFinder);
 
     SelectorDialogTester.assureRenderedOptions(
@@ -142,11 +135,7 @@ void main() {
     await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
 
     final pairIndicatorFinder =
-        AssuredFinder.findOne(type: TranslationIndicator, shouldFind: true);
-    final indicator = tester.widget<TranslationIndicator>(pairIndicatorFinder);
-    expect(indicator.from, Language.english);
-    expect(indicator.to, Language.french);
-
+        LanguagePairSelectorTester.assureNonEmptyPairSelector(tester, chosenLangPair);
     await new WidgetAssistant(tester).tapWidget(pairIndicatorFinder);
 
     SelectorDialogTester.assureRenderedOptions(
@@ -160,11 +149,97 @@ void main() {
       expect(optionTile.trailing != null, pair == chosenLangPair);
     }, ListTile);
   });
+
+  testWidgets('Chooses the language pair and saves it into the app preferences',
+      (WidgetTester tester) async {
+    PreferencesTester.resetSharedPreferences();
+
+    final langPairsToShow = {
+      const LanguagePair(Language.english, Language.italian),
+      const LanguagePair(Language.french, Language.russian)
+    };
+    await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
+
+    await new WidgetAssistant(tester)
+        .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
+
+    await SelectorDialogTester.assureTappingItem(
+        tester, langPairsToShow.toList()..insert(0, LanguagePair.empty()), 2);
+
+    final savedUserParams = await PreferencesProvider.fetch();
+    expect(const LanguagePair(Language.french, Language.russian),
+        savedUserParams.languagePair);
+  });
+
+  testWidgets(
+      'Saves no language pair into the app preferences when the selector dialog is cancelled',
+      (WidgetTester tester) async {
+    const chosenPair = LanguagePair(Language.english, Language.spanish);
+    final params = new UserParams();
+    params.languagePair = chosenPair;
+
+    await PreferencesTester.saveParams(params);
+
+    final settingsBloc = await _pumpLanguagePairSelectorWidget(tester, {
+      const LanguagePair(Language.english, Language.italian),
+      const LanguagePair(Language.french, Language.russian)
+    });
+
+    bool settingsSaved = false;
+    settingsBloc.addOnSaveListener((_) => settingsSaved = true);
+
+    await new WidgetAssistant(tester)
+        .tapWidget(LanguagePairSelectorTester.findNonEmptyPairSelector());
+
+    await CancellableDialogTester.cancelDialog(tester);
+
+    final savedUserParams = await PreferencesProvider.fetch();
+    expect(chosenPair, savedUserParams.languagePair);
+    expect(settingsSaved, false);
+  });
+
+  testWidgets(
+      'Saves no language pair into the app preferences when the same pair is chosen',
+      (WidgetTester tester) async {
+    const chosenPair = LanguagePair(Language.spanish, Language.english);
+    final params = new UserParams();
+    params.languagePair = chosenPair;
+
+    await PreferencesTester.saveParams(params);
+
+    final langPairsToShow = {
+      const LanguagePair(Language.english, Language.italian),
+      const LanguagePair(Language.french, Language.russian)
+    };
+    final settingsBloc =
+        await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
+
+    bool settingsSaved = false;
+    settingsBloc.addOnSaveListener((_) => settingsSaved = true);
+
+    await new WidgetAssistant(tester)
+        .tapWidget(LanguagePairSelectorTester.findNonEmptyPairSelector());
+
+    await SelectorDialogTester.assureTappingItem(
+        tester,
+        langPairsToShow.toList()
+          ..add(chosenPair)
+          ..insert(0, LanguagePair.empty()),
+        3);
+
+    final savedUserParams = await PreferencesProvider.fetch();
+    expect(chosenPair, savedUserParams.languagePair);
+    expect(settingsSaved, false);
+  });
 }
 
-Future _pumpLanguagePairSelectorWidget(
+Future<SettingsBloc> _pumpLanguagePairSelectorWidget(
     WidgetTester tester, Set<LanguagePair> langPairs) async {
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       child: new SettingsBlocProvider(child: LanguagePairSelector(langPairs))));
-  return new WidgetAssistant(tester).pumpAndAnimate();
+  await new WidgetAssistant(tester).pumpAndAnimate();
+
+  final BuildContext selectorContext =
+      tester.element(find.byType(LanguagePairSelector));
+  return SettingsBlocProvider.of(selectorContext)!;
 }
