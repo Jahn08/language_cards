@@ -55,7 +55,7 @@ class PackScreenState extends State<PackScreen> {
             ? locale.packScreenHeadBarAddingPackTitle
             : locale.packScreenHeadBarChangingPackTitle,
         onNavGoingBack: () =>
-            Router.goBackToPackList(context, refresh: widget.refresh),
+            Router.goBackToPackList(context, cardsUpdated: widget.refresh),
         body: new Form(
             key: _key,
             child: new FutureBuilder(
@@ -138,7 +138,7 @@ class PackScreenState extends State<PackScreen> {
                                     ? null
                                     : () => _onSave((_) =>
                                         Router.goBackToPackList(context,
-                                            refresh: true)))),
+                                            packsUpdated: true)))),
                     new ValueListenableBuilder(
                         valueListenable: _isStateDirtyNotifier,
                         child: new Text(
@@ -194,6 +194,7 @@ class PackScreenState extends State<PackScreen> {
     if (state == null || !state.validate()) return;
 
     state.save();
+    // TODO: if a language pair is chosen and it differs from a created pack - show a message
     afterSaving((await _storage.upsert([_buildPack()])).first);
   }
 }

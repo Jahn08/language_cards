@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
-import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/widgets/translation_indicator.dart';
@@ -44,8 +43,8 @@ void main() {
     final locale = Localizator.defaultLocalization;
     SelectorDialogTester.assureRenderedOptions(
         tester,
-        LanguagePairSelectorTester.sortLanguagePairs(langPairsToShow, locale)
-          ..insert(0, LanguagePair.empty()), (finder, pair) {
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow, locale), (finder, pair) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
       final optionTile = option.child! as ListTile;

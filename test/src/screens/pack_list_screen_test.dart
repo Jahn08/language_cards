@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
+import 'package:language_cards/src/models/language.dart';
+import 'package:language_cards/src/router.dart';
 import 'package:language_cards/src/screens/list_screen.dart';
+import 'package:language_cards/src/screens/main_screen.dart';
 import 'package:language_cards/src/screens/pack_list_screen.dart';
 import 'package:language_cards/src/utilities/pack_exporter.dart';
 import 'package:language_cards/src/widgets/card_number_indicator.dart';
@@ -14,7 +18,10 @@ import '../../mocks/root_widget_mock.dart';
 import '../../mocks/word_storage_mock.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/exporter_tester.dart';
+import '../../testers/language_pair_selector_tester.dart';
 import '../../testers/list_screen_tester.dart';
+import '../../testers/preferences_tester.dart';
+import '../../testers/selector_dialog_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
@@ -29,19 +36,109 @@ void main() {
 
   screenTester.testDismissingItems();
 
+  testWidgets("Renders packs for a selected language pair", (tester) async {
+    final storage = new PackStorageMock(singleLanguagePair: false);
+    final langPairs = await storage.fetchLanguagePairs();
+    final chosenLangPair = langPairs.first;
+
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
+        child: new PackListScreen(
+            storage: storage,
+            cardStorage: storage.wordStorage,
+            languagePair: chosenLangPair)));
+    final assistant = new WidgetAssistant(tester);
+    await assistant.pumpAndAnimate();
+
+    final listItemFinders = find.byType(ListTile);
+
+    final itemsLength = listItemFinders.evaluate().length;
+    final langPairPacks = await storage.fetch(languagePair: chosenLangPair);
+    expect(itemsLength, langPairPacks.length);
+
+    for (int i = 0; i < itemsLength; ++i) {
+      final pack = langPairPacks[i];
+      expect(
+          find.descendant(
+              of: listItemFinders.at(i), matching: find.text(pack.name)),
+          findsOneWidget);
+    }
+  });
+
   final returnNavigationWay =
       ValueVariant<ReturnNavigationWay>(ReturnNavigationWay.values.toSet());
 
-  final returnNavigationWayAndPack =
-      new ValueVariant<DoubleVariant<ReturnNavigationWay, bool>>({
-    new DoubleVariant(ReturnNavigationWay.byOSButton, true, name2: "nonePack"),
-    new DoubleVariant(ReturnNavigationWay.byBarBackButton, true,
-        name2: "nonePack"),
-    new DoubleVariant(ReturnNavigationWay.byOSButton, false,
-        name2: "namedPack"),
-    new DoubleVariant(ReturnNavigationWay.byBarBackButton, false,
-        name2: "namedPack")
-  });
+  testWidgets(
+      "Removes a language pair from the language pair selector after all its packs were removed",
+      (tester) async {
+    PreferencesTester.resetSharedPreferences();
+
+    final storage = await _pumpScreenWithRouting(tester,
+        mainScreenBuilder: (PackStorage? storage) =>
+            new SettingsBlocProvider(child: MainScreen(packStorage: storage)),
+        singleLanguagePair: false);
+
+    final langPairs = await storage.fetchLanguagePairs();
+    final langPairPacks = await storage.fetch(languagePair: langPairs.first);
+    final langPairPackNames = langPairPacks.map((p) => p.name).toList();
+
+    final assistant = new WidgetAssistant(tester);
+    await screenTester.activateEditorMode(assistant);
+    await screenTester.selectItemsInEditor(assistant, langPairPackNames);
+    await screenTester.deleteSelectedItems(assistant, shouldAccept: true);
+
+    await _goBack(assistant, returnNavigationWay.currentValue!);
+
+    LanguagePairSelectorTester.findEmptyPairSelector(shouldFind: false);
+    LanguagePairSelectorTester.findNonEmptyPairSelector(shouldFind: false);
+  }, variant: returnNavigationWay);
+
+  testWidgets(
+      "Updates a pack with a new language pair which should appear in the language pair selector",
+      (tester) async {
+    PreferencesTester.resetSharedPreferences();
+
+    final storage = await _pumpScreenWithRouting(tester,
+        mainScreenBuilder: (PackStorage? storage) =>
+            new SettingsBlocProvider(child: MainScreen(packStorage: storage)),
+        singleLanguagePair: false);
+
+    final langPairs = await storage.fetchLanguagePairs();
+    final fromLanguages = langPairs.map((p) => p.from).toSet();
+    final toLanguages = langPairs.map((p) => p.to).toSet();
+    final langToChoose = Language.values.firstWhere(
+        (l) => !fromLanguages.contains(l) && !toLanguages.contains(l));
+
+    final packToEdit = await _getFirstPackWithEnoughCards(storage, tester);
+    final assistant = new WidgetAssistant(tester);
+    await _goToPack(assistant, packToEdit.name);
+
+    await assistant.changeDropdownItem(packToEdit.from!, langToChoose);
+
+    final saveBtn = find.widgetWithText(ElevatedButton,
+        Localizator.defaultLocalization.constsSavingItemButtonLabel);
+    await assistant.tapWidget(saveBtn);
+
+    await _goBack(assistant, returnNavigationWay.currentValue!);
+
+    await assistant
+        .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
+
+    SelectorDialogTester.assureRenderedOptions(
+        tester,
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairs..add(new LanguagePair(langToChoose, packToEdit.to!)),
+            Localizator.defaultLocalization), (finder, pair) {
+      final option = tester.widget<SimpleDialogOption>(finder);
+
+      final optionTile = option.child! as ListTile;
+      final pairIndicator = optionTile.title! as TranslationIndicator;
+
+      if (!pair.isEmpty) {
+        expect(pairIndicator.from, pair.from);
+        expect(pairIndicator.to, pair.to);
+      }
+    }, ListTile);
+  }, variant: returnNavigationWay);
 
   testWidgets(
       "Updates a pack in the pack list, after going to its cards and back to the card list",
@@ -69,6 +166,17 @@ void main() {
         of: find.text(newPackName), matching: find.byType(ListTile));
     expect(tileWithCardsFinder, findsOneWidget);
   }, variant: returnNavigationWay);
+
+  final returnNavigationWayAndPack =
+      new ValueVariant<DoubleVariant<ReturnNavigationWay, bool>>({
+    new DoubleVariant(ReturnNavigationWay.byOSButton, true, name2: "nonePack"),
+    new DoubleVariant(ReturnNavigationWay.byBarBackButton, true,
+        name2: "nonePack"),
+    new DoubleVariant(ReturnNavigationWay.byOSButton, false,
+        name2: "namedPack"),
+    new DoubleVariant(ReturnNavigationWay.byBarBackButton, false,
+        name2: "namedPack")
+  });
 
   testWidgets(
       "Doesn't update a number of cards for a pack without changes in it",
@@ -435,19 +543,24 @@ void main() {
 }
 
 PackListScreen _buildPackListScreen(
-    {PackStorageMock? storage, int? packsNumber}) {
+    {PackStorageMock? storage, int? packsNumber, bool refresh = false}) {
   storage ??= new PackStorageMock(
       packsNumber: packsNumber ?? 40,
       textGetter: (text, id) => (id! % 2).toString() + text);
-  return new PackListScreen(storage, storage.wordStorage);
+  return new PackListScreen(
+      storage: storage, cardStorage: storage.wordStorage, refresh: refresh);
 }
 
 Future<PackStorageMock> _pumpScreenWithRouting(WidgetTester tester,
-    {bool? cardWasAdded}) async {
-  final storage = new PackStorageMock();
+    {bool? cardWasAdded,
+    Widget Function(PackStorage?)? mainScreenBuilder,
+    bool singleLanguagePair = true}) async {
+  final storage = new PackStorageMock(singleLanguagePair: singleLanguagePair);
   await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
       storage: storage,
-      packListScreenBuilder: () => _buildPackListScreen(storage: storage),
+      mainScreenBuilder: mainScreenBuilder,
+      packListScreenBuilder: (PackListRoute? route) => _buildPackListScreen(
+          storage: storage, refresh: route?.params.refresh == true),
       cardWasAdded: cardWasAdded));
 
   await tester.pump(const Duration(milliseconds: 500));

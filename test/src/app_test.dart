@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/app.dart';
-import 'package:language_cards/src/models/language.dart';
 import '../mocks/pack_storage_mock.dart';
 import '../mocks/root_widget_mock.dart';
 import '../testers/language_pair_selector_tester.dart';
@@ -26,11 +25,12 @@ void main() {
     await assistant
         .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
 
-    final sortedPairs = LanguagePairSelectorTester.sortLanguagePairs(
-        langPairsToShow, Localizator.defaultLocalization);
+    final sortedPairs =
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow, Localizator.defaultLocalization);
     const chosenPairIndex = 1;
     await SelectorDialogTester.assureTappingItem(
-        tester, sortedPairs..insert(0, LanguagePair.empty()), chosenPairIndex);
+        tester, sortedPairs, chosenPairIndex);
 
     final expectedChosenPair = sortedPairs[chosenPairIndex];
     LanguagePairSelectorTester.assureNonEmptyPairSelector(

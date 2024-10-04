@@ -88,7 +88,7 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     if (widget.pack == null)
       Router.returnHome(context);
     else if (widget.pack!.isNone)
-      Router.goBackToPackList(context, refresh: shouldRefreshPack);
+      Router.goBackToPackList(context, cardsUpdated: shouldRefreshPack);
     else
       Router.goBackToPack(context,
           pack: widget.pack, refresh: shouldRefreshPack);

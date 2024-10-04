@@ -53,8 +53,9 @@ void main() {
     DialogTester.assureDialog(shouldFind: true);
 
     SelectorDialogTester.assureRenderedOptions(
-        tester, langPairsToShow.toList()..insert(0, LanguagePair.empty()),
-        (finder, pair) {
+        tester,
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow, Localizator.defaultLocalization), (finder, pair) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
       final optionTile = option.child! as ListTile;
@@ -109,8 +110,9 @@ void main() {
     await new WidgetAssistant(tester).tapWidget(pairSelectorFinder);
 
     SelectorDialogTester.assureRenderedOptions(
-        tester, langPairsToShow.toList()..insert(0, LanguagePair.empty()),
-        (finder, pair) {
+        tester,
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow, Localizator.defaultLocalization), (finder, pair) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
       final optionTile = option.child! as ListTile;
@@ -135,14 +137,15 @@ void main() {
     await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
 
     final pairIndicatorFinder =
-        LanguagePairSelectorTester.assureNonEmptyPairSelector(tester, chosenLangPair);
+        LanguagePairSelectorTester.assureNonEmptyPairSelector(
+            tester, chosenLangPair);
     await new WidgetAssistant(tester).tapWidget(pairIndicatorFinder);
 
     SelectorDialogTester.assureRenderedOptions(
         tester,
-        langPairsToShow.toList()
-          ..insert(0, chosenLangPair)
-          ..insert(0, LanguagePair.empty()), (finder, pair) {
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow.toList()..insert(0, chosenLangPair),
+            Localizator.defaultLocalization), (finder, pair) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
       final optionTile = option.child! as ListTile;
@@ -164,7 +167,10 @@ void main() {
         .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
 
     await SelectorDialogTester.assureTappingItem(
-        tester, langPairsToShow.toList()..insert(0, LanguagePair.empty()), 2);
+        tester,
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow, Localizator.defaultLocalization),
+        2);
 
     final savedUserParams = await PreferencesProvider.fetch();
     expect(const LanguagePair(Language.french, Language.russian),
@@ -222,9 +228,9 @@ void main() {
 
     await SelectorDialogTester.assureTappingItem(
         tester,
-        langPairsToShow.toList()
-          ..add(chosenPair)
-          ..insert(0, LanguagePair.empty()),
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairsToShow.toList()..add(chosenPair),
+            Localizator.defaultLocalization),
         3);
 
     final savedUserParams = await PreferencesProvider.fetch();

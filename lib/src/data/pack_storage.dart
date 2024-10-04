@@ -18,9 +18,15 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
 
   @override
   Future<List<StoredPack>> fetch(
-      {String? textFilter, int? skipCount, int? takeCount}) async {
+      {String? textFilter,
+      int? skipCount,
+      int? takeCount,
+      LanguagePair? languagePair}) async {
     final packs = await fetchInternally(
-        textFilter: textFilter, skipCount: skipCount, takeCount: takeCount);
+        textFilter: textFilter,
+        skipCount: skipCount,
+        takeCount: takeCount,
+        filters: buildLanguagePairFilter(languagePair));
 
     final isFirstRequest = skipCount == null || skipCount == 0;
     if (textFilter == null && isFirstRequest) packs.insert(0, StoredPack.none);
@@ -30,6 +36,16 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     packs.forEach((p) => p.cardsNumber = lengths[p.id] ?? 0);
 
     return packs;
+  }
+
+  static Map<String, List<int>>? buildLanguagePairFilter(
+      LanguagePair? languagePair) {
+    return languagePair == null
+        ? null
+        : {
+            StoredPack.fromFieldName: [languagePair.from.index],
+            StoredPack.toFieldName: [languagePair.to.index]
+          };
   }
 
   @protected

@@ -122,10 +122,11 @@ class _ThemedAppState extends State<_ThemedApp> {
                 else if (route is StudyHelpRoute)
                   return const StudyHelpScreen();
 
-                final packListParams = (route as PackListRoute).params;
-                return packListParams.storage == null
-                    ? const PackListScreen()
-                    : new PackListScreen(packListParams.storage);
+                final args = (route as PackListRoute).params;
+                return new PackListScreen(
+                    storage: args.storage,
+                    languagePair: params.languagePair,
+                    refresh: args.refresh);
               }));
     });
   }

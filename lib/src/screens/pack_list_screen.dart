@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
+import 'package:language_cards/src/models/language.dart';
 import '../utilities/pack_importer.dart';
 import './list_screen.dart';
 import '../data/pack_storage.dart';
@@ -18,6 +19,8 @@ import '../widgets/translation_indicator.dart';
 
 class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   Set<int?>? _nonRemovableItemIds;
+
+  bool packsDeleted = false;
 
   final _nonPackCardsNumberNotifier = new ValueNotifier<int?>(null);
 
@@ -61,10 +64,11 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
   @override
   Future<List<StoredPack>> fetchNextItems(
-      int skipCount, int takeCount, String? text) {
+      int skipCount, int takeCount, String? text) async {
     if (skipCount > 0) return Future.value([]);
 
-    return widget.storage.fetch(textFilter: text);
+    return widget.storage
+        .fetch(textFilter: text, languagePair: widget.languagePair);
   }
 
   @override
@@ -79,6 +83,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
         _nonPackCardsNumberNotifier.value = StoredPack.none.cardsNumber;
       }
     });
+
+    packsDeleted = true;
   }
 
   @override
@@ -114,7 +120,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   bool get canGoBack => true;
 
   @override
-  void onGoingBack(BuildContext context) => Router.returnHome(context);
+  void onGoingBack(BuildContext context) =>
+      Router.returnHome(context, refresh: widget.refresh || packsDeleted);
 
   @override
   int get removableItemsLength =>
@@ -221,7 +228,15 @@ class PackListScreen extends ListScreen<StoredPack> {
 
   final WordStorage cardStorage;
 
-  const PackListScreen([PackStorage? storage, WordStorage? cardStorage])
+  final LanguagePair? languagePair;
+
+  final bool refresh;
+
+  const PackListScreen(
+      {PackStorage? storage,
+      WordStorage? cardStorage,
+      this.languagePair,
+      this.refresh = false})
       : storage = storage ?? const PackStorage(),
         cardStorage = cardStorage ?? const WordStorage(),
         super();
