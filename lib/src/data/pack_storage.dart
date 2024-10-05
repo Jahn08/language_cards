@@ -84,15 +84,16 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
   }
 
   @override
-  Future<List<StudyPack>> fetchStudyPacks() async {
-    final packs = await fetchInternally();
+  Future<List<StudyPack>> fetchStudyPacks(LanguagePair? languagePair) async {
+    final packs =
+        await fetchInternally(filters: buildLanguagePairFilter(languagePair));
     final packMap = <int?, StoredPack>{
       for (final StoredPack p in packs) p.id: p
     };
 
     return (await buildWordStorage().groupByStudyLevels())
         .entries
-        .where((e) => e.key != null)
+        .where((e) => e.key != null && packMap.containsKey(e.key))
         .map((e) => new StudyPack(packMap[e.key]!, e.value))
         .toList();
   }

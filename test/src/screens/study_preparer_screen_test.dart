@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/preferences_provider.dart';
 import 'package:language_cards/src/data/study_storage.dart';
+import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -16,6 +17,7 @@ import '../../testers/preferences_tester.dart';
 import '../../testers/study_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
+import '../../utilities/randomiser.dart';
 import '../../utilities/storage_fetcher.dart';
 import '../../utilities/variants.dart';
 import '../../utilities/widget_assistant.dart';
@@ -28,7 +30,7 @@ void main() {
       (tester) async {
     final storage = await _pumpScreen(tester);
 
-    final packs = await _fetchNamedPacks(tester, storage);
+    final packs = await StorageFetcher.fetchNamedPacks(storage);
     expect(_findCheckTiles(), findsNWidgets(packs.length));
 
     await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
@@ -40,10 +42,27 @@ void main() {
           findsOneWidget);
     });
 
-    final studyPacks = await _fetchStudyPacks(tester, storage);
+    final studyPacks = await storage.fetchStudyPacks(null);
     _assureCardNumbersForStudyLevels(studyPacks);
 
     _findDownwardScrollBtn(shouldFind: false);
+  });
+
+  testWidgets('Renders card packs filtered by a language pair', (tester) async {
+    final packStorage = new PackStorageMock(singleLanguagePair: false);
+    final langPairs = await packStorage.fetchLanguagePairs();
+    final chosenLangPair = Randomiser.nextElement(langPairs);
+
+    final storage = await _pumpScreen(tester,
+        storage: packStorage, langPair: chosenLangPair);
+
+    final packs = await StorageFetcher.fetchNamedPacks(storage, langPair: chosenLangPair);
+    expect(_findCheckTiles(), findsNWidgets(packs.length));
+
+    await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
+      expect(find.descendant(of: packTileFinder, matching: find.text(p.name)),
+          findsOneWidget);
+    });
   });
 
   testWidgets(
@@ -104,7 +123,7 @@ void main() {
   });
 
   testWidgets(
-      'Keeps packs ordered by their study date in order after finishing a study cycle updates the dates',
+      'Keeps packs ordered by their study date after finishing a study cycle updates the dates',
       (tester) async {
     final packOrder = returnNavigationWayAndOrder.currentValue!.value2;
     await _setPackOrderPreference(packOrder);
@@ -113,7 +132,7 @@ void main() {
     final assistant = new WidgetAssistant(tester);
     final studyTester = new StudyScreenTester(assistant);
 
-    final packs = await _fetchNamedPacks(tester, storage);
+    final packs = await StorageFetcher.fetchNamedPacks(storage);
     final packsToStudy = studyTester.takeEnoughCards(packs);
 
     await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithStudyRouting(
@@ -156,8 +175,8 @@ void main() {
       (tester) async {
     final storage = await _pumpScreen(tester);
 
-    final packs = await _fetchNamedPacks(tester, storage);
-    final studyPacks = await _fetchStudyPacks(tester, storage);
+    final packs = await StorageFetcher.fetchNamedPacks(storage);
+    final studyPacks = await storage.fetchStudyPacks(null);
 
     final widgetAssistant = new WidgetAssistant(tester);
     final selectorBtnFinder =
@@ -178,9 +197,9 @@ void main() {
       (tester) async {
     final storage = await _pumpScreen(tester);
 
-    final studyPacks = await _fetchStudyPacks(tester, storage);
+    final studyPacks = await storage.fetchStudyPacks(null);
 
-    final packs = await _fetchNamedPacks(tester, storage);
+    final packs = await StorageFetcher.fetchNamedPacks(storage);
     final packsToUncheck = <StoredPack>[packs.first, packs.last];
 
     final assistant = new WidgetAssistant(tester);
@@ -219,7 +238,7 @@ void main() {
     await assistant.pumpAndAnimate(animationTimeoutMs);
 
     final storedPacks =
-        _sortPacksByName(await _fetchNamedPacks(tester, storage));
+        _sortPacksByName(await StorageFetcher.fetchNamedPacks(storage));
 
     final checkTileFinder = _findCheckTiles();
     List<CheckboxListTile> checkTiles =
@@ -274,26 +293,21 @@ List<StoredPack> _sortPacks(List<StoredPack> packs, PackOrder? order) {
 }
 
 Future<PackStorageMock> _pumpScreen(WidgetTester tester,
-    {int? packsNumber, int? cardsNumber}) async {
-  final storage =
+    {PackStorageMock? storage,
+    int? packsNumber,
+    int? cardsNumber,
+    LanguagePair? langPair}) async {
+  storage = storage ??
       new PackStorageMock(packsNumber: packsNumber, cardsNumber: cardsNumber);
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
-      childBuilder: (context) =>
-          new SettingsBlocProvider(child: new StudyPreparerScreen(storage)),
+      childBuilder: (context) => new SettingsBlocProvider(
+          child: new StudyPreparerScreen(storage, langPair)),
       noBar: true));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 700));
 
   return storage;
 }
-
-Future<List<StoredPack>> _fetchNamedPacks(
-        WidgetTester tester, PackStorageMock storage) =>
-    StorageFetcher.fetchNamedPacks(storage);
-
-Future<List<StudyPack>> _fetchStudyPacks(
-        WidgetTester tester, PackStorageMock storage) async =>
-    (await tester.runAsync<List<StudyPack>>(() => storage.fetchStudyPacks()))!;
 
 Finder _findCheckTiles() {
   final finder = find.byType(CheckboxListTile, skipOffstage: false);
@@ -411,7 +425,7 @@ Future<void> _testRenderingStudyDates(WidgetTester tester,
     {bool shouldShowDates = false}) async {
   final storage = await _pumpScreen(tester);
 
-  final packs = await _fetchNamedPacks(tester, storage);
+  final packs = await StorageFetcher.fetchNamedPacks(storage);
   expect(_findCheckTiles(), findsNWidgets(packs.length));
 
   final locale = Localizator.defaultLocalization;
@@ -438,7 +452,7 @@ Future<void> _setPackOrderPreference(PackOrder? order) async {
 Future<void> _testRenderingPackOrder(
     WidgetTester tester, PackOrder order) async {
   final storage = await _pumpScreen(tester);
-  final packs = await _fetchNamedPacks(tester, storage);
+  final packs = await StorageFetcher.fetchNamedPacks(storage);
 
   await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
     expect(find.descendant(of: packTileFinder, matching: find.text(p.name)),

@@ -108,9 +108,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                       params.storage, new AssetDictionaryProvider(context),
                       packId: params.packId, refresh: params.refresh);
                 } else if (route is StudyPreparerRoute)
-                  return route.params.storage == null
-                      ? const StudyPreparerScreen()
-                      : new StudyPreparerScreen(route.params.storage);
+                  return new StudyPreparerScreen(
+                      route.params.storage, params.languagePair);
                 else if (route is StudyModeRoute) {
                   final args = route.params;
                   return new StudyScreen(args.storage,

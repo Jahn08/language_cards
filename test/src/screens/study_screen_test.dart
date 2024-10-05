@@ -448,8 +448,7 @@ void main() {
     final assistant = new WidgetAssistant(tester);
     await assistant.tapWidget(CardEditorTester.findPackButton());
 
-    final packs = await packStorage.fetch(languagePair: expectedLangPair);
-    final namedPacks = packs.where((p) => !p.isNone).toList();
+    final namedPacks = await StorageFetcher.fetchNamedPacks(packStorage, langPair: expectedLangPair);
     final packNames = namedPacks.map((p) => p.name).toSet();
     SelectorDialogTester.assureRenderedOptions(tester, namedPacks, (finder, _) {
       final itemTitleFinder =

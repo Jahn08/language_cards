@@ -23,7 +23,7 @@ void main() {
 
   screenTester.testDismissingItems();
 
-  testWidgets("Renders packs for a selected language pair", (tester) async {
+  testWidgets("Renders packs filtered by a language pair", (tester) async {
     final packStorage = new PackStorageMock(singleLanguagePair: false);
     final langPairs = await packStorage.fetchLanguagePairs();
     final chosenLangPair = Randomiser.nextElement(langPairs);
@@ -78,7 +78,8 @@ void main() {
             WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
         itemsLengthGetter: () => Future.value(childCards.length),
         indexGroupsGetter: (_) async {
-          final indexGroups = await wordStorage.groupByTextIndexAndParent([pack.id]);
+          final indexGroups =
+              await wordStorage.groupByTextIndexAndParent([pack.id]);
           expect(indexGroups!.length, 2);
           return indexGroups;
         });

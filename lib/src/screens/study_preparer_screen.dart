@@ -2,9 +2,10 @@ import 'dart:collection';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
-import 'package:language_cards/src/data/pack_storage.dart';
 import '../blocs/settings_bloc.dart';
+import '../data/pack_storage.dart';
 import '../data/study_storage.dart';
+import '../models/language.dart';
 import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
@@ -79,7 +80,7 @@ class _StudyPreparerScreenState extends State<StudyPreparerScreen> {
 
     return new FutureLoader<List<StudyPack>>(
         _packs == null
-            ? widget.storage.fetchStudyPacks()
+            ? widget.storage.fetchStudyPacks(widget.languagePair)
             : Future.value(_packs),
         (stPacks) => new FutureLoader(_futureParams!, (UserParams userParams) {
               _initPacks(stPacks, userParams.studyParams.packOrder);
@@ -306,7 +307,9 @@ class _StudyLevelList extends StatelessWidget {
 class StudyPreparerScreen extends StatefulWidget {
   final StudyStorage storage;
 
-  const StudyPreparerScreen([StudyStorage? storage])
+  final LanguagePair? languagePair;
+
+  const StudyPreparerScreen([StudyStorage? storage, this.languagePair])
       : storage = storage ?? const PackStorage();
 
   @override

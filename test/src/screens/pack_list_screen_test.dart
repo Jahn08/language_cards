@@ -36,7 +36,7 @@ void main() {
 
   screenTester.testDismissingItems();
 
-  testWidgets("Renders packs for a selected language pair", (tester) async {
+  testWidgets("Renders packs filtered by a language pair", (tester) async {
     final storage = new PackStorageMock(singleLanguagePair: false);
     final langPairs = await storage.fetchLanguagePairs();
     final chosenLangPair = langPairs.first;
