@@ -2,13 +2,13 @@ import 'dart:math';
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
+import 'package:language_cards/src/models/language.dart';
 import '../dialogs/outcome_dialog.dart';
 import '../router.dart';
 import '../blocs/settings_bloc.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
-import '../models/stored_pack.dart';
 import '../models/user_params.dart';
 import '../models/word_study_stage.dart';
 import '../utilities/speaker.dart';
@@ -34,7 +34,9 @@ class _CardEditorDialog
 
   final WordStorage wordStorage;
 
-  final BaseStorage<StoredPack> packStorage;
+  final PackStorage packStorage;
+
+  final LanguagePair? languagePair;
 
   const _CardEditorDialog(
       {required this.card,
@@ -42,7 +44,8 @@ class _CardEditorDialog
       required this.wordStorage,
       required this.packStorage,
       required this.provider,
-      this.defaultSpeaker})
+      this.defaultSpeaker,
+      this.languagePair})
       : super();
 
   Future<MapEntry<StoredWord, StoredPack>?> show(BuildContext context) {
@@ -58,6 +61,7 @@ class _CardEditorDialog
                   wordStorage: wordStorage,
                   packStorage: packStorage,
                   hideNonePack: true,
+                  languagePair: languagePair,
                   afterSave: (card, pack, {bool refresh = false}) {
                     returnResult(buildContext, new MapEntry(card, pack));
                   }),
@@ -140,7 +144,8 @@ class _StudyScreenState extends State<StudyScreen> {
                                   provider: widget.provider,
                                   defaultSpeaker: widget.defaultSpeaker,
                                   wordStorage: widget.storage,
-                                  packStorage: widget.packStorage)
+                                  packStorage: widget.packStorage,
+                                  languagePair: widget.languagePair)
                               .show(context);
 
                           if (updatedPackedCard == null) return;
@@ -443,7 +448,7 @@ class _CenteredBigText extends StatelessWidget {
 class StudyScreen extends StatefulWidget {
   final WordStorage storage;
 
-  final BaseStorage<StoredPack> packStorage;
+  final PackStorage packStorage;
 
   final List<StoredPack> packs;
 
@@ -453,12 +458,15 @@ class StudyScreen extends StatefulWidget {
 
   final ISpeaker? defaultSpeaker;
 
+  final LanguagePair? languagePair;
+
   const StudyScreen(this.storage,
       {required this.packs,
       required this.packStorage,
       required this.provider,
       this.studyStageIds,
-      this.defaultSpeaker});
+      this.defaultSpeaker,
+      this.languagePair});
 
   @override
   _StudyScreenState createState() => new _StudyScreenState();

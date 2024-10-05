@@ -92,12 +92,10 @@ class _StudyModeRouteArgs extends _CardStorageRouteArgs {
 
   final List<int>? studyStageIds;
 
-  final BaseStorage<StoredPack> packStorage;
+  final PackStorage packStorage;
 
   _StudyModeRouteArgs(this.packs,
-      {this.studyStageIds,
-      WordStorage? storage,
-      BaseStorage<StoredPack>? packStorage})
+      {this.studyStageIds, WordStorage? storage, PackStorage? packStorage})
       : packStorage = packStorage ?? const PackStorage(),
         super(storage);
 }

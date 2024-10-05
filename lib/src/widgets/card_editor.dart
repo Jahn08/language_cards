@@ -17,6 +17,7 @@ import '../dialogs/confirm_dialog.dart';
 import '../dialogs/merge_selector_dialog.dart';
 import '../dialogs/translation_selector_dialog.dart';
 import '../dialogs/word_selector_dialog.dart';
+import '../models/language.dart';
 import '../models/part_of_speech.dart';
 import '../models/presentable_enum.dart';
 import '../models/word_study_stage.dart';
@@ -63,7 +64,7 @@ class CardEditorState extends State<CardEditor> {
 
   Future<List<StoredPack>> _getFuturePacks() async {
     if (_futurePacks == null) {
-      _futurePacks = widget._packStorage.fetch();
+      _futurePacks = widget._packStorage.fetch(languagePair: widget.languagePair);
 
       if (widget.hideNonePack ?? false)
         _futurePacks =
@@ -433,13 +434,15 @@ class CardEditor extends StatefulWidget {
 
   final StoredPack? pack;
 
+  final LanguagePair? languagePair;
+
   final DictionaryProvider _provider;
 
   final ISpeaker? _defaultSpeaker;
 
   final WordStorage _wordStorage;
 
-  final BaseStorage<StoredPack> _packStorage;
+  final PackStorage _packStorage;
 
   final void Function(StoredWord card, StoredPack pack, {bool refresh})
       afterSave;
@@ -448,14 +451,15 @@ class CardEditor extends StatefulWidget {
 
   CardEditor(
       {required WordStorage wordStorage,
-      required BaseStorage<StoredPack> packStorage,
+      required PackStorage packStorage,
       required this.afterSave,
       required DictionaryProvider provider,
       ISpeaker? defaultSpeaker,
       int? wordId,
       this.pack,
       this.card,
-      this.hideNonePack})
+      this.hideNonePack,
+      this.languagePair})
       : _provider = provider,
         _defaultSpeaker = defaultSpeaker,
         _packStorage = packStorage,

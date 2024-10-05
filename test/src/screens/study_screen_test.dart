@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart' hide NavigationBar;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/presentable_enum.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/data/asset_dictionary_provider.dart';
@@ -17,6 +18,7 @@ import '../../testers/cancellable_dialog_tester.dart';
 import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/preferences_tester.dart';
+import '../../testers/selector_dialog_tester.dart';
 import '../../testers/study_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
@@ -433,6 +435,31 @@ void main() {
   });
 
   testWidgets(
+      'Displays all named packs filtered by a language pair in the pack selector dialog',
+      (tester) async {
+    final packStorage = new PackStorageMock(singleLanguagePair: false);
+    final langPairs = await packStorage.fetchLanguagePairs();
+
+    final expectedLangPair = langPairs.first;
+    await _pumpScreen(tester, packStorage, null, expectedLangPair);
+
+    await _openEditorMode(tester);
+
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(CardEditorTester.findPackButton());
+
+    final packs = await packStorage.fetch(languagePair: expectedLangPair);
+    final namedPacks = packs.where((p) => !p.isNone).toList();
+    final packNames = namedPacks.map((p) => p.name).toSet();
+    SelectorDialogTester.assureRenderedOptions(tester, namedPacks, (finder, _) {
+      final itemTitleFinder =
+          find.descendant(of: finder, matching: find.byType(Text));
+      final itemTitle = tester.widget<Text>(itemTitleFinder.first);
+      expect(packNames.contains(itemTitle.data), true);
+    }, ListTile);
+  });
+
+  testWidgets(
       'Cancels changes in the dialog for editing a card when clicking the Cancel button',
       (tester) async {
     final packStorage = new PackStorageMock();
@@ -507,7 +534,7 @@ void main() {
 
 Future<List<StoredPack>> _pumpScreen(
     WidgetTester tester, PackStorageMock packStorage,
-    [List<StoredPack>? packs]) async {
+    [List<StoredPack>? packs, LanguagePair? langPair]) async {
   packs ??= await _fetchNamedPacks(tester, packStorage);
 
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
@@ -517,6 +544,7 @@ Future<List<StoredPack>> _pumpScreen(
               provider: new AssetDictionaryProvider(context),
               packs: packs ?? [],
               packStorage: packStorage,
+              languagePair: langPair,
               defaultSpeaker: const SpeakerMock()))));
   await tester.pump();
   await tester.pump(const Duration(milliseconds: 500));

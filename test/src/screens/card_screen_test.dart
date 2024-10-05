@@ -7,6 +7,7 @@ import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/data/word_storage.dart';
+import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -20,6 +21,7 @@ import '../../mocks/speaker_mock.dart';
 import '../../mocks/word_storage_mock.dart';
 import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
+import '../../testers/selector_dialog_tester.dart';
 import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/http_responder.dart';
@@ -141,6 +143,32 @@ void main() {
 
       CardEditorTester.findListTileByTitle(p.name);
     });
+  });
+
+  testWidgets(
+      'Displays all named packs filtered by a language pair in the pack selector dialog',
+      (tester) async {
+    final packStorage = new PackStorageMock(singleLanguagePair: false);
+    final langPairs = await packStorage.fetchLanguagePairs();
+    final expectedLangPair = langPairs.first;
+
+    await _displayFilledWord(tester,
+        storage: packStorage,
+        pack: packStorage.getRandom(),
+        speaker: const SpeakerMock(),
+        langPair: expectedLangPair);
+
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(CardEditorTester.findPackButton());
+
+    final packs = await packStorage.fetch(languagePair: expectedLangPair);
+    final packNames = packs.map((p) => p.name).toSet();
+    SelectorDialogTester.assureRenderedOptions(tester, packs, (finder, _) {
+      final itemTitleFinder =
+          find.descendant(of: finder, matching: find.byType(Text));
+      final itemTitle = tester.widget<Text>(itemTitleFinder.first);
+      expect(packNames.contains(itemTitle.data), true);
+    }, ListTile);
   });
 
   testWidgets(
@@ -636,6 +664,7 @@ Future<StoredWord?> _displayFilledWord(WidgetTester tester,
     StoredPack? pack,
     StoredWord? wordToShow,
     SpeakerMock? speaker,
+    LanguagePair? langPair,
     bool shouldHideWarningDialog = true}) async {
   storage ??= new PackStorageMock();
   final wordStorage = storage.wordStorage;
@@ -646,6 +675,7 @@ Future<StoredWord?> _displayFilledWord(WidgetTester tester,
       pack: pack,
       wordToShow: wordToShow,
       speaker: speaker,
+      langPair: langPair,
       shouldHideWarningDialog: shouldHideWarningDialog);
 }
 
@@ -654,6 +684,7 @@ Future<StoredWord?> _displayWord(WidgetTester tester, PackStorageMock storage,
     StoredPack? pack,
     StoredWord? wordToShow,
     SpeakerMock? speaker,
+    LanguagePair? langPair,
     bool shouldHideWarningDialog = true}) async {
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       childBuilder: (context) => new CardScreen(
@@ -661,6 +692,7 @@ Future<StoredWord?> _displayWord(WidgetTester tester, PackStorageMock storage,
           packStorage: storage,
           wordId: wordToShow?.id,
           pack: pack,
+          languagePair: langPair,
           provider: provider ?? _createDictionaryProvider([]),
           defaultSpeaker: speaker ?? const SpeakerMock())));
   await tester.pump();

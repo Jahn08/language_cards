@@ -88,13 +88,14 @@ class _ThemedAppState extends State<_ThemedApp> {
                 if (route == null)
                   return MainScreen(packStorage: widget.packStorage);
                 else if (route is WordCardRoute) {
-                  final params = route.params;
+                  final args = route.params;
                   return new CardScreen(
                       provider: new AssetDictionaryProvider(context),
-                      wordStorage: params.storage,
-                      packStorage: params.packStorage,
-                      wordId: params.wordId,
-                      pack: params.pack);
+                      wordStorage: args.storage,
+                      packStorage: args.packStorage,
+                      wordId: args.wordId,
+                      languagePair: params.languagePair,
+                      pack: args.pack);
                 } else if (route is CardListRoute) {
                   final params = route.params;
                   return new CardListScreen(params.storage,
@@ -109,12 +110,13 @@ class _ThemedAppState extends State<_ThemedApp> {
                       ? const StudyPreparerScreen()
                       : new StudyPreparerScreen(route.params.storage);
                 else if (route is StudyModeRoute) {
-                  final params = route.params;
-                  return new StudyScreen(params.storage,
+                  final args = route.params;
+                  return new StudyScreen(args.storage,
                       provider: new AssetDictionaryProvider(context),
-                      packStorage: params.packStorage,
-                      packs: params.packs,
-                      studyStageIds: params.studyStageIds);
+                      packStorage: args.packStorage,
+                      packs: args.packs,
+                      languagePair: params.languagePair,
+                      studyStageIds: args.studyStageIds);
                 } else if (route is CardHelpRoute)
                   return const CardHelpScreen();
                 else if (route is PackHelpRoute)

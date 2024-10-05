@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'package:flutter/widgets.dart' hide Router;
-import '../router.dart';
 import '../data/dictionary_provider.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
+import '../models/language.dart';
+import '../router.dart';
 import '../utilities/speaker.dart';
 import '../widgets/card_editor.dart';
 import '../widgets/bar_scaffold.dart';
@@ -20,7 +21,9 @@ class CardScreen extends StatelessWidget {
 
   final WordStorage wordStorage;
 
-  final BaseStorage<StoredPack> packStorage;
+  final PackStorage packStorage;
+
+  final LanguagePair? languagePair;
 
   const CardScreen(
       {required this.wordStorage,
@@ -28,7 +31,8 @@ class CardScreen extends StatelessWidget {
       required this.provider,
       this.defaultSpeaker,
       this.pack,
-      this.wordId});
+      this.wordId,
+      this.languagePair});
 
   @override
   Widget build(BuildContext context) {
@@ -46,6 +50,7 @@ class CardScreen extends StatelessWidget {
             defaultSpeaker: defaultSpeaker,
             pack: pack,
             wordId: wordId,
+            languagePair: languagePair,
             afterSave: (_, __, {bool refresh = false}) =>
                 Router.goBackToCardList(context,
                     pack: pack, refresh: refresh)));
