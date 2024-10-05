@@ -7,6 +7,8 @@ class Consts {
 
   static const IconData packListIcon = Icons.library_books;
 
+  static const IconData studyPreparationIcon = Icons.school;
+
   static const double largeFontSize = 20;
 
   static const double biggerFontSize = 18;

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../consts.dart';
 import '../data/pack_storage.dart';
+import '../data/word_storage.dart';
 import '../router.dart';
 import '../data/quote_provider.dart';
 import '../widgets/bar_scaffold.dart';
@@ -50,7 +51,7 @@ class MainScreenState extends State<MainScreen> {
               2),
           new _FlexibleRow(new _MenuItem(
               locale.mainScreenStudyModeMenuItemLabel,
-              Icons.school,
+              Consts.studyPreparationIcon,
               () => Router.goToStudyPreparation(context))),
           new _FlexibleRow(new _MenuItem(
               locale.mainScreenWordPacksMenuItemLabel,
@@ -59,7 +60,7 @@ class MainScreenState extends State<MainScreen> {
           new _FlexibleRow(new _MenuItem(
               locale.mainScreenWordCardsMenuItemLabel,
               Consts.cardListIcon,
-              () => Router.goToCardList(context)))
+              () => Router.goToCardList(context, storage: widget.worStorage)))
         ]));
   }
 }
@@ -102,11 +103,12 @@ class _MenuItem extends StatelessWidget {
 }
 
 class MainScreen extends StatefulWidget {
-
   final PackStorage packStorage;
 
-  const MainScreen({ PackStorage? packStorage }) : 
-    packStorage = packStorage ?? const PackStorage();
+  final WordStorage? worStorage;
+
+  const MainScreen({PackStorage? packStorage, this.worStorage})
+      : packStorage = packStorage ?? const PackStorage();
 
   @override
   State<StatefulWidget> createState() {

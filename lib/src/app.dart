@@ -16,11 +16,14 @@ import './screens/study_screen.dart';
 import './screens/study_preparer_screen.dart';
 import './utilities/styler.dart';
 import './widgets/loader.dart';
+import 'data/word_storage.dart';
 
 class App extends StatefulWidget {
   final PackStorage? packStorage;
 
-  const App({this.packStorage});
+  final WordStorage? wordStorage;
+
+  const App({this.packStorage, this.wordStorage});
 
   @override
   AppState createState() => new AppState();
@@ -31,7 +34,10 @@ class AppState extends State<App> {
 
   @override
   Widget build(BuildContext context) =>
-      _blocProvider ??= new SettingsBlocProvider(child: new _ThemedApp(packStorage: widget.packStorage));
+      _blocProvider ??= new SettingsBlocProvider(
+          child: new _ThemedApp(
+              packStorage: widget.packStorage,
+              wordStorage: widget.wordStorage));
 }
 
 class _ThemedAppState extends State<_ThemedApp> {
@@ -86,7 +92,9 @@ class _ThemedAppState extends State<_ThemedApp> {
           onGenerateRoute: (settings) =>
               _buildPageRoute(settings, (context, route) {
                 if (route == null)
-                  return MainScreen(packStorage: widget.packStorage);
+                  return MainScreen(
+                      packStorage: widget.packStorage,
+                      worStorage: widget.wordStorage);
                 else if (route is WordCardRoute) {
                   final args = route.params;
                   return new CardScreen(
@@ -100,6 +108,7 @@ class _ThemedAppState extends State<_ThemedApp> {
                   final args = route.params;
                   return new CardListScreen(args.storage,
                       pack: args.pack,
+                      packStorage: widget.packStorage,
                       refresh: args.refresh,
                       languagePair: params.languagePair);
                 } else if (route is PackRoute) {
@@ -109,7 +118,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                       packId: params.packId, refresh: params.refresh);
                 } else if (route is StudyPreparerRoute)
                   return new StudyPreparerScreen(
-                      route.params.storage, params.languagePair);
+                      route.params.storage ?? widget.packStorage,
+                      params.languagePair);
                 else if (route is StudyModeRoute) {
                   final args = route.params;
                   return new StudyScreen(args.storage,
@@ -127,7 +137,7 @@ class _ThemedAppState extends State<_ThemedApp> {
 
                 final args = (route as PackListRoute).params;
                 return new PackListScreen(
-                    storage: args.storage,
+                    storage: args.storage ?? widget.packStorage,
                     languagePair: params.languagePair,
                     refresh: args.refresh);
               }));
@@ -157,7 +167,9 @@ class _ThemedAppState extends State<_ThemedApp> {
 class _ThemedApp extends StatefulWidget {
   final PackStorage? packStorage;
 
-  const _ThemedApp({this.packStorage});
+  final WordStorage? wordStorage;
+
+  const _ThemedApp({this.packStorage, this.wordStorage});
 
   @override
   State<StatefulWidget> createState() => new _ThemedAppState();

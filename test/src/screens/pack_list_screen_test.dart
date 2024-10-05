@@ -49,11 +49,11 @@ void main() {
     final assistant = new WidgetAssistant(tester);
     await assistant.pumpAndAnimate();
 
-    final listItemFinders = find.byType(ListTile);
-
-    final itemsLength = listItemFinders.evaluate().length;
     final langPairPacks = await storage.fetch(languagePair: chosenLangPair);
-    expect(itemsLength, langPairPacks.length);
+    final itemsLength = langPairPacks.length;
+    
+    final listItemFinders = find.byType(ListTile);
+    expect(listItemFinders, findsNWidgets(itemsLength));
 
     for (int i = 0; i < itemsLength; ++i) {
       final pack = langPairPacks[i];

@@ -14,6 +14,7 @@ import '../../testers/list_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
+import '../../utilities/storage_fetcher.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
@@ -23,7 +24,7 @@ void main() {
 
   screenTester.testDismissingItems();
 
-  testWidgets("Renders packs filtered by a language pair", (tester) async {
+  testWidgets("Renders cards filtered by a language pair", (tester) async {
     final packStorage = new PackStorageMock(singleLanguagePair: false);
     final langPairs = await packStorage.fetchLanguagePairs();
     final chosenLangPair = Randomiser.nextElement(langPairs);
@@ -31,22 +32,25 @@ void main() {
     final screenTester =
         _buildScreenTester(packStorage: packStorage, langPair: chosenLangPair);
     await screenTester.pumpScreen(tester);
-
-    final packIdsByLangPair =
-        await packStorage.fetchIdsByLanguagePair(chosenLangPair);
-    final wordsByLangPair = await packStorage.wordStorage
-        .fetchFiltered(parentIds: packIdsByLangPair..add(null));
+    
+    final packsByLangPair =
+        await packStorage.fetch(languagePair: chosenLangPair);
+    final wordsByLangPair = await StorageFetcher.fetchPackedCards(
+        packsByLangPair, packStorage.wordStorage);
+    final itemsLength = wordsByLangPair.length;
 
     final listItemFinders = find.descendant(
-        of: screenTester.tryFindingListItems(shouldFind: true),
-        matching: find.byType(ListTile),
+        of: find.byType(Dismissible, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false),
         skipOffstage: false);
-    final itemsLength = listItemFinders.evaluate().length;
+    expect(listItemFinders, findsNWidgets(itemsLength));
+
     for (int i = 0; i < itemsLength; ++i) {
       final word = wordsByLangPair[i];
       expect(
           find.descendant(
-              of: listItemFinders.at(i), matching: find.text(word.text)),
+              of: listItemFinders.at(i),
+              matching: find.text(word.text, skipOffstage: false)),
           findsOneWidget);
     }
   });
