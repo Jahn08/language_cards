@@ -22,6 +22,7 @@ abstract class DataProvider {
 
   Future<List<Map<String, dynamic>>> fetch(String tableName,
       {required String orderBy,
+      List<String>? columns,
       int? take,
       int? skip,
       Map<String, dynamic>? filters});

@@ -97,9 +97,11 @@ class _ThemedAppState extends State<_ThemedApp> {
                       languagePair: params.languagePair,
                       pack: args.pack);
                 } else if (route is CardListRoute) {
-                  final params = route.params;
-                  return new CardListScreen(params.storage,
-                      pack: params.pack, refresh: params.refresh);
+                  final args = route.params;
+                  return new CardListScreen(args.storage,
+                      pack: args.pack,
+                      refresh: args.refresh,
+                      languagePair: params.languagePair);
                 } else if (route is PackRoute) {
                   final params = route.params;
                   return new PackScreen(

@@ -42,10 +42,10 @@ class StoredPack extends StoredEntity {
       value == null || value < 0 ? 0 : value;
 
   StoredPack.fromDbMap(Map<String, dynamic> values)
-      : this(values[nameFieldName] as String,
+      : this(values[nameFieldName] as String? ?? '',
             id: values[StoredEntity.idFieldName] as int?,
-            from: Language.values[values[fromFieldName] as int],
-            to: Language.values[values[toFieldName] as int],
+            from: values[fromFieldName] == null ? null : Language.values[values[fromFieldName] as int],
+            to: values[toFieldName] == null ? null : Language.values[values[toFieldName] as int],
             studyDate: _tryParseDate(values[studyDateFieldName] as int?));
 
   static DateTime? _tryParseDate(int? value) => value == null

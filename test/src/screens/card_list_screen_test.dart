@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
+import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/stored_word.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
@@ -12,6 +13,7 @@ import '../../testers/dialog_tester.dart';
 import '../../testers/list_screen_tester.dart';
 import '../../utilities/assured_finder.dart';
 import '../../utilities/localizator.dart';
+import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
@@ -21,19 +23,47 @@ void main() {
 
   screenTester.testDismissingItems();
 
+  testWidgets("Renders packs for a selected language pair", (tester) async {
+    final packStorage = new PackStorageMock(singleLanguagePair: false);
+    final langPairs = await packStorage.fetchLanguagePairs();
+    final chosenLangPair = Randomiser.nextElement(langPairs);
+
+    final screenTester =
+        _buildScreenTester(packStorage: packStorage, langPair: chosenLangPair);
+    await screenTester.pumpScreen(tester);
+
+    final packIdsByLangPair =
+        await packStorage.fetchIdsByLanguagePair(chosenLangPair);
+    final wordsByLangPair = await packStorage.wordStorage
+        .fetchFiltered(parentIds: packIdsByLangPair..add(null));
+
+    final listItemFinders = find.descendant(
+        of: screenTester.tryFindingListItems(shouldFind: true),
+        matching: find.byType(ListTile),
+        skipOffstage: false);
+    final itemsLength = listItemFinders.evaluate().length;
+    for (int i = 0; i < itemsLength; ++i) {
+      final word = wordsByLangPair[i];
+      expect(
+          find.descendant(
+              of: listItemFinders.at(i), matching: find.text(word.text)),
+          findsOneWidget);
+    }
+  });
+
   testWidgets('Switches to the search mode for cards grouped by a pack',
       (tester) async {
     final packStorage = new PackStorageMock(cardsNumber: 70);
-    final pack = (await tester.runAsync(() => packStorage.fetch()))!
+    final pack = (await packStorage.fetch())
         .firstWhere((p) => !p.isNone && p.cardsNumber > 0);
     final wordStorage = packStorage.wordStorage;
 
-    final groupedScreenTester = _buildScreenTester(wordStorage, pack);
-    final childCards = await tester
-        .runAsync(() => wordStorage.fetchFiltered(parentIds: [pack.id]));
+    final groupedScreenTester =
+        _buildScreenTester(storage: wordStorage, pack: pack);
+    final childCards = await wordStorage.fetchFiltered(parentIds: [pack.id]);
 
     int index = 0;
-    await tester.runAsync(() => wordStorage.upsert(childCards!
+    await wordStorage.upsert(childCards
         .map((e) => new StoredWord((index++ % 2).toString() + e.text,
             id: e.id,
             packId: e.packId,
@@ -41,15 +71,14 @@ void main() {
             studyProgress: e.studyProgress,
             transcription: e.transcription,
             translation: e.translation))
-        .toList()));
+        .toList());
 
     await groupedScreenTester.testSwitchingToSearchMode(tester,
         newEntityGetter: (index) =>
             WordStorageMock.generateWord(id: 100 + index, packId: pack.id),
-        itemsLengthGetter: () => Future.value(childCards!.length),
+        itemsLengthGetter: () => Future.value(childCards.length),
         indexGroupsGetter: (_) async {
-          final indexGroups = await tester
-              .runAsync(() => wordStorage.groupByTextIndexAndParent([pack.id]));
+          final indexGroups = await wordStorage.groupByTextIndexAndParent([pack.id]);
           expect(indexGroups!.length, 2);
           return indexGroups;
         });
@@ -58,7 +87,7 @@ void main() {
   testWidgets('Renders study progress for each card', (tester) async {
     final wordStorage =
         await screenTester.pumpScreen(tester) as WordStorageMock;
-    final words = await _fetchWords(tester, wordStorage);
+    final words = await wordStorage.fetch();
 
     final listItemFinders = find.descendant(
         of: screenTester.tryFindingListItems(shouldFind: true),
@@ -89,7 +118,7 @@ void main() {
             assistant, wordWithProgressIndex))
         .values
         .toSet();
-    final selectedWords = (await _fetchWords(tester, wordStorage))
+    final selectedWords = (await wordStorage.fetchFiltered())
         .where((w) => selectedItems.contains(w.text));
     final selectedWordsWithProgress = <String, int>{
       for (final w in selectedWords) w.text: w.studyProgress
@@ -132,9 +161,9 @@ void main() {
       'Shows no dialog to reset study progress for cards without progress',
       (tester) async {
     final storage = new WordStorageMock();
-    final inScreenTester = _buildScreenTester(storage);
+    final inScreenTester = _buildScreenTester(storage: storage);
 
-    final words = await _fetchWords(tester, storage);
+    final words = await storage.fetchFiltered();
     words.forEach((w) => w.resetStudyProgress());
     await storage.upsert(words);
 
@@ -164,7 +193,7 @@ void main() {
     final packsStorage = new PackStorageMock(cardsNumber: itemsOverall);
     final storage = packsStorage.wordStorage;
 
-    final inScreenTester = _buildScreenTester(storage);
+    final inScreenTester = _buildScreenTester(storage: storage);
     await inScreenTester.pumpScreen(tester);
 
     final assistant = new WidgetAssistant(tester);
@@ -203,7 +232,8 @@ void main() {
       (tester) async {
     const int expectedCardsNumber = 15;
     final packsStorage = new PackStorageMock(cardsNumber: expectedCardsNumber);
-    final inScreenTester = _buildScreenTester(packsStorage.wordStorage);
+    final inScreenTester =
+        _buildScreenTester(storage: packsStorage.wordStorage);
     await inScreenTester.pumpScreen(tester);
 
     final assistant = new WidgetAssistant(tester);
@@ -218,20 +248,26 @@ void main() {
 }
 
 ListScreenTester<StoredWord> _buildScreenTester(
-    [WordStorageMock? storage, StoredPack? pack]) {
+    {WordStorageMock? storage,
+    StoredPack? pack,
+    PackStorageMock? packStorage,
+    LanguagePair? langPair}) {
   return new ListScreenTester(
       'Card',
       ([cardsNumber]) => new CardListScreen(
           storage ??
+              packStorage?.wordStorage ??
               new WordStorageMock(
                   cardsNumber: cardsNumber ?? 40,
                   textGetter: (text, id) => (id! % 2).toString() + text),
-          pack: pack));
+          pack: pack,
+          packStorage: packStorage,
+          languagePair: langPair));
 }
 
 Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester,
     ListScreenTester screenTester, WordStorageMock storage) async {
-  final words = await _fetchWords(tester, storage);
+  final words = await storage.fetchFiltered();
 
   final assuredWords = <StoredWord>[];
   final listItemFinders = find.descendant(
@@ -250,12 +286,6 @@ Future<List<StoredWord>> _assureStudyProgressForWords(WidgetTester tester,
   }
 
   return assuredWords;
-}
-
-Future<List<StoredWord>> _fetchWords(
-    WidgetTester tester, WordStorageMock storage) async {
-  final result = await tester.runAsync(() => storage.fetchFiltered());
-  return result!;
 }
 
 Finder _findRestoreBtn({bool? shouldFind}) =>
@@ -284,7 +314,7 @@ Future<void> _operateResettingProgressDialog(WidgetAssistant assistant,
 
 Future<int> _getIndexOfFirstWordWithProgress(
     WidgetTester tester, WordStorageMock storage) async {
-  final words = (await _fetchWords(tester, storage)).toList();
+  final words = (await storage.fetchFiltered()).toList();
   int wordWithProgressIndex =
       words.indexWhere((w) => w.studyProgress > WordStudyStage.unknown);
 
@@ -299,7 +329,7 @@ Future<int> _getIndexOfFirstWordWithProgress(
 
 Future<void> _testSelectingOnPage(WidgetTester tester, WordStorageMock storage,
     [StoredPack? pack]) async {
-  final inScreenTester = _buildScreenTester(storage, pack);
+  final inScreenTester = _buildScreenTester(storage: storage, pack: pack);
   await inScreenTester.pumpScreen(tester);
 
   final assistant = new WidgetAssistant(tester);
@@ -307,8 +337,7 @@ Future<void> _testSelectingOnPage(WidgetTester tester, WordStorageMock storage,
   await inScreenTester.selectAll(assistant);
 
   final expectedCardNumberStr =
-      (await tester.runAsync(() => storage.count(parentId: pack?.id)))
-          .toString();
+      (await storage.count(parentId: pack?.id)).toString();
   final locale = Localizator.defaultLocalization;
   expect(
       inScreenTester.getSelectorBtnLabel(tester),

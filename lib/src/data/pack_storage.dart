@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'study_storage.dart';
 import '../data/word_storage.dart';
+import '../models/stored_entity.dart';
 import '../models/stored_pack.dart';
 import '../models/language.dart';
 
@@ -54,11 +55,13 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
   @override
   Future<List<StoredPack>> fetchInternally(
           {int? skipCount,
+          List<String>? columns,
           int? takeCount,
           String? orderBy,
           String? textFilter,
           Map<String, List<dynamic>>? filters}) =>
       super.fetchInternally(
+          columns: columns,
           skipCount: skipCount,
           takeCount: takeCount,
           orderBy: orderBy ?? StoredPack.nameFieldName,
@@ -100,5 +103,13 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     return groups.where((gr) => gr[StoredPack.fromFieldName] != null).map((gr) {
       return LanguagePair.fromDbMap(gr.fields);
     }).toSet();
+  }
+
+  Future<List<int?>> fetchIdsByLanguagePair(LanguagePair languagePair) async {
+    final packs = await fetchInternally(
+        columns: [StoredEntity.idFieldName],
+        filters: buildLanguagePairFilter(languagePair));
+
+    return packs.map((p) => p.id).toList();
   }
 }

@@ -235,12 +235,14 @@ class DbProvider extends DataProvider {
   @override
   Future<List<Map<String, dynamic>>> fetch(String tableName,
       {required String orderBy,
+      List<String>? columns,
       int? take,
       int? skip,
       Map<String, dynamic>? filters}) {
     return _perform(
         tableName,
         () async => _db!.query(tableName,
+            columns: columns,
             limit: take,
             offset: skip,
             orderBy: orderBy + ' COLLATE NOCASE',

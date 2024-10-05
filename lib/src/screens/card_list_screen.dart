@@ -4,6 +4,7 @@ import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
 import '../dialogs/confirm_dialog.dart';
 import './list_screen.dart';
+import '../models/language.dart';
 import '../models/word_study_stage.dart';
 import '../router.dart';
 import '../widgets/iconed_button.dart';
@@ -13,6 +14,8 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   bool _cardsWereRemoved = false;
 
   int _loadedItemsCount = 0;
+
+  List<int?>? _parentIds;
 
   @override
   Widget getItemSubtitle(StoredWord item, {bool? forCheckbox}) {
@@ -40,10 +43,11 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
   @override
   Future<List<StoredWord>> fetchNextItems(
       int skipCount, int takeCount, String? text) async {
+    final parentIds = await _getParentIds();
     final items = await widget.storage.fetchFiltered(
         skipCount: skipCount,
         takeCount: takeCount,
-        parentIds: _parentIds,
+        parentIds: parentIds,
         text: text);
 
     if (items.isNotEmpty) _loadedItemsCount = skipCount + items.length;
@@ -51,7 +55,19 @@ class _CardListScreenState extends ListScreenState<StoredWord, CardListScreen> {
     return items;
   }
 
-  List<int?>? get _parentIds => widget.pack == null ? null : [widget.pack!.id];
+  Future<List<int?>?> _getParentIds() async {
+    if (_parentIds == null) {
+      if (widget.pack != null)
+        _parentIds = [widget.pack!.id];
+      else if (widget.languagePair != null) {
+        _parentIds = await widget.packStorage
+            .fetchIdsByLanguagePair(widget.languagePair!);
+        _parentIds!.add(null);
+      }
+    }
+
+    return _parentIds;
+  }
 
   @override
   void deleteItems(List<StoredWord> items) {
@@ -179,12 +195,18 @@ class CardListScreen extends ListScreen<StoredWord> {
   @override
   final WordStorage storage;
 
+  final PackStorage packStorage;
+
   final StoredPack? pack;
+
+  final LanguagePair? languagePair;
 
   final bool refresh;
 
-  const CardListScreen(this.storage, {this.pack, bool? refresh})
+  const CardListScreen(this.storage,
+      {this.pack, bool? refresh, this.languagePair, PackStorage? packStorage})
       : refresh = refresh ?? false,
+        packStorage = packStorage ?? const PackStorage(),
         super();
 
   @override

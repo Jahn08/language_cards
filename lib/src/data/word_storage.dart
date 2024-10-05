@@ -53,6 +53,7 @@ class WordStorage extends BaseStorage<StoredWord> {
   @override
   Future<List<StoredWord>> fetchInternally(
           {int? skipCount,
+          List<String>? columns,
           int? takeCount,
           String? orderBy,
           String? textFilter,
@@ -62,6 +63,7 @@ class WordStorage extends BaseStorage<StoredWord> {
           takeCount: takeCount,
           orderBy: orderBy ?? StoredWord.textFieldName,
           filters: filters,
+          columns: columns,
           textFilter: textFilter);
 
   String get _parentIdField => StoredWord.packIdFieldName;

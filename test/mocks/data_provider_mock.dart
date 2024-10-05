@@ -50,6 +50,7 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
   @override
   Future<List<Map<String, dynamic>>> fetch(String tableName,
       {required String orderBy,
+      List<String>? columns,
       int? take,
       int? skip,
       Map<String, dynamic>? filters}) {

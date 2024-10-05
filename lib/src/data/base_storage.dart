@@ -32,6 +32,7 @@ abstract class BaseStorage<T extends StoredEntity> {
   @protected
   Future<List<T>> fetchInternally(
       {required String orderBy,
+      List<String>? columns,
       int? skipCount,
       int? takeCount,
       String? textFilter,
@@ -39,7 +40,11 @@ abstract class BaseStorage<T extends StoredEntity> {
     final inFilters =
         addTextFilterClause(filters: filters, textFilter: textFilter);
     final wordValues = await connection.fetch(entityName,
-        take: takeCount, filters: inFilters, orderBy: orderBy, skip: skipCount);
+        take: takeCount,
+        filters: inFilters,
+        orderBy: orderBy,
+        skip: skipCount,
+        columns: columns);
     return convertToEntity(wordValues);
   }
 

@@ -133,11 +133,14 @@ abstract class ListScreenState<TItem extends StoredEntity,
   void initState() {
     super.initState();
 
-    _initFilterIndexes();
-
     _scrollController.addListener(_expandListOnScroll);
 
-    _fetchItems();
+    _initItemsState();
+  }
+
+  Future<void> _initItemsState() async {
+    await _fetchItems();
+    await _initFilterIndexes();
   }
 
   Future<void> _initFilterIndexes() async {
