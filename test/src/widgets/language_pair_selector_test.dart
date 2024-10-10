@@ -26,7 +26,7 @@ void main() {
   testWidgets(
       'Shows no language pair selector when there is no pair chosen and there are not enough pairs',
       (WidgetTester tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     await _pumpLanguagePairSelectorWidget(tester, {});
     AssuredFinder.findOne(type: IconButton, shouldFind: false);
@@ -39,7 +39,7 @@ void main() {
   testWidgets(
       'Shows the language pair selector with an empty flag icon when there is no pair chosen from available pairs',
       (WidgetTester tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final langPairsToShow = {
       const LanguagePair(Language.english, Language.german),
@@ -155,7 +155,7 @@ void main() {
 
   testWidgets('Chooses the language pair and saves it into the app preferences',
       (WidgetTester tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final langPairsToShow = {
       const LanguagePair(Language.english, Language.italian),

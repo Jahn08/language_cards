@@ -19,7 +19,7 @@ void main() {
   testWidgets(
       "Replaces the language pair selector's icon with a non-empty indicator of a choosen pair",
       (WidgetTester tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final packStorage = PackStorageMock(singleLanguagePair: false);
     final langPairsToShow = await packStorage.fetchLanguagePairs();
@@ -170,7 +170,7 @@ Future _pumpAppWidget(WidgetTester tester, PackStorageMock packStorage) async {
 
 Future<LanguagePair> _saveLanguagePairToSettings(
     PackStorageMock storage) async {
-  PreferencesTester.resetSharedPreferences();
+  await PreferencesTester.saveDefaultUserParams();
 
   final langPairs = await storage.fetchLanguagePairs();
   final chosenLangPair = Randomiser.nextElement(langPairs);

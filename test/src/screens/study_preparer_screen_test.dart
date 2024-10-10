@@ -23,7 +23,7 @@ import '../../utilities/variants.dart';
 import '../../utilities/widget_assistant.dart';
 
 void main() {
-  setUp(() => PreferencesTester.resetSharedPreferences());
+  setUp(() => PreferencesTester.saveDefaultUserParams());
 
   testWidgets(
       'Renders card packs as selected displaying their number of cards and study levels',

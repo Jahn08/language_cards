@@ -207,7 +207,7 @@ void main() {
   testWidgets(
       'Saves and hides settings after clicking the apply button on the panel',
       (tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
     final defaultUserParams = await PreferencesProvider.fetch();
 
     await _pumpScaffoldWithSettings(tester);
@@ -304,7 +304,7 @@ void main() {
   testWidgets(
       'Changes the interface language immediately after applying the setting',
       (tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
     await tester.pumpWidget(const App());
     await tester.pump();
     await tester.pump();

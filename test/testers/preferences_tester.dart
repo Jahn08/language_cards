@@ -6,7 +6,7 @@ import '../utilities/randomiser.dart';
 class PreferencesTester {
   PreferencesTester._();
 
-  static void resetSharedPreferences() =>
+  static void _resetSharedPreferences() =>
       SharedPreferences.setMockInitialValues({});
 
   static Future<UserParams> saveRandomUserParams() async {
@@ -25,8 +25,10 @@ class PreferencesTester {
     return params;
   }
 
+  static Future<void> saveDefaultUserParams() => saveParams(new UserParams());
+
   static Future<void> saveParams(UserParams params) async {
-    resetSharedPreferences();
+    _resetSharedPreferences();
     await PreferencesProvider.save(params);
   }
 

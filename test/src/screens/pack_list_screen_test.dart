@@ -70,7 +70,7 @@ void main() {
   testWidgets(
       "Removes a language pair from the language pair selector after all its packs were removed",
       (tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final storage = await _pumpScreenWithRouting(tester,
         mainScreenBuilder: (PackStorage? storage) =>
@@ -95,7 +95,7 @@ void main() {
   testWidgets(
       "Updates a pack with a new language pair which should appear in the language pair selector",
       (tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final storage = await _pumpScreenWithRouting(tester,
         mainScreenBuilder: (PackStorage? storage) =>

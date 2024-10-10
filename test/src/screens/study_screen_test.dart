@@ -32,7 +32,7 @@ enum _CardNavigationWay {
 }
 
 void main() {
-  setUp(() => PreferencesTester.resetSharedPreferences());
+  setUp(() => PreferencesTester.saveDefaultUserParams());
 
   testWidgets(
       'Renders card data along with buttons for configuring the study mode',

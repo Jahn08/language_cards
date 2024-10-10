@@ -18,7 +18,7 @@ void main() {
   testWidgets(
       "Shows the language pair selector and available pairs in its dialog",
       (WidgetTester tester) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final packStorage = PackStorageMock(singleLanguagePair: false);
     final langPairsToShow = await packStorage.fetchLanguagePairs();

@@ -7,7 +7,7 @@ void main() {
   testWidgets(
       'Loads empty user settings from the storage of shared preferences',
       (_) async {
-    PreferencesTester.resetSharedPreferences();
+    await PreferencesTester.saveDefaultUserParams();
 
     final userParams = await PreferencesProvider.fetch();
     expect(userParams.toJson(), new UserParams().toJson());
