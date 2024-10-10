@@ -161,21 +161,31 @@ void main() {
       const LanguagePair(Language.english, Language.italian),
       const LanguagePair(Language.french, Language.russian)
     };
-    await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
+    final settingsBloc = await _pumpLanguagePairSelectorWidget(tester, langPairsToShow);
+    
+    bool settingsSaved = false;
+    settingsBloc.addOnSaveListener((_) => settingsSaved = true);
 
     await new WidgetAssistant(tester)
         .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
 
+    final isEmptyPackExpected =
+        chosenPackVar.currentValue == _ChosenLangPairVariant.empty;
     await SelectorDialogTester.assureTappingItem(
         tester,
         LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
             langPairsToShow, Localizator.defaultLocalization),
-        2);
+        isEmptyPackExpected ? 0 : 2);
 
+    expect(settingsSaved, true);
+    
     final savedUserParams = await PreferencesProvider.fetch();
-    expect(const LanguagePair(Language.french, Language.russian),
-        savedUserParams.languagePair);
-  });
+    if (isEmptyPackExpected)
+      expect(savedUserParams.languagePair, null);
+    else
+      expect(const LanguagePair(Language.french, Language.russian),
+          savedUserParams.languagePair);
+  }, variant: chosenPackVar);
 
   testWidgets(
       'Saves no language pair into the app preferences when the selector dialog is cancelled',

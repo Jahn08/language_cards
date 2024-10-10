@@ -59,7 +59,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
     item != null && item.isNone
         ? Router.goToCardList(context, pack: item)
-        : Router.goToPack(buildContext, pack: item);
+        : Router.goToPack(buildContext, pack: item, storage: widget.storage);
   }
 
   @override

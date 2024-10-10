@@ -597,11 +597,11 @@ Future<void> _goToPack(WidgetAssistant assistant, String packName) {
 }
 
 Finder _findPackTileByName(String name) {
-  final nonePackTileFinder = find.ancestor(
+  final packTileFinder = find.ancestor(
       of: find.text(name), matching: find.byType(ListTile), matchRoot: true);
-  expect(nonePackTileFinder, findsOneWidget);
+  expect(packTileFinder, findsOneWidget);
 
-  return nonePackTileFinder;
+  return packTileFinder;
 }
 
 Future<void> _goBackToPackList(WidgetAssistant assistant, String packName,

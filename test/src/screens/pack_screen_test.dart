@@ -72,6 +72,24 @@ void main() {
   });
 
   testWidgets(
+      'Renders read-only language selectors with a chosen language pair filter',
+      (tester) async {
+    final storage = new PackStorageMock();
+    final chosenPack = storage.getRandom();
+    final expectedLangPair = new LanguagePair(chosenPack.from!, chosenPack.to!);
+    await _pumpScreen(tester, langPair: expectedLangPair);
+
+    final langSelectors = tester.widgetList<DropdownButton<String>>(_findLanguageDropdowns());
+    final fromLangSelector = langSelectors.elementAt(0);
+    expect(fromLangSelector.value, expectedLangPair.from.present(Localizator.defaultLocalization));
+    expect(fromLangSelector.onChanged, null);
+
+    final toLangSelector = langSelectors.elementAt(1);
+    expect(toLangSelector.value, expectedLangPair.to.present(Localizator.defaultLocalization));
+    expect(toLangSelector.onChanged, null);
+  });
+
+  testWidgets(
       'Warns when choosing a language pair without an available dictionary',
       (tester) async {
     await _testNonAvailableDictionaryWarning(tester,
@@ -264,11 +282,12 @@ void main() {
 Future<PackStorageMock> _pumpScreen(WidgetTester tester,
     {DictionaryProvider? provider,
     int? packId,
-    PackStorageMock? storage}) async {
+    PackStorageMock? storage,
+    LanguagePair? langPair}) async {
   storage ??= new PackStorageMock();
   await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
       child: new PackScreen(storage, provider ?? new DictionaryProviderMock(),
-          packId: packId)));
+          packId: packId, languagePair: langPair)));
 
   await new WidgetAssistant(tester).pumpAndAnimate();
   return storage;

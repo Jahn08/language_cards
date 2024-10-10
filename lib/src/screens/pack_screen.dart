@@ -47,6 +47,11 @@ class PackScreenState extends State<PackScreen> {
     final locale = AppLocalizations.of(context)!;
     _languages ??= PresentableEnum.mapStringValues(Language.values, locale);
 
+    if(widget.languagePair != null) {
+        _fromLangNotifier.value = widget.languagePair!.from.present(locale);
+        _toLangNotifier.value = widget.languagePair!.to.present(locale);
+    }
+
     final futurePack = _isNew || _initialised
         ? Future.value(new StoredPack(''))
         : _storage.find(widget.packId);
@@ -94,13 +99,15 @@ class PackScreenState extends State<PackScreen> {
                                 label: locale
                                     .packScreenTranslationFromDropdownLabel,
                                 initialValue: fromLang,
-                                onChanged: (value) {
-                                  _fromLangNotifier.value = value;
-                                  _checkTranslationPossibility(
-                                      buildContext, locale);
+                                onChanged: widget.languagePair == null
+                                    ? (value) {
+                                        _fromLangNotifier.value = value;
+                                        _checkTranslationPossibility(
+                                            buildContext, locale);
 
-                                  _setStateDirtiness();
-                                },
+                                        _setStateDirtiness();
+                                      }
+                                    : null,
                                 onValidate: (_) => _validateLanguages(locale))),
                     new ValueListenableBuilder(
                         valueListenable: _toLangNotifier,
@@ -110,13 +117,15 @@ class PackScreenState extends State<PackScreen> {
                                 label:
                                     locale.packScreenTranslationToDropdownLabel,
                                 initialValue: toLang,
-                                onChanged: (value) {
-                                  _toLangNotifier.value = value;
-                                  _checkTranslationPossibility(
-                                      buildContext, locale);
+                                onChanged: widget.languagePair == null
+                                    ? (value) {
+                                        _toLangNotifier.value = value;
+                                        _checkTranslationPossibility(
+                                            buildContext, locale);
 
-                                  _setStateDirtiness();
-                                },
+                                        _setStateDirtiness();
+                                      }
+                                    : null,
                                 onValidate: (_) => _validateLanguages(locale))),
                     if (!_isNew && _foundPack != null)
                       new Container(
@@ -194,7 +203,6 @@ class PackScreenState extends State<PackScreen> {
     if (state == null || !state.validate()) return;
 
     state.save();
-    // TODO: if a language pair is chosen and it differs from a created pack - show a message
     afterSaving((await _storage.upsert([_buildPack()])).first);
   }
 }
@@ -204,13 +212,15 @@ class PackScreen extends StatefulWidget {
 
   final bool refresh;
 
+  final LanguagePair? languagePair;
+
   final BaseStorage<StoredPack> _storage;
 
   final DictionaryProvider _provider;
 
   const PackScreen(
       BaseStorage<StoredPack>? storage, DictionaryProvider provider,
-      {this.packId, this.refresh = false})
+      {this.packId, this.languagePair, this.refresh = false})
       : _storage = storage ?? const PackStorage(),
         _provider = provider;
 

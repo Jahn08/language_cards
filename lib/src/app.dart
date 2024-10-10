@@ -112,10 +112,12 @@ class _ThemedAppState extends State<_ThemedApp> {
                       refresh: args.refresh,
                       languagePair: params.languagePair);
                 } else if (route is PackRoute) {
-                  final params = route.params;
+                  final args = route.params;
                   return new PackScreen(
-                      params.storage, new AssetDictionaryProvider(context),
-                      packId: params.packId, refresh: params.refresh);
+                      args.storage, new AssetDictionaryProvider(context),
+                      packId: args.packId,
+                      refresh: args.refresh,
+                      languagePair: params.languagePair);
                 } else if (route is StudyPreparerRoute)
                   return new StudyPreparerScreen(
                       route.params.storage ?? widget.packStorage,

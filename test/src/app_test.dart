@@ -40,7 +40,8 @@ void main() {
         tester, expectedChosenPair);
   });
 
-  testWidgets("Renders the pack screen with packs filtered by a language pair",
+  testWidgets(
+      "Renders the pack list screen with packs filtered by a language pair",
       (WidgetTester tester) async {
     final packStorage = PackStorageMock(singleLanguagePair: false);
     final chosenLangPair = await _saveLanguagePairToSettings(packStorage);
@@ -63,6 +64,38 @@ void main() {
               of: listItemFinders.at(i), matching: find.text(pack.name)),
           findsOneWidget);
     }
+  });
+
+  testWidgets(
+      "Renders the pack screen with read-only language selectors set up with a language pair",
+      (WidgetTester tester) async {
+    final packStorage = PackStorageMock(singleLanguagePair: false);
+    final chosenLangPair = await _saveLanguagePairToSettings(packStorage);
+    
+    await _pumpAppWidget(tester, packStorage);
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(AssuredFinder.findOne(
+        type: ElevatedButton, icon: Consts.packListIcon, shouldFind: true));
+
+    final langPairPacks = await packStorage.fetch(languagePair: chosenLangPair);
+    final chosenPack = langPairPacks[1];
+    final packTileFinder = find.ancestor(
+        of: find.text(chosenPack.name),
+        matching: find.byType(ListTile),
+        matchRoot: true);
+    await assistant.tapWidget(packTileFinder);
+
+    final langSelectors = tester.widgetList<DropdownButton<String>>(
+        find.byType(AssuredFinder.typify<DropdownButton<String>>()));
+    final fromLangSelector = langSelectors.elementAt(0);
+    expect(fromLangSelector.value,
+        chosenLangPair.from.present(Localizator.defaultLocalization));
+    expect(fromLangSelector.onChanged, null);
+
+    final toLangSelector = langSelectors.elementAt(1);
+    expect(toLangSelector.value,
+        chosenLangPair.to.present(Localizator.defaultLocalization));
+    expect(toLangSelector.onChanged, null);
   });
 
   testWidgets(
@@ -94,7 +127,8 @@ void main() {
     }
   });
 
-  testWidgets("Renders the card screen with cards filtered by a language pair",
+  testWidgets(
+      "Renders the card list screen with cards filtered by a language pair",
       (WidgetTester tester) async {
     final packStorage = PackStorageMock(singleLanguagePair: false);
     final chosenLangPair = await _saveLanguagePairToSettings(packStorage);
