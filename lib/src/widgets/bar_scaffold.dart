@@ -37,18 +37,18 @@ class _SettingsPanelState extends State<_SettingsPanel> {
                   return new ExpansionPanelList(
                       children: [
                         _buildPanel(0,
-                            header: const _SettingsSectionHeader(),
+                            header: const SettingsSectionHeader(),
                             body: const _SettingsSectionBody()),
                         _buildPanel(1,
-                            header: const _ContactsSectionHeader(),
+                            header: const ContactsSectionHeader(),
                             body: const _ContactsSectionBody()),
                         _buildPanel(2,
-                            header: const _HelpSectionHeader(),
+                            header: const HelpSectionHeader(),
                             body: const _HelpSectionBody())
                       ],
                       expansionCallback: (panelIndex, isExpanded) {
                         _expandedPanelIndexNotifier.value =
-                            isExpanded ? null : panelIndex;
+                            isExpanded ? panelIndex : null;
                       });
                 }),
             padding: const EdgeInsets.only(top: 30))
@@ -362,8 +362,8 @@ class _HelpSectionBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     return new Column(children: [
-      new _TextButtonedRow(locale.mainScreenLabel,
-          () => Router.goToMainMenuHelp(context)),
+      new _TextButtonedRow(
+          locale.mainScreenLabel, () => Router.goToMainMenuHelp(context)),
       new _TextButtonedRow(locale.mainScreenStudyModeMenuItemLabel,
           () => Router.goToStudyHelp(context)),
       new _TextButtonedRow(locale.mainScreenWordPacksMenuItemLabel,
@@ -472,16 +472,18 @@ class _TextButtonedRow extends StatelessWidget {
       ]);
 }
 
-class _SettingsSectionHeader extends StatelessWidget {
-  const _SettingsSectionHeader();
+@visibleForTesting
+class SettingsSectionHeader extends StatelessWidget {
+  const SettingsSectionHeader();
 
   @override
   Widget build(BuildContext context) => _SectionHeader(
       AppLocalizations.of(context)!.barScaffoldSettingsPanelTitle);
 }
 
-class _ContactsSectionHeader extends StatelessWidget {
-  const _ContactsSectionHeader();
+@visibleForTesting
+class ContactsSectionHeader extends StatelessWidget {
+  const ContactsSectionHeader();
 
   @override
   Widget build(BuildContext context) =>
@@ -489,8 +491,9 @@ class _ContactsSectionHeader extends StatelessWidget {
           .barScaffoldSettingsPanelContactsSectionLabel);
 }
 
-class _HelpSectionHeader extends StatelessWidget {
-  const _HelpSectionHeader();
+@visibleForTesting
+class HelpSectionHeader extends StatelessWidget {
+  const HelpSectionHeader();
 
   @override
   Widget build(BuildContext context) => _SectionHeader(

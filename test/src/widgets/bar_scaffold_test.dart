@@ -203,6 +203,38 @@ void main() {
     expect(tester.widget<CheckboxListTile>(studyDateCheckFinder).value,
         studyParams.showStudyDate);
   });
+  
+  testWidgets('Navigates between sections of the settings panel',
+      (tester) async {
+    await PreferencesTester.saveRandomUserParams();
+    
+    await _pumpScaffoldWithSettings(tester);
+    
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(_assureSettingsBtn(true));
+
+    final panelFinder = AssuredFinder.findOne(type: ExpansionPanelList, shouldFind: true);
+    var sections = tester.widget<ExpansionPanelList>(panelFinder).children;
+    expect(sections.where((p) => p.isExpanded).length, 1);
+    expect(sections[0].isExpanded, true);
+    
+    final settingsSectionHeaderFinder = find.descendant(of: panelFinder, matching: find.byType(SettingsSectionHeader));
+    await assistant.tapWidget(settingsSectionHeaderFinder);
+    sections = tester.widget<ExpansionPanelList>(panelFinder).children;
+    expect(sections.every((p) => !p.isExpanded), true);
+
+    final contactsSectionHeaderFinder = find.descendant(of: panelFinder, matching: find.byType(ContactsSectionHeader));
+    await assistant.tapWidget(contactsSectionHeaderFinder);
+    sections = tester.widget<ExpansionPanelList>(panelFinder).children;
+    expect(sections.where((p) => p.isExpanded).length, 1);
+    expect(sections[1].isExpanded, true);
+
+    final helpSectionHeaderFinder = find.descendant(of: panelFinder, matching: find.byType(HelpSectionHeader));
+    await assistant.tapWidget(helpSectionHeaderFinder);
+    sections = tester.widget<ExpansionPanelList>(panelFinder).children;
+    expect(sections.where((p) => p.isExpanded).length, 1);
+    expect(sections[2].isExpanded, true);
+  });
 
   testWidgets(
       'Saves and hides settings after clicking the apply button on the panel',
