@@ -50,16 +50,35 @@ void main() {
   testWidgets('Retrieves an article for an existent word', (tester) async {
     await tester
         .pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
-      const wordToLookUp = 'World';
+      const wordToLookUp = ' World ';
       final article = await new AssetDictionaryProvider(context).lookUp(
           WordDictionaryTester.buildLangPair(
               Language.english, Language.russian),
           wordToLookUp);
 
-      final expectedText = wordToLookUp.toLowerCase();
+      expect(article.words.isEmpty, false);
+
+      final expectedText = wordToLookUp.toLowerCase().trim();
       expect(article.words.every((w) => w.text == expectedText), true);
+
       expect(new Set.from(article.words.map((w) => w.partOfSpeech)).length,
           article.words.length);
+    }));
+  });
+
+  testWidgets('Retrieves lemmas for a text', (tester) async {
+    await tester
+        .pumpWidget(RootWidgetMock.buildAsAppHome(onBuilding: (context) async {
+      const wordToLookUp = ' WoRld  ';
+      final lemmas = await new AssetDictionaryProvider(context).searchForLemmas(
+          WordDictionaryTester.buildLangPair(
+              Language.english, Language.russian),
+          wordToLookUp);
+
+      expect(lemmas.length, 6);
+
+      final expectedText = wordToLookUp.toLowerCase().trim();
+      expect(lemmas.every((l) => l.startsWith(expectedText)), true);
     }));
   });
 

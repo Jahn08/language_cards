@@ -21,7 +21,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
 
   @override
   Future<AssetArticle> lookUp(String langParam, String text) async {
-    final key = text.toLowerCase();
+    final key = _getSearchKey(text);
 
     final dic = await _getCachedDictionary(langParam);
     if (dic == null) return new AssetArticle(key, []);
@@ -30,6 +30,8 @@ class AssetDictionaryProvider extends DictionaryProvider {
     return new AssetArticle(
         key, (json as List<dynamic>?)?.cast<Map<String, dynamic>>());
   }
+
+  String _getSearchKey(String text) => text.toLowerCase().trim();
 
   Future<Map<String, dynamic>?> _getCachedDictionary(String langParam) async {
     var dic = _cache[langParam];
@@ -68,7 +70,7 @@ class AssetDictionaryProvider extends DictionaryProvider {
     final dic = await _getCachedDictionary(langParam);
     if (dic == null) return <String>{};
 
-    final key = text.toLowerCase();
+    final key = _getSearchKey(text);
     return dic.keys.where((k) => k.startsWith(key)).toSet();
   }
 
