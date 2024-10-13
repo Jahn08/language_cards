@@ -1,4 +1,3 @@
-import 'package:http/http.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
@@ -55,7 +54,4 @@ class WordDictionaryTester {
       DictionaryProvider.buildLangPair(
           DictionaryProvider.representLanguage(from),
           DictionaryProvider.representLanguage(to));
-
-  static bool isLookUpRequest(Request req) =>
-      req.url.queryParameters.length > 1;
 }

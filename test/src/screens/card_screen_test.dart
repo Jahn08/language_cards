@@ -1,10 +1,7 @@
-import 'package:http/http.dart';
-import 'package:http/testing.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/consts.dart';
 import 'package:language_cards/src/data/dictionary_provider.dart';
-import 'package:language_cards/src/data/web_dictionary_provider.dart';
 import 'package:language_cards/src/data/word_dictionary.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/language.dart';
@@ -22,9 +19,7 @@ import '../../mocks/word_storage_mock.dart';
 import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/selector_dialog_tester.dart';
-import '../../testers/word_dictionary_tester.dart';
 import '../../utilities/assured_finder.dart';
-import '../../utilities/http_responder.dart';
 import '../../utilities/localizator.dart';
 import '../../utilities/randomiser.dart';
 import '../../utilities/widget_assistant.dart';
@@ -807,13 +802,13 @@ void _assureTileIsTicked(Finder tileFinder) => expect(
 Future<void> _testInitialDictionaryState(WidgetTester tester,
     {required bool hasPack}) async {
   bool dictionaryIsActive = false;
-  final client = new MockClient((request) async {
+  final dicProvider = new DictionaryProviderMock(onSearchForLemmas: (text) {
     dictionaryIsActive = true;
-    return _respondWithEmptyResponse(request);
+    return [];
   });
 
   final wordToShow = await _displayFilledWord(tester,
-      provider: new WebDictionaryProvider('', client: client),
+      provider: dicProvider,
       shouldHideWarningDialog: false,
       pack: hasPack
           ? PackStorageMock.generatePack(
@@ -826,11 +821,6 @@ Future<void> _testInitialDictionaryState(WidgetTester tester,
 
   expect(dictionaryIsActive, hasPack);
 }
-
-Response _respondWithEmptyResponse(Request req) =>
-    HttpResponder.respondWithJson(WordDictionaryTester.isLookUpRequest(req)
-        ? {}
-        : WordDictionaryTester.buildAcceptedLanguagesResponse());
 
 Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {
   final warningBtnFinder = _findWarningDialogButton(shouldFind: shouldFind);
@@ -850,17 +840,15 @@ Future<void> _inputTextAndAccept(WidgetTester tester, String wordText) async {
 Future<void> _testChangingDictionaryState(WidgetTester tester,
     {required bool nullifyPack}) async {
   bool dictionaryIsActive = false;
-  final client = new MockClient((request) async {
-    if (WordDictionaryTester.isLookUpRequest(request))
-      dictionaryIsActive = true;
-
-    return _respondWithEmptyResponse(request);
+  final dicProvider = new DictionaryProviderMock(onSearchForLemmas: (text) {
+    dictionaryIsActive = true;
+    return [];
   });
 
   final storage = new PackStorageMock();
   final wordToShow = await _displayFilledWord(tester,
       storage: storage,
-      provider: new WebDictionaryProvider('', client: client),
+      provider: dicProvider,
       pack: nullifyPack
           ? PackStorageMock.generatePack(
               Randomiser.nextInt(PackStorageMock.namedPacksNumber))
