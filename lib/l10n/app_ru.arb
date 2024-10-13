@@ -198,7 +198,7 @@
     "constsPackPluralForm": "наборов",
     "@constsPackPluralForm": {},
     
-    "helpScreenTitle": "О '{mainMenuItemLabel}'",
+    "helpScreenTitle": "Про '{mainMenuItemLabel}'",
     "@helpScreenTitle": {
         "placeholders": {
             "mainMenuItemLabel": {
@@ -274,7 +274,20 @@
     "@helpCardScreenTranslationMergeDescription": {},
     "helpCardScreenSearchSlideDescription": "Когда на экране достаточно много карточек, становится доступен режим поиска - иконка лупы в верхнем правом углу. В этом режиме можно фильтровать карточки по первой букве в их тексте@Поиск карточек",
     "@helpCardScreenSearchSlideDescription": {},
-    
+
+    "helpMainScreenOverviewSlideDescription": "Помимо навигации и настроек, в правом верхнем углу этот экран содержит кнопку для открытия диалога фильтрации словарных наборов по языковой паре. Кнопка становится видимой, если есть наборы для более чем одной языковой пары@Основное меню",
+    "@helpMainScreenOverviewSlideDescription": {},
+    "helpMainScreenFilteringPacksAndCardsSlideDescription": "С выбранной языковой парой для фильтрации, все экраны показывают только карточки и наборы выбранной языковой пары и карточки из набора '{nonePackName}'@Фильтрация наборов и карточек",
+    "@helpMainScreenFilteringPacksAndCardsSlideDescription": {
+        "placeholders": {
+            "nonePackName": {
+                "type": "String"
+            }
+        }
+    },
+    "helpMainScreenFilteredPackSlideDescription": "С выбранной языковой парой для фильтрации, при редактировании набора нельзя поменять его языковую пару. Чтобы снова сделать это доступным, сбросьте языковую пару для фильтрации в диалоге основного меню@Языковая пара для набора",
+    "@helpMainScreenFilteredPackSlideDescription": {},
+
     "helpPackScreenOverviewSlideDescription": "Здесь перечислены наборы словарных карточек: их имя, количество карточек и языки перевода@Экран наборов словарных карточек",
     "@helpPackScreenOverviewSlideDescription": {},
     "helpPackExportSlideDescription": "'{exportingBtnLabel}' становится доступным, если выделен хотя бы один набор. Он позволяет сохранить все выделенные наборы с их карточками в JSON-файл, из которого они могут быть позднее импортированы@Экспорт наборов",
@@ -442,6 +455,8 @@
     "@mainScreenWordCardsMenuItemLabel": {},
     "mainScreenWordPacksMenuItemLabel": "Наборы карточек",
     "@mainScreenWordPacksMenuItemLabel": {},
+    "mainScreenLabel": "Основное меню",
+    "@mainScreenLabel": {},
 
     "mergeSelectorDialogTitle": "Выбор перевода для совмещения",
     "@mergeSelectorDialogTitle": {},

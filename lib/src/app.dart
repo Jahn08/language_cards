@@ -136,6 +136,8 @@ class _ThemedAppState extends State<_ThemedApp> {
                   return const PackHelpScreen();
                 else if (route is StudyHelpRoute)
                   return const StudyHelpScreen();
+                else if (route is MainMenuHelpRoute)
+                  return const MainMenuHelpScreen();
 
                 final args = (route as PackListRoute).params;
                 return new PackListScreen(

@@ -129,6 +129,10 @@ abstract class _SliderScreen extends StatefulWidget {
 
   @protected
   String getTitle(AppLocalizations locale);
+
+  @protected
+  static Exception createSlideDescriptionNotFoundError(int slideIndex) =>
+      new Exception('No description is found for slide #$slideIndex');
 }
 
 class CardHelpScreen extends _SliderScreen {
@@ -185,7 +189,7 @@ class CardHelpScreen extends _SliderScreen {
       case 11:
         return locale.helpCardScreenSearchSlideDescription;
       default:
-        return '';
+        throw _SliderScreen.createSlideDescriptionNotFoundError(slideIndex);
     }
   }
 }
@@ -236,7 +240,7 @@ class PackHelpScreen extends _SliderScreen {
       case 8:
         return locale.helpPackScreenSearchSlideDescription;
       default:
-        return '';
+        throw _SliderScreen.createSlideDescriptionNotFoundError(slideIndex);
     }
   }
 }
@@ -274,11 +278,38 @@ class StudyHelpScreen extends _SliderScreen {
             _stringifyEnumValues(StudyDirection.values, locale),
             _stringifyEnumValues(CardSide.values, locale));
       default:
-        return '';
+        throw _SliderScreen.createSlideDescriptionNotFoundError(slideIndex);
     }
   }
 
   static String _stringifyEnumValues(
           Iterable<PresentableEnum> values, AppLocalizations locale) =>
       values.map((d) => d.present(locale)).join('/');
+}
+
+class MainMenuHelpScreen extends _SliderScreen {
+  const MainMenuHelpScreen()
+      : super(const [
+          'help_main_screen',
+          'help_main_lang_pair_filter',
+          'help_main_filtered_pack'
+        ], _descriptor);
+
+  @override
+  String getTitle(AppLocalizations locale) =>
+      locale.helpScreenTitle(locale.mainScreenLabel);
+
+  static String _descriptor(int slideIndex, AppLocalizations locale) {
+    switch (slideIndex) {
+      case 0:
+        return locale.helpMainScreenOverviewSlideDescription;
+      case 1:
+        return locale.helpMainScreenFilteringPacksAndCardsSlideDescription(
+            locale.storedPackNonePackName);
+      case 2:
+        return locale.helpMainScreenFilteredPackSlideDescription;
+      default:
+        throw _SliderScreen.createSlideDescriptionNotFoundError(slideIndex);
+    }
+  }
 }

@@ -362,6 +362,8 @@ class _HelpSectionBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final locale = AppLocalizations.of(context)!;
     return new Column(children: [
+      new _TextButtonedRow(locale.mainScreenLabel,
+          () => Router.goToMainMenuHelp(context)),
       new _TextButtonedRow(locale.mainScreenStudyModeMenuItemLabel,
           () => Router.goToStudyHelp(context)),
       new _TextButtonedRow(locale.mainScreenWordPacksMenuItemLabel,

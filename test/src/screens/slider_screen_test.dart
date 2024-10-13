@@ -15,6 +15,8 @@ void main() {
   _runTestsForScreen('Pack Help Screen', () => const PackHelpScreen());
 
   _runTestsForScreen('Study Help Screen', () => const StudyHelpScreen());
+
+  _runTestsForScreen('Main Menu Help Screen', () => const MainMenuHelpScreen());
 }
 
 void _runTestsForScreen(String screenName, Widget Function() screenBuilder) {

@@ -275,6 +275,19 @@
     "helpCardScreenSearchSlideDescription": "When there are enough cards on the screen the search mode gets available - the icon of a magnifier in the upper right corner. The mode makes it possible to filter cards by the first letter of their text@Searching for Cards",
     "@helpCardScreenSearchSlideDescription": {},
     
+    "helpMainScreenOverviewSlideDescription": "Apart from the navigation and settings, in the right upper corner the screen features a button for opening a dialog to filter word packs by a language pair. It becomes visible, if there are packs for more than 1 language pair@Main Menu",
+    "@helpMainScreenOverviewSlideDescription": {},
+    "helpMainScreenFilteringPacksAndCardsSlideDescription": "With the filtering language pair chosen, all the screens show cards and packs of only this chosen language pair as well as cards of the '{nonePackName}' pack@Filtering Packs and Cards@Filtering Packs and Cards",
+    "@helpMainScreenFilteringPacksAndCardsSlideDescription": {
+        "placeholders": {
+            "nonePackName": {
+                "type": "String"
+            }
+        }
+    },
+    "helpMainScreenFilteredPackSlideDescription": "With the filtering language pair chosen, it is impossible to change a language pair of a pack. To allow it again, reset the filtering language pack in the dialog in the main menu@Language Pair for Pack",
+    "@helpMainScreenFilteredPackSlideDescription": {},
+
     "helpPackScreenOverviewSlideDescription": "The screen lists packs of cards showing their name, a number of their cards and translation languages@Pack Card Screen",
     "@helpPackScreenOverviewSlideDescription": {},
     "helpPackExportSlideDescription": "'{exportingBtnLabel}' gets available when there is at least one pack selected. It saves all selected packs with their cards into a JSON-file so that the data could later be imported@Exporting Packs",
@@ -441,6 +454,8 @@
     "@mainScreenWordCardsMenuItemLabel": {},
     "mainScreenWordPacksMenuItemLabel": "Word Packs",
     "@mainScreenWordPacksMenuItemLabel": {},
+    "mainScreenLabel": "Main Menu",
+    "@mainScreenLabel": {},
 
     "mergeSelectorDialogTitle": "Choose Translation for Merge",
     "@mergeSelectorDialogTitle": {},

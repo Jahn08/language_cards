@@ -133,6 +133,8 @@ class CardHelpRoute {}
 
 class StudyHelpRoute {}
 
+class MainMenuHelpRoute {}
+
 class Router {
   static const String _cardRouteName = 'card';
 
@@ -153,6 +155,8 @@ class Router {
   static const String _packHelpRouteName = 'packHelp';
 
   static const String _studyHelpRouteName = 'studyHelp';
+
+  static const String _mainMenuHelpRouteName = 'mainMenuHelp';
 
   static String get initialRouteName => _mainMenuRouteName;
 
@@ -176,6 +180,8 @@ class Router {
         return new CardHelpRoute();
       case _studyHelpRouteName:
         return new StudyHelpRoute();
+      case _mainMenuHelpRouteName:
+        return new MainMenuHelpRoute();
       default:
         return null;
     }
@@ -276,4 +282,7 @@ class Router {
 
   static void goToStudyHelp(BuildContext context) =>
       Navigator.pushNamed(context, _studyHelpRouteName);
+
+  static void goToMainMenuHelp(BuildContext context) =>
+      Navigator.pushNamed(context, _mainMenuHelpRouteName);
 }
