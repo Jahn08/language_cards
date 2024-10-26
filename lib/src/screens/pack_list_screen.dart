@@ -22,6 +22,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
   bool packsDeleted = false;
 
+  bool packsImported = false;
+
   final _nonPackCardsNumberNotifier = new ValueNotifier<int?>(null);
 
   @override
@@ -120,8 +122,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
   bool get canGoBack => true;
 
   @override
-  void onGoingBack(BuildContext context) =>
-      Router.returnHome(context, refresh: widget.refresh || packsDeleted);
+  void onGoingBack(BuildContext context) => Router.returnHome(context,
+      refresh: widget.refresh || packsDeleted || packsImported);
 
   @override
   int get removableItemsLength =>
@@ -166,6 +168,8 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
                 if (!scaffoldContext.mounted) return;
 
                 if (importState!.error != null) throw importState.error!;
+
+                packsImported = true;
 
                 final packsWithCards = importState.value!;
                 await new ConfirmDialog.ok(

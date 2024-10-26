@@ -67,21 +67,21 @@ class PackStorageMock extends PackStorage with StudyStorage {
       {String Function(String, int?)? textGetter,
       bool singleLanguagePair = true}) {
     final packs = new List<StoredPack>.generate(packsNumber,
-        (index) => generatePack(index + 1, textGetter, singleLanguagePair));
+        (index) => generatePack(index + 1, textGetter: textGetter, singleLanguagePair: singleLanguagePair));
     _sort(packs);
 
     return packs;
   }
 
-  static StoredPack generatePack(
-      [int? id,
-      String Function(String, int?)? textGetter,
-      bool singleLanguagePair = true]) {
+  static StoredPack generatePack(int? id,
+      {String Function(String, int?)? textGetter,
+      bool singleLanguagePair = true,
+      Language? from}) {
     final text = Randomiser.nextString();
     final isIdEven = id?.isEven == true;
     return new StoredPack(textGetter?.call(text, id) ?? text,
         id: id,
-        from: Language.english,
+        from: from ?? Language.english,
         to: singleLanguagePair || isIdEven
             ? Language.russian
             : Language.spanish,

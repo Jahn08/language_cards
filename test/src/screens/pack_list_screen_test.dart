@@ -51,7 +51,7 @@ void main() {
 
     final langPairPacks = await storage.fetch(languagePair: chosenLangPair);
     final itemsLength = langPairPacks.length;
-    
+
     final listItemFinders = find.byType(ListTile);
     expect(listItemFinders, findsNWidgets(itemsLength));
 
@@ -127,6 +127,60 @@ void main() {
         tester,
         LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
             langPairs..add(new LanguagePair(langToChoose, packToEdit.to!)),
+            Localizator.defaultLocalization), (finder, pair) {
+      final option = tester.widget<SimpleDialogOption>(finder);
+
+      final optionTile = option.child! as ListTile;
+      final pairIndicator = optionTile.title! as TranslationIndicator;
+
+      if (!pair.isEmpty) {
+        expect(pairIndicator.from, pair.from);
+        expect(pairIndicator.to, pair.to);
+      }
+    }, ListTile);
+  }, variant: returnNavigationWay);
+
+  testWidgets(
+      "Imports a pack with a new language pair which should appear in the language pair selector",
+      (tester) async {
+    await PreferencesTester.saveDefaultUserParams();
+
+    final storage = await _pumpScreenWithRouting(tester,
+        mainScreenBuilder: (PackStorage? storage) =>
+            new SettingsBlocProvider(child: MainScreen(packStorage: storage)),
+        singleLanguagePair: false);
+
+    final langPairs = await storage.fetchLanguagePairs();
+    final fromLanguages = langPairs.map((p) => p.from).toSet();
+    final toLanguages = langPairs.map((p) => p.to).toSet();
+
+    final expectedFromLang = Language.values.firstWhere(
+        (l) => !fromLanguages.contains(l) && !toLanguages.contains(l));
+    final packToImport =
+        PackStorageMock.generatePack(99, from: expectedFromLang);
+
+    final assistant = new WidgetAssistant(tester);
+
+    await ContextChannelMock.testWithChannel(() async {
+      final importFilePath = await tester.runAsync(() =>
+          new PackExporter(storage.wordStorage).export([packToImport],
+              Randomiser.nextString(), Localizator.defaultLocalization));
+
+      await screenTester.activateEditorMode(assistant);
+
+      await _activateImport(assistant, importFilePath!);
+      await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
+    });
+
+    await _goBack(assistant, returnNavigationWay.currentValue!);
+    await assistant
+        .tapWidget(LanguagePairSelectorTester.findEmptyPairSelector());
+
+    SelectorDialogTester.assureRenderedOptions(
+        tester,
+        LanguagePairSelectorTester.prepareLanguagePairsForDisplay(
+            langPairs
+              ..add(new LanguagePair(packToImport.from!, packToImport.to!)),
             Localizator.defaultLocalization), (finder, pair) {
       final option = tester.widget<SimpleDialogOption>(finder);
 
