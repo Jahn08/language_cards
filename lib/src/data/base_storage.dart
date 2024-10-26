@@ -115,7 +115,12 @@ abstract class BaseStorage<T extends StoredEntity> {
 
     final groups = await connection.groupBySeveral(entityName,
         groupFields: groupFields, groupValues: groupValues);
-    return new Map.fromEntries(groups.map(
-        (g) => new MapEntry(g.fields[mainGroupFieldKey] as String, g.length)));
+
+    final entries = <String, int>{};
+    groups.forEach((g) {
+      final key = g.fields[mainGroupFieldKey] as String;
+      entries[key] = (entries[key] ?? 0) + g.length;
+    });
+    return entries;
   }
 }

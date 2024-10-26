@@ -32,7 +32,7 @@ void main() {
     final screenTester =
         _buildScreenTester(packStorage: packStorage, langPair: chosenLangPair);
     await screenTester.pumpScreen(tester);
-    
+
     final packsByLangPair =
         await packStorage.fetch(languagePair: chosenLangPair);
     final wordsByLangPair = await StorageFetcher.fetchPackedCards(
@@ -189,6 +189,38 @@ void main() {
     final packsStorage = new PackStorageMock(
         cardsNumber: (ListScreen.itemsPerPage * 1.5).toInt());
     await _testSelectingOnPage(tester, packsStorage.wordStorage);
+  });
+
+  testWidgets(
+      'Shows the right number of cards for selection when there are cards in the none pack present and a language pair set',
+      (tester) async {
+    final packsStorage = new PackStorageMock(cardsNumber: 7);
+    final words = await packsStorage.wordStorage.fetch();
+    final wordWithPack = words.firstWhere((w) => w.packId != null);
+
+    final wordsToAdd = List.generate(
+        5,
+        (i) => WordStorageMock.generateWord(
+            id: i + 999,
+            hasNoPack: true,
+            textGetter: (_, __) => "${wordWithPack.text}$i"));
+    await packsStorage.wordStorage.upsert(wordsToAdd);
+
+    final pack = (await packsStorage.fetch())
+        .firstWhere((p) => p.id == wordWithPack.packId);
+    final inScreenTester = _buildScreenTester(
+        storage: packsStorage.wordStorage,
+        packStorage: packsStorage,
+        langPair: new LanguagePair(pack.from!, pack.to!));
+    await inScreenTester.pumpScreen(tester);
+
+    final assistant = new WidgetAssistant(tester);
+    await inScreenTester.activateEditorMode(assistant);
+
+    final expectedCardNumberStr = await packsStorage.wordStorage.count();
+    final locale = Localizator.defaultLocalization;
+    expect(inScreenTester.getSelectorBtnLabel(tester),
+        locale.constsSelectAll(expectedCardNumberStr.toString()));
   });
 
   testWidgets(
