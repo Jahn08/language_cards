@@ -25,7 +25,7 @@ class Word {
             partOfSpeech: _lookUpPartOfSpeech(json['pos'] as String),
             translations: _decodeTranslations(json['tr'] as List<dynamic>));
 
-  static PartOfSpeech _lookUpPartOfSpeech(String givenPos) =>
+  static PartOfSpeech _lookUpPartOfSpeech(String? givenPos) =>
       PartOfSpeech.retrieve(givenPos);
 
   String get translationString => translations.join('; ');
@@ -48,7 +48,8 @@ class AssetWord extends Word {
 
   AssetWord.fromJson(String text, Map<String, dynamic> json)
       : super(json['t'] as String? ?? text,
-            transcription: json['s'] as String,
-            partOfSpeech: Word._lookUpPartOfSpeech(json['p'] as String),
-            translations: (json['r'] as List).cast<String>());
+            transcription: json['s'] as String?,
+            partOfSpeech: Word._lookUpPartOfSpeech(json['p'] as String?),
+            translations:
+                json['r'] == null ? null : (json['r'] as List).cast<String>());
 }
