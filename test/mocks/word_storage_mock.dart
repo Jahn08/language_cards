@@ -45,7 +45,7 @@ class WordStorageMock extends WordStorage {
 
   static List<StoredWord> _generateWords(int length, int? parentsOverall,
       {String Function(String, int?)? textGetter}) {
-    final cardsWithoutPackNumber = Randomiser.nextInt(4) + 1;
+    final cardsWithoutPackNumber = Randomiser.nextInt(4) + 3;
     final cardsWithPackNumber = length - cardsWithoutPackNumber;
     final words = new List<StoredWord>.generate(
         cardsWithPackNumber,
