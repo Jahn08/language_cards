@@ -66,8 +66,12 @@ void main() {
               packStorage.wordStorage, Localizator.defaultLocalization)
           .import(filePath);
       expect(imports.length, packsToExport.length);
+      final importedPackName = "${packToExport.name}_imported";
       expect(
-          imports.entries.every((e) => e.key.name == packToExport.name), true);
+          imports.entries.every((e) => e.key.name == importedPackName), true);
+      final packsWithExportName = await packStorage.fetch(textFilter: packToExport.name);
+      expect(packsWithExportName.length, 6);
+      expect(packsWithExportName.where((p) => p.name == packToExport.name).length, 3);
 
       allWords = await packStorage.wordStorage.fetch();
 

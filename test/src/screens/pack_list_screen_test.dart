@@ -727,27 +727,32 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
 
     await assistant.tapWidget(DialogTester.findConfirmationDialogBtn());
 
-    for (final importedPack in packsToExport
+    for (final packToExport in packsToExport
       ..sort((a, b) => a.name.compareTo(b.name))) {
       await assistant.scrollUntilVisible(
-          find.text(importedPack.name), CheckboxListTile);
+          find.text(packToExport.name), CheckboxListTile);
 
-      final isDuplicatedPack = existentPackIds.contains(importedPack.id);
-      final matcher = findsNWidgets(isDuplicatedPack ? 2 : 1);
-      final packNameFinders = find.text(importedPack.name, skipOffstage: false);
-      expect(packNameFinders, matcher);
+      final isDuplicatedPack = existentPackIds.contains(packToExport.id);
+      String expectedImportedPackName = packToExport.name;
+      if(isDuplicatedPack) {
+        expect(find.text(packToExport.name, skipOffstage: false), findsOne);
+        expectedImportedPackName += "_imported";
+      }
+
+      final packNameFinder = find.text(expectedImportedPackName, skipOffstage: false);
+      expect(packNameFinder, findsOne);
 
       final packTileFinders = find.ancestor(
-          of: packNameFinders,
+          of: packNameFinder,
           matching: find.byType(CheckboxListTile, skipOffstage: false));
-      expect(packTileFinders, matcher);
+      expect(packTileFinders, findsOne);
 
       final cardsNumberIndicators = tester.widgetList<CardNumberIndicator>(
           find.descendant(
               of: packTileFinders,
               matching: find.byType(CardNumberIndicator, skipOffstage: false)));
       cardsNumberIndicators
-          .forEach((i) => i.number == importedPack.cardsNumber);
+          .forEach((i) => i.number == packToExport.cardsNumber);
 
       final langIndicators = tester.widgetList<TranslationIndicator>(
           find.descendant(
@@ -755,8 +760,8 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
               matching:
                   find.byType(TranslationIndicator, skipOffstage: false)));
       langIndicators.forEach((i) {
-        expect(i.from, importedPack.from);
-        expect(i.to, importedPack.to);
+        expect(i.from, packToExport.from);
+        expect(i.to, packToExport.to);
       });
     }
   });

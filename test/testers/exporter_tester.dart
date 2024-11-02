@@ -98,7 +98,7 @@ class ExporterTester {
         .fetchFiltered(parentIds: originalPacks.map((p) => p.id).toList());
     for (final originalPack in originalPacks) {
       final importedPackObj =
-          imports.entries.singleWhere((e) => e.key.name == originalPack.name);
+          imports.entries.singleWhere((e) => e.key.name.startsWith(originalPack.name));
       final importedPack = importedPackObj.key;
       expect(importedPack.isNew, false);
       expect(importedPack.id == originalPack.id, false);

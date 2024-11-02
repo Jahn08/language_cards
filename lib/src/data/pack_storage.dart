@@ -27,7 +27,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
         textFilter: textFilter,
         skipCount: skipCount,
         takeCount: takeCount,
-        filters: buildLanguagePairFilter(languagePair));
+        filters: _buildLanguagePairFilter(languagePair));
 
     final isFirstRequest = skipCount == null || skipCount == 0;
     if (textFilter == null && isFirstRequest) packs.insert(0, StoredPack.none);
@@ -39,7 +39,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     return packs;
   }
 
-  static Map<String, List<int>>? buildLanguagePairFilter(
+  static Map<String, List<int>>? _buildLanguagePairFilter(
       LanguagePair? languagePair) {
     return languagePair == null
         ? null
@@ -86,7 +86,7 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
   @override
   Future<List<StudyPack>> fetchStudyPacks(LanguagePair? languagePair) async {
     final packs =
-        await fetchInternally(filters: buildLanguagePairFilter(languagePair));
+        await fetchInternally(filters: _buildLanguagePairFilter(languagePair));
     final packMap = <int?, StoredPack>{
       for (final StoredPack p in packs) p.id: p
     };
@@ -109,8 +109,27 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
   Future<List<int?>> fetchIdsByLanguagePair(LanguagePair languagePair) async {
     final packs = await fetchInternally(
         columns: [StoredEntity.idFieldName],
-        filters: buildLanguagePairFilter(languagePair));
+        filters: _buildLanguagePairFilter(languagePair));
 
     return packs.map((p) => p.id).toList();
+  }
+
+  Future<Map<String, List<LanguagePair>>> groupLanguagePairsByNames() async {
+    final groups = await connection.groupBySeveral(entityName, groupFields: [
+      StoredPack.nameFieldName,
+      StoredPack.fromFieldName,
+      StoredPack.toFieldName
+    ]);
+
+    final packLangPairsByNames = <String, List<LanguagePair>>{};
+    groups.where((gr) => gr[StoredPack.fromFieldName] != null).forEach((gr) {
+      final langPair = LanguagePair.fromDbMap(gr.fields);
+      final packName = gr.fields[StoredPack.nameFieldName] as String;
+      if (packLangPairsByNames.containsKey(packName))
+        packLangPairsByNames[packName]!.add(langPair);
+      else
+        packLangPairsByNames[packName] = [langPair];
+    });
+    return packLangPairsByNames;
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'string_ext.dart';
 import '../data/pack_storage.dart';
 import '../data/word_storage.dart';
+import '../models/language.dart';
 
 class ImportException implements Exception {
   final String importFilePath;
@@ -23,9 +24,9 @@ class ImportException implements Exception {
 }
 
 class PackImporter {
-  final BaseStorage<StoredPack> packStorage;
+  final PackStorage packStorage;
 
-  final BaseStorage<StoredWord> cardStorage;
+  final WordStorage cardStorage;
 
   final AppLocalizations locale;
 
@@ -59,9 +60,15 @@ class PackImporter {
                 .toList());
       }));
 
-      await packStorage.upsert(packDic.keys.toList());
+      final packsToImport = await _postfixPacksWithExistentNamesAndLanguages(
+          packDic.keys.toList());
+      final importedPacks = await packStorage.upsert(packsToImport);
 
-      final newCards = packDic.entries
+      int index = 0;
+      final packDicEntries = packDic.entries.toList();
+      final importedPackDic = Map.fromEntries(importedPacks.map((ip) => new MapEntry(ip, packDicEntries[index++].value)));
+
+      final newCards = importedPackDic.entries
           .map((e) {
             final packId = e.key.id;
             e.value.forEach((c) {
@@ -73,10 +80,31 @@ class PackImporter {
           .toList();
       await cardStorage.upsert(newCards);
 
-      return packDic;
+      return importedPackDic;
     } catch (ex, stackTrace) {
       throw new ImportException(ex, stackTrace,
           importFilePath: importFilePath, locale: locale);
     }
+  }
+
+  Future<List<StoredPack>> _postfixPacksWithExistentNamesAndLanguages(
+      List<StoredPack> importedPacks) async {
+    final langPairsByNames = await packStorage.groupLanguagePairsByNames();
+
+    return importedPacks.map((i) {
+      if (i.from != null && i.to != null) {
+        final langPairs = langPairsByNames[i.name];
+        if (langPairs != null &&
+            langPairs.contains(new LanguagePair(i.from!, i.to!)))
+          return new StoredPack(
+            i.name + "_imported",
+            from: i.from,
+            to: i.to,
+            studyDate: i.studyDate,
+          );
+      }
+
+      return i;
+    }).toList();
   }
 }
