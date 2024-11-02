@@ -6,6 +6,7 @@ import 'package:language_cards/src/app.dart';
 
 void main() {
   runZonedGuarded(() async {
+    // This will fail without an env variable set up for a bundle: --dart-define=SENTRY_DSN=<value>
     await SentryFlutter.init((_) {});
     runApp(const App());
   }, (error, stack) async {
