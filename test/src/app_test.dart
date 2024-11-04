@@ -130,7 +130,7 @@ void main() {
   testWidgets(
       "Renders the card list screen with cards filtered by a language pair",
       (WidgetTester tester) async {
-    final packStorage = PackStorageMock(singleLanguagePair: false);
+    final packStorage = PackStorageMock(singleLanguagePair: false, cardsNumber: 10);
     final chosenLangPair = await _saveLanguagePairToSettings(packStorage);
 
     await _pumpAppWidget(tester, packStorage);

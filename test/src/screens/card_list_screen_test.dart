@@ -25,7 +25,7 @@ void main() {
   screenTester.testDismissingItems();
 
   testWidgets("Renders cards filtered by a language pair", (tester) async {
-    final packStorage = new PackStorageMock(singleLanguagePair: false);
+    final packStorage = new PackStorageMock(singleLanguagePair: false, cardsNumber: 10);
     final langPairs = await packStorage.fetchLanguagePairs();
     final chosenLangPair = Randomiser.nextElement(langPairs);
 
