@@ -645,7 +645,7 @@ Future<void> _testChangingStudyModes(
 
 Future<void> _pressButtonEndingWithText(
         WidgetAssistant assistant, String text) =>
-    assistant.pressButtonDirectly(_findButtonEndingWithText(text));
+    assistant.pressWidgetDirectly(_findButtonEndingWithText(text));
 
 Finder _findButtonEndingWithText(String text) => find.ancestor(
     of: find.byWidgetPredicate((w) => w is Text && w.data!.endsWith(text),

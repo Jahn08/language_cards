@@ -104,15 +104,16 @@ void main() {
     final packBtnFinder = CardEditorTester.findPackButton();
     await assistant.tapWidget(packBtnFinder);
 
+    final cardEditorTester = new CardEditorTester(tester);
     final packTileFinder =
-        CardEditorTester.findListTileByTitle(expectedPack.name);
+        cardEditorTester.findListTileByTitle(expectedPack.name);
     _assureTileIsTicked(packTileFinder);
 
     late StoredPack anotherExpectedPack;
     await tester.runAsync(() async => anotherExpectedPack =
         await _fetchAnotherPack(storage, expectedPack.id));
     final anotherPackTileFinder =
-        CardEditorTester.findListTileByTitle(anotherExpectedPack.name);
+        cardEditorTester.findListTileByTitle(anotherExpectedPack.name);
     await assistant.tapWidget(anotherPackTileFinder);
 
     await assistant.tapWidget(packBtnFinder);
@@ -136,7 +137,7 @@ void main() {
     packs!.forEach((p) {
       if (p.isNone) return;
 
-      CardEditorTester.findListTileByTitle(p.name);
+      new CardEditorTester(tester).findListTileByTitle(p.name);
     });
   });
 
@@ -174,11 +175,13 @@ void main() {
         storage: storage, pack: StoredPack.none, speaker: const SpeakerMock());
     CardEditorTester.findSpeakerButton(shouldFind: false);
 
-    await _changePack(
-        tester, () => _fetchAnotherPack(storage, StoredPack.none.id));
+    final packToChoose = await _fetchAnotherPack(storage, StoredPack.none.id);
+    final cardEditorTester = new CardEditorTester(tester);
+    
+    await cardEditorTester.changePack(packToChoose);
     CardEditorTester.findSpeakerButton(shouldFind: true);
 
-    await _changePack(tester, () => Future.value(StoredPack.none));
+    await cardEditorTester.changePack(StoredPack.none);
     CardEditorTester.findSpeakerButton(shouldFind: false);
   });
 
@@ -317,14 +320,45 @@ void main() {
     final storage = new PackStorageMock();
     final wordToShow = (await _displayFilledWord(tester, storage: storage))!;
 
-    final expectedPack = await _changePack(
-        tester, () => _fetchAnotherPack(storage, wordToShow.packId));
+    final packToChoose = await _fetchAnotherPack(storage, wordToShow.packId);
+    await new CardEditorTester(tester).changePack(packToChoose);
     await new WidgetAssistant(tester)
-        .pressButtonDirectly(CardEditorTester.findSaveButton());
+        .pressWidgetDirectly(CardEditorTester.findSaveButton());
 
     final changedWord = await storage.wordStorage.find(wordToShow.id);
-    expect(changedWord == null, false);
-    expect(changedWord!.packId, expectedPack.id);
+    expect(changedWord!.packId, packToChoose.id);
+  });
+  
+  testWidgets('Changes nothing if the same pack is chosen', (tester) async {
+    final storage = new PackStorageMock();
+    final wordToShow = (await _displayFilledWord(tester, storage: storage))!;
+
+    final currentPack = await storage.find(wordToShow.packId);
+    await new CardEditorTester(tester).changePack(currentPack!, isChosen: true);
+    
+    expect(tester.widget<ElevatedButton>(CardEditorTester.findSaveButton()).enabled, false);
+    
+    final changedWord = await storage.wordStorage.find(wordToShow.id);
+    expect(changedWord!.packId, currentPack.id);
+  });
+
+  testWidgets('Saves a new pack with the same name for a card', (tester) async {
+    final storage = new PackStorageMock();
+    final wordToShow = storage.wordStorage.getRandom();
+
+    final currentPack = await storage.find(wordToShow.packId);
+    final equallyNamedPack = PackStorageMock.generatePack(null,
+        singleLanguagePair: false, textGetter: (_, __) => currentPack!.name);
+    final packToChoose = (await storage.upsert([equallyNamedPack])).single;
+
+    await _displayFilledWord(tester, storage: storage, wordToShow: wordToShow);
+    
+    await new CardEditorTester(tester).changePack(packToChoose, isChosen: false);
+    await new WidgetAssistant(tester)
+        .pressWidgetDirectly(CardEditorTester.findSaveButton());
+
+    final changedWord = await storage.wordStorage.find(wordToShow.id);
+    expect(changedWord!.packId, packToChoose.id);
   });
 
   testWidgets(
@@ -346,9 +380,9 @@ void main() {
     await new WidgetAssistant(tester).tapWidget(cardListBtnFinder);
     await assistant.tapWidget(find.byType(ListTile).first);
 
-    await _changePack(tester, () => Future.value(StoredPack.none));
+    await new CardEditorTester(tester).changePack(StoredPack.none);
     await new WidgetAssistant(tester)
-        .pressButtonDirectly(CardEditorTester.findSaveButton());
+        .pressWidgetDirectly(CardEditorTester.findSaveButton());
 
     expect(
         pack.name
@@ -785,16 +819,6 @@ Future<StoredPack> _fetchAnotherPack(PackStorageMock storage, int? curPackId,
     (await storage.fetch()).firstWhere((p) =>
         p.cardsNumber > 0 && p.id != curPackId && (canBeNonePack || !p.isNone));
 
-Future<StoredPack> _changePack(
-    WidgetTester tester, Future<StoredPack> Function() newPackGetter) async {
-  late StoredPack expectedPack;
-  await tester.runAsync(() async => expectedPack = await newPackGetter());
-
-  await new CardEditorTester(tester).changePack(expectedPack);
-
-  return expectedPack;
-}
-
 void _assureTileIsTicked(Finder tileFinder) => expect(
     find.descendant(of: tileFinder, matching: find.byIcon(Icons.check)),
     findsOneWidget);
@@ -854,11 +878,10 @@ Future<void> _testChangingDictionaryState(WidgetTester tester,
               Randomiser.nextInt(PackStorageMock.namedPacksNumber))
           : null);
 
-  await _changePack(
-      tester,
-      () => nullifyPack
-          ? Future.value(StoredPack.none)
-          : _fetchAnotherPack(storage, wordToShow!.packId));
+  final packToChoose = await (nullifyPack
+      ? Future.value(StoredPack.none)
+      : _fetchAnotherPack(storage, wordToShow!.packId));
+  await new CardEditorTester(tester).changePack(packToChoose);
 
   await _assureWarningDialog(tester, nullifyPack);
 
@@ -927,7 +950,7 @@ Future<StoredWord> _updateCard(WordStorageMock wordStorage, StoredWord card,
 }
 
 Future<void> _saveCard(WidgetAssistant assistant) =>
-    assistant.pressButtonDirectly(CardEditorTester.findSaveButton());
+    assistant.pressWidgetDirectly(CardEditorTester.findSaveButton());
 
 Future<void> _changeCardText(
     WidgetAssistant assistant, String currentText, String newText) async {

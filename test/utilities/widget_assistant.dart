@@ -29,12 +29,13 @@ class WidgetAssistant {
   }
 
   Future<void> pressButtonDirectlyByLabel(String label) async {
-    await pressButtonDirectly(find.widgetWithText(ElevatedButton, label));
+    await pressWidgetDirectly(find.widgetWithText(ElevatedButton, label));
   }
 
-  Future<void> pressButtonDirectly(Finder btnFinder) async {
+  Future<void> pressWidgetDirectly(Finder btnFinder) async {
     expect(btnFinder, findsOneWidget);
-    tester.widget<ElevatedButton>(btnFinder).onPressed?.call();
+    // ignore: avoid_dynamic_calls
+    (tester.widget(btnFinder) as dynamic).onPressed?.call();
 
     await pumpAndAnimate();
   }

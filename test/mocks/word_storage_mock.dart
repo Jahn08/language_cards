@@ -93,7 +93,7 @@ class WordStorageMock extends WordStorage {
         studyProgress: Randomiser.nextElement(studyStages));
   }
 
-  StoredWord getRandom() => Randomiser.nextElement(_words);
+  StoredWord getRandom() => Randomiser.nextElement(_words.where((w) => w.packId != null));
 
   Future<StoredWord?> updateWordProgress(int id, int studyProgress) async {
     final wordToUpdate = _words.firstWhereOrNull((StoredWord w) => w.id == id);

@@ -215,7 +215,7 @@ class CardEditorState extends State<CardEditor> {
                           await new PackSelectorDialog(context, pack.id)
                               .showAsync(_getFuturePacks());
 
-                      if (chosenPack != null && chosenPack.name != pack.name)
+                      if (chosenPack != null && chosenPack.id != pack.id)
                         _setPack(chosenPack);
                     }))),
             new ValueListenableBuilder(

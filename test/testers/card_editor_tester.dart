@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/word_storage.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
+import 'package:language_cards/src/widgets/dialog_list_view.dart';
 import 'package:language_cards/src/widgets/phonetic_keyboard.dart';
 import 'package:language_cards/src/widgets/speaker_button.dart';
 import '../utilities/assured_finder.dart';
@@ -63,18 +64,28 @@ class CardEditorTester {
       label: Localizator.defaultLocalization.constsSavingItemButtonLabel,
       shouldFind: true);
 
-  Future<void> changePack(StoredPack newPack) async {
+  Future<void> changePack(StoredPack newPack, {bool? isChosen}) async {
     final assistant = new WidgetAssistant(tester);
     await assistant.tapWidget(findPackButton());
 
-    final packTileFinder = findListTileByTitle(newPack.name);
-    await assistant.tapWidget(packTileFinder);
+    final packTileFinder =
+        findListTileByTitle(newPack.name, isChosen: isChosen);
+    final dialogOptionFinder = find.ancestor(of: packTileFinder,
+        matching: find.byType(ShrinkableSimpleDialogOption, skipOffstage: false));
+    await assistant.pressWidgetDirectly(dialogOptionFinder);
   }
 
-  static Finder findListTileByTitle(String title) {
-    final tileFinder =
-        find.ancestor(of: find.text(title), matching: find.byType(ListTile));
-    expect(tileFinder, findsOneWidget);
+  Finder findListTileByTitle(String title, {bool? isChosen}) {
+    final tileFinder = find.ancestor(
+        of: find.text(title, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false));
+
+    if (isChosen != null) {
+      final listTile = tester
+          .widgetList<ListTile>(tileFinder)
+          .singleWhere((t) => (t.trailing == null) == !isChosen);
+      return find.byWidget(listTile, skipOffstage: false);
+    }
 
     return tileFinder;
   }
