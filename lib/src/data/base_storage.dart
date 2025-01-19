@@ -104,6 +104,7 @@ abstract class BaseStorage<T extends StoredEntity> {
   @protected
   List<T> convertToEntity(List<Map<String, dynamic>> values);
 
+  @protected
   Future<Map<String, int>> groupByTextIndex(
       [Map<String, List<dynamic>>? groupValues]) async {
     final mainGroupFieldKey =

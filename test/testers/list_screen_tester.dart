@@ -434,11 +434,13 @@ class ListScreenTester<TEntity extends StoredEntity> {
     return removedTitle;
   }
 
-  void testSearchMode(TEntity Function(int) newEntityGetter) {
+  void testSearchMode(TEntity Function(int) newEntityGetter,
+      Future<Map<String, int>> Function(BaseStorage<TEntity>) textIndexGetter) {
     testWidgets(
         _buildDescription('switches to the search mode and back'),
         (tester) => testSwitchingToSearchMode(tester,
-            newEntityGetter: newEntityGetter));
+            newEntityGetter: newEntityGetter,
+            textIndexGetter: textIndexGetter));
 
     testWidgets(
         _buildDescription('renders no search mode for a too short list'),
@@ -458,7 +460,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
       findSearcherEndButton(shouldFind: false);
       _findSearcherButton(shouldFind: false);
 
-      final indexGroups = await tester.runAsync(storage.groupByTextIndex);
+      final indexGroups = await tester.runAsync(() => textIndexGetter(storage));
       assureFilterIndexes(indexGroups!.keys, shouldFind: false);
     });
 
@@ -470,10 +472,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
       final filterGroup = indexGroups.first;
       final filterIndex = filterGroup.key;
@@ -515,9 +518,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
           searcherModeThreshold: _searcherModeThreshold);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
       final filterGroupToDelete = indexGroups.first;
       final filterIndexToDelete = filterGroupToDelete.key;
       await chooseFilterIndex(assistant, filterIndexToDelete);
@@ -541,9 +545,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
           searcherModeThreshold: _searcherModeThreshold);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
       final filterGroupToDelete = indexGroups.first;
       final filterIndexToDelete = filterGroupToDelete.key;
 
@@ -572,7 +577,8 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
       final assistant = new WidgetAssistant(tester);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
       final filterGroupToDelete = indexGroups.first;
       final filterIndexToDelete = filterGroupToDelete.key;
 
@@ -584,7 +590,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
       await selectItemsInEditor(assistant, titlesToDelete);
       await deleteSelectedItems(assistant);
 
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
       _findFilterIndex(filterIndexToDelete);
     });
 
@@ -597,9 +603,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
           searcherModeThreshold: _searcherModeThreshold);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
-      final indexGroup = (await _getIndexGroups(tester, storage))
-          .firstWhere((e) => e.value > 1);
+      await activateSearchMode(assistant);
+      final indexGroup =
+          (await _getIndexGroups(tester, storage, textIndexGetter))
+              .firstWhere((e) => e.value > 1);
       final filterIndex = indexGroup.key;
       await chooseFilterIndex(assistant, filterIndex);
 
@@ -629,7 +636,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
       await _deleteItemsUntilSearchIsUnavailable(
-          new WidgetAssistant(tester), storage);
+          new WidgetAssistant(tester), storage, textIndexGetter);
 
       _findSearcherButton(shouldFind: false);
     });
@@ -643,8 +650,9 @@ class ListScreenTester<TEntity extends StoredEntity> {
           searcherModeThreshold: _searcherModeThreshold);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
-      await _deleteItemsUntilSearchIsUnavailable(assistant, storage);
+      await activateSearchMode(assistant);
+      await _deleteItemsUntilSearchIsUnavailable(
+          assistant, storage, textIndexGetter);
 
       _findSearcherButton(shouldFind: false);
       findSearcherEndButton(shouldFind: false);
@@ -660,9 +668,10 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
       final assistant = new WidgetAssistant(tester);
       await activateEditorMode(assistant);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
       int overallLength = indexGroups.fold<int>(0, (res, e) => res + e.value);
       for (final gr in indexGroups) {
         await chooseFilterIndex(assistant, gr.key);
@@ -683,10 +692,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
       final filterGroup = indexGroups.first;
       final filterIndex = filterGroup.key;
@@ -709,10 +719,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
 
       final assistant = new WidgetAssistant(tester);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
       await chooseFilterIndex(assistant, indexGroups.first.key);
 
@@ -753,11 +764,12 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
 
-      final indexGroups = await _getIndexGroups(tester, storage);
+      final indexGroups =
+          await _getIndexGroups(tester, storage, textIndexGetter);
 
       final assistant = new WidgetAssistant(tester);
       await activateEditorMode(assistant);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
       final firstIndexGroup = indexGroups.first;
       await chooseFilterIndex(assistant, firstIndexGroup.key);
@@ -783,11 +795,11 @@ class ListScreenTester<TEntity extends StoredEntity> {
           newEntityGetter: newEntityGetter,
           searcherModeThreshold: _searcherModeThreshold);
 
-      await _getIndexGroups(tester, storage);
+      await _getIndexGroups(tester, storage, textIndexGetter);
 
       final assistant = new WidgetAssistant(tester);
       await activateEditorMode(assistant);
-      await _activateSearchMode(assistant);
+      await activateSearchMode(assistant);
 
       final overallItems = await tester.runAsync(() => storage.count());
       await selectAndAssureSelection(assistant, overallItems!);
@@ -802,13 +814,19 @@ class ListScreenTester<TEntity extends StoredEntity> {
   }
 
   Future<List<MapEntry<String, int>>> _getIndexGroups(
-          WidgetTester tester, BaseStorage<TEntity> storage) async =>
-      ((await tester.runAsync(storage.groupByTextIndex))!.entries.toList()
+          WidgetTester tester,
+          BaseStorage<TEntity> storage,
+          Future<Map<String, int>> Function(BaseStorage<TEntity>)
+              textIndexGetter) async =>
+      // ignore: invalid_use_of_protected_member
+      ((await tester.runAsync(() => textIndexGetter(storage)))!.entries.toList()
             ..sort((a, b) => a.key.compareTo(b.key)))
           .toList();
 
   Future<List<String>> testSwitchingToSearchMode(WidgetTester tester,
       {required TEntity Function(int) newEntityGetter,
+      required Future<Map<String, int>> Function(BaseStorage<TEntity>)
+          textIndexGetter,
       Future<Map<String, int>> Function(BaseStorage<TEntity>)?
           indexGroupsGetter,
       Future<int> Function()? itemsLengthGetter,
@@ -822,7 +840,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
 
     Iterable<MapEntry<String, int>> indexGroups;
     if (indexGroupsGetter == null)
-      indexGroups = await _getIndexGroups(tester, storage);
+      indexGroups = await _getIndexGroups(tester, storage, textIndexGetter);
     else
       indexGroups = (await indexGroupsGetter(storage)).entries;
 
@@ -830,7 +848,7 @@ class ListScreenTester<TEntity extends StoredEntity> {
     assureFilterIndexes(indexes, shouldFind: false);
 
     final assistant = new WidgetAssistant(tester);
-    await _activateSearchMode(assistant);
+    await activateSearchMode(assistant);
 
     _findSearcherButton(shouldFind: false);
     assureFilterIndexes(indexes, shouldFind: true);
@@ -868,16 +886,22 @@ class ListScreenTester<TEntity extends StoredEntity> {
   Finder findSearcherEndButton({bool? shouldFind}) =>
       AssuredFinder.findOne(icon: Icons.search_off, shouldFind: shouldFind);
 
-  Future<void> _activateSearchMode(WidgetAssistant assistant) =>
+  static Future<void> activateSearchMode(WidgetAssistant assistant) =>
       assistant.tapWidget(_findSearcherButton(shouldFind: true));
 
-  Finder _findSearcherButton({bool? shouldFind}) =>
+  static Finder _findSearcherButton({bool? shouldFind}) =>
       AssuredFinder.findOne(icon: Icons.search, shouldFind: shouldFind);
 
-  void assureFilterIndexes(Iterable<String> indexes, {bool? shouldFind}) =>
-      indexes.forEach((i) => _findFilterIndex(i, shouldFind: shouldFind));
+  static void assureFilterIndexes(Iterable<String> indexes,
+      {bool? shouldFind}) {
+    final textBtnFinders = find.byType(TextButton, skipOffstage: false);
+    expect(textBtnFinders.evaluate().length,
+        shouldFind == true ? indexes.length : 0);
 
-  Finder _findFilterIndex(String index, {bool? shouldFind}) {
+    indexes.forEach((i) => _findFilterIndex(i, shouldFind: shouldFind));
+  }
+
+  static Finder _findFilterIndex(String index, {bool? shouldFind}) {
     final finder = find.widgetWithText(TextButton, index, skipOffstage: false);
     expect(finder, (shouldFind ?? false) ? findsOneWidget : findsNothing);
 
@@ -950,9 +974,12 @@ class ListScreenTester<TEntity extends StoredEntity> {
   }
 
   Future<void> _deleteItemsUntilSearchIsUnavailable(
-      WidgetAssistant assistant, BaseStorage<TEntity> storage) async {
+      WidgetAssistant assistant,
+      BaseStorage<TEntity> storage,
+      Future<Map<String, int>> Function(BaseStorage<TEntity>)
+          textIndexGetter) async {
     final tester = assistant.tester;
-    final indexGroups = await _getIndexGroups(tester, storage);
+    final indexGroups = await _getIndexGroups(tester, storage, textIndexGetter);
     final filterIndexesToDelete = <String>[];
 
     int overallLength = indexGroups.fold<int>(0, (res, e) => res + e.value);

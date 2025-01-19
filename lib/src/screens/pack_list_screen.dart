@@ -136,7 +136,7 @@ class _PackListScreenState extends ListScreenState<StoredPack, PackListScreen> {
 
   @override
   Future<Map<String, int>> getFilterIndexes() =>
-      widget.storage.groupByTextIndex();
+      widget.storage.groupByTextIndexAndLanguagePair(widget.languagePair);
 
   @override
   List<Widget> getBottomBarOptions(List<StoredPack> markedItems,

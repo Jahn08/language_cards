@@ -1,4 +1,3 @@
-import 'package:flutter/cupertino.dart';
 import 'package:language_cards/src/models/part_of_speech.dart';
 import '../data/base_storage.dart';
 import '../models/stored_word.dart';
@@ -107,15 +106,9 @@ class WordStorage extends BaseStorage<StoredWord> {
     });
   }
 
-  Future<Map<String, int>?> groupByTextIndexAndParent(
+  Future<Map<String, int>> groupByTextIndexAndParent(
           [List<int?>? parentIds]) =>
       groupByTextIndex(parentIds == null || parentIds.isEmpty
           ? null
           : {_parentIdField: parentIds});
-
-  @protected
-  @override
-  Future<Map<String, int>> groupByTextIndex(
-          [Map<String, List<dynamic>>? groupValues]) =>
-      super.groupByTextIndex(groupValues);
 }

@@ -132,4 +132,8 @@ class PackStorage extends BaseStorage<StoredPack> with StudyStorage {
     });
     return packLangPairsByNames;
   }
+
+  Future<Map<String, int>> groupByTextIndexAndLanguagePair(
+          [LanguagePair? languagePair]) =>
+      groupByTextIndex(_buildLanguagePairFilter(languagePair));
 }

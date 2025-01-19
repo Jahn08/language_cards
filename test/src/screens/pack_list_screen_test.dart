@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' hide Router;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/blocs/settings_bloc.dart';
 import 'package:language_cards/src/consts.dart';
+import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/router.dart';
@@ -32,7 +33,8 @@ void main() {
   final screenTester = new ListScreenTester('Pack',
       ([packsNumber]) => _buildPackListScreen(packsNumber: packsNumber));
   screenTester.testEditorMode();
-  screenTester.testSearchMode(PackStorageMock.generatePack);
+  screenTester.testSearchMode(
+      PackStorageMock.generatePack, _groupPacksByTextIndex);
 
   screenTester.testDismissingItems();
 
@@ -546,7 +548,8 @@ void main() {
 
     final indexes = await inScreenTester.testSwitchingToSearchMode(tester,
         newEntityGetter: PackStorageMock.generatePack,
-        shouldKeepInSearchMode: true);
+        shouldKeepInSearchMode: true,
+        textIndexGetter: _groupPacksByTextIndex);
 
     final activeIndex = indexes.first;
     final assistant = new WidgetAssistant(tester);
@@ -558,9 +561,9 @@ void main() {
 
     inScreenTester.findSearcherEndButton(shouldFind: true);
 
-    final newIndexes =
-        (indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())));
-    inScreenTester.assureFilterIndexes(newIndexes, shouldFind: true);
+    final newIndexes = Set<String>.from(
+        indexes..addAll(exportedPacks.map((p) => p.name[0].toUpperCase())));
+    ListScreenTester.assureFilterIndexes(newIndexes, shouldFind: true);
 
     inScreenTester.assureFilterIndexActiveness(tester, activeIndex);
 
@@ -594,13 +597,36 @@ void main() {
 
     inScreenTester.assureSelectionForAllTilesInEditor(tester, selected: true);
   });
+
+  testWidgets("Renders search indexes filtered by a language pair",
+      (tester) async {
+    final storage =
+        new PackStorageMock(singleLanguagePair: false, packsNumber: 20);
+    final langPairs = await storage.fetchLanguagePairs();
+    final chosenLangPair = langPairs.first;
+
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHome(
+        child: new PackListScreen(
+            storage: storage,
+            cardStorage: storage.wordStorage,
+            languagePair: chosenLangPair)));
+    final assistant = new WidgetAssistant(tester);
+    await assistant.pumpAndAnimate();
+
+    await ListScreenTester.activateSearchMode(assistant);
+
+    final expectedIndexes =
+        await _groupPacksByTextIndex(storage, chosenLangPair);
+    ListScreenTester.assureFilterIndexes(expectedIndexes.keys,
+        shouldFind: true);
+  });
 }
 
 PackListScreen _buildPackListScreen(
     {PackStorageMock? storage, int? packsNumber, bool refresh = false}) {
   storage ??= new PackStorageMock(
       packsNumber: packsNumber ?? 40,
-      textGetter: (text, id) => (id! % 2).toString() + text);
+      textGetter: (text, id) => (id! % 5).toString() + text);
   return new PackListScreen(
       storage: storage, cardStorage: storage.wordStorage, refresh: refresh);
 }
@@ -734,12 +760,13 @@ Future<List<StoredPack>> _testImportingPacks(WidgetAssistant assistant,
 
       final isDuplicatedPack = existentPackIds.contains(packToExport.id);
       String expectedImportedPackName = packToExport.name;
-      if(isDuplicatedPack) {
+      if (isDuplicatedPack) {
         expect(find.text(packToExport.name, skipOffstage: false), findsOne);
         expectedImportedPackName += "_imported";
       }
 
-      final packNameFinder = find.text(expectedImportedPackName, skipOffstage: false);
+      final packNameFinder =
+          find.text(expectedImportedPackName, skipOffstage: false);
       expect(packNameFinder, findsOne);
 
       final packTileFinders = find.ancestor(
@@ -806,3 +833,21 @@ ListScreenTester<StoredPack> _buildScreenTester(PackStorageMock storage) =>
         'Pack', ([_]) => _buildPackListScreen(storage: storage));
 
 String get _nonePackName => StoredPack.none.name;
+
+Future<Map<String, int>> _groupPacksByTextIndex(BaseStorage<StoredPack> storage,
+    [LanguagePair? langPair]) async {
+  final groups = <String, int>{};
+  (await storage.fetch()).forEach((p) {
+    if (p.id == null ||
+        (langPair != null && (p.from != langPair.from || p.to != langPair.to)))
+      return;
+
+    final firstLetter = p.name[0];
+    if (groups.containsKey(firstLetter))
+      groups[firstLetter] = groups[firstLetter]! + 1;
+    else
+      groups[firstLetter] = 1;
+  });
+
+  return groups;
+}

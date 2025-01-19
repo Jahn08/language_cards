@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:language_cards/src/data/base_storage.dart';
 import 'package:language_cards/src/data/pack_storage.dart';
 import 'package:language_cards/src/models/language.dart';
 import 'package:language_cards/src/models/stored_pack.dart';
@@ -20,12 +21,14 @@ import '../../utilities/widget_assistant.dart';
 void main() {
   final screenTester = _buildScreenTester();
   screenTester.testEditorMode();
-  screenTester.testSearchMode((id) => WordStorageMock.generateWord(id: id));
+  screenTester.testSearchMode(
+      (id) => WordStorageMock.generateWord(id: id), _groupCardsByTextIndex);
 
   screenTester.testDismissingItems();
 
   testWidgets("Renders cards filtered by a language pair", (tester) async {
-    final packStorage = new PackStorageMock(singleLanguagePair: false, cardsNumber: 10);
+    final packStorage =
+        new PackStorageMock(singleLanguagePair: false, cardsNumber: 10);
     final langPairs = await packStorage.fetchLanguagePairs();
     final chosenLangPair = Randomiser.nextElement(langPairs);
 
@@ -84,9 +87,10 @@ void main() {
         indexGroupsGetter: (_) async {
           final indexGroups =
               await wordStorage.groupByTextIndexAndParent([pack.id]);
-          expect(indexGroups!.length, 2);
+          expect(indexGroups.length, 2);
           return indexGroups;
-        });
+        },
+        textIndexGetter: _groupCardsByTextIndex);
   });
 
   testWidgets('Renders study progress for each card', (tester) async {
@@ -390,4 +394,21 @@ Future<void> _testSelectingOnPage(WidgetTester tester, WordStorageMock storage,
 
   await inScreenTester.selectAll(assistant);
   inScreenTester.assureSelectionForAllTilesInEditor(tester, selected: true);
+}
+
+Future<Map<String, int>> _groupCardsByTextIndex(
+    BaseStorage<StoredWord> storage) async {
+  final groups = <String, int>{};
+  (await storage.fetch()).forEach((p) {
+    if(p.id == null)
+      return;
+
+    final firstLetter = p.text[0];
+    if (groups.containsKey(firstLetter))
+      groups[firstLetter] = groups[firstLetter]! + 1;
+    else
+      groups[firstLetter] = 1;
+  });
+
+  return groups;
 }
