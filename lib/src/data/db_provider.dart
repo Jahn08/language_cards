@@ -144,7 +144,7 @@ class DbProvider extends DataProvider {
   List<dynamic> _getNonNullValues(Iterable<dynamic>? values) =>
       values?.where((v) => v != null).toList(growable: false) ?? [];
 
-  String _joinWithOrOperator(Iterable items) => items.join(' OR ');
+  String _joinWithOrOperator(Iterable items) => '(${items.join(' OR ')})';
 
   @override
   Future<int> count(String tableName, {Map<String, dynamic>? filters}) {
