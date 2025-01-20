@@ -606,7 +606,8 @@ class BarScaffold extends StatelessWidget {
                   leading: _settingsOpener),
           body: body,
           bottomNavigationBar: bottomBar,
-          floatingActionButton: floatingActionButton),
+          floatingActionButton: floatingActionButton,
+          floatingActionButtonLocation: FloatingActionButtonLocation.startFloat),
       canPop: onNavGoingBack == null,
       onPopInvokedWithResult: (bool didPop, _) {
         if (!didPop) onNavGoingBack?.call();

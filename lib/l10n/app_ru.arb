@@ -243,7 +243,7 @@
             }
         }
     },
-    "helpCardScreenAddingSlideDescription": "Круглая кнопка в нижнем правом углу ведёт к экрану добавления новой карточки. Карточка автоматически добавляется к текущему набору либо к набору '{nonePackName}', если его нет. Набор можно изменить, кликнув по его имени@Добавление карточки",
+    "helpCardScreenAddingSlideDescription": "Круглая кнопка в нижнем левом углу ведёт к экрану добавления новой карточки. Карточка автоматически добавляется к текущему набору либо к набору '{nonePackName}', если его нет. Набор можно изменить, кликнув по его имени@Добавление карточки",
     "@helpCardScreenAddingSlideDescription": {
         "placeholders": {
             "nonePackName": {
@@ -328,7 +328,7 @@
             }
         }
     },
-    "helpPackScreenAddingSlideDescription": "Круглая кнопка в нижнем правом углу ведёт к экрану добавления нового набора. Все поля на форме обязательны для заполнения перед сохранением. '{savingAndAddingCardsBtnLabel}' открывает пустой список карточек, где возможно добавить новые записи для созданного набора@Добавление набора",
+    "helpPackScreenAddingSlideDescription": "Круглая кнопка в нижнем левом углу ведёт к экрану добавления нового набора. Все поля на форме обязательны для заполнения перед сохранением. '{savingAndAddingCardsBtnLabel}' открывает пустой список карточек, где возможно добавить новые записи для созданного набора@Добавление набора",
     "@helpPackScreenAddingSlideDescription": {
         "placeholders": {
             "savingAndAddingCardsBtnLabel": {
@@ -434,7 +434,7 @@
             }
         }
     },
-    "listScreenBottomSnackBarUndoingActionLabel": "Восстановить",
+    "listScreenBottomSnackBarUndoingActionLabel": "Отменить",
     "@listScreenBottomSnackBarUndoingActionLabel": {},
     "listScreenBottomSnackBarDismissedItemInfo": "Запись {itemText} была удалена",
     "@listScreenBottomSnackBarDismissedItemInfo": {
