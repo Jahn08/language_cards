@@ -10,6 +10,7 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/card_screen.dart';
 import 'package:language_cards/src/widgets/bar_scaffold.dart';
+import 'package:language_cards/src/widgets/one_line_text.dart';
 import 'package:language_cards/src/widgets/styled_text_field.dart';
 import '../../mocks/dictionary_provider_mock.dart';
 import '../../mocks/pack_storage_mock.dart';
@@ -291,12 +292,89 @@ void main() {
   });
 
   testWidgets(
+      'Does not leave the screen when cancelling discarding unsaved changed',
+      (tester) async {
+    final storage = new PackStorageMock();
+    final wordToShow = await _displayFilledWord(tester, storage: storage);
+
+    final assistant = new WidgetAssistant(tester);
+
+    final initialValue = wordToShow!.text;
+    final changedText = await assistant.enterChangedText(initialValue);
+    await assistant.finishEnteringText();
+
+    final backBtnFinder =
+        AssuredFinder.findOne(type: BackButton, shouldFind: true);
+    await assistant.tapWidget(backBtnFinder);
+
+    final cancelDialogBtnFinder = DialogTester.findConfirmationDialogBtn(
+        Localizator
+            .defaultLocalization.cancellableDialogCancellationButtonLabel);
+    await assistant.tapWidget(cancelDialogBtnFinder);
+
+    AssuredFinder.findOne(
+        label: changedText, type: TextField, shouldFind: true);
+    AssuredFinder.findOne(
+        label:
+            Localizator.defaultLocalization.cardScreenHeadBarChangingCardTitle,
+        shouldFind: true);
+
+    final unchangedWord = await storage.wordStorage.find(wordToShow.id);
+    expect(unchangedWord!.text, initialValue);
+  });
+
+  testWidgets('Leaves the screen when discarding unsaved changed',
+      (tester) async {
+    final storage = new PackStorageMock();
+    await tester.pumpWidget(
+        RootWidgetMock.buildAsAppHomeWithNonStudyRouting(storage: storage, noBar: true));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    final packListBtnFinder = find.byIcon(Consts.packListIcon);
+    await new WidgetAssistant(tester).tapWidget(packListBtnFinder);
+
+    final pack = await _fetchAnotherPack(storage, null);
+    final assistant = new WidgetAssistant(tester);
+    await assistant.tapWidget(find.widgetWithText(ListTile, pack.name));
+
+    final cardListBtnFinder = find.byIcon(Consts.cardListIcon);
+    await assistant.tapWidget(cardListBtnFinder);
+
+    final wordListTileFinder = find.byType(ListTile).first;
+    final initialText = (tester.widget<ListTile>(wordListTileFinder).title! as OneLineText).content!;
+    final wordToShow = (await storage.wordStorage.fetchFiltered(text: initialText)).single;
+    await assistant.tapWidget(wordListTileFinder);
+
+    await assistant.enterChangedText(initialText);
+    await assistant.finishEnteringText();
+
+    final backBtnFinder =
+        AssuredFinder.findOne(type: BackButton, shouldFind: true);
+    await assistant.tapWidget(backBtnFinder);
+
+    final confirmDialogBtnFinder = DialogTester.findConfirmationDialogBtn(
+        Localizator.defaultLocalization
+            .cardEditorUnsavedChangesDialogConfirmationButtonLabel);
+    await assistant.tapWidget(confirmDialogBtnFinder);
+
+    AssuredFinder.findOne(
+        label:
+            Localizator.defaultLocalization.cardScreenHeadBarChangingCardTitle,
+        shouldFind: false);
+
+    final unchangedWord = await storage.wordStorage.find(wordToShow.id);
+    expect(unchangedWord!.text, initialText);
+  });
+
+  testWidgets(
       'Saves nothing when changes to the word text field have not been accepted yet',
-      (tester) => _testSavingChangedValue(tester, (word) => word.text));
+      (tester) =>
+          _testSavingNonAcceptedChangedValue(tester, (word) => word.text));
 
   testWidgets(
       'Saves nothing when changes to the word translation field have not been accepted yet',
-      (tester) => _testSavingChangedValue(tester, (word) => word.translation!));
+      (tester) => _testSavingNonAcceptedChangedValue(
+          tester, (word) => word.translation!));
 
   testWidgets(
       'Saves nothing when changes to the word transcription field have not been accepted yet',
@@ -328,16 +406,20 @@ void main() {
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord!.packId, packToChoose.id);
   });
-  
+
   testWidgets('Changes nothing if the same pack is chosen', (tester) async {
     final storage = new PackStorageMock();
     final wordToShow = (await _displayFilledWord(tester, storage: storage))!;
 
     final currentPack = await storage.find(wordToShow.packId);
     await new CardEditorTester(tester).changePack(currentPack!, isChosen: true);
-    
-    expect(tester.widget<ElevatedButton>(CardEditorTester.findSaveButton()).enabled, false);
-    
+
+    expect(
+        tester
+            .widget<ElevatedButton>(CardEditorTester.findSaveButton())
+            .enabled,
+        false);
+
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord!.packId, currentPack.id);
   });
@@ -352,8 +434,9 @@ void main() {
     final packToChoose = (await storage.upsert([equallyNamedPack])).single;
 
     await _displayFilledWord(tester, storage: storage, wordToShow: wordToShow);
-    
-    await new CardEditorTester(tester).changePack(packToChoose, isChosen: false);
+
+    await new CardEditorTester(tester)
+        .changePack(packToChoose, isChosen: false);
     await new WidgetAssistant(tester)
         .pressWidgetDirectly(CardEditorTester.findSaveButton());
 
@@ -647,7 +730,7 @@ void main() {
     expect(nonMergedWordB!.translation, duplicateTranslationB);
   });
 
-  testWidgets('Desagrees to merge translations and saves a duplicated card',
+  testWidgets('Disagrees to merge translations and saves a duplicated card',
       (tester) async {
     final storage = new PackStorageMock();
     final wordStorage = storage.wordStorage;
@@ -774,7 +857,7 @@ Future<Finder> _focusTextField(
   return refocusedFieldFinder;
 }
 
-Future<void> _testSavingChangedValue(WidgetTester tester,
+Future<void> _testSavingNonAcceptedChangedValue(WidgetTester tester,
     String Function(StoredWord) valueToChangeGetter) async {
   final storage = new PackStorageMock();
   final wordToShow = await _displayFilledWord(tester, storage: storage);

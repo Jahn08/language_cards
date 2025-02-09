@@ -75,6 +75,13 @@
     "cardEditorCardTextTextFieldLabel": "Текст",
     "@cardEditorCardTextTextFieldLabel": {},
 
+    "cardEditorUnsavedChangesDialogTitle": "Сбросить несохранённые изменения",
+    "@cardEditorUnsavedChangesDialogTitle": {},
+    "cardEditorUnsavedChangesDialogConfirmationButtonLabel": "Сбросить",
+    "@cardEditorUnsavedChangesDialogConfirmationButtonLabel": {},
+    "cardEditorUnsavedChangesDialogContent": "Вы покидаете текущий экран - все несохранённые изменения будут потеряны. Продолжить?",
+    "@cardEditorUnsavedChangesDialogContent": {},
+
     "cardEditorDuplicatedCardDialogTitle": "Дубликат карточки",
     "@cardEditorDuplicatedCardDialogTitle": {},
     "cardEditorDuplicatedCardDialogConfirmationButtonLabel": "Совместить",

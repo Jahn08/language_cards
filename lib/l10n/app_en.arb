@@ -75,6 +75,13 @@
     "cardEditorCardTextTextFieldLabel": "Text",
     "@cardEditorCardTextTextFieldLabel": {},
     
+    "cardEditorUnsavedChangesDialogTitle": "Discard Unsaved Changes",
+    "@cardEditorUnsavedChangesDialogTitle": {},
+    "cardEditorUnsavedChangesDialogConfirmationButtonLabel": "Discard",
+    "@cardEditorUnsavedChangesDialogConfirmationButtonLabel": {},
+    "cardEditorUnsavedChangesDialogContent": "You are leaving the screen - all unsaved changes will be discarded. Proceed?",
+    "@cardEditorUnsavedChangesDialogContent": {},
+
     "cardEditorDuplicatedCardDialogTitle": "Duplicated Card",
     "@cardEditorDuplicatedCardDialogTitle": {},
     "cardEditorDuplicatedCardDialogConfirmationButtonLabel": "Merge",

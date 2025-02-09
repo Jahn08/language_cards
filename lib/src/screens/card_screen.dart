@@ -41,18 +41,23 @@ class CardScreen extends StatelessWidget {
         ? locale!.cardScreenHeadBarAddingCardTitle
         : locale!.cardScreenHeadBarChangingCardTitle;
 
+    final cardEditor = new CardEditor(
+        wordStorage: wordStorage,
+        packStorage: packStorage,
+        provider: provider,
+        defaultSpeaker: defaultSpeaker,
+        pack: pack,
+        wordId: wordId,
+        languagePair: languagePair,
+        afterSave: (_, __, {bool refresh = false}) =>
+            Router.goBackToCardList(context, pack: pack, refresh: refresh));
+
     return new BarScaffold(
         title: title,
-        body: new CardEditor(
-            wordStorage: wordStorage,
-            packStorage: packStorage,
-            provider: provider,
-            defaultSpeaker: defaultSpeaker,
-            pack: pack,
-            wordId: wordId,
-            languagePair: languagePair,
-            afterSave: (_, __, {bool refresh = false}) =>
-                Router.goBackToCardList(context,
-                    pack: pack, refresh: refresh)));
+        onNavGoingBack: () async {
+          if (await cardEditor.shouldDiscardChanges() && context.mounted)
+            Router.goBackToCardList(context, pack: pack);
+        },
+        body: cardEditor);
   }
 }

@@ -62,9 +62,23 @@ class CardEditorState extends State<CardEditor> {
     _getFuturePacks();
   }
 
+  Future<bool> shouldDiscardChanges() async {
+    if (!_isStateDirtyNotifier.value) return true;
+
+    final locale = AppLocalizations.of(context)!;
+    final discardChanges = await ConfirmDialog(
+            title: locale.cardEditorUnsavedChangesDialogTitle,
+            content: locale.cardEditorUnsavedChangesDialogContent,
+            confirmationLabel:
+                locale.cardEditorUnsavedChangesDialogConfirmationButtonLabel)
+        .show(context);
+    return discardChanges == true;
+  }
+
   Future<List<StoredPack>> _getFuturePacks() async {
     if (_futurePacks == null) {
-      _futurePacks = widget._packStorage.fetch(languagePair: widget.languagePair);
+      _futurePacks =
+          widget._packStorage.fetch(languagePair: widget.languagePair);
 
       if (widget.hideNonePack ?? false)
         _futurePacks =
@@ -464,8 +478,18 @@ class CardEditor extends StatefulWidget {
         _defaultSpeaker = defaultSpeaker,
         _packStorage = packStorage,
         _wordStorage = wordStorage,
-        wordId = card?.id ?? wordId;
+        wordId = card?.id ?? wordId,
+        super(key: new GlobalKey<CardEditorState>());
 
   @override
   CardEditorState createState() => new CardEditorState();
+
+  Future<bool> shouldDiscardChanges() async {
+    if (key != null) {
+      final state = (key! as GlobalKey<CardEditorState>).currentState;
+      return state == null || await state.shouldDiscardChanges();
+    }
+
+    return true;
+  }
 }
