@@ -9,9 +9,11 @@ import 'package:language_cards/src/models/stored_pack.dart';
 import 'package:language_cards/src/models/user_params.dart';
 import 'package:language_cards/src/models/word_study_stage.dart';
 import 'package:language_cards/src/screens/study_preparer_screen.dart';
+import 'package:language_cards/src/widgets/card_number_indicator.dart';
 import 'package:language_cards/src/widgets/one_line_text.dart';
 import '../../mocks/pack_storage_mock.dart';
 import '../../mocks/root_widget_mock.dart';
+import '../../testers/card_editor_tester.dart';
 import '../../testers/dialog_tester.dart';
 import '../../testers/preferences_tester.dart';
 import '../../testers/study_screen_tester.dart';
@@ -56,7 +58,8 @@ void main() {
     final storage = await _pumpScreen(tester,
         storage: packStorage, langPair: chosenLangPair);
 
-    final packs = await StorageFetcher.fetchNamedPacks(storage, langPair: chosenLangPair);
+    final packs =
+        await StorageFetcher.fetchNamedPacks(storage, langPair: chosenLangPair);
     expect(_findCheckTiles(), findsNWidgets(packs.length));
 
     await _assureConsecutivelyCheckedTiles(tester, packs, (p, packTileFinder) {
@@ -77,9 +80,7 @@ void main() {
   testWidgets(
       'Renders no last study date for card packs when the option is off',
       (tester) async {
-    final userParams = await PreferencesTester.saveNonDefaultUserParams();
-    expect(userParams.studyParams.showStudyDate, false);
-
+    await _hideStudyDate();
     await _testRenderingStudyDates(tester);
   });
 
@@ -169,6 +170,179 @@ void main() {
       expect((checkTile.title! as OneLineText).content, pack.name);
     });
   }, variant: returnNavigationWayAndOrder);
+
+  final returnNavigationWay = new ValueVariant(
+      {ReturnNavigationWay.byOSButton, ReturnNavigationWay.byBarBackButton});
+  testWidgets(
+      'Updates pack information on the study preparer screen after a card pack is changed during the study',
+      (tester) async {
+    await _hideStudyDate();
+
+    final packStorage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
+    final assistant = new WidgetAssistant(tester);
+    final studyTester = new StudyScreenTester(assistant);
+
+    final packs = await StorageFetcher.fetchNamedPacks(packStorage);
+    final packsToStudy = studyTester.takeEnoughCards(packs);
+    final cardsToStudy = await StorageFetcher.fetchPackedCards(
+        packsToStudy, packStorage.wordStorage);
+    final cards = StudyScreenTester.sortCards(cardsToStudy);
+
+    final cardToEdit = cards.first;
+    final initialPack = packs.singleWhere((p) => p.id == cardToEdit.packId);
+    final initialPackCardsNumber = initialPack.cardsNumber;
+    final newPack =
+        packs.firstWhere((p) => !p.isNone && p.id != cardToEdit.packId);
+    final newPackCardsNumber = newPack.cardsNumber;
+
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithStudyRouting(
+        storage: packStorage, packsToStudy: packsToStudy, noBar: true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+    await assistant.tapWidget(find.widgetWithText(
+        ListTile,
+        Localizator
+            .defaultLocalization.studyPreparerScreenAllCardsCategoryName));
+
+    await studyTester.openEditorMode();
+
+    final editorTester = CardEditorTester(tester);
+    await editorTester.changePack(newPack);
+    await tester.tap(CardEditorTester.findSaveButton());
+    await tester.pumpAndSettle();
+
+    await (returnNavigationWay.currentValue == ReturnNavigationWay.byOSButton
+        ? assistant.navigateBackByOSButton()
+        : assistant.navigateBack());
+
+    final tiles = <CheckboxListTile>{};
+    await assistant.scrollDownListView(find.byType(CheckboxListTile),
+        onIteration: () => tiles.addAll(assistant.tester
+            .widgetList<CheckboxListTile>(find.byType(CheckboxListTile))));
+
+    final initialPackTile = tiles.firstWhere(
+        (t) => (t.title! as OneLineText).content == initialPack.name);
+    expect((initialPackTile.subtitle as CardNumberIndicator?)?.number,
+        initialPackCardsNumber - 1);
+
+    final newPackTile = tiles
+        .firstWhere((t) => (t.title! as OneLineText).content == newPack.name);
+    expect((newPackTile.subtitle as CardNumberIndicator?)?.number,
+        newPackCardsNumber + 1);
+  }, variant: returnNavigationWay);
+
+  testWidgets(
+      'Updates study progress for a card after its progress is reset during the study',
+      (tester) async {
+    final packStorage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
+    final assistant = new WidgetAssistant(tester);
+    final studyTester = new StudyScreenTester(assistant);
+
+    final packs = await StorageFetcher.fetchNamedPacks(packStorage);
+    final packsToStudy = studyTester.takeEnoughCards(packs);
+    final cardsToStudy = await StorageFetcher.fetchPackedCards(
+        packsToStudy, packStorage.wordStorage);
+    final cards = StudyScreenTester.sortCards(cardsToStudy);
+
+    final cardToEdit = cards.first;
+    if(cardToEdit.studyProgress == 0)
+      await packStorage.wordStorage
+            .updateWordProgress(cardToEdit.id!, WordStudyStage.learned);
+
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithStudyRouting(
+        storage: packStorage, packsToStudy: packsToStudy, noBar: true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+
+    final locale = Localizator.defaultLocalization;
+    final unknownStudyStageName = WordStudyStage.stringify(WordStudyStage.unknown, locale);
+    var studyStageFinder = find.ancestor(
+        of: find.text(unknownStudyStageName, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false));
+    final unknownStudyStageTile = tester.widget(studyStageFinder) as ListTile;
+    final initialNumberOfUnknownCards = int.parse((unknownStudyStageTile.trailing! as Text).data!); 
+    
+    await assistant.tapWidget(find.widgetWithText(
+        ListTile,
+        Localizator
+            .defaultLocalization.studyPreparerScreenAllCardsCategoryName));
+
+    await studyTester.openEditorMode();
+
+    await assistant
+        .tapWidget(CardEditorTester.findStudyProgressButton(shouldFind: true));
+    await tester.tap(CardEditorTester.findSaveButton());
+    await tester.pumpAndSettle();
+
+    await (returnNavigationWay.currentValue == ReturnNavigationWay.byOSButton
+        ? assistant.navigateBackByOSButton()
+        : assistant.navigateBack());
+
+    studyStageFinder = find.ancestor(
+        of: find.text(unknownStudyStageName, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false));
+    expect(
+        find.descendant(
+            of: studyStageFinder,
+            matching: find.text((initialNumberOfUnknownCards + 1).toString(), skipOffstage: false)),
+        findsOneWidget);
+  }, variant: returnNavigationWay);
+
+  testWidgets(
+      'Updates study progress for a card after its progress is increased during the study',
+      (tester) async {
+    final packStorage = new PackStorageMock(packsNumber: 7, cardsNumber: 50);
+    final assistant = new WidgetAssistant(tester);
+    final studyTester = new StudyScreenTester(assistant);
+
+    final packs = await StorageFetcher.fetchNamedPacks(packStorage);
+    final packsToStudy = studyTester.takeEnoughCards(packs);
+    final cardsToStudy = await StorageFetcher.fetchPackedCards(
+        packsToStudy, packStorage.wordStorage);
+    final cards = StudyScreenTester.sortCards(cardsToStudy);
+
+    final cardToEdit = cards.first;
+    if(cardToEdit.studyProgress > 0)
+      await packStorage.wordStorage
+            .updateWordProgress(cardToEdit.id!, WordStudyStage.unknown);
+
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithStudyRouting(
+        storage: packStorage, packsToStudy: packsToStudy, noBar: true));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 700));
+
+    final locale = Localizator.defaultLocalization;
+    final recognisedStudyStageName = WordStudyStage.stringify(WordStudyStage.recognisedOnce, locale);
+    var studyStageFinder = find.ancestor(
+        of: find.text(recognisedStudyStageName, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false));
+    final recognisedStudyStageTile = tester.widget(studyStageFinder) as ListTile;
+    final initialNumberOfRecognisedCards = int.parse((recognisedStudyStageTile.trailing! as Text).data!); 
+    
+    await assistant.tapWidget(find.widgetWithText(
+        ListTile,
+        Localizator
+            .defaultLocalization.studyPreparerScreenAllCardsCategoryName));
+
+    await assistant.tapWidget(AssuredFinder.findOne(
+        label:
+            Localizator.defaultLocalization.studyScreenLearningCardButtonLabel,
+        type: ElevatedButton,
+        shouldFind: true));
+
+    await (returnNavigationWay.currentValue == ReturnNavigationWay.byOSButton
+        ? assistant.navigateBackByOSButton()
+        : assistant.navigateBack());
+
+    studyStageFinder = find.ancestor(
+        of: find.text(recognisedStudyStageName, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false));
+    expect(
+        find.descendant(
+            of: studyStageFinder,
+            matching: find.text((initialNumberOfRecognisedCards + 1).toString(), skipOffstage: false)),
+        findsOneWidget);
+  }, variant: returnNavigationWay);
 
   testWidgets(
       'Unselects/selects all card packs changing the summary of their study levels',
@@ -446,6 +620,12 @@ Future<void> _testRenderingStudyDates(WidgetTester tester,
 Future<void> _setPackOrderPreference(PackOrder? order) async {
   final userParams = await PreferencesProvider.fetch();
   userParams.studyParams.packOrder = order;
+  await PreferencesTester.saveParams(userParams);
+}
+
+Future<void> _hideStudyDate() async {
+  final userParams = await PreferencesProvider.fetch();
+  userParams.studyParams.showStudyDate = false;
   await PreferencesTester.saveParams(userParams);
 }
 

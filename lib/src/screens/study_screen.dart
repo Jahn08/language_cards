@@ -92,7 +92,7 @@ class _StudyScreenState extends State<StudyScreen> {
 
   AppLocalizations? _locale;
 
-  bool _packStorageChanged = false;
+  bool _storageChanged = false;
 
   @override
   void initState() {
@@ -172,8 +172,10 @@ class _StudyScreenState extends State<StudyScreen> {
                         child: new _ButtonPanel(
                       onLearningPressed: () async {
                         final card = _cards![_curCardIndexNotifier.value];
-                        if (card.incrementProgress())
+                        if (card.incrementProgress()) {
                           await widget.storage.upsert([card]);
+                          _storageChanged = true;
+                        }
 
                         _setNextCard();
                       },
@@ -209,7 +211,8 @@ class _StudyScreenState extends State<StudyScreen> {
                     ))
                   ]),
                   onNavGoingBack: () {
-                    if (_packStorageChanged)
+                    final refreshStudyPreparationScreen = _storageChanged || _curCardUpdater.value > 0;
+                    if (refreshStudyPreparationScreen)
                       Router.goToStudyPreparation(context);
                     else
                       Router.goBackToStudyPreparation(context);
@@ -289,7 +292,7 @@ class _StudyScreenState extends State<StudyScreen> {
       if ((widget.studyStageIds ?? []).isEmpty) {
         widget.packs.forEach((p) => p.setNowAsStudyDate());
         widget.packStorage.upsert(widget.packs);
-        _packStorageChanged = true;
+        _storageChanged = true;
       }
     }
 
