@@ -385,31 +385,39 @@ abstract class ListScreenState<TItem extends StoredEntity,
   }
 
   Widget _buildListView(BuildContext context, AppLocalizations locale) {
-    return new Flex(direction: Axis.horizontal, children: [
-      new Flexible(child: _buildList(locale), flex: 8, fit: FlexFit.tight),
-      new ValueListenableBuilder(
-          valueListenable: _isSearchModeNotifier,
-          builder: (_, bool isSearchMode, __) {
-            if (isSearchMode)
-              return new Flexible(
-                  child: new Scrollbar(
-                      child: new ValueListenableBuilder(
-                          valueListenable: _filterIndexesNotifier,
-                          builder: (_, Map<String, int> filterIndexes, __) =>
-                              new ValueListenableBuilder(
-                                  valueListenable: _curFilterIndexNotifier,
-                                  builder: (_, String? curIndex, __) =>
-                                      new ListView(
-                                          shrinkWrap: true,
-                                          children: (filterIndexes.keys.toList()
-                                                ..sort())
-                                              .map((i) => _buildFilterIndex(
-                                                  context, i, curIndex))
-                                              .toList())))));
+    final defaultPadding = MediaQuery.of(context).padding;
+    return new Padding(
+        padding: new EdgeInsets.only(
+            left: defaultPadding.left,
+            right: defaultPadding.right,
+            bottom: defaultPadding.bottom),
+        child: new Flex(direction: Axis.horizontal, children: [
+          new Flexible(child: _buildList(locale), flex: 8, fit: FlexFit.tight),
+          new ValueListenableBuilder(
+              valueListenable: _isSearchModeNotifier,
+              builder: (_, bool isSearchMode, __) {
+                if (isSearchMode)
+                  return new Flexible(
+                      child: new Scrollbar(
+                          child: new ValueListenableBuilder(
+                              valueListenable: _filterIndexesNotifier,
+                              builder: (_, Map<String, int> filterIndexes,
+                                      __) =>
+                                  new ValueListenableBuilder(
+                                      valueListenable: _curFilterIndexNotifier,
+                                      builder: (_, String? curIndex, __) =>
+                                          new ListView(
+                                              shrinkWrap: true,
+                                              children: (filterIndexes.keys
+                                                      .toList()
+                                                    ..sort())
+                                                  .map((i) => _buildFilterIndex(
+                                                      context, i, curIndex))
+                                                  .toList())))));
 
-            return const EmptyWidget();
-          })
-    ]);
+                return const EmptyWidget();
+              })
+        ]));
   }
 
   Widget _buildFilterIndex(

@@ -604,7 +604,7 @@ class BarScaffold extends StatelessWidget {
                   actions: barActions,
                   onGoingBack: onNavGoingBack!,
                   leading: _settingsOpener),
-          body: body,
+          body: new SafeArea(child: body),
           bottomNavigationBar: bottomBar,
           floatingActionButton: floatingActionButton,
           floatingActionButtonLocation: FloatingActionButtonLocation.startFloat),
