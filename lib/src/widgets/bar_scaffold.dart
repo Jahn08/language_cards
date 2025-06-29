@@ -596,7 +596,7 @@ class BarScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) => new PopScope(
       child: new Scaffold(
-          drawer: _settingsOpener == null ? null : const _SettingsPanel(),
+          drawer: _settingsOpener == null ? null : const SafeArea(child: _SettingsPanel()),
           appBar: onNavGoingBack == null
               ? new AppBar(
                   actions: barActions, leading: _settingsOpener, title: _title)
