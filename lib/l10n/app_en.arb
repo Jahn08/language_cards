@@ -45,7 +45,7 @@
         "description": "Label for a button cancelling an action clarified by a dialog"
     },
 
-    "cardEditorChoosingPackDialogTitle": "Choose Pack",
+    "cardEditorChoosingPackDialogTitle": "Card Pack",
     "@cardEditorChoosingPackDialogTitle": {},
     "cardEditorChoosingPackDialogContent": "You should choose a pack to enable automatic translation",
     "@cardEditorChoosingPackDialogContent": {},
@@ -75,7 +75,7 @@
     "cardEditorCardTextTextFieldLabel": "Text",
     "@cardEditorCardTextTextFieldLabel": {},
     
-    "cardEditorUnsavedChangesDialogTitle": "Discard Unsaved Changes",
+    "cardEditorUnsavedChangesDialogTitle": "Discard Changes",
     "@cardEditorUnsavedChangesDialogTitle": {},
     "cardEditorUnsavedChangesDialogConfirmationButtonLabel": "Discard",
     "@cardEditorUnsavedChangesDialogConfirmationButtonLabel": {},
@@ -104,7 +104,7 @@
     "@cardListScreenWithoutPackTitle": {},
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Unlearn",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
-    "cardListScreenResettingProgressDialogTitle": "Confirm Resetting Study Progress",
+    "cardListScreenResettingProgressDialogTitle": "Reset Study Progress",
     "@cardListScreenResettingProgressDialogTitle": {},
     "cardListScreenResettingProgressDialogContent": "The study progress of the {cardsToResetLength} marked cards will be reset. Continue?",
     "@cardListScreenResettingProgressDialogContent": {
@@ -389,7 +389,7 @@
         }
     },
     
-    "importDialogTitle": "Importing Packs",
+    "importDialogTitle": "Import Packs",
     "@importDialogTitle": {},
     "importDialogImportBtnLabel": "Import",
     "@importDialogImportBtnLabel": {},
@@ -427,7 +427,7 @@
     "languageItalianName": "Italian",
     "@languageItalianName": {},
     
-    "languagePairSelectorDialogTitle": "Filter Packs by Language Pair",
+    "languagePairSelectorDialogTitle": "Filter by Languages",
     "@languagePairSelectorDialogTitle": {},
     "languagePairSelectorNoneLanguagePairName": "None",
     "@languagePairSelectorNoneLanguagePairName": {},
@@ -464,7 +464,7 @@
     "mainScreenLabel": "Main Menu",
     "@mainScreenLabel": {},
 
-    "mergeSelectorDialogTitle": "Choose Translation for Merge",
+    "mergeSelectorDialogTitle": "Translation to Merge",
     "@mergeSelectorDialogTitle": {},
     "mergeSelectorDialogWordTitle": "{text} ({partOfSpeech}) from the {packName} pack",
     "@mergeSelectorDialogWordTitle": {
@@ -580,7 +580,7 @@
     "packScreenSameTranslationDirectionsValidationError": "Translation languages must differ",
     "@packScreenSameTranslationDirectionsValidationError": {},
 
-    "packSelectorDialogTitle": "Choose Card Pack",
+    "packSelectorDialogTitle": "Card Pack",
     "@packSelectorDialogTitle": {},
     
     "partOfSpeechAdjectiveName": "adjective",
@@ -671,7 +671,7 @@
     "quote27": "If you want people to understand you, you speak their language.@African Proverb",
     "@quote27": {},
     
-    "speakerButtonUnaivailableTTSDialogTitle": "Text to Speech Is Unavailable",
+    "speakerButtonUnaivailableTTSDialogTitle": "No Text to Speech",
     "@speakerButtonUnaivailableTTSDialogTitle": {},
     "speakerButtonUnaivailableTTSDialogContent": "The language {language} is absent. Try installing it in the settings of your device",
     "@speakerButtonUnaivailableTTSDialogContent": {
@@ -698,9 +698,9 @@
         }
     },
 
-    "studyScreenEditingCardDialogTitle": "Change Card",
+    "studyScreenEditingCardDialogTitle": "Edit Card",
     "@studyScreenEditingCardDialogTitle": {},
-    "studyScreenStudyEndDialogTitle": "Study Cycle Is Over",
+    "studyScreenStudyEndDialogTitle": "Study Is Over",
     "@studyScreenStudyEndDialogTitle": {},
     "studyScreenStudyEndDialogContent": "Well Done! You have finished the study.\n\nYou can repeat the study to hone your knowledge to perfection",
     "@studyScreenStudyEndDialogContent": {},
@@ -736,12 +736,12 @@
         }
     },
 
-    "translationSelectorDialogTitle": "Choose Translations",
+    "translationSelectorDialogTitle": "Translation",
     "@translationSelectorDialogTitle": {},
     "translationSelectorDoneButtonLabel": "Done",
     "@translationSelectorDoneButtonLabel": {},
 
-    "wordSelectorDialogTitle": "Choose Word Definition",
+    "wordSelectorDialogTitle": "Definition",
     "@wordSelectorDialogTitle": {},
     "wordStudyStageNewStageName": "New",
     "@wordStudyStageNewStageName": {},

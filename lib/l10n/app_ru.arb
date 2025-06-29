@@ -45,7 +45,7 @@
         "description": "Label for a button cancelling an action clarified by a dialog"
     },
 
-    "cardEditorChoosingPackDialogTitle": "Выберите набор",
+    "cardEditorChoosingPackDialogTitle": "Набор карточек",
     "@cardEditorChoosingPackDialogTitle": {},
     "cardEditorChoosingPackDialogContent": "Вам следует выбрать набор карточек, чтобы включить автоматический перевод",
     "@cardEditorChoosingPackDialogContent": {},
@@ -75,7 +75,7 @@
     "cardEditorCardTextTextFieldLabel": "Текст",
     "@cardEditorCardTextTextFieldLabel": {},
 
-    "cardEditorUnsavedChangesDialogTitle": "Сбросить несохранённые изменения",
+    "cardEditorUnsavedChangesDialogTitle": "Сброс изменений",
     "@cardEditorUnsavedChangesDialogTitle": {},
     "cardEditorUnsavedChangesDialogConfirmationButtonLabel": "Сбросить",
     "@cardEditorUnsavedChangesDialogConfirmationButtonLabel": {},
@@ -104,7 +104,7 @@
     "@cardListScreenWithoutPackTitle": {},
     "cardListScreenBottomNavBarResettingProgressActionLabel": "Разучить",
     "@cardListScreenBottomNavBarResettingProgressActionLabel": {},
-    "cardListScreenResettingProgressDialogTitle": "Подтвердить сброс прогресса обучения",
+    "cardListScreenResettingProgressDialogTitle": "Сброс прогресса обучения",
     "@cardListScreenResettingProgressDialogTitle": {},
     "cardListScreenResettingProgressDialogContent": "Прогресс обучения {cardsToResetLength} отмеченных карточек будет сброшен. Продолжить?",
     "@cardListScreenResettingProgressDialogContent": {
@@ -428,7 +428,7 @@
     "languageItalianName": "Итальянский",
     "@languageItalianName": {},
 
-    "languagePairSelectorDialogTitle": "Фильтрация наборов по языковой паре",
+    "languagePairSelectorDialogTitle": "Фильтр по языкам",
     "@languagePairSelectorDialogTitle": {},
     "languagePairSelectorNoneLanguagePairName": "Отсутствует",
     "@languagePairSelectorNoneLanguagePairName": {},
@@ -465,7 +465,7 @@
     "mainScreenLabel": "Основное меню",
     "@mainScreenLabel": {},
 
-    "mergeSelectorDialogTitle": "Выбор перевода для совмещения",
+    "mergeSelectorDialogTitle": "Перевод для слияния",
     "@mergeSelectorDialogTitle": {},
     "mergeSelectorDialogWordTitle": "{text} ({partOfSpeech}) из набора \"{packName}\"",
     "@mergeSelectorDialogWordTitle": {
@@ -581,7 +581,7 @@
     "packScreenSameTranslationDirectionsValidationError": "Языки переводов должны отличаться",
     "@packScreenSameTranslationDirectionsValidationError": {},
 
-    "packSelectorDialogTitle": "Выберите набор карточек",
+    "packSelectorDialogTitle": "Набор карточек",
     "@packSelectorDialogTitle": {},
     
     "partOfSpeechAdjectiveName": "прилагательное",
@@ -619,7 +619,7 @@
 
     "quote1": "Границы моего языка - это границы моего мира.@Людвиг Витгенштейн",
     "@quote1": {},
-    "quote2": "Живите так, как будто ты умрёте завтра. Учитесь так, как будто ты будете жить вечно.@Махатма Ганди",
+    "quote2": "Живите так, как будто вы умрёте завтра. Учитесь так, как будто вы будете жить вечно.@Махатма Ганди",
     "@quote2": {},
     "quote3": "Язык - это платье мыслей.@Сэмюэль Джонсон",
     "@quote3": {},
@@ -629,7 +629,7 @@
     "@quote5": {},
     "quote6": "Перемены — это конечный результат любого настоящего обучения.@Лео Бускалья",
     "@quote6": {},
-    "quote7": "Учите язык, и вы сможете избежать войны.@Арабская пословица",
+    "quote7": "Учите язык, и вы избежите войны.@Арабская пословица",
     "@quote7": {},
     "quote8": "Я всё ещё учусь.@Микеланджело",
     "@quote8": {},
@@ -672,7 +672,7 @@
     "quote27": "Если вы хотите, чтобы люди вас понимали, вам следует говорить на их языке.@Африканская пословица",
     "@quote27": {},
 
-    "speakerButtonUnaivailableTTSDialogTitle": "Озвучивание текста отсутствует",
+    "speakerButtonUnaivailableTTSDialogTitle": "Нет озвучивания текста",
     "@speakerButtonUnaivailableTTSDialogTitle": {},
     "speakerButtonUnaivailableTTSDialogContent": "Язык {language} отсутствует. Попробуйте установить его в настройках вашего устройства",
     "@speakerButtonUnaivailableTTSDialogContent": {
@@ -699,9 +699,9 @@
         }
     },
 
-    "studyScreenEditingCardDialogTitle": "Изменить карточку",
+    "studyScreenEditingCardDialogTitle": "Изменение карточки",
     "@studyScreenEditingCardDialogTitle": {},
-    "studyScreenStudyEndDialogTitle": "Цикл обучения закончен",
+    "studyScreenStudyEndDialogTitle": "Конец обучения",
     "@studyScreenStudyEndDialogTitle": {},
     "studyScreenStudyEndDialogContent": "Так держать! Обучение успешно завершено.\n\nВы можете пройти его повторно, чтобы отточить знания до совершенства",
     "@studyScreenStudyEndDialogContent": {},
@@ -737,12 +737,12 @@
         }
     },
 
-    "translationSelectorDialogTitle": "Выберите перевод",
+    "translationSelectorDialogTitle": "Перевод",
     "@translationSelectorDialogTitle": {},
     "translationSelectorDoneButtonLabel": "Принять",
     "@translationSelectorDoneButtonLabel": {},
 
-    "wordSelectorDialogTitle": "Выберите определение слова",
+    "wordSelectorDialogTitle": "Определение",
     "@wordSelectorDialogTitle": {},
     "wordStudyStageNewStageName": "Новые",
     "@wordStudyStageNewStageName": {},
