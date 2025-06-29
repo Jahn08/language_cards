@@ -5,13 +5,15 @@ class OneLineText extends StatelessWidget {
 
   final double? textScaleFactor;
 
-  const OneLineText(this.content, {this.textScaleFactor});
+  final TextStyle? style;
+
+  const OneLineText(this.content, {this.textScaleFactor, this.style});
 
   @override
   Widget build(BuildContext context) => new Text(content ?? '',
-      textScaler: textScaleFactor == null
-          ? TextScaler.noScaling
-          : TextScaler.linear(textScaleFactor!),
+      textScaler:
+          textScaleFactor == null ? null : TextScaler.linear(textScaleFactor!),
       maxLines: 1,
+      style: style,
       overflow: TextOverflow.ellipsis);
 }

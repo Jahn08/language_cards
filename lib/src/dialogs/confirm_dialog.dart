@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import 'outcome_dialog.dart';
 import '../widgets/cancel_button.dart';
+import '../widgets/one_line_text.dart';
 
 class ConfirmDialog extends OutcomeDialog<bool> {
   final String title;
@@ -43,7 +44,7 @@ class ConfirmDialog extends OutcomeDialog<bool> {
               content: new Scrollbar(
                   thumbVisibility: true,
                   child: new SingleChildScrollView(child: new Text(content))),
-              title: new Text(title),
+              title: new OneLineText(title),
               actions: [
                 if (isCancellable)
                   new CancelButton(

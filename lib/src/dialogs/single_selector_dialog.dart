@@ -4,6 +4,7 @@ import '../utilities/styler.dart';
 import '../widgets/cancel_button.dart';
 import '../widgets/dialog_list_view.dart';
 import '../widgets/loader.dart';
+import '../widgets/one_line_text.dart';
 
 abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
   @protected
@@ -36,21 +37,24 @@ abstract class SingleSelectorDialog<T> extends SelectorDialog<T> {
       new DialogListView(
           isShrunk: isShrunk,
           title: new ListTile(
-              title: new Text(_title, style: new Styler(context).titleStyle)),
+              title: new OneLineText(_title,
+                  style: new Styler(context).titleStyle)),
           children: children,
           buttons: buttons);
 
   Widget _buildDialog(List<T> items, BuildContext inContext) =>
-      _createDialogView(items.map((w) => _buildDialogOption(w, inContext)).toList(),
+      _createDialogView(
+          items.map((w) => _buildDialogOption(w, inContext)).toList(),
           [new Center(child: new CancelButton(() => returnResult(inContext)))]);
 
-  Widget _buildDialogOption(T item, BuildContext inContext) => new ShrinkableSimpleDialogOption(
-      new ListTile(
-          title: getItemTitle(item),
-          subtitle: getItemSubtitle(item),
-          trailing: getItemTrailing(item)),
-      onPressed: () => returnResult(inContext, item),
-      isShrunk: isShrunk);
+  Widget _buildDialogOption(T item, BuildContext inContext) =>
+      new ShrinkableSimpleDialogOption(
+          new ListTile(
+              title: getItemTitle(item),
+              subtitle: getItemSubtitle(item),
+              trailing: getItemTrailing(item)),
+          onPressed: () => returnResult(inContext, item),
+          isShrunk: isShrunk);
 
   @override
   Future<T?> show([List<T>? items]) {

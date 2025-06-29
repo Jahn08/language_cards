@@ -6,6 +6,7 @@ import '../models/stored_pack.dart';
 import '../models/stored_word.dart';
 import '../utilities/context_provider.dart';
 import '../widgets/cancel_button.dart';
+import '../widgets/one_line_text.dart';
 import '../widgets/styled_text_field.dart';
 
 class _ImportFormDialogState extends State<_ImportFormDialog> {
@@ -65,7 +66,7 @@ class _ImportFormDialogState extends State<_ImportFormDialog> {
                         _importFilePathNotifier.value = filePath;
                       })
                 ]))),
-        title: new Text(locale.importDialogTitle),
+        title: new OneLineText(locale.importDialogTitle),
         actions: [
           widget.cancelButton,
           ElevatedButton(

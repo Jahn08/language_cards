@@ -4,6 +4,7 @@ import 'selector_dialog.dart';
 import '../utilities/styler.dart';
 import '../widgets/cancel_button.dart';
 import '../widgets/dialog_list_view.dart';
+import '../widgets/one_line_text.dart';
 
 class _CheckboxListState extends State<_CheckboxList> {
   final _chosenItems = <String>{};
@@ -14,8 +15,8 @@ class _CheckboxListState extends State<_CheckboxList> {
         isShrunk: true,
         buttons: widget.buttons,
         title: new CheckboxListTile(
-            title:
-                new Text(widget.title, style: new Styler(context).titleStyle),
+            title: new OneLineText(widget.title,
+                style: new Styler(context).titleStyle),
             value: widget.items.length == _chosenItems.length,
             onChanged: (value) => setState(() {
                   _chosenItems.clear();

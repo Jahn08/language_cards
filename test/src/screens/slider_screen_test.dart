@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/screens/slider_screen.dart';
+import 'package:language_cards/src/widgets/one_line_text.dart';
 import '../../mocks/root_widget_mock.dart';
 import '../../mocks/asset_bundle_mock.dart';
 import '../../testers/dialog_tester.dart';
@@ -160,5 +161,5 @@ MapEntry<String, String> _extractDialogData(WidgetTester tester) {
       .widget<Text>(find.descendant(
           of: find.byWidget(dialog.content!), matching: find.byType(Text)))
       .data;
-  return new MapEntry((dialog.title! as Text).data!, content!);
+  return new MapEntry((dialog.title! as OneLineText).content!, content!);
 }

@@ -8,6 +8,7 @@ import '../data/quote_provider.dart';
 import '../widgets/bar_scaffold.dart';
 import '../widgets/empty_widget.dart';
 import '../widgets/language_pair_selector.dart';
+import '../widgets/one_line_text.dart';
 import '../widgets/tight_flexible.dart';
 
 class MainScreenState extends State<MainScreen> {
@@ -18,6 +19,7 @@ class MainScreenState extends State<MainScreen> {
 
     final languagePairsFuture = widget.packStorage.fetchLanguagePairs();
 
+    final mediaQueryData = MediaQuery.of(context);
     return new BarScaffold.withSettings('Language Cards',
         barActions: [
           FutureBuilder(
@@ -32,18 +34,20 @@ class MainScreenState extends State<MainScreen> {
         body: new Column(children: [
           _FlexibleRow(
               new Container(
-                  width: MediaQuery.of(context).size.width * 0.97,
+                  width: mediaQueryData.size.width * 0.97,
                   child: new Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         new Text(quote.key,
                             textAlign: TextAlign.start,
+                            maxLines: (4 / mediaQueryData.textScaler.scale(1)).round(),
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                                 fontSize: Consts.largeFontSize)),
-                        const Text(''),
                         new Text(quote.value,
-                            textAlign: TextAlign.left,
+                            textAlign: TextAlign.start,
+                            overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
                                 fontSize: Consts.biggerFontSize))
                       ]),
@@ -99,7 +103,7 @@ class _MenuItem extends StatelessWidget {
                       const TextStyle(fontSize: Consts.largeFontSize))),
               onPressed: onClick,
               icon: new Icon(icon),
-              label: new Text(title))));
+              label: new OneLineText(title))));
 }
 
 class MainScreen extends StatefulWidget {

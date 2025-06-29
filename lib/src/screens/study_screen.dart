@@ -52,21 +52,25 @@ class _CardEditorDialog
     final locale = AppLocalizations.of(context)!;
     return showDialog(
         context: context,
-        builder: (buildContext) => new SimpleDialog(children: [
-              new CardEditor(
-                  card: card,
-                  pack: pack,
-                  provider: provider,
-                  defaultSpeaker: defaultSpeaker,
-                  wordStorage: wordStorage,
-                  packStorage: packStorage,
-                  hideNonePack: true,
-                  languagePair: languagePair,
-                  afterSave: (card, pack, {bool refresh = false}) {
-                    returnResult(buildContext, new MapEntry(card, pack));
-                  }),
-              new Center(child: new CancelButton(() => returnResult(context)))
-            ], title: new Text(locale.studyScreenEditingCardDialogTitle)));
+        builder: (buildContext) => new SimpleDialog(
+                children: [
+                  new CardEditor(
+                      card: card,
+                      pack: pack,
+                      provider: provider,
+                      defaultSpeaker: defaultSpeaker,
+                      wordStorage: wordStorage,
+                      packStorage: packStorage,
+                      hideNonePack: true,
+                      languagePair: languagePair,
+                      afterSave: (card, pack, {bool refresh = false}) {
+                        returnResult(buildContext, new MapEntry(card, pack));
+                      }),
+                  new Center(
+                      child: new CancelButton(() => returnResult(context)))
+                ],
+                title:
+                    new OneLineText(locale.studyScreenEditingCardDialogTitle)));
   }
 }
 
@@ -211,7 +215,8 @@ class _StudyScreenState extends State<StudyScreen> {
                     ))
                   ]),
                   onNavGoingBack: () {
-                    final refreshStudyPreparationScreen = _storageChanged || _curCardUpdater.value > 0;
+                    final refreshStudyPreparationScreen =
+                        _storageChanged || _curCardUpdater.value > 0;
                     if (refreshStudyPreparationScreen)
                       Router.goToStudyPreparation(context);
                     else
@@ -274,7 +279,7 @@ class _StudyScreenState extends State<StudyScreen> {
                           front: _CardSideFrame(card: card, isFront: isFront),
                           back: _CardSideFrame(card: card, isFront: !isFront));
                     }),
-                flex: 9)
+                flex: 8)
           ]);
         });
   }
@@ -339,10 +344,10 @@ class _PackLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
-    return new Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
+    return new Row(children: [
       new Container(
           child: new TranslationIndicator(pack.from, pack.to),
-          margin: const EdgeInsets.only(left: 10, bottom: 5)),
+          margin: const EdgeInsets.only(left: 10)),
       new Container(
           width: screenSize.width * 0.75,
           child: new OneLineText(pack.name),

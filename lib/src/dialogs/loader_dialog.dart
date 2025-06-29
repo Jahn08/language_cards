@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 import '../widgets/empty_widget.dart';
+import '../widgets/one_line_text.dart';
 
 class LoaderDialog {
   LoaderDialog._();
@@ -27,7 +28,7 @@ class LoaderDialog {
 
                 return new AlertDialog(
                     content: new Row(children: [
-                  Expanded(child: Text(locale.loaderDialogLabel)),
+                  Expanded(child: new OneLineText(locale.loaderDialogLabel)),
                   const CircularProgressIndicator()
                 ]));
               });

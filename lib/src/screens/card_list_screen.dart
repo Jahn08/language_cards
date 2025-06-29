@@ -181,14 +181,15 @@ class _CardAdditionalInfo extends StatelessWidget {
   const _CardAdditionalInfo(this.card, this.alignment, [this.topItem]);
 
   @override
-  Widget build(BuildContext context) =>
-      new Column(crossAxisAlignment: alignment, children: <Widget>[
+  Widget build(BuildContext context) => new FractionallySizedBox(
+      widthFactor: 0.4,
+      child: new Column(crossAxisAlignment: alignment, children: <Widget>[
         if (topItem != null) topItem!,
         if (card.partOfSpeech != null)
           new OneLineText(
               card.partOfSpeech!.present(AppLocalizations.of(context)!)),
         new OneLineText('${card.studyProgress}%')
-      ]);
+      ]));
 }
 
 class CardListScreen extends ListScreen<StoredWord> {
