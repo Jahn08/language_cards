@@ -99,6 +99,8 @@ class WidgetAssistant {
   }
 
   Future<String> enterText(Finder fieldFinder, String changedText) async {
+    final textWidgetFinder = fieldFinder.first;
+    await tester.tap(textWidgetFinder);
     await tester.enterText(fieldFinder.first, changedText);
 
     await pumpAndAnimate();

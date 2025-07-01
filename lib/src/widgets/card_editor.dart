@@ -55,7 +55,8 @@ class CardEditorState extends State<CardEditor> {
   void initState() {
     super.initState();
 
-    if (widget.pack != null || _isNew) _setPack(widget.pack ?? StoredPack.none);
+    if (widget.pack != null || _isNew)
+      _setPack(widget.pack ?? StoredPack.none, initialState: true);
 
     _futureCard = _isNew ? Future.value(new StoredWord('')) : _retrieveWord();
 
@@ -88,9 +89,9 @@ class CardEditorState extends State<CardEditor> {
     return _futurePacks!;
   }
 
-  void _setPack(StoredPack newPack) {
+  void _setPack(StoredPack newPack, {bool initialState = false}) {
     _packNotifier.value = newPack;
-    _setStateDirtiness();
+    if (!initialState) _setStateDirtiness();
 
     _disposeDictionary();
     _dictionary = _isNonePack
@@ -114,9 +115,11 @@ class CardEditorState extends State<CardEditor> {
     if (widget.pack == null) {
       final nonePack = StoredPack.none;
 
-      _setPack(word.packId == nonePack.id
-          ? nonePack
-          : (await widget._packStorage.find(word.packId))!);
+      _setPack(
+          word.packId == nonePack.id
+              ? nonePack
+              : (await widget._packStorage.find(word.packId))!,
+          initialState: true);
     }
 
     return word;
@@ -341,15 +344,20 @@ class CardEditorState extends State<CardEditor> {
     if (translation != null) _translationNotifier.value = translation;
   }
 
-  void _setStateDirtiness() => _isStateDirtyNotifier.value = _isNew ||
-      (_foundCard != null &&
-          (_foundCard!.text != _textNotifier.value ||
-              _foundCard!.translation != _translationNotifier.value ||
-              _foundCard!.transcription != _transcriptionNotifier.value ||
-              _foundCard!.partOfSpeech !=
-                  _partOfSpeechDic![_partOfSpeechNotifier.value] ||
-              _foundCard!.studyProgress != _studyProgressNotifier.value ||
-              _foundCard!.packId != _packNotifier.value.id));
+  void _setStateDirtiness() {
+    final initCard = _foundCard == null
+        ? new StoredWord('', translation: '', packId: widget.pack?.id)
+        : _foundCard!;
+    _isStateDirtyNotifier.value = initCard.text != _textNotifier.value ||
+        initCard.translation != _translationNotifier.value ||
+        initCard.transcription != _transcriptionNotifier.value ||
+        initCard.partOfSpeech !=
+            (_partOfSpeechDic == null
+                ? null
+                : _partOfSpeechDic![_partOfSpeechNotifier.value]) ||
+        initCard.studyProgress != _studyProgressNotifier.value ||
+        initCard.packId != _packNotifier.value.id;
+  }
 
   Future<StoredWord?> _mergeIfDuplicated(
       StoredWord word, StoredPack pack, AppLocalizations locale) async {

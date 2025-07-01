@@ -272,11 +272,9 @@ void main() {
 
   testWidgets('Saves a new card', (tester) async {
     final storage = new PackStorageMock();
-
-    await _displayWord(tester, storage, shouldHideWarningDialog: false);
+    await _displayWord(tester, storage);
 
     final assistant = new WidgetAssistant(tester);
-
     final textFields =
         AssuredFinder.findSeveral(type: StyledTextField, shouldFind: true);
     final cardText = Randomiser.nextString();
@@ -292,7 +290,7 @@ void main() {
   });
 
   testWidgets(
-      'Does not leave the screen when cancelling discarding unsaved changed',
+      'Does not leave the screen when cancelling the dialog about discarding unsaved changed',
       (tester) async {
     final storage = new PackStorageMock();
     final wordToShow = await _displayFilledWord(tester, storage: storage);
@@ -323,11 +321,12 @@ void main() {
     expect(unchangedWord!.text, initialValue);
   });
 
-  testWidgets('Leaves the screen when discarding unsaved changed',
+  testWidgets(
+      'Leaves the screen when accepting the dialog about discarding unsaved changed',
       (tester) async {
     final storage = new PackStorageMock();
-    await tester.pumpWidget(
-        RootWidgetMock.buildAsAppHomeWithNonStudyRouting(storage: storage, noBar: true));
+    await tester.pumpWidget(RootWidgetMock.buildAsAppHomeWithNonStudyRouting(
+        storage: storage, noBar: true));
     await tester.pump(const Duration(milliseconds: 500));
 
     final packListBtnFinder = find.byIcon(Consts.packListIcon);
@@ -341,8 +340,11 @@ void main() {
     await assistant.tapWidget(cardListBtnFinder);
 
     final wordListTileFinder = find.byType(ListTile).first;
-    final initialText = (tester.widget<ListTile>(wordListTileFinder).title! as OneLineText).content!;
-    final wordToShow = (await storage.wordStorage.fetchFiltered(text: initialText)).single;
+    final initialText =
+        (tester.widget<ListTile>(wordListTileFinder).title! as OneLineText)
+            .content!;
+    final wordToShow =
+        (await storage.wordStorage.fetchFiltered(text: initialText)).single;
     await assistant.tapWidget(wordListTileFinder);
 
     await assistant.enterChangedText(initialText);
@@ -364,6 +366,51 @@ void main() {
 
     final unchangedWord = await storage.wordStorage.find(wordToShow.id);
     expect(unchangedWord!.text, initialText);
+  });
+
+  testWidgets(
+      'Shows no dialog about discarding unsaved changes for a new card without changes',
+      (tester) async {
+    final storage = new PackStorageMock();
+    final randomPack = storage.getRandom();
+    await _displayWord(tester, storage,
+        pack: randomPack, shouldHideWarningDialog: false);
+
+    final assistant = new WidgetAssistant(tester);
+    final backBtnFinder =
+        AssuredFinder.findOne(type: BackButton, shouldFind: true);
+    await assistant.tapWidget(backBtnFinder);
+
+    DialogTester.assureDialog(shouldFind: false);
+  });
+
+  testWidgets(
+      'Shows no dialog about discarding unsaved changes for a card without changes',
+      (tester) async {
+    final storage = new PackStorageMock();
+    final wordToShow = storage.wordStorage.getRandom();
+    final pack = await storage.find(wordToShow.packId);
+    await _displayFilledWord(tester,
+        storage: storage,
+        pack: pack,
+        wordToShow: wordToShow,
+        shouldHideWarningDialog: false);
+
+    final assistant = new WidgetAssistant(tester);
+
+    final initialText = wordToShow.text;
+    const changedText = '11111';
+    await assistant.enterChangedText(initialText, changedText: changedText);
+    await assistant.finishEnteringText();
+
+    await assistant.enterChangedText(changedText, changedText: initialText);
+    await assistant.finishEnteringText();
+
+    final backBtnFinder =
+        AssuredFinder.findOne(type: BackButton, shouldFind: true);
+    await assistant.tapWidget(backBtnFinder);
+
+    DialogTester.assureDialog(shouldFind: false);
   });
 
   testWidgets(
@@ -392,6 +439,45 @@ void main() {
     final changedWord = await storage.wordStorage.find(wordToShow.id);
     expect(changedWord?.transcription, initialValue);
     expect(changedWord?.transcription == changedValue, false);
+  });
+
+  testWidgets('Saving button is disabled for a new card without changes',
+      (tester) async {
+    final storage = new PackStorageMock();
+    await _displayWord(tester, storage);
+
+    final saveBtn = CardEditorTester.findSaveButton();
+    expect(tester.widget<ElevatedButton>(saveBtn).enabled, false);
+  });
+
+  testWidgets('Saving button is disabled for a card without changes',
+      (tester) async {
+    final storage = new PackStorageMock();
+    final wordToShow = storage.wordStorage.getRandom();
+    final pack = await storage.find(wordToShow.packId);
+    await _displayFilledWord(tester,
+        storage: storage,
+        pack: pack,
+        wordToShow: wordToShow,
+        shouldHideWarningDialog: false);
+
+    final assistant = new WidgetAssistant(tester);
+
+    final initialTranslation = wordToShow.translation!;
+    const changedTranslation = '11111';
+    await assistant.enterChangedText(initialTranslation,
+        changedText: changedTranslation);
+    await assistant.finishEnteringText();
+
+    var saveBtn = CardEditorTester.findSaveButton();
+    expect(tester.widget<ElevatedButton>(saveBtn).enabled, true);
+
+    await assistant.enterChangedText(changedTranslation,
+        changedText: initialTranslation);
+    await assistant.finishEnteringText();
+
+    saveBtn = CardEditorTester.findSaveButton();
+    expect(tester.widget<ElevatedButton>(saveBtn).enabled, false);
   });
 
   testWidgets('Saves a new pack for a card', (tester) async {
