@@ -461,6 +461,9 @@ void main() {
         wordToShow: wordToShow,
         shouldHideWarningDialog: false);
 
+    var saveBtn = CardEditorTester.findSaveButton();
+    expect(tester.widget<ElevatedButton>(saveBtn).enabled, false);
+
     final assistant = new WidgetAssistant(tester);
 
     final initialTranslation = wordToShow.translation!;
@@ -469,7 +472,7 @@ void main() {
         changedText: changedTranslation);
     await assistant.finishEnteringText();
 
-    var saveBtn = CardEditorTester.findSaveButton();
+    saveBtn = CardEditorTester.findSaveButton();
     expect(tester.widget<ElevatedButton>(saveBtn).enabled, true);
 
     await assistant.enterChangedText(changedTranslation,
