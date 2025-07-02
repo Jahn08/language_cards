@@ -178,7 +178,7 @@ void main() {
 
     final packToChoose = await _fetchAnotherPack(storage, StoredPack.none.id);
     final cardEditorTester = new CardEditorTester(tester);
-    
+
     await cardEditorTester.changePack(packToChoose);
     CardEditorTester.findSpeakerButton(shouldFind: true);
 
@@ -564,7 +564,8 @@ void main() {
 
   testWidgets(
       'Shows a warning for a card without a pack and turns off dictionaries',
-      (tester) => _testInitialDictionaryState(tester, hasPack: false));
+      (tester) => _testInitialDictionaryState(tester,
+          hasPack: false, dictionaryIsExpected: false));
 
   testWidgets(
       'Shows a warning after nullifying a pack and turns off dictionaries',
@@ -572,7 +573,18 @@ void main() {
 
   testWidgets(
       'Turns on dictionaries and shows no warnings when a card has a pack',
-      (tester) => _testInitialDictionaryState(tester, hasPack: true));
+      (tester) => _testInitialDictionaryState(tester,
+          hasPack: true, dictionaryIsExpected: true));
+
+  testWidgets(
+      'Turns on dictionaries and shows no warnings when packs are filtered by a lnaguage pair',
+      (tester) async {
+    final packStorage = new PackStorageMock();
+    final langPairs = await packStorage.fetchLanguagePairs();
+    final expectedLangPair = langPairs.first;
+    await _testInitialDictionaryState(tester,
+        hasPack: false, dictionaryIsExpected: true, langPair: expectedLangPair);
+  });
 
   testWidgets(
       'Turns on dictionaries and shows no warnings after choosing a pack',
@@ -996,7 +1008,9 @@ void _assureTileIsTicked(Finder tileFinder) => expect(
     findsOneWidget);
 
 Future<void> _testInitialDictionaryState(WidgetTester tester,
-    {required bool hasPack}) async {
+    {required bool hasPack,
+    required bool dictionaryIsExpected,
+    LanguagePair? langPair}) async {
   bool dictionaryIsActive = false;
   final dicProvider = new DictionaryProviderMock(onSearchForLemmas: (text) {
     dictionaryIsActive = true;
@@ -1009,13 +1023,14 @@ Future<void> _testInitialDictionaryState(WidgetTester tester,
       pack: hasPack
           ? PackStorageMock.generatePack(
               Randomiser.nextInt(PackStorageMock.namedPacksNumber))
-          : StoredPack.none);
+          : StoredPack.none,
+      langPair: langPair);
 
-  await _assureWarningDialog(tester, !hasPack);
+  await _assureWarningDialog(tester, !dictionaryIsExpected);
 
   await _inputTextAndAccept(tester, wordToShow!.text);
 
-  expect(dictionaryIsActive, hasPack);
+  expect(dictionaryIsActive, dictionaryIsExpected);
 }
 
 Future<void> _assureWarningDialog(WidgetTester tester, bool shouldFind) async {

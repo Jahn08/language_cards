@@ -94,10 +94,18 @@ class CardEditorState extends State<CardEditor> {
     if (!initialState) _setStateDirtiness();
 
     _disposeDictionary();
-    _dictionary = _isNonePack
-        ? null
-        : new WordDictionary(widget._provider,
+    if (_isNonePack && widget.languagePair == null)
+      _dictionary = null;
+    else {
+      if (widget.languagePair == null)
+        _dictionary = new WordDictionary(widget._provider,
             from: newPack.from!, to: newPack.to);
+      else {
+        final langPair = widget.languagePair!;
+        _dictionary = new WordDictionary(widget._provider,
+            from: langPair.from, to: langPair.to);
+      }
+    }
 
     if (_dictionary == null)
       WidgetsBinding.instance
