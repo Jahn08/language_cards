@@ -261,7 +261,7 @@ Finder _findEditableText(String input) => find.descendant(
     of: find.byType(EditableText), matching: find.text(input), matchRoot: true);
 
 InputKeyboard _getEmptyKeyboard([Language? lang]) =>
-    PhoneticKeyboard.getLanguageSpecific((s) => s!, lang: lang);
+    PhoneticKeyboard.getLanguageSpecific((s) => s!, lang: lang, height: 270);
 
 Future<void> _testEnteringSymbol(
     WidgetTester tester, int Function(String) positionGetter) async {

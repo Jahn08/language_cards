@@ -3,19 +3,18 @@ import 'package:keyboard_actions/keyboard_actions.dart';
 import '../consts.dart';
 
 abstract class InputKeyboard extends StatelessWidget
-    with KeyboardCustomPanelMixin<String>
-    implements PreferredSizeWidget {
-  static const double _keyboardHeight = 270;
-
+    with KeyboardCustomPanelMixin<String> {
   final double _symbolSize;
   final ValueNotifier<String> _notifier;
 
   final List<String> symbols;
+  final double height;
 
   final String Function(String? symbol) onSymbolTap;
 
   InputKeyboard(this.symbols,
       {required this.onSymbolTap,
+      required this.height,
       String? initialValue,
       super.key,
       double symbolSize = 15})
@@ -25,7 +24,9 @@ abstract class InputKeyboard extends StatelessWidget
   @override
   Widget build(BuildContext context) {
     const int rows = 4;
-    const height = _keyboardHeight / (rows + 1) - 5;
+    final bottomPadding = MediaQuery.of(context).padding.bottom;
+    final availableHeight = height - bottomPadding;
+    final symbolHeight = availableHeight / (rows + 1) - 5;
 
     final itemsPerRow = ((symbols.length + 4) / rows).ceil();
     final screenWidth = MediaQuery.of(context).size.width;
@@ -37,7 +38,7 @@ abstract class InputKeyboard extends StatelessWidget
                 symbol: s,
                 symbolSize: _symbolSize,
                 onTap: () => updateValue(onSymbolTap(s))),
-            height: height,
+            height: symbolHeight,
             width: width))
         .toList();
 
@@ -50,7 +51,7 @@ abstract class InputKeyboard extends StatelessWidget
               child: const Icon(Icons.backspace),
               color: backspaceColor,
               onTap: () => updateValue(onSymbolTap(null))),
-          height: height,
+          height: symbolHeight,
           width: wideBtnWidth,
           borderColor: backspaceColor),
       new _Key(
@@ -58,14 +59,14 @@ abstract class InputKeyboard extends StatelessWidget
               child: const Icon(Icons.done),
               color: doneColor,
               onTap: () => FocusScope.of(context).unfocus()),
-          height: height,
+          height: symbolHeight,
           width: wideBtnWidth,
           borderColor: doneColor)
     ]);
 
     return new Container(
         color: Colors.grey[300],
-        height: _keyboardHeight,
+        height: availableHeight,
         width: double.maxFinite,
         child: new Wrap(
             alignment: WrapAlignment.spaceEvenly,
@@ -75,9 +76,6 @@ abstract class InputKeyboard extends StatelessWidget
 
   @override
   ValueNotifier<String> get notifier => _notifier;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(_keyboardHeight);
 }
 
 class _Key extends StatelessWidget {

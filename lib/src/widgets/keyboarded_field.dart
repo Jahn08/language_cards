@@ -31,6 +31,10 @@ class KeyboardedField extends StatelessWidget {
     late TextEditingController textController;
     int? newPosition;
     late RegExp lastSymbolRegExp;
+
+    final screenSize = MediaQuery.of(context).size;
+    final keyboardSize = new Size(screenSize.width, screenSize.height * 0.4);
+
     final keyboard = PhoneticKeyboard.getLanguageSpecific((symbol) {
       final selection = textController.selection;
       final isNormalized = selection.isNormalized;
@@ -66,12 +70,12 @@ class KeyboardedField extends StatelessWidget {
       }
 
       return newText;
-    }, initialValue: _initialValue, lang: _lang);
+    }, height: keyboardSize.height, initialValue: _initialValue, lang: _lang);
     lastSymbolRegExp = new RegExp('(${keyboard.symbols.join('|')}|.)\$');
 
     return new KeyboardActionsBottomed(
         focusNode: _focusNode,
-        config: _buildKeyboardConfig(keyboard),
+        config: _buildKeyboardConfig(keyboard, keyboardSize),
         child: new Column(children: <Widget>[
           new KeyboardCustomInput<String?>(
               focusNode: _focusNode,
@@ -102,14 +106,35 @@ class KeyboardedField extends StatelessWidget {
         ]));
   }
 
-  KeyboardActionsConfig _buildKeyboardConfig(InputKeyboard keyboard) =>
+  KeyboardActionsConfig _buildKeyboardConfig(
+          InputKeyboard keyboard, Size keyboardSize) =>
       new KeyboardActionsConfig(actions: <KeyboardActionsItem>[
         new KeyboardActionsItem(
             displayArrows: false,
             displayActionBar: false,
             focusNode: _focusNode,
-            footerBuilder: (context) => keyboard)
+            footerBuilder: (context) => _PreferredSizePadding(
+                child: keyboard, preferredSize: keyboardSize))
       ]);
 
   void _emitOnChangedEvent(String value) => _onChanged?.call(value);
+}
+
+class _PreferredSizePadding extends StatelessWidget
+    implements PreferredSizeWidget {
+  final Widget child;
+  @override
+  final Size preferredSize;
+
+  const _PreferredSizePadding({
+    required this.child,
+    required this.preferredSize,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return new Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).padding.bottom),
+        child: child);
+  }
 }

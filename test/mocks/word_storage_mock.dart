@@ -72,7 +72,7 @@ class WordStorageMock extends WordStorage {
       bool hasNoPack = false,
       String Function(String, int?)? textGetter}) {
     final phoneticSymbols =
-        PhoneticKeyboard.getLanguageSpecific((s) => s!).symbols;
+        PhoneticKeyboard.getLanguageSpecific((s) => s!, height: 270).symbols;
 
     const studyStages = WordStudyStage.values;
     final text = Randomiser.nextString();
@@ -93,7 +93,8 @@ class WordStorageMock extends WordStorage {
         studyProgress: Randomiser.nextElement(studyStages));
   }
 
-  StoredWord getRandom() => Randomiser.nextElement(_words.where((w) => w.packId != null));
+  StoredWord getRandom() =>
+      Randomiser.nextElement(_words.where((w) => w.packId != null));
 
   Future<StoredWord?> updateWordProgress(int id, int studyProgress) async {
     final wordToUpdate = _words.firstWhereOrNull((StoredWord w) => w.id == id);

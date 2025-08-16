@@ -70,8 +70,10 @@ class CardEditorTester {
 
     final packTileFinder =
         findListTileByTitle(newPack.name, isChosen: isChosen);
-    final dialogOptionFinder = find.ancestor(of: packTileFinder,
-        matching: find.byType(ShrinkableSimpleDialogOption, skipOffstage: false));
+    final dialogOptionFinder = find.ancestor(
+        of: packTileFinder,
+        matching:
+            find.byType(ShrinkableSimpleDialogOption, skipOffstage: false));
     await assistant.pressWidgetDirectly(dialogOptionFinder);
   }
 
@@ -92,8 +94,8 @@ class CardEditorTester {
 
   Future<List<String>> enterRandomTranscription(
       {List<String>? symbols, String? symbolToEnter}) async {
-    final inSymbols =
-        symbols ?? PhoneticKeyboard.getLanguageSpecific((s) => s!).symbols;
+    final inSymbols = symbols ??
+        PhoneticKeyboard.getLanguageSpecific((s) => s!, height: 270).symbols;
     final doubleSymbolA = inSymbols.firstWhere((s) => s.length > 1,
         orElse: () => Randomiser.nextElement(inSymbols));
     final doubleSymbolB = inSymbols.lastWhere((s) => s.length > 1,
