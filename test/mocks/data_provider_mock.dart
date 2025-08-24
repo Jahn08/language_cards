@@ -14,6 +14,9 @@ abstract class DataProviderMock<T extends StoredEntity> extends DataProvider {
   DataProviderMock(this.items);
 
   @override
+  int? get versionBeforeUpdate => null;
+
+  @override
   Future<int> count(String tableName, {Map<String, dynamic>? filters}) =>
       Future.value(_getFilteredItemProps(filters).length);
 

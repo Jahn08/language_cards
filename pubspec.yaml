@@ -39,6 +39,7 @@ dependencies:
   file_picker: ^8.1.2
   sentry_flutter: ^8.8.0
   permission_handler: ^11.3.1
+  diacritic: ^0.1.6
 
   meta: any
   sentry: any

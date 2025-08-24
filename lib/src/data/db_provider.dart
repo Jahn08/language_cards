@@ -7,7 +7,14 @@ import '../models/stored_entity.dart';
 import '../utilities/path.dart';
 
 class DbProvider extends DataProvider {
+  static const int normalTextFieldAddedVersion = 6;
+
   Database? _db;
+
+  int? _versionBeforeUpdate;
+
+  @override
+  int? get versionBeforeUpdate => _versionBeforeUpdate;
 
   final List<StoredEntity> tableEntities;
 
@@ -36,13 +43,15 @@ class DbProvider extends DataProvider {
     final dbPath = Path.combine([docDir.path, 'language_cards6.db']);
 
     _db = await openDatabase(dbPath,
-        version: 5,
+        version: normalTextFieldAddedVersion,
         onConfigure: (db) => db.execute('PRAGMA foreign_keys = ON'),
         onUpgrade: (db, oldVer, _) async {
           if (oldVer == 0)
             await _executeClauses(db, _compileCreationClauses(tableEntities));
 
           await _executeClauses(db, _compileUpgradeClauses(oldVer));
+
+          _versionBeforeUpdate = oldVer;
         });
   }
 

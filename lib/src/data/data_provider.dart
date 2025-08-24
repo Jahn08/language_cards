@@ -1,6 +1,8 @@
 import 'data_group.dart';
 
 abstract class DataProvider {
+  int? get versionBeforeUpdate;
+
   Future<void> close();
 
   Future<void> update(String tableName, List<Map<String, dynamic>> entities);

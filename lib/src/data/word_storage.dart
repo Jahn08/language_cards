@@ -1,12 +1,14 @@
 import 'package:language_cards/src/models/part_of_speech.dart';
 import '../data/base_storage.dart';
+import '../data/db_provider.dart';
 import '../models/stored_word.dart';
-
 export '../models/stored_word.dart';
 export '../data/base_storage.dart';
 
 class WordStorage extends BaseStorage<StoredWord> {
   const WordStorage() : super();
+
+  static int _dbVersionAfterUpdate = 0;
 
   @override
   String get entityName => StoredWord.entityName;
@@ -51,19 +53,39 @@ class WordStorage extends BaseStorage<StoredWord> {
 
   @override
   Future<List<StoredWord>> fetchInternally(
-          {int? skipCount,
-          List<String>? columns,
-          int? takeCount,
-          String? orderBy,
-          String? textFilter,
-          Map<String, List<dynamic>>? filters}) =>
-      super.fetchInternally(
-          skipCount: skipCount,
-          takeCount: takeCount,
-          orderBy: orderBy ?? StoredWord.textFieldName,
-          filters: filters,
-          columns: columns,
-          textFilter: textFilter);
+      {int? skipCount,
+      List<String>? columns,
+      int? takeCount,
+      String? orderBy,
+      String? textFilter,
+      Map<String, List<dynamic>>? filters}) async {
+    await _normalizeTexts();
+
+    return super.fetchInternally(
+        skipCount: skipCount,
+        takeCount: takeCount,
+        orderBy: orderBy ?? StoredWord.normalTextFieldName,
+        filters: filters,
+        columns: columns,
+        textFilter: textFilter);
+  }
+
+  Future _normalizeTexts() async {
+    if (connection.versionBeforeUpdate == null ||
+        _dbVersionAfterUpdate == DbProvider.normalTextFieldAddedVersion ||
+        connection.versionBeforeUpdate! >= DbProvider.normalTextFieldAddedVersion)
+      return;
+    _dbVersionAfterUpdate = DbProvider.normalTextFieldAddedVersion;
+
+    try {
+      final cards =
+          await super.fetchInternally(orderBy: StoredWord.textFieldName);
+      await super.upsert(cards);
+    } catch (_) {
+      _dbVersionAfterUpdate = 0;
+      rethrow;
+    }
+  }
 
   String get _parentIdField => StoredWord.packIdFieldName;
 
@@ -106,8 +128,7 @@ class WordStorage extends BaseStorage<StoredWord> {
     });
   }
 
-  Future<Map<String, int>> groupByTextIndexAndParent(
-          [List<int?>? parentIds]) =>
+  Future<Map<String, int>> groupByTextIndexAndParent([List<int?>? parentIds]) =>
       groupByTextIndex(parentIds == null || parentIds.isEmpty
           ? null
           : {_parentIdField: parentIds});

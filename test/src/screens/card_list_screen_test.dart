@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:language_cards/src/data/base_storage.dart';
@@ -25,6 +26,41 @@ void main() {
       (id) => WordStorageMock.generateWord(id: id), _groupCardsByTextIndex);
 
   screenTester.testDismissingItems();
+
+  testWidgets("Sorts cards by normalized text", (tester) async {
+    final packStorage = new PackStorageMock(cardsNumber: 10, packsNumber: 1);
+
+    final wordTexts = ['café', 'apple', 'abacus', 'banana', 'ábaco'];
+    
+    final namedPacks = await StorageFetcher.fetchNamedPacks(packStorage);
+    final chosenPack = namedPacks.first;
+    final wordsByNamedPacks = await StorageFetcher.fetchPackedCards([chosenPack], packStorage.wordStorage);
+
+    final updatedWords = wordsByNamedPacks.mapIndexed((i, w) => new StoredWord(
+      wordTexts[i], id: w.id, packId: w.packId, partOfSpeech: w.partOfSpeech,
+      studyProgress: w.studyProgress, transcription: w.transcription,
+      translation: w.translation));
+    await packStorage.wordStorage.upsert(updatedWords.toList());
+
+    final screenTester = _buildScreenTester(packStorage: packStorage, pack: chosenPack);
+    await screenTester.pumpScreen(tester);
+
+    final listItemFinders = find.descendant(
+        of: find.byType(Dismissible, skipOffstage: false),
+        matching: find.byType(ListTile, skipOffstage: false),
+        skipOffstage: false);
+
+    final wordTextsOrdered = ['ábaco', 'abacus', 'apple', 'banana', 'café'];
+
+    for (int i = 0; i < 5; ++i) {
+      final expectedText = wordTextsOrdered[i];
+      expect(
+          find.descendant(
+              of: listItemFinders.at(i),
+              matching: find.text(expectedText, skipOffstage: false)),
+          findsOneWidget);
+    }
+  });
 
   testWidgets("Renders cards filtered by a language pair", (tester) async {
     final packStorage =
@@ -400,8 +436,7 @@ Future<Map<String, int>> _groupCardsByTextIndex(
     BaseStorage<StoredWord> storage) async {
   final groups = <String, int>{};
   (await storage.fetch()).forEach((p) {
-    if(p.id == null)
-      return;
+    if (p.id == null) return;
 
     final firstLetter = p.text[0];
     if (groups.containsKey(firstLetter))
