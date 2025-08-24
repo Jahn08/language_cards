@@ -48,10 +48,10 @@ class DbProvider extends DataProvider {
         onUpgrade: (db, oldVer, _) async {
           if (oldVer == 0)
             await _executeClauses(db, _compileCreationClauses(tableEntities));
-
-          await _executeClauses(db, _compileUpgradeClauses(oldVer));
-
-          _versionBeforeUpdate = oldVer;
+          else {
+            await _executeClauses(db, _compileUpgradeClauses(oldVer));
+            _versionBeforeUpdate = oldVer;
+          }
         });
   }
 

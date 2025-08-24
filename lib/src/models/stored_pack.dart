@@ -77,7 +77,8 @@ class StoredPack extends StoredEntity {
   @override
   String get columnsExpr => """ $nameFieldName TEXT NOT NULL,
             $fromFieldName INTEGER NOT NULL,
-            $toFieldName INTEGER NOT NULL""";
+            $toFieldName INTEGER NOT NULL,
+            $studyDateFieldName INT NULL""";
 
   @override
   List<String> getUpgradeExpr(int oldVersion) {
